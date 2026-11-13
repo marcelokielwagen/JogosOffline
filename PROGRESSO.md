@@ -23,10 +23,17 @@ O roteiro completo das etapas está em `PROMPT.md`.
   revelar palavra, lista de todas as dicas e progresso salvo por grade.
   As grades foram montadas por um programa que confere que não há cruzamento
   acidental; para criar grades novas, peça para gerar outro lote do mesmo jeito.
-- Versão atual do cache em `sw.js`: `jogos-offline-v5`.
+- **Etapa 5 (12/11/2026):** acabamento. Tela inicial ganhou Estatísticas (📊) e
+  Ajustes (⚙️: sons, vibração, letra grande). Sons curtos feitos pelo próprio
+  código em `js/comum.js` (`JO.som`, `JO.vibrar`) ligados nos quatro jogos.
+  Paciência e Palavras Cruzadas ajustadas para celular deitado; contraste e
+  bordas revistos no tema claro. Publicado.
+- Versão atual do cache em `sw.js`: `jogos-offline-v7`.
 
 ## Falta
-- **Etapa 5:** acabamento (estatísticas, sons, revisão visual, teste final).
+- Nada do roteiro original. Ideias de etapas extras estão no fim do `PROMPT.md`
+  (Campo Minado, Memória, Sudoku, Damas, Forca, Caça-Palavras, 2048).
+- Ajustes que aparecerem no teste do dono em celular de verdade.
 
 ## Lembretes para a próxima etapa
 - Cada jogo novo: criar `jogos/<nome>/`, trocar o cartão "em breve" por link em
@@ -63,7 +70,16 @@ O roteiro completo das etapas está em `PROMPT.md`.
   de dicas, limpar grade e troca horizontal/vertical.
 - As dicas foram escritas à mão e não revisadas por outra pessoa.
 
+## Testado na Etapa 5
+- Tamanho de celular em pé (375x812) e deitado (812x375), e tela de computador.
+- Tema claro conferido visualmente nas cinco telas.
+- Ajustes (ligar/desligar som, letra grande) e tela de estatísticas.
+- Paciência: arrastar carta em pé e deitado depois da mudança de medidas.
+- Offline de verdade: servidor desligado (porta conferida) e as cinco telas
+  abriram e funcionaram a partir do cache.
+
 ## Ainda não testado
-- Em um celular de verdade e a instalação "Adicionar à tela inicial" (o dono testa
-  no próprio aparelho).
-- Tema claro e celular deitado foram feitos, mas não conferidos visualmente.
+- Os sons não foram ouvidos (o teste é automático, sem alto-falante): só foi
+  conferido que tocar não gera erro.
+- Em um celular de verdade: instalação "Adicionar à tela inicial", arrasto com
+  o dedo, vibração e som.

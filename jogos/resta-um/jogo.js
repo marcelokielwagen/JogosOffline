@@ -34,8 +34,9 @@
       const n = restam();
       if (e.stats.melhor == null || n < e.stats.melhor) e.stats.melhor = n;
       if (n === 1) e.stats.vitorias++;
-      if (navigator.vibrate) navigator.vibrate(n === 1 ? [40, 60, 120] : 60);
+      JO.vibrar(n === 1 ? [40, 60, 120] : 60); JO.som(n === 1 ? 'vitoria' : 'derrota');
     }
+    if (temJogadas()) JO.som('toque');
     salvar(); desenhar(); animar(de, d.meio, d.para);
   }
 
@@ -47,7 +48,7 @@
     if (e.t[i] !== 1) { sel = -1; return desenhar(); }
     if (!destinos(i).length) {
       sel = -1; desenhar();
-      casas[i].classList.add('treme');
+      casas[i].classList.add('treme'); JO.som('erro');
       setTimeout(() => casas[i].classList.remove('treme'), 320);
       return;
     }

@@ -88,6 +88,7 @@
   function conferir(lista) {
     let erros = 0, vistas = 0;
     lista.forEach(x => { if (letras[x]) { vistas++; marca[x] = letras[x] === sol[x] ? 'ok' : 'erro'; if (marca[x] === 'erro') erros++; } });
+    if (vistas) JO.som(erros ? 'erro' : 'acerto');
     $('aviso').textContent = !vistas ? 'Escreva alguma letra primeiro.' : erros ? (erros === 1 ? '1 letra errada.' : erros + ' letras erradas.') : 'Tudo certo até aqui!';
     desenhar();
   }
@@ -102,7 +103,7 @@
     if (!cheias) return;
     if (!sol.every((ch, x) => !ch || letras[x] === ch)) { $('aviso').textContent = 'Tudo preenchido, mas há letras erradas. Use ✓ Palavra.'; return; }
     fim = true; marca = {}; guardar(); desenhar();
-    if (navigator.vibrate) navigator.vibrate([40, 60, 120]);
+    JO.vibrar([40, 60, 120]); JO.som('vitoria');
     $('vitoria-txt').textContent = rev.size ? `Você completou a ${GRADES[gi].n} com ${rev.size} ${rev.size === 1 ? 'letra revelada' : 'letras reveladas'}.` : `Você completou a ${GRADES[gi].n} sem revelar nenhuma letra!`;
     $('vitoria-prox').hidden = !GRADES.some((_, i) => !(salvo.g[i] && salvo.g[i].fim));
     $('vitoria').showModal();
@@ -141,7 +142,7 @@
       const b = document.createElement('button');
       b.className = 'tecla' + (t === '⌫' ? ' larga' : ''); b.textContent = t;
       b.setAttribute('aria-label', t === '⌫' ? 'Apagar' : t);
-      b.addEventListener('click', () => t === '⌫' ? apagar() : digitar(t));
+      b.addEventListener('click', () => { JO.som('toque'); t === '⌫' ? apagar() : digitar(t); });
       div.appendChild(b);
     });
     $('teclado').appendChild(div);

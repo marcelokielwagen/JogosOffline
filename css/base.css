@@ -3,20 +3,20 @@
   --fundo: #0f1220; --superficie: #1a1e33; --superficie2: #252a48;
   --texto: #eef0fa; --texto2: #9aa0c0; --borda: rgba(255,255,255,.09);
   --destaque: #7c8cff; --x: #ff7a90; --o: #5fd4c4; --ouro: #ffcf6b;
-  --sombra: 0 10px 30px rgba(0,0,0,.35);
+  --sombra: 0 10px 30px rgba(0,0,0,.35); --aviso: #ffcf6b;
   --raio: 18px;
 }
 :root[data-tema="claro"] {
   --fundo: #f2f3fa; --superficie: #ffffff; --superficie2: #e8eaf6;
   --texto: #1b1e30; --texto2: #5d6385; --borda: rgba(20,25,60,.1);
   --destaque: #4a5ae8; --x: #e0475f; --o: #169a88; --ouro: #c98a00;
-  --sombra: 0 10px 30px rgba(40,50,110,.14);
+  --sombra: 0 10px 30px rgba(40,50,110,.14); --aviso: #8a5d00;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { background: var(--fundo); }
 body {
   margin: 0; min-height: 100dvh; color: var(--texto); background: var(--fundo);
-  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 1rem/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   transition: background .25s, color .25s;
   user-select: none; -webkit-user-select: none; touch-action: manipulation;

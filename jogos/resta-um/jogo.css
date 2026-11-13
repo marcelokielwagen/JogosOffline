@@ -5,7 +5,7 @@
 
 #status { text-align: center; font-weight: 600; font-size: 1.05rem; margin: 14px 0 12px; min-height: 1.6em; }
 #status.fim { animation: pulo .5s ease-out; }
-#status.vitoria { color: var(--ouro); }
+#status.vitoria { color: var(--aviso); }
 
 .tab-caixa { width: min(100%, 56dvh); margin: 0 auto; }
 .tab {

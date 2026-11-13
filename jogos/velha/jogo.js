@@ -57,7 +57,10 @@
     if (t[i] || resultado(t)) return;
     e.hist.push(i); ultima = i;
     const r = resultado(tabuleiro());
-    if (r) { e.placar[e.modo][r.quem]++; if (navigator.vibrate) navigator.vibrate(r.quem === 'E' ? 40 : [40, 60, 90]); }
+    if (r) {
+      e.placar[e.modo][r.quem]++; JO.vibrar(r.quem === 'E' ? 40 : [40, 60, 90]);
+      JO.som(r.quem === 'E' ? 'acerto' : contraPC() && r.quem === 'O' ? 'derrota' : 'vitoria');
+    } else JO.som('toque');
     JO.salvar('velha', e); desenhar(); agendaPC();
   }
   function tocar(i) { if (!(contraPC() && vez() === 'O')) marcar(i); }

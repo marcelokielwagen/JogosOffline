@@ -16,6 +16,8 @@
 <div class="pagina larga">
   <header class="topo">
     <h1>Jogos Offline</h1>
+    <button class="icone-btn" data-abre="stats" aria-label="Estatísticas">📊</button>
+    <button class="icone-btn" data-abre="ajustes" aria-label="Ajustes">⚙️</button>
     <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
   </header>
   <p class="saudacao">Clássicos para jogar em qualquer lugar, mesmo sem internet.</p>
@@ -65,5 +67,19 @@
 
   <p id="status-offline">Preparando para funcionar sem internet…</p>
 </div>
+
+<dialog id="stats">
+  <h2>Estatísticas</h2>
+  <div data-estatisticas></div>
+  <button class="btn principal" data-fecha>Fechar</button>
+</dialog>
+
+<dialog id="ajustes">
+  <h2>Ajustes</h2>
+  <button class="chave" data-ajuste="som" data-padrao="1"><span>🔊 Sons</span><b></b></button>
+  <button class="chave" data-ajuste="vibra" data-padrao="1"><span>📳 Vibração</span><b></b></button>
+  <button class="chave" data-ajuste="letraGrande" data-padrao="0"><span>🔎 Letra grande</span><b></b></button>
+  <button class="btn principal" data-fecha>Fechar</button>
+</dialog>
 </body>
 </html>

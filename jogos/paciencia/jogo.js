@@ -65,7 +65,7 @@
     if (p[0] === 'f') e.f[+p[1]].push(g.ids[0]); else e.c[+p[1]].k.push(...g.ids);
     e.m++; sel = null;
     if (e.f.every(x => x.length === 13)) return vitoria(g.ids);
-    salvar(); desenhar(g.ids);
+    JO.som('carta'); salvar(); desenhar(g.ids);
   }
   function paraFundacao(id) {
     const g = pegavel(id);
@@ -80,7 +80,7 @@
     let ids = [];
     if (!e.s.length) { e.s = e.w.reverse(); e.w = []; }
     else for (let n = 0; n < e.vira && e.s.length; n++) { const c = e.s.pop(); e.w.push(c); ids.push(c); }
-    e.m++; sel = null; salvar(); desenhar(ids);
+    e.m++; sel = null; JO.som('carta'); salvar(); desenhar(ids);
     return true;
   }
   function desfazer() {
@@ -108,7 +108,7 @@
     e.ganhou = true; e.hist = []; e.stats.v++;
     if (e.stats.melhor == null || e.t < e.stats.melhor) e.stats.melhor = e.t;
     salvar(); desenhar(ids);
-    if (navigator.vibrate) navigator.vibrate([40, 60, 120]);
+    JO.vibrar([40, 60, 120]); JO.som('vitoria');
     const id = festaId;
     setTimeout(() => { if (id === festaId) festa(); }, 350);
     setTimeout(() => {
@@ -142,7 +142,7 @@
   function novoJogo() {
     festaId++; clearInterval(auto); auto = null; sel = null;
     e = nova(e.vira, e.stats); salvar();
-    cartas.forEach(el => { el.classList.add('arrasta'); el.style.transform = 'translate(0px,0px)'; el.style.visibility = ''; });
+    cartas.forEach(el => { el.classList.add('arrasta'); el.style.transform = `translate(${G.x(0)}px,0px)`; el.style.visibility = ''; });
     void tab.offsetWidth; // força o navegador a aplicar a posição antes de distribuir
     desenhar();
   }
@@ -160,13 +160,15 @@
   }
 
   function medir() {
-    const W = tab.clientWidth, gap = Math.max(4, W * .012), cw = (W - 6 * gap) / 7, ch = cw * 1.42, y0 = ch + gap * 3;
-    const H = Math.max(window.innerHeight - tab.getBoundingClientRect().top - 10, y0 + ch * 2.6);
-    G = { W, gap, cw, ch, y0, H, x: j => j * (cw + gap) };
+    // A carta cabe na largura e, em tela deitada, também na altura; o tabuleiro fica centralizado.
+    const W = tab.clientWidth, gap = Math.max(4, W * .012), livre = window.innerHeight - tab.getBoundingClientRect().top - 10;
+    const cw = Math.max(34, Math.min((W - 6 * gap) / 7, livre / (1.42 * 3.7))), ch = cw * 1.42, y0 = ch + gap * 3;
+    const H = Math.max(livre, y0 + ch * 2.2), x0 = (W - 7 * cw - 6 * gap) / 2;
+    G = { W, gap, cw, ch, y0, H, x0, x: j => x0 + j * (cw + gap) };
     tab.style.height = H + 'px';
     tab.style.setProperty('--cw', cw + 'px'); tab.style.setProperty('--ch', ch + 'px');
     const pv = (p, x, y) => vagas[p].style.transform = `translate(${x}px,${y}px)`;
-    pv('e', 0, 0); pv('d', G.x(1), 0);
+    pv('e', G.x(0), 0); pv('d', G.x(1), 0);
     for (let n = 0; n < 4; n++) pv('f' + n, G.x(3 + n), 0);
     for (let j = 0; j < 7; j++) pv('c' + j, G.x(j), y0);
   }
@@ -189,7 +191,7 @@
       el.classList.remove('arrasta');
       xy[id] = { x, y }; onde[id] = { p, i };
     };
-    e.s.forEach((id, i) => poe(id, 0, 0, i, true, 'e', i));
+    e.s.forEach((id, i) => poe(id, G.x(0), 0, i, true, 'e', i));
     const leque = e.vira === 3 ? 3 : 1, base = Math.max(0, e.w.length - leque);
     e.w.forEach((id, i) => poe(id, G.x(1) + Math.max(0, i - base) * G.cw * .3, 0, 100 + i, false, 'd', i));
     e.f.forEach((pl, n) => pl.forEach((id, i) => poe(id, G.x(3 + n), 0, 200 + i, false, 'f' + n, i)));
@@ -252,7 +254,7 @@
     if (!t.arrastando) return tocar(t.alvo);
     const lider = t.g.ids[0];
     const cx = xy[lider].x + ev.clientX - t.x + G.cw / 2, cy = xy[lider].y + ev.clientY - t.y + G.ch / 2;
-    const col = Math.max(0, Math.min(6, Math.round((cx - G.cw / 2) / (G.cw + G.gap))));
+    const col = Math.max(0, Math.min(6, Math.round((cx - G.x0 - G.cw / 2) / (G.cw + G.gap))));
     const p = cy < G.y0 - G.gap ? (col >= 3 ? 'f' + (col - 3) : null) : 'c' + col;
     if (!p || !tentar(t.g, p)) desenhar();
   }
