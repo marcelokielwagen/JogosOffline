@@ -46,6 +46,7 @@ dialog {
 }
 dialog::backdrop { background: rgba(5,7,18,.6); backdrop-filter: blur(3px); }
 dialog[open] { animation: surgir .22s ease-out; }
+dialog { max-height: 88dvh; overflow-y: auto; }
 dialog h2 { margin: 0 0 10px; font-size: 1.2rem; }
 dialog p, dialog li { color: var(--texto2); }
 dialog ul { padding-left: 20px; margin: 0 0 16px; }

@@ -28,7 +28,22 @@ O roteiro completo das etapas está em `PROMPT.md`.
   código em `js/comum.js` (`JO.som`, `JO.vibrar`) ligados nos quatro jogos.
   Paciência e Palavras Cruzadas ajustadas para celular deitado; contraste e
   bordas revistos no tema claro. Publicado.
-- Versão atual do cache em `sw.js`: `jogos-offline-v8`. O `sw.js` busca os arquivos com
+- **Etapa 6 (12/11/2026):**
+  - Endereço aceita qualquer grafia (`jogosoffline`, `JOGOSOFFLINE`...): um
+    segundo repositório público, `marcelokielwagen.github.io`, tem só uma página
+    `404.html` que redireciona para `/JogosOffline/`.
+  - **Resta Um** com tabuleiro maior (peças de 34 para 44 px no celular).
+  - **Caça-Palavras** (`jogos/caca-palavras/`): quadro 10x10 sorteado a cada jogo,
+    10 temas, 3 níveis, arrastar ou tocar na primeira e na última letra.
+  - **Dobro** (`jogos/dobro/`): jogo de deslizar e juntar números iguais (do tipo
+    "2048"), com nome e visual próprios, desfazer e recorde.
+  - **Palavras Cruzadas por categoria**: 16 grades temáticas novas em
+    `jogos/cruzadas/grades-temas.js` (Viagens pelo mundo, Animais, Comidas, Corpo
+    humano, Natureza, Brasil, Esportes, Casa), cada uma com uma palavra grande no
+    centro. As 10 antigas viraram a categoria "Variadas". Total: 26 grades.
+  - Estatísticas incluem os dois jogos novos.
+  - Ainda não enviada ao GitHub (falta autorização para o push).
+- Versão atual do cache em `sw.js`: `jogos-offline-v9`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta
@@ -78,6 +93,15 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - Paciência: arrastar carta em pé e deitado depois da mudança de medidas.
 - Offline de verdade: servidor desligado (porta conferida) e as cinco telas
   abriram e funcionaram a partir do cache.
+
+## Testado na Etapa 6
+- Redirecionamento do endereço em três grafias, no site real.
+- As 26 grades de Palavras Cruzadas resolvidas inteiras pelo teclado da tela.
+- Caça-Palavras: os 3 níveis jogados até o fim, metade das palavras arrastando
+  e metade tocando na primeira e na última letra.
+- Dobro: 157 jogadas comparadas uma a uma com um cálculo independente; desfazer,
+  deslizar e fim de jogo (posição montada).
+- Resta Um: tamanho novo medido e uma jogada feita.
 
 ## Ainda não testado
 - Os sons não foram ouvidos (o teste é automático, sem alto-falante): só foi

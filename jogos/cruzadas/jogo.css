@@ -3,6 +3,9 @@
 
 /* Lista de grades */
 .lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-top: 4px; }
+.lista .cat { grid-column: 1 / -1; margin: 10px 2px 0; font-size: 1rem; color: var(--destaque); display: flex; justify-content: space-between; align-items: baseline; }
+.lista .cat:first-child { margin-top: 0; }
+.lista .cat small { color: var(--texto2); font-weight: 500; font-size: .8rem; }
 .item { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; padding: 14px; border-radius: 18px; background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); transition: transform .12s; }
 .item:active { transform: scale(.96); }
 .item b { font-size: 1.05rem; }

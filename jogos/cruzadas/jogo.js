@@ -14,13 +14,25 @@
     gi = -1;
     $('lista').hidden = false; $('jogo').hidden = true; $('titulo').textContent = 'Palavras Cruzadas';
     $('lista').innerHTML = '';
-    GRADES.forEach((g, i) => {
-      const s = salvo.g[i], total = totalCasas(g), feitas = s ? s.l.filter(Boolean).length : 0;
-      const b = document.createElement('button');
-      b.className = 'item' + (s && s.fim ? ' feita' : '');
-      b.innerHTML = `<b>${g.n}</b><span>${s && s.fim ? '✓ Completa' : `${g.t}×${g.t} · ${g.p.length} palavras`}</span><div class="barrinha"><i style="width:${Math.round(100 * feitas / total)}%"></i></div>`;
-      b.addEventListener('click', () => abrir(i));
-      $('lista').appendChild(b);
+    salvo.total = GRADES.length; JO.salvar('cruzadas', salvo);
+    // Agrupa por categoria: primeiro as temáticas (palavra grande no centro), depois as variadas.
+    const cats = [];
+    GRADES.forEach((g, i) => { const c = g.cat || 'Variadas'; let x = cats.find(k => k.nome === c); if (!x) cats.push(x = { nome: c, itens: [] }); x.itens.push(i); });
+    cats.sort((x, y) => (x.nome === 'Variadas') - (y.nome === 'Variadas'));
+    cats.forEach(cat => {
+      const h = document.createElement('h2'); h.className = 'cat'; h.textContent = cat.nome;
+      const feitasCat = cat.itens.filter(i => salvo.g[i] && salvo.g[i].fim).length;
+      h.innerHTML += ` <small>${feitasCat}/${cat.itens.length}</small>`;
+      $('lista').appendChild(h);
+      cat.itens.forEach(i => {
+        const g = GRADES[i], s = salvo.g[i], total = totalCasas(g), feitas = s ? s.l.filter(Boolean).length : 0;
+        const b = document.createElement('button');
+        b.className = 'item' + (s && s.fim ? ' feita' : '');
+        const sub = s && s.fim ? '✓ Completa' : g.centro ? `Palavra central de ${g.centro.length} letras` : `${g.t}×${g.t} · ${g.p.length} palavras`;
+        b.innerHTML = `<b>${g.n}</b><span>${sub}</span><div class="barrinha"><i style="width:${Math.round(100 * feitas / total)}%"></i></div>`;
+        b.addEventListener('click', () => abrir(i));
+        $('lista').appendChild(b);
+      });
     });
   }
 

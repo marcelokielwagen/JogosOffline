@@ -1,0 +1,31 @@
+.pagina { padding-left: 12px; padding-right: 12px; padding-bottom: 12px; }
+
+.modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 44px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
+.modos button.ativo { background: var(--destaque); color: #fff; }
+
+.barra { display: flex; gap: 6px; align-items: stretch; margin: 10px 0; }
+.chip { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 44px; padding: 3px 4px; border-radius: 14px; background: var(--superficie); border: 1px solid var(--borda); }
+.chip span { font-size: .68rem; color: var(--texto2); line-height: 1.2; }
+.chip b { font-size: .92rem; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.barra .btn { min-height: 44px; padding: 0 14px; }
+
+.grade-caixa { position: relative; width: min(100%, calc(100dvh - 330px)); min-width: 240px; margin: 0 auto; container-type: inline-size; touch-action: none; border-radius: 14px; background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); }
+.grade { display: grid; grid-template-columns: repeat(10, 1fr); aspect-ratio: 1; }
+.letra { display: grid; place-items: center; font-weight: 700; font-size: calc(100cqw / 10 * .56); line-height: 1; pointer-events: none; }
+.letra.ancora { color: var(--ouro); transform: scale(1.3); }
+#riscos { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#riscos line { stroke-width: .78; stroke-linecap: round; opacity: .42; }
+#riscos line.agora { stroke: var(--texto); opacity: .28; }
+
+.palavras { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
+.palavra { padding: 6px 11px; border-radius: 99px; background: var(--superficie); border: 1px solid var(--borda); font-weight: 600; font-size: .86rem; letter-spacing: .03em; }
+.palavra.ok { text-decoration: line-through; color: var(--texto2); border-color: var(--cor); background: color-mix(in srgb, var(--cor) 22%, var(--superficie)); }
+dialog .btn + .btn { margin-top: 6px; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .pagina { max-width: 900px; display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: start; }
+  .topo { grid-column: 1 / -1; padding: 6px 0; }
+  .grade-caixa { grid-column: 1; grid-row: 2 / span 4; width: calc(100dvh - 76px); }
+  .modos, .barra, .palavras { grid-column: 2; }
+}

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1220">
+<title>Dobro — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body>
+<div class="pagina">
+  <header class="topo">
+    <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
+    <h1>Dobro</h1>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+    <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
+  </header>
+
+  <div class="barra">
+    <div class="chip"><span>Pontos</span><b id="pontos">0</b></div>
+    <div class="chip"><span>Recorde</span><b id="recorde">0</b></div>
+    <button id="desfazer" class="icone-btn" aria-label="Desfazer">↶</button>
+    <button id="novo" class="btn principal">Novo</button>
+  </div>
+
+  <p id="status" role="status" aria-live="polite">Deslize o dedo para juntar números iguais</p>
+
+  <div class="tab-caixa"><div id="tab" class="tab"></div></div>
+
+  <div class="setas" aria-label="Setas para mover">
+    <button data-dir="2" aria-label="Para cima">▲</button>
+    <button data-dir="0" aria-label="Para a esquerda">◀</button>
+    <button data-dir="3" aria-label="Para baixo">▼</button>
+    <button data-dir="1" aria-label="Para a direita">▶</button>
+  </div>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li>Deslize o dedo no quadro (ou use as setas) para empurrar todas as peças para um lado.</li>
+    <li>Duas peças <b>iguais</b> que se encontram viram uma só, com o <b>dobro</b> do valor: 2+2=4, 4+4=8…</li>
+    <li>A cada jogada aparece uma peça nova.</li>
+    <li>Tente chegar na peça <b>2048</b>, e depois vá além!</li>
+    <li>O jogo acaba quando o quadro enche e não dá mais para juntar nada.</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<dialog id="confirma">
+  <h2>Começar um novo jogo?</h2>
+  <p>A partida atual será perdida.</p>
+  <button id="confirma-sim" class="btn principal">Sim, novo jogo</button>
+  <button class="btn discreto" data-fecha>Continuar jogando</button>
+</dialog>
+
+<dialog id="aviso">
+  <h2 id="aviso-titulo"></h2>
+  <p id="aviso-txt"></p>
+  <button id="aviso-novo" class="btn principal">Novo jogo</button>
+  <button id="aviso-fecha" class="btn discreto" data-fecha>Continuar</button>
+</dialog>
+
+<script src="jogo.js"></script>
+</body>
+</html>
