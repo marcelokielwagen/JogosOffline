@@ -28,7 +28,8 @@ O roteiro completo das etapas está em `PROMPT.md`.
   código em `js/comum.js` (`JO.som`, `JO.vibrar`) ligados nos quatro jogos.
   Paciência e Palavras Cruzadas ajustadas para celular deitado; contraste e
   bordas revistos no tema claro. Publicado.
-- Versão atual do cache em `sw.js`: `jogos-offline-v7`.
+- Versão atual do cache em `sw.js`: `jogos-offline-v8`. O `sw.js` busca os arquivos com
+  `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta
 - Nada do roteiro original. Ideias de etapas extras estão no fim do `PROMPT.md`
