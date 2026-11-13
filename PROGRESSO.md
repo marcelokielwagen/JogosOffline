@@ -10,11 +10,12 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Etapa 2, parte 1 (12/11/2026):** **Resta Um** (tabuleiro em cruz de 33 casas,
   tocar na peça e no destino, buracos possíveis piscando, desfazer sem limite,
   contadores de peças/jogadas, melhor resultado e vitórias salvos).
+- **Etapa 2, parte 2 (12/11/2026):** publicado no GitHub Pages em
+  https://marcelokielwagen.github.io/JogosOffline/ (repositório público, branch
+  `main`, pasta raiz). Para atualizar o site basta commit + push.
 - Versão atual do cache em `sw.js`: `jogos-offline-v3`.
 
 ## Falta
-- **Etapa 2, parte 2:** criar o repositório público `JogosOffline` no GitHub,
-  dar push e ligar o GitHub Pages (só com autorização do dono).
 - **Etapa 3:** Paciência. **Etapa 4:** Palavras Cruzadas. **Etapa 5:** acabamento.
 
 ## Lembretes para a próxima etapa
@@ -39,6 +40,6 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - O cache novo (v3) guardou os 14 arquivos.
 
 ## Ainda não testado
-- Em um celular de verdade e a instalação "Adicionar à tela inicial" (só dá
-  depois de publicar no GitHub Pages, na Etapa 2).
+- Em um celular de verdade e a instalação "Adicionar à tela inicial" (o dono testa
+  no próprio aparelho).
 - Tema claro e celular deitado foram feitos, mas não conferidos visualmente.
