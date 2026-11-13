@@ -229,6 +229,10 @@
     desenhar();
   }
 
+  // Impede o zoom do navegador no toque duplo (o toque duplo aqui sobe a carta).
+  tab.addEventListener('touchstart', ev => ev.preventDefault(), { passive: false });
+  tab.addEventListener('touchend', ev => ev.preventDefault(), { passive: false });
+  tab.addEventListener('dblclick', ev => ev.preventDefault());
   tab.addEventListener('pointerdown', ev => {
     const alvo = ev.target.closest('.carta,.vaga');
     if (!alvo || toque) return;
