@@ -17,10 +17,16 @@ O roteiro completo das etapas está em `PROMPT.md`.
   no destino, dois toques mandam para o monte, virar 1 ou 3 cartas, desfazer,
   tempo, jogadas, botão "Completar sozinho" e cartas caindo na vitória.
   Publicada no site.
-- Versão atual do cache em `sw.js`: `jogos-offline-v4`.
+- **Etapa 4 (12/11/2026):** **Palavras Cruzadas**: 10 grades (9x9 a 11x11, 148
+  palavras, sem repetição) em `jogos/cruzadas/grades.js`, teclado próprio com Ç,
+  palavra atual destacada, dica acima do teclado, conferir letra/palavra,
+  revelar palavra, lista de todas as dicas e progresso salvo por grade.
+  As grades foram montadas por um programa que confere que não há cruzamento
+  acidental; para criar grades novas, peça para gerar outro lote do mesmo jeito.
+- Versão atual do cache em `sw.js`: `jogos-offline-v5`.
 
 ## Falta
-- **Etapa 4:** Palavras Cruzadas. **Etapa 5:** acabamento.
+- **Etapa 5:** acabamento (estatísticas, sons, revisão visual, teste final).
 
 ## Lembretes para a próxima etapa
 - Cada jogo novo: criar `jogos/<nome>/`, trocar o cartão "em breve" por link em
@@ -50,6 +56,12 @@ O roteiro completo das etapas está em `PROMPT.md`.
   "Completar sozinho" em uma posição montada; aviso de vitória.
 - Não conferido de perto: o desenho das cartas em tela real (a janela de teste
   era pequena demais para julgar a leitura) e o arrasto com o dedo de verdade.
+
+## Testado na Etapa 4
+- Em tamanho de celular: as 10 grades foram resolvidas inteiras pelo teclado da
+  tela até o aviso de vitória; conferir (certo/errado), apagar, revelar, lista
+  de dicas, limpar grade e troca horizontal/vertical.
+- As dicas foram escritas à mão e não revisadas por outra pessoa.
 
 ## Ainda não testado
 - Em um celular de verdade e a instalação "Adicionar à tela inicial" (o dono testa

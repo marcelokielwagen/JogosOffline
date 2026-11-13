@@ -1,0 +1,52 @@
+.pagina { padding-left: 12px; padding-right: 12px; padding-bottom: 10px; }
+[hidden] { display: none !important; }
+
+/* Lista de grades */
+.lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-top: 4px; }
+.item { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; padding: 14px; border-radius: 18px; background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); transition: transform .12s; }
+.item:active { transform: scale(.96); }
+.item b { font-size: 1.05rem; }
+.item span { font-size: .82rem; color: var(--texto2); }
+.item .barrinha { width: 100%; height: 6px; border-radius: 99px; background: var(--superficie2); overflow: hidden; margin-top: 6px; }
+.item .barrinha i { display: block; height: 100%; background: var(--destaque); border-radius: 99px; }
+.item.feita { border-color: var(--o); }
+.item.feita .barrinha i { background: var(--o); }
+.item.feita span { color: var(--o); }
+
+/* Grade */
+.grade-caixa { width: min(100%, calc(100dvh - 400px)); min-width: 230px; margin: 0 auto; container-type: inline-size; }
+.grade { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; aspect-ratio: 1; }
+.cel { position: relative; padding: 0; border-radius: 4px; background: #fdfdfb; color: #1b1e30; font-weight: 700; font-size: calc(100cqw / var(--n) * .56); line-height: 1; display: grid; place-items: center; text-transform: uppercase; min-width: 0; min-height: 0; }
+.cel i { position: absolute; left: 6%; top: 4%; font-style: normal; font-weight: 600; font-size: calc(100cqw / var(--n) * .25); color: #6b7090; }
+.cel.pal { background: #d6dcff; }
+.cel.atual { background: var(--ouro); box-shadow: 0 0 0 2px var(--texto); z-index: 1; }
+.cel.ok { color: #0d8a55; }
+.cel.erro { color: #d6324a; background-image: linear-gradient(135deg, transparent 46%, #d6324a 46% 54%, transparent 54%); }
+.cel.rev { color: #3d4bd1; }
+
+/* Dica */
+.dica-barra { display: flex; gap: 6px; align-items: stretch; margin-top: 10px; }
+.dica { flex: 1; min-height: 52px; padding: 6px 10px; border-radius: 14px; background: var(--superficie); border: 1px solid var(--borda); text-align: left; font-size: .95rem; line-height: 1.25; }
+.dica small { display: block; color: var(--destaque); font-weight: 700; font-size: .72rem; letter-spacing: .03em; }
+.dica-barra .icone-btn { height: auto; font-size: 1.5rem; }
+
+.acoes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.acoes .btn { min-height: 44px; padding: 0 4px; font-size: .85rem; border-radius: 12px; }
+#aviso { margin: 4px 0 0; min-height: 1.3em; text-align: center; font-size: .85rem; color: var(--ouro); }
+
+/* Teclado */
+.teclado { display: grid; gap: 5px; margin-top: 4px; }
+.teclado .linha { display: flex; gap: 4px; justify-content: center; }
+.tecla { flex: 1; max-width: 46px; min-height: 46px; border-radius: 9px; background: var(--superficie); border: 1px solid var(--borda); font-weight: 700; font-size: 1.05rem; transition: transform .08s, background .08s; }
+.tecla:active { transform: scale(.9); background: var(--destaque); color: #fff; }
+.tecla.larga { flex: 1.6; max-width: 76px; font-size: 1.2rem; }
+
+/* Lista com todas as dicas */
+.todas-lista { max-height: 52dvh; overflow-y: auto; margin-bottom: 12px; user-select: none; }
+.todas-lista h3 { margin: 10px 0 4px; font-size: .8rem; color: var(--destaque); letter-spacing: .04em; text-transform: uppercase; }
+.todas-lista button { display: block; width: 100%; text-align: left; padding: 9px 8px; border-radius: 10px; font-size: .92rem; color: var(--texto); }
+.todas-lista button:active { background: var(--superficie2); }
+.todas-lista button.pronta { color: var(--texto2); text-decoration: line-through; }
+dialog .btn + .btn { margin-top: 6px; }
+
+@media (min-width: 700px) { .lista { grid-template-columns: repeat(3, 1fr); } }

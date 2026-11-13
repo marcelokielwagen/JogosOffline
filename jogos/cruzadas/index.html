@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1220">
+<title>Palavras Cruzadas — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body>
+<div class="pagina">
+  <header class="topo">
+    <a id="voltar" class="icone-btn" href="../../index.html" aria-label="Voltar">←</a>
+    <h1 id="titulo">Palavras Cruzadas</h1>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+    <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
+  </header>
+
+  <!-- Tela 1: escolha da grade -->
+  <main id="lista" class="lista"></main>
+
+  <!-- Tela 2: jogo -->
+  <main id="jogo" hidden>
+    <div class="grade-caixa"><div id="grade" class="grade"></div></div>
+
+    <div class="dica-barra">
+      <button id="ant" class="icone-btn" aria-label="Palavra anterior">‹</button>
+      <button id="dica" class="dica" aria-live="polite"></button>
+      <button id="prox" class="icone-btn" aria-label="Próxima palavra">›</button>
+    </div>
+
+    <div class="acoes">
+      <button id="c-letra" class="btn">✓ Letra</button>
+      <button id="c-palavra" class="btn">✓ Palavra</button>
+      <button id="revelar" class="btn">Revelar</button>
+      <button class="btn" data-abre="todas" id="abre-todas">Dicas</button>
+    </div>
+    <p id="aviso" role="status" aria-live="polite"></p>
+
+    <div id="teclado" class="teclado"></div>
+  </main>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li>Escolha uma grade. Toque em uma casa e use o teclado da tela para escrever.</li>
+    <li>Toque de novo na mesma casa (ou na dica) para trocar entre horizontal e vertical.</li>
+    <li>As setas ‹ › pulam para a palavra anterior ou a próxima.</li>
+    <li>As respostas <b>não têm acento</b> (PÃO vira PAO), mas o <b>Ç</b> é usado.</li>
+    <li><b>✓ Letra / ✓ Palavra:</b> mostram o que está certo (verde) e errado (vermelho).</li>
+    <li><b>Revelar:</b> preenche a palavra atual com a resposta.</li>
+    <li>Tudo fica salvo: você pode sair e continuar depois.</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<dialog id="todas">
+  <h2>Todas as dicas</h2>
+  <div id="todas-lista" class="todas-lista"></div>
+  <button class="btn principal" data-fecha>Fechar</button>
+  <button id="limpar" class="btn discreto">Limpar esta grade</button>
+</dialog>
+
+<dialog id="vitoria">
+  <h2>Grade completa! 🎉</h2>
+  <p id="vitoria-txt"></p>
+  <button id="vitoria-prox" class="btn principal">Próxima grade</button>
+  <button id="vitoria-lista" class="btn discreto">Ver todas as grades</button>
+</dialog>
+
+<script src="grades.js"></script>
+<script src="jogo.js"></script>
+</body>
+</html>
