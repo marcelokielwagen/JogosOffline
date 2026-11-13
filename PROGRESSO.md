@@ -16,7 +16,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Etapa 3 (12/11/2026):** **Paciência** (Klondike): arrastar ou tocar na carta e
   no destino, dois toques mandam para o monte, virar 1 ou 3 cartas, desfazer,
   tempo, jogadas, botão "Completar sozinho" e cartas caindo na vitória.
-  Ainda não enviada ao GitHub (falta autorização para o push).
+  Publicada no site.
 - Versão atual do cache em `sw.js`: `jogos-offline-v4`.
 
 ## Falta
