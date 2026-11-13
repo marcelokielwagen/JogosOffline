@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1220">
+<title>Resta Um — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body>
+<div class="pagina">
+  <header class="topo">
+    <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
+    <h1>Resta Um</h1>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+    <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
+  </header>
+
+  <div class="painel">
+    <div class="info"><span>Peças</span><b id="n-pecas">32</b></div>
+    <div class="info"><span>Jogadas</span><b id="n-jogadas">0</b></div>
+    <div class="info"><span>Melhor</span><b id="n-melhor">–</b></div>
+    <div class="info"><span>Vitórias</span><b id="n-vitorias">0</b></div>
+  </div>
+
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <div class="tab-caixa"><div id="tab" class="tab"></div></div>
+
+  <div class="acoes">
+    <button id="desfazer" class="btn">↶ Desfazer</button>
+    <button id="novo" class="btn principal">Novo jogo</button>
+  </div>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li>Toque em uma peça e depois no buraco vazio para onde ela vai pular.</li>
+    <li>A peça pula por cima de uma vizinha (para os lados, para cima ou para baixo) e a vizinha sai do tabuleiro.</li>
+    <li>Os buracos que piscam mostram para onde a peça escolhida pode ir.</li>
+    <li>Ganha quem deixar <b>só uma peça</b>. Se ela terminar no centro, é jogada de mestre!</li>
+    <li>Errou? Use o Desfazer quantas vezes quiser.</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<script src="jogo.js"></script>
+</body>
+</html>

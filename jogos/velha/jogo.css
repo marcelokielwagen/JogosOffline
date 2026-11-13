@@ -1,0 +1,42 @@
+.modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 44px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
+.modos button.ativo { background: var(--destaque); color: #fff; }
+
+.placar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.ponto { display: flex; flex-direction: column; align-items: center; padding: 10px 6px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); transition: border-color .2s, transform .2s; }
+.ponto span { font-size: .78rem; color: var(--texto2); white-space: nowrap; }
+.ponto b { font-size: 1.6rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.ponto.x b { color: var(--x); } .ponto.o b { color: var(--o); }
+.ponto.vez { transform: translateY(-2px); }
+.ponto.x.vez { border-color: var(--x); } .ponto.o.vez { border-color: var(--o); }
+
+#status { text-align: center; font-weight: 600; font-size: 1.1rem; margin: 16px 0 12px; min-height: 1.6em; }
+#status.fim { animation: pulo .5s ease-out; }
+
+.tabuleiro-caixa { position: relative; width: min(100%, 52dvh); margin: 0 auto; }
+.tabuleiro { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10px; aspect-ratio: 1; }
+.casa { position: relative; display: grid; place-items: center; border-radius: var(--raio); background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); transition: transform .12s, opacity .3s; }
+.casa:not(.x):not(.o):active { transform: scale(.94); }
+.casa.x::before, .casa.x::after { content: ""; position: absolute; width: 62%; height: 11%; border-radius: 99px; background: var(--x); transform: rotate(45deg); }
+.casa.x::after { transform: rotate(-45deg); }
+.casa.o::before { content: ""; position: absolute; width: 54%; aspect-ratio: 1; border-radius: 50%; border: clamp(8px, 2.8vw, 13px) solid var(--o); }
+.casa.nova::before, .casa.nova::after { animation: marca .25s ease-out backwards; }
+.tabuleiro.fim .casa:not(.ganhou) { opacity: .45; }
+
+#risco { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#risco line { stroke: var(--ouro); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; opacity: 0; }
+#risco.mostra line { opacity: 1; animation: riscar .45s ease-out forwards; }
+
+.acoes { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+.acoes + .acoes { margin-top: 6px; }
+.acoes .btn:not(.discreto) { flex: 1; max-width: 200px; }
+
+@keyframes marca { from { opacity: 0; scale: .3; } }
+@keyframes riscar { to { stroke-dashoffset: 0; } }
+@keyframes pulo { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .pagina { max-width: 900px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-items: start; }
+  .topo { grid-column: 1 / -1; }
+  .tabuleiro-caixa { grid-column: 2; grid-row: 2 / span 5; width: min(100%, 72dvh); }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1220">
+<title>Jogos Offline</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/inicio.css">
+<script src="js/comum.js"></script>
+</head>
+<body>
+<div class="pagina larga">
+  <header class="topo">
+    <h1>Jogos Offline</h1>
+    <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
+  </header>
+  <p class="saudacao">Clássicos para jogar em qualquer lugar, mesmo sem internet.</p>
+
+  <main class="grade">
+    <a class="cartao" href="jogos/velha/index.html">
+      <div class="arte"><svg viewBox="0 0 60 60" fill="none" stroke-linecap="round" stroke-width="4">
+        <path d="M21 6v48M39 6v48M6 21h48M6 39h48" stroke="var(--texto2)" opacity=".5"/>
+        <path d="M8 8l8 8M16 8l-8 8M44 44l8 8M52 44l-8 8" stroke="var(--x)"/>
+        <circle cx="30" cy="30" r="5" stroke="var(--o)"/><circle cx="48" cy="12" r="5" stroke="var(--o)"/>
+      </svg></div>
+      <h2>Jogo da Velha</h2><p>Em dupla ou contra o computador</p>
+    </a>
+
+    <a class="cartao" href="jogos/resta-um/index.html">
+      <div class="arte"><svg viewBox="0 0 60 60" fill="var(--destaque)">
+        <circle cx="22" cy="8" r="4"/><circle cx="30" cy="8" r="4"/><circle cx="38" cy="8" r="4"/>
+        <circle cx="8" cy="22" r="4"/><circle cx="22" cy="22" r="4"/><circle cx="30" cy="22" r="4"/><circle cx="38" cy="22" r="4"/><circle cx="52" cy="22" r="4"/>
+        <circle cx="8" cy="30" r="4"/><circle cx="22" cy="30" r="4"/><circle cx="30" cy="30" r="4" fill="none" stroke="var(--texto2)" stroke-width="2"/><circle cx="38" cy="30" r="4"/><circle cx="52" cy="30" r="4"/>
+        <circle cx="8" cy="38" r="4"/><circle cx="22" cy="38" r="4"/><circle cx="30" cy="38" r="4"/><circle cx="38" cy="38" r="4"/><circle cx="52" cy="38" r="4"/>
+        <circle cx="22" cy="52" r="4"/><circle cx="30" cy="52" r="4"/><circle cx="38" cy="52" r="4"/>
+      </svg></div>
+      <h2>Resta Um</h2><p>Deixe só uma peça no tabuleiro</p>
+    </a>
+
+    <div class="cartao breve" aria-disabled="true">
+      <span class="selo">EM BREVE</span>
+      <div class="arte"><svg viewBox="0 0 60 60">
+        <rect x="8" y="12" width="28" height="40" rx="5" fill="var(--superficie)" stroke="var(--texto2)" stroke-width="2" transform="rotate(-10 22 32)"/>
+        <rect x="24" y="8" width="28" height="40" rx="5" fill="#fff" stroke="var(--texto2)" stroke-width="2" transform="rotate(8 38 28)"/>
+        <path d="M38 20c-5 5-8 8-8 11a4 4 0 0 0 7 2l-1 4h4l-1-4a4 4 0 0 0 7-2c0-3-3-6-8-11z" fill="#1b1e30" transform="rotate(8 38 28)"/>
+      </svg></div>
+      <h2>Paciência</h2><p>O clássico das cartas</p>
+    </div>
+
+    <div class="cartao breve" aria-disabled="true">
+      <span class="selo">EM BREVE</span>
+      <div class="arte"><svg viewBox="0 0 60 60" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">
+        <g fill="var(--superficie)" stroke="var(--texto2)" stroke-width="1.5">
+          <rect x="6" y="6" width="16" height="16" rx="3"/><rect x="22" y="6" width="16" height="16" rx="3"/><rect x="38" y="6" width="16" height="16" rx="3"/>
+          <rect x="22" y="22" width="16" height="16" rx="3"/><rect x="22" y="38" width="16" height="16" rx="3"/><rect x="38" y="38" width="16" height="16" rx="3"/>
+        </g>
+        <rect x="6" y="22" width="16" height="16" rx="3" fill="var(--texto2)" opacity=".5"/>
+        <g fill="var(--ouro)"><text x="14" y="18">S</text><text x="30" y="18">O</text><text x="46" y="18">L</text><text x="30" y="34">V</text><text x="30" y="50">O</text><text x="46" y="50">I</text></g>
+      </svg></div>
+      <h2>Palavras Cruzadas</h2><p>Dicas e grades em português</p>
+    </div>
+  </main>
+
+  <p id="status-offline">Preparando para funcionar sem internet…</p>
+</div>
+</body>
+</html>

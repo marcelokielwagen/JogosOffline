@@ -1,0 +1,54 @@
+/* Visual compartilhado por todas as telas */
+:root {
+  --fundo: #0f1220; --superficie: #1a1e33; --superficie2: #252a48;
+  --texto: #eef0fa; --texto2: #9aa0c0; --borda: rgba(255,255,255,.09);
+  --destaque: #7c8cff; --x: #ff7a90; --o: #5fd4c4; --ouro: #ffcf6b;
+  --sombra: 0 10px 30px rgba(0,0,0,.35);
+  --raio: 18px;
+}
+:root[data-tema="claro"] {
+  --fundo: #f2f3fa; --superficie: #ffffff; --superficie2: #e8eaf6;
+  --texto: #1b1e30; --texto2: #5d6385; --borda: rgba(20,25,60,.1);
+  --destaque: #4a5ae8; --x: #e0475f; --o: #169a88; --ouro: #c98a00;
+  --sombra: 0 10px 30px rgba(40,50,110,.14);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--fundo); }
+body {
+  margin: 0; min-height: 100dvh; color: var(--texto); background: var(--fundo);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  transition: background .25s, color .25s;
+  user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+.pagina { max-width: 560px; margin: 0 auto; padding: 0 16px 28px; }
+.topo { display: flex; align-items: center; gap: 8px; padding: 14px 0 10px; }
+.topo h1 { flex: 1; margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -.01em; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+.icone-btn {
+  width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+  background: var(--superficie); border: 1px solid var(--borda); font-size: 1.15rem;
+  text-decoration: none; color: inherit; transition: transform .12s, background .2s;
+}
+.icone-btn:active, .btn:active { transform: scale(.94); }
+.btn {
+  min-height: 48px; padding: 0 20px; border-radius: 14px; font-weight: 600;
+  background: var(--superficie); border: 1px solid var(--borda);
+  transition: transform .12s, background .2s, opacity .2s;
+}
+.btn.principal { background: var(--destaque); color: #fff; border-color: transparent; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.discreto { background: none; border: 0; color: var(--texto2); font-weight: 500; min-height: 44px; }
+:focus-visible { outline: 3px solid var(--destaque); outline-offset: 2px; }
+dialog {
+  border: 1px solid var(--borda); border-radius: 22px; background: var(--superficie); color: var(--texto);
+  padding: 22px; width: min(92vw, 420px); box-shadow: var(--sombra);
+}
+dialog::backdrop { background: rgba(5,7,18,.6); backdrop-filter: blur(3px); }
+dialog[open] { animation: surgir .22s ease-out; }
+dialog h2 { margin: 0 0 10px; font-size: 1.2rem; }
+dialog p, dialog li { color: var(--texto2); }
+dialog ul { padding-left: 20px; margin: 0 0 16px; }
+dialog .btn { width: 100%; }
+@keyframes surgir { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

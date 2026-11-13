@@ -1,0 +1,46 @@
+.painel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.info { display: flex; flex-direction: column; align-items: center; padding: 9px 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.info span { font-size: .74rem; color: var(--texto2); }
+.info b { font-size: 1.35rem; line-height: 1.25; font-variant-numeric: tabular-nums; }
+
+#status { text-align: center; font-weight: 600; font-size: 1.05rem; margin: 14px 0 12px; min-height: 1.6em; }
+#status.fim { animation: pulo .5s ease-out; }
+#status.vitoria { color: var(--ouro); }
+
+.tab-caixa { width: min(100%, 56dvh); margin: 0 auto; }
+.tab {
+  display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr);
+  aspect-ratio: 1; padding: 7%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, var(--superficie2), var(--superficie) 70%);
+  border: 1px solid var(--borda); box-shadow: var(--sombra), inset 0 2px 0 rgba(255,255,255,.05);
+}
+.casa { position: relative; display: grid; place-items: center; padding: 0; min-width: 0; min-height: 0; border-radius: 50%; }
+.casa::before { content: ""; position: absolute; width: 58%; height: 58%; border-radius: 50%; background: var(--fundo); box-shadow: inset 0 2px 4px rgba(0,0,0,.45); }
+.pino {
+  position: relative; width: 80%; height: 80%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 34% 28%, #fff 0 5%, color-mix(in srgb, var(--destaque) 55%, #fff) 14%, var(--destaque) 52%, color-mix(in srgb, var(--destaque) 55%, #000) 100%);
+  box-shadow: 0 3px 6px rgba(0,0,0,.4);
+  transition: transform .15s, box-shadow .15s;
+}
+.pino.fantasma { position: absolute; }
+.casa.sel .pino {
+  transform: scale(1.12) translateY(-4%);
+  background: radial-gradient(circle at 34% 28%, #fff 0 5%, color-mix(in srgb, var(--ouro) 55%, #fff) 14%, var(--ouro) 52%, color-mix(in srgb, var(--ouro) 55%, #000) 100%);
+  box-shadow: 0 6px 12px rgba(0,0,0,.45), 0 0 0 3px color-mix(in srgb, var(--ouro) 40%, transparent);
+}
+.casa.destino::after { content: ""; position: absolute; width: 58%; height: 58%; border-radius: 50%; border: 3px solid var(--o); animation: pisca 1s ease-in-out infinite; }
+.casa.treme .pino { animation: treme .3s; }
+.tab.fim .pino { filter: saturate(.6); }
+
+.acoes { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+.acoes .btn { flex: 1; max-width: 200px; }
+
+@keyframes pisca { 50% { transform: scale(1.25); opacity: .5; } }
+@keyframes treme { 25% { transform: translateX(-12%); } 75% { transform: translateX(12%); } }
+@keyframes pulo { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .pagina { max-width: 900px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-items: start; }
+  .topo { grid-column: 1 / -1; }
+  .tab-caixa { grid-column: 2; grid-row: 2 / span 4; width: min(100%, 74dvh); }
+}
