@@ -42,7 +42,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
     humano, Natureza, Brasil, Esportes, Casa), cada uma com uma palavra grande no
     centro. As 10 antigas viraram a categoria "Variadas". Total: 26 grades.
   - Estatísticas incluem os dois jogos novos.
-  - Ainda não enviada ao GitHub (falta autorização para o push).
+  - Publicada em 13/11/2026 e conferida no site (versão `jogos-offline-v9`, 6 jogos na tela inicial).
 - Versão atual do cache em `sw.js`: `jogos-offline-v9`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
