@@ -13,10 +13,14 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Etapa 2, parte 2 (12/11/2026):** publicado no GitHub Pages em
   https://marcelokielwagen.github.io/JogosOffline/ (repositório público, branch
   `main`, pasta raiz). Para atualizar o site basta commit + push.
-- Versão atual do cache em `sw.js`: `jogos-offline-v3`.
+- **Etapa 3 (12/11/2026):** **Paciência** (Klondike): arrastar ou tocar na carta e
+  no destino, dois toques mandam para o monte, virar 1 ou 3 cartas, desfazer,
+  tempo, jogadas, botão "Completar sozinho" e cartas caindo na vitória.
+  Ainda não enviada ao GitHub (falta autorização para o push).
+- Versão atual do cache em `sw.js`: `jogos-offline-v4`.
 
 ## Falta
-- **Etapa 3:** Paciência. **Etapa 4:** Palavras Cruzadas. **Etapa 5:** acabamento.
+- **Etapa 4:** Palavras Cruzadas. **Etapa 5:** acabamento.
 
 ## Lembretes para a próxima etapa
 - Cada jogo novo: criar `jogos/<nome>/`, trocar o cartão "em breve" por link em
@@ -38,6 +42,14 @@ O roteiro completo das etapas está em `PROMPT.md`.
   até ficar sem jogadas, e vitória com a última peça no centro (posição montada
   para o teste, não uma partida inteira ganha à mão).
 - O cache novo (v3) guardou os 14 arquivos.
+
+## Testado na Etapa 3
+- Em tamanho de celular, por toques simulados: uma partida inteira até a vitória
+  (102 jogadas) conferindo as regras a cada passo; arrastar uma carta para outra
+  coluna; soltar em lugar inválido (a carta volta); virar 3; desfazer; novo jogo;
+  "Completar sozinho" em uma posição montada; aviso de vitória.
+- Não conferido de perto: o desenho das cartas em tela real (a janela de teste
+  era pequena demais para julgar a leitura) e o arrasto com o dedo de verdade.
 
 ## Ainda não testado
 - Em um celular de verdade e a instalação "Adicionar à tela inicial" (o dono testa

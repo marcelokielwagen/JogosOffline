@@ -1,12 +1,13 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v3';
+const VERSAO = 'jogos-offline-v4';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
   './icones/icone-192.png', './icones/icone-512.png',
   './jogos/velha/index.html', './jogos/velha/jogo.css', './jogos/velha/jogo.js',
   './jogos/resta-um/index.html', './jogos/resta-um/jogo.css', './jogos/resta-um/jogo.js',
+  './jogos/paciencia/index.html', './jogos/paciencia/jogo.css', './jogos/paciencia/jogo.js',
 ];
 
 self.addEventListener('install', e => {
