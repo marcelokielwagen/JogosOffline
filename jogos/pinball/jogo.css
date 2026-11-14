@@ -1,12 +1,33 @@
 /* Pinball Galáxia: a mesa sempre escura, painel com cara de máquina dos anos 90 */
-body.pinball { overflow: hidden; background: #07091a; color: #eef0fa; }
+/* Fundo da página: céu estrelado com nebulosas, combinando com a mesa */
+html:has(body.pinball) { background: #04050f; }
+body.pinball {
+  overflow: hidden; color: #eef0fa; background-color: #04050f;
+  background-image:
+    radial-gradient(1.2px 1.2px at 23px 41px, rgba(255,255,255,.9), transparent 2px),
+    radial-gradient(1px 1px at 97px 13px, rgba(255,240,200,.8), transparent 2px),
+    radial-gradient(1px 1px at 151px 88px, rgba(255,255,255,.7), transparent 2px),
+    radial-gradient(1.5px 1.5px at 61px 133px, rgba(180,220,255,.9), transparent 2px),
+    radial-gradient(1px 1px at 183px 157px, rgba(255,255,255,.6), transparent 2px),
+    radial-gradient(1px 1px at 131px 191px, rgba(255,255,255,.5), transparent 2px),
+    radial-gradient(ellipse 60% 45% at 12% 18%, rgba(140,60,220,.32), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 88% 78%, rgba(30,170,220,.24), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 85% 12%, rgba(230,60,150,.18), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 90%, rgba(60,90,255,.22), transparent 70%),
+    linear-gradient(#070a22, #0b0720 60%, #04050f);
+  background-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
 .pb { height: 100dvh; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; padding: 0 10px; }
 .pb .topo { padding: 8px 0 6px; }
-.pb .topo .icone-btn { background: #1a1e33; border-color: rgba(255,255,255,.09); color: #eef0fa; }
+.pb .topo h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 4px; background: linear-gradient(#fff3a0, #ffb627 55%, #ff5e1a); -webkit-background-clip: text; background-clip: text; color: transparent; font-style: italic; font-weight: 900; text-shadow: none; filter: drop-shadow(0 1px 0 #2a0b3a); }
+@media (max-width: 420px) { .pb .topo h1 { font-size: 1.05rem; } .pb .topo { gap: 6px; } }
+.pb .topo .icone-btn { background: rgba(26,30,51,.7); border-color: rgba(255,255,255,.12); color: #eef0fa; backdrop-filter: blur(4px); }
 .pb-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
 
-.mesa { flex: 1; min-height: 0; display: grid; place-items: center; touch-action: none; cursor: pointer; }
-.mesa canvas { display: block; border-radius: 10px; box-shadow: 0 0 0 3px #2b2117, 0 0 0 6px #120c07, 0 14px 40px rgba(0,0,0,.6); }
+.mesa { flex: 1; min-height: 0; display: grid; place-items: center; touch-action: none; cursor: pointer; position: relative; }
+.mesa::before { content: ""; position: absolute; inset: 4% 8%; border-radius: 40%; background: radial-gradient(closest-side, rgba(120,80,255,.28), rgba(40,180,255,.12) 60%, transparent); filter: blur(18px); pointer-events: none; }
+.mesa canvas { position: relative; display: block; border-radius: 12px; box-shadow: 0 0 0 2px #6b5236, 0 0 0 4px #1a1009, 0 0 0 5px rgba(220,226,236,.35), 0 0 34px rgba(120,90,255,.35), 0 18px 50px rgba(0,0,0,.7); }
 
 /* Painel com bordas em relevo, como os botões de antigamente */
 .painel {

@@ -52,42 +52,70 @@ const COGUMELOS = [
   { x: 185, y: 282, r: 19, cor: ['#fff0b8', '#fb8c00', '#7a3d00'], flash: 0 },
 ];
 const BURACO = { x: 288, y: 258 };
+const BASE_NAVE = { x: 185, y: 352 };
 
 // palhetas com "peso": aceleram até a velocidade máxima
 const palhetas = [
-  { px: 116, py: 646, len: 60, rb: 10, rt: 5.5, rep: .5, cima: -.45, ang: .5, w: 0, wReal: 0, apertada: false },
-  { px: 254, py: 646, len: 60, rb: 10, rt: 5.5, rep: Math.PI - .5, cima: Math.PI + .45, ang: Math.PI - .5, w: 0, wReal: 0, apertada: false },
+  { px: 116, py: 646, len: 60, rb: 10, rt: 5.5, rep: .5, cima: -.45, ang: .5, oang: .5, w: 0, wReal: 0, apertada: false },
+  { px: 254, py: 646, len: 60, rb: 10, rt: 5.5, rep: Math.PI - .5, cima: Math.PI + .45, ang: Math.PI - .5, oang: Math.PI - .5, w: 0, wReal: 0, apertada: false },
 ];
 
-// Rampa de arame: entra na frente da esquerda, dá a volta por cima e desce no retorno da direita
-const RAMPA_CTRL = [[99, 345], [92, 290], [88, 225], [96, 160], [118, 108], [160, 72], [220, 60], [276, 76], [314, 112], [334, 165], [340, 230], [339, 310], [336, 390], [329, 450], [318, 495], [311, 524]];
-const RAMPA = [];
-(() => {
-  const P = RAMPA_CTRL, pts = [];
+// ----- Trilhas elevadas (rampa de arame e cano de vidro com looping) -----
+function catmull(P, n = 10) {
+  const pts = [];
   for (let i = 0; i < P.length - 1; i++) {
     const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
-    for (let k = 0; k < 10; k++) {
-      const t = k / 10, t2 = t * t, t3 = t2 * t;
+    for (let k = 0; k < n; k++) {
+      const t = k / n, t2 = t * t, t3 = t2 * t;
       const c = q => .5 * (2 * p1[q] + (-p0[q] + p2[q]) * t + (2 * p0[q] - 5 * p1[q] + 4 * p2[q] - p3[q]) * t2 + (-p0[q] + 3 * p1[q] - 3 * p2[q] + p3[q]) * t3);
       pts.push([c(0), c(1)]);
     }
   }
   pts.push(P[P.length - 1]);
-  let d = 0;
-  for (let i = 0; i < pts.length; i++) {
-    if (i) d += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    RAMPA.push({ x: pts[i][0], y: pts[i][1], d, dx: (b[0] - a[0]) / l, dy: (b[1] - a[1]) / l });
-  }
-})();
-const L_RAMPA = RAMPA[RAMPA.length - 1].d;
-const alturaRampa = t => t < .28 ? t / .28 : 1 - .5 * (t - .28) / .72;
-function pontoRampa(d) {
-  let i = 1;
-  while (i < RAMPA.length - 1 && RAMPA[i].d < d) i++;
-  const a = RAMPA[i - 1], b = RAMPA[i], t = Math.max(0, Math.min(1, (d - a.d) / ((b.d - a.d) || 1)));
-  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, dx: a.dx + (b.dx - a.dx) * t, dy: a.dy + (b.dy - a.dy) * t };
+  return pts;
 }
+function montarTrilha(pts, alturas, extra) {
+  const T = Object.assign({ pts: [], L: 0 }, extra);
+  let d = 0;
+  pts.forEach((p, i) => {
+    if (i) d += Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]);
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    T.pts.push({ x: p[0], y: p[1], d, dx: (b[0] - a[0]) / l, dy: (b[1] - a[1]) / l, h: 0 });
+  });
+  T.L = d;
+  T.pts.forEach((p, i) => p.h = typeof alturas === 'function' ? alturas(p.d / d) : alturas[i]);
+  return T;
+}
+function pontoTrilha(T, d) {
+  const P = T.pts;
+  let i = 1;
+  while (i < P.length - 1 && P[i].d < d) i++;
+  const a = P[i - 1], b = P[i], t = Math.max(0, Math.min(1, (d - a.d) / ((b.d - a.d) || 1)));
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, dx: a.dx + (b.dx - a.dx) * t, dy: a.dy + (b.dy - a.dy) * t, h: a.h + (b.h - a.h) * t };
+}
+// Rampa: entra na frente da esquerda, dá a volta por cima e desce no retorno da direita
+const RAMPA = montarTrilha(
+  catmull([[99, 345], [92, 290], [88, 225], [96, 160], [118, 108], [160, 72], [220, 60], [276, 76], [314, 112], [334, 165], [340, 230], [339, 310], [336, 390], [329, 450], [318, 495], [311, 524]]),
+  t => t < .28 ? t / .28 : 1 - .5 * (t - .28) / .72,
+  { nome: 'rampa', vmin: 250, vmax: 650 });
+// Cano com looping: entra à direita do centro, sobe, dá uma volta completa e cai no alto da esquerda
+const TUBO = (() => {
+  const ida = catmull([[262, 352], [258, 305], [246, 262], [230, 215], [212, 182], [190, 176]], 8);
+  const volta = [];
+  for (let a = 96; a <= 450; a += 6) { const r = a * Math.PI / 180; volta.push([190 + 26 * Math.cos(r), 150 + 26 * Math.sin(r)]); }
+  const saida = catmull([[190, 176], [160, 180], [132, 190], [116, 210], [112, 234]], 8).slice(1);
+  const pts = ida.concat(volta, saida);
+  const alt = pts.map((p, i) => {
+    if (i < ida.length) return .7 * i / (ida.length - 1);
+    if (i < ida.length + volta.length) { const a = (96 + (i - ida.length) * 6) * Math.PI / 180; return .7 + .5 * (1 - Math.cos(a - Math.PI / 2)) / 2; }
+    return .7 - .4 * (i - ida.length - volta.length) / (saida.length - 1);
+  });
+  return montarTrilha(pts, alt, { nome: 'tubo', vmin: 200, vmax: 480 });
+})();
+const TRILHAS = { rampa: RAMPA, tubo: TUBO };
+
+// voo da nave: sai da base, dá uma volta pela mesa e solta a bola no alto
+const ROTA_NAVE = montarTrilha(catmull([[185, 352], [150, 300], [96, 232], [96, 150], [140, 92], [215, 74], [290, 112], [300, 185], [255, 190], [215, 140], [185, 84]], 10), () => 1, {});
 
 const PLANETAS = [
   { nome: 'Lua', x: 113, y: 452, r: 10, cor: ['#ffffff', '#b8bcc6', '#555a66'] },
@@ -98,21 +126,25 @@ const PLANETAS = [
 ];
 const MISSOES = [
   { ev: 'bancada', txt: 'derrube os alvos', meta: r => r },
-  { ev: 'orbita', txt: 'faça órbitas', meta: r => 2 + r },
+  { ev: 'nave', txt: 'voe com a nave', meta: r => r },
   { ev: 'cogumelo', txt: 'acerte os cogumelos', meta: r => 10 + 5 * r },
   { ev: 'rampa', txt: 'suba a rampa', meta: r => 1 + r },
-  { ev: 'buraco', txt: 'caia no buraco negro', meta: r => 1 + r },
+  { ev: 'tubo', txt: 'faça o looping', meta: r => r },
 ];
 
 // Áreas que contam pontos quando a bola passa (não são sólidas)
 const ZONAS = [
   ...[145, 185, 225].map((x, i) => ({ x0: x - 10, y0: 98, x1: x + 10, y1: 118, ev: 'trilha', i })),
   { x0: 24, y0: 292, x1: 58, y1: 308, ev: 'orbita' },
-  { x0: 50, y0: 560, x1: 68, y1: 590, ev: 'retorno' }, { x0: 302, y0: 560, x1: 320, y1: 590, ev: 'retorno' },
-  { x0: 24, y0: 560, x1: 42, y1: 590, ev: 'fora', lado: 'E' }, { x0: 328, y0: 560, x1: 346, y1: 590, ev: 'fora', lado: 'D' },
+  { x0: 24, y0: 560, x1: 42, y1: 590, ev: 'fora', lado: 'E', faixa: 0 },
+  { x0: 50, y0: 560, x1: 68, y1: 590, ev: 'retorno', faixa: 1 },
+  { x0: 302, y0: 560, x1: 320, y1: 590, ev: 'retorno', faixa: 2 },
+  { x0: 328, y0: 560, x1: 346, y1: 590, ev: 'fora', lado: 'D', faixa: 3 },
   { x0: 353, y0: 150, x1: 380, y1: 185, ev: 'saiu', sobe: true },
-  { x0: 80, y0: 330, x1: 118, y1: 352, ev: 'rampa', sobe: true },
+  { x0: 80, y0: 330, x1: 118, y1: 352, ev: 'entrada', trilha: 'rampa', sobe: true },
+  { x0: 248, y0: 342, x1: 276, y1: 362, ev: 'entrada', trilha: 'tubo', sobe: true },
 ];
+const X_FAIXAS = [33, 59, 311, 337];
 
 // ================= Opções e dados salvos =================
 const dados = JO.carregar('pinball', { recordes: [], jogos: 0, melhor: 0, nome: '' });
@@ -132,8 +164,10 @@ const MARCAS = [];
 for (let i = 0; i < 12; i++) { const y = 1 - (i + .5) / 6, r = Math.sqrt(Math.max(0, 1 - y * y)), a = i * 2.4; MARCAS.push([Math.cos(a) * r, y, Math.sin(a) * r]); }
 let bolas = [], B = null;
 let plY = PL_BASE, puxar = 0, puxando = false;
-let relogio = 0, pausado = false, tremor = 0, gi = 0, giCor = '255,210,120', show = 0, rampaBrilho = -9;
+let relogio = 0, pausado = false, tremor = 0, gi = 0, giCor = '255,210,120', show = 0, brilhoTrilha = { rampa: -9, tubo: -9 };
 const spinner = { ang: 0, w: 0 };
+// nave: pronta → decolando → voando → voltando → recarga → pronta
+const nave = { estado: 'pronta', t: 0, bola: null, x: BASE_NAVE.x, y: BASE_NAVE.y, alt: 0, ang: -Math.PI / 2, voos: 0 };
 let mensagem = '', msgAte = 0, msgIni = 0, msgAnim = 'zoom';
 const agenda = [], particulas = [], popups = [];
 const depois = (s, fn) => agenda.push({ t: relogio + s, fn });
@@ -141,7 +175,7 @@ const msg = (t, s = 2.4, anim = 'zoom') => { mensagem = t; msgAte = relogio + s;
 let j;
 
 function novaBola(x, y) {
-  return { x, y, vx: 0, vy: 0, presa: 0, fora: false, rampa: null, ignora: 0, parado: 0, travar: false,
+  return { x, y, ox: x, oy: y, vx: 0, vy: 0, presa: 0, fora: false, trilha: null, naNave: false, ignora: 0, parado: 0, travar: false,
            zd: ZONAS.map(() => false), px: x, py: y, marcas: MARCAS.map(m => m.slice()), rastro: [] };
 }
 
@@ -191,12 +225,18 @@ const som = (() => {
     orbita() { tom(280, .4, 'sawtooth', .05, 1400); },
     giro() { tom(1800, .02, 'square', .03); },
     rampa() { tom(200, .5, 'sawtooth', .04, 700); ruido(.5, .06, 1800, 0, 'bandpass'); },
+    tubo() { tom(300, .9, 'sine', .07, 900); ruido(.9, .07, 1200, 0, 'bandpass'); },
     rampaOk() { arpejo([659, 784, 988, 1319], .06, .06); },
+    looping() { arpejo([523, 784, 1047, 1568, 2093], .06, .07); },
     rampaFalha() { tom(500, .3, 'triangle', .07, 180); },
     buraco() { tom(720, .9, 'sine', .13, 50); ruido(.7, .08, 500); },
     ejetar() { ruido(.14, .3, 1300); tom(95, .12, 'square', .1, 45); },
     lancar() { ruido(.18, .25, 2200, 0, 'bandpass'); tom(120, .1, 'triangle', .08, 60); },
     catapulta() { ruido(.2, .35, 900); tom(80, .25, 'square', .12, 300); },
+    nave() { tom(90, 1.2, 'sawtooth', .07, 420); ruido(2.8, .12, 700); tom(420, 1.6, 'sawtooth', .04, 300, 1.2); },
+    pouso() { tom(300, .5, 'sawtooth', .05, 80); ruido(.4, .1, 500); },
+    naveSolta() { arpejo([784, 1047, 1319, 1568], .07, .07); },
+    faixa() { tom(1500, .05, 'sine', .08); },
     mola() { tom(70, .05, 'triangle', .06); },
     perdeu() { arpejo([392, 330, 262, 196], .16, .1, 'triangle'); },
     missao() { arpejo([523, 659, 784, 659, 784, 1047], .09); },
@@ -262,10 +302,11 @@ function clarao(forca, cor = '255,210,120') { if (efeitos()) { gi = Math.max(gi,
 function novoJogo() {
   agenda.length = 0; particulas.length = 0; popups.length = 0;
   regras = DIFIC[opc.dific]; totalBolas = opc.bolas;
-  j = { pontos: 0, bola: 1, extras: 0, mult: 1, trilhas: [false, false, false], missao: 0, prog: 0, rodada: 1,
+  j = { pontos: 0, bola: 1, extras: 0, mult: 1, trilhas: [false, false, false], faixas: [false, false, false, false], missao: 0, prog: 0, rodada: 1,
         planetas: 0, bonus: 0, salvaAte: 0, tilt: 0, tiltado: false, estado: 'pronto', extraPontos: false,
         trava: false, travadas: 0, multibola: false, jackpot: false, catapulta: true, skill: 0, skillAte: 0 };
   ALVOS.forEach(a => a.de_pe = true);
+  Object.assign(nave, { estado: 'pronta', t: 0, bola: null, x: BASE_NAVE.x, y: BASE_NAVE.y, alt: 0, ang: -Math.PI / 2, voos: 0 });
   prepararBola();
   som('inicio');
   msg('BOA SORTE!', 2);
@@ -313,6 +354,17 @@ function evento(tipo) {
   }
 }
 
+// luzes dos 4 corredores de baixo: acender todas recarrega o escudo
+function acenderFaixa(i, b) {
+  if (j.faixas[i]) return;
+  j.faixas[i] = true; som('faixa'); faiscas(X_FAIXAS[i], 575, 8, '#7dffb2', .6);
+  if (j.faixas.every(Boolean)) {
+    pontuar(15000 * j.rodada, 185, 640); clarao(.4, '90,200,255');
+    if (j.estado === 'jogando') { j.salvaAte = Math.max(j.salvaAte, relogio + 10); msg('ESCUDO\nRECARREGADO', 2.4); }
+    depois(.7, () => { j.faixas = [false, false, false, false]; });
+  }
+}
+
 function aoEntrar(b, z) {
   if (j.tiltado) return;
   switch (z.ev) {
@@ -336,8 +388,9 @@ function aoEntrar(b, z) {
         pontuar(5000 * j.rodada, 60, 300); j.bonus += 1000; som('orbita'); msg('ÓRBITA!', 1.6); evento('orbita');
       }
       break;
-    case 'retorno': pontuar(1000); j.bonus += 250; som('retorno'); break;
+    case 'retorno': pontuar(1000); j.bonus += 250; som('retorno'); acenderFaixa(z.faixa, b); break;
     case 'fora':
+      acenderFaixa(z.faixa, b);
       if (z.lado === 'E' && j.catapulta) {
         j.catapulta = false; b.vx = aleat(10, 50); b.vy = -1550; som('catapulta'); msg('CATAPULTA!', 1.6);
         faiscas(b.x, b.y + 10, 20, '#ff5dd8', 1.2, 0, -1); tremor = .12;
@@ -346,49 +399,57 @@ function aoEntrar(b, z) {
     case 'saiu':
       if (j.estado === 'pronto') { j.estado = 'jogando'; j.salvaAte = relogio + regras.escudo; j.skillAte = relogio + 4; }
       break;
-    case 'rampa':
-      if (!b.rampa && b.vy < -150) entrarRampa(b);
+    case 'entrada':
+      if (!b.trilha && b.vy < -150) entrarTrilha(b, TRILHAS[z.trilha]);
       break;
   }
 }
 
-// ----- Rampa -----
-const K_RAMPA = 8e5, F_RAMPA = 350;
-function entrarRampa(b) {
+// ----- Trilhas: a bola sobe gastando força; sem força suficiente, ela volta -----
+const K_TRILHA = 8e5, F_TRILHA = 350;
+function entrarTrilha(b, T) {
   const s0 = Math.hypot(b.vx, b.vy);
-  b.rampa = { d: 0, dir: 1, E: s0 * s0 * .8, gasto: 0, s: s0 };
-  som('rampa');
+  b.trilha = { T, d: 0, dir: 1, E: s0 * s0 * .8, gasto: 0, s: s0, h: 0 };
+  som(T.nome);
 }
-function moverRampa(b, h) {
-  const r = b.rampa;
-  let s2 = r.E - K_RAMPA * alturaRampa(r.d / L_RAMPA) - F_RAMPA * r.gasto;
-  if (r.dir > 0 && s2 <= 0) {            // não teve força para chegar ao alto: a bola volta
-    r.dir = -1; r.E = K_RAMPA * alturaRampa(r.d / L_RAMPA) + F_RAMPA * r.gasto; s2 = 0; som('rampaFalha');
+function moverTrilha(b, h) {
+  const r = b.trilha, T = r.T;
+  const aqui = pontoTrilha(T, r.d);
+  let s2 = r.E - K_TRILHA * aqui.h - F_TRILHA * r.gasto;
+  if (r.dir > 0 && s2 <= 0) {
+    r.dir = -1; r.E = K_TRILHA * aqui.h + F_TRILHA * r.gasto; s2 = 0; som('rampaFalha');
   }
   const s = Math.max(45, Math.sqrt(Math.max(0, s2)));
   r.s = s;
   r.d += r.dir * s * h; r.gasto += s * h;
-  if (r.d >= L_RAMPA) { sairRampa(b, true); return; }
-  if (r.d <= 0) { sairRampa(b, false); return; }
-  const p = pontoRampa(r.d);
-  b.x = p.x; b.y = p.y; b.vx = p.dx * s * r.dir; b.vy = p.dy * s * r.dir;
+  if (r.d >= T.L) { sairTrilha(b, true); return; }
+  if (r.d <= 0) { sairTrilha(b, false); return; }
+  const p = pontoTrilha(T, r.d);
+  b.x = p.x; b.y = p.y; b.vx = p.dx * s * r.dir; b.vy = p.dy * s * r.dir; r.h = p.h;
 }
-function sairRampa(b, fim) {
-  const s = b.rampa.s;
-  b.rampa = null;
+function sairTrilha(b, fim) {
+  const T = b.trilha.T, s = b.trilha.s;
+  b.trilha = null;
   if (fim) {
-    const p = RAMPA[RAMPA.length - 1], v = Math.min(650, Math.max(250, s));
+    const p = T.pts[T.pts.length - 1], v = Math.min(T.vmax, Math.max(T.vmin, s));
     b.x = p.x; b.y = p.y; b.vx = p.dx * v; b.vy = p.dy * v;
-    rampaFeita(b);
+    trilhaFeita(b, T);
   } else {
-    const p = RAMPA[0];
+    const p = T.pts[0];
     b.x = p.x - p.dx * 3; b.y = p.y - p.dy * 3; b.vx = -p.dx * s; b.vy = -p.dy * s;
   }
+  b.ox = b.x; b.oy = b.y;
   b.zd = ZONAS.map(z => b.x > z.x0 && b.x < z.x1 && b.y > z.y0 && b.y < z.y1);
 }
-function rampaFeita(b) {
+function trilhaFeita(b, T) {
   if (j.tiltado) return;
-  rampaBrilho = relogio;
+  brilhoTrilha[T.nome] = relogio;
+  if (T.nome === 'tubo') {
+    pontuar(20000 * j.rodada, 190, 150); j.bonus += 3000;
+    som('looping'); evento('tubo'); clarao(.5, '120,255,190'); faiscas(b.x, b.y, 18, '#7dffb2', 1);
+    msg('LOOPING!', 2, 'pisca');
+    return;
+  }
   pontuar(10000 * j.rodada, 300, 470); j.bonus += 2000;
   som('rampaOk'); evento('rampa');
   if (j.multibola && j.jackpot) {
@@ -397,6 +458,50 @@ function rampaFeita(b) {
   } else if (!j.trava && !j.multibola) {
     j.trava = true; msg('TRAVA ACESA\nVÁ AO BURACO NEGRO', 2.6);
   } else msg('RAMPA!', 1.6);
+}
+
+// ----- Nave: pega a bola na base, voa pela mesa e solta lá no alto -----
+function embarcar(b) {
+  b.naNave = true; b.vx = b.vy = 0;
+  Object.assign(nave, { estado: 'decolando', t: 0, bola: b });
+  som('nave'); msg('DECOLAGEM!', 2, 'pisca'); clarao(.4, '150,220,255');
+  faiscas(BASE_NAVE.x, BASE_NAVE.y, 20, '#9fe8ff', 1);
+  pontuar(5000 * j.rodada);
+}
+function atualizarNave(h) {
+  nave.t += h;
+  if (nave.estado === 'decolando') {
+    nave.alt = Math.min(1, nave.t / .6); nave.x = BASE_NAVE.x; nave.y = BASE_NAVE.y - nave.alt * 6;
+    if (nave.t >= .6) { nave.estado = 'voando'; nave.t = 0; }
+  } else if (nave.estado === 'voando') {
+    const dur = 2.6, f = Math.min(1, nave.t / dur), suave = f * f * (3 - 2 * f);
+    const p = pontoTrilha(ROTA_NAVE, suave * ROTA_NAVE.L);
+    nave.x = p.x; nave.y = p.y; nave.ang = Math.atan2(p.dy, p.dx);
+    if (efeitos() && Math.random() < .6) particulas.push({ x: p.x - p.dx * 16, y: p.y - p.dy * 16, vx: -p.dx * 120 + aleat(-30, 30), vy: -p.dy * 120 + aleat(-30, 30), vida: .35, max: .35, cor: Math.random() < .5 ? '#ffb347' : '#ff5e3a', tam: aleat(1.5, 3) });
+    if (f >= 1) { nave.estado = 'soltando'; nave.t = 0; }
+  } else if (nave.estado === 'soltando') {
+    nave.ang += (Math.PI / 2 - nave.ang) * .02;
+    if (nave.t >= .35 && nave.bola) {
+      const b = nave.bola; nave.bola = null;
+      Object.assign(b, { naNave: false, x: 185, y: 82, ox: 185, oy: 82, vx: aleat(-25, 25), vy: 160 });
+      b.zd = ZONAS.map(() => false);
+      nave.voos++;
+      if (!j.tiltado) {
+        pontuar(25000 * j.rodada, 185, 70); som('naveSolta'); evento('nave'); show = 1.2;
+        if (nave.voos % 3 === 0) { pontuar(75000 * j.rodada); msg('SUPER VOO!\n+' + fmt(75000 * j.rodada), 2.6, 'pisca'); }
+        else msg('VOO GALÁCTICO!', 2.2);
+      }
+    }
+    if (nave.t >= .7) { nave.estado = 'voltando'; nave.t = 0; nave.de = [nave.x, nave.y]; }
+  } else if (nave.estado === 'voltando') {
+    const f = Math.min(1, nave.t / 1.1), s = f * f * (3 - 2 * f);
+    nave.x = nave.de[0] + (BASE_NAVE.x - nave.de[0]) * s; nave.y = nave.de[1] + (BASE_NAVE.y - nave.de[1]) * s;
+    nave.ang += (-Math.PI / 2 - nave.ang) * .05;
+    nave.alt = f > .7 ? 1 - (f - .7) / .3 : 1;
+    if (f >= 1) { nave.estado = 'recarga'; nave.t = 0; nave.alt = 0; som('pouso'); }
+  } else if (nave.estado === 'recarga') {
+    if (nave.t >= 6) { nave.estado = 'pronta'; if (j.estado === 'jogando') msg('NAVE PRONTA', 1.6); }
+  }
 }
 
 // ----- Buraco negro (prende, trava bolas e solta a multibola) -----
@@ -446,7 +551,10 @@ function fimDaBola() {
   let contado = 0;
   if (j.tiltado) msg('TILT\nSEM BÔNUS', 2.6);
   else msg(() => `BÔNUS x${j.mult}\n${fmt(contado)}`, 2.8, 'fixo');
-  if (total > 0) for (let k = 1; k <= 12; k++) depois(.6 + k * .12, () => { j.pontos += total / 12; contado += total / 12; som('contar'); });
+  if (total > 0) for (let k = 1; k <= 12; k++) depois(.6 + k * .12, () => {
+    const parte = Math.round(total * k / 12) - Math.round(total * (k - 1) / 12);
+    j.pontos += parte; contado += parte; som('contar');
+  });
   depois(3, proximaBola);
 }
 function proximaBola() {
@@ -492,7 +600,7 @@ function mostrarRecordes() {
 function sacudir() {
   if (pausado || j.tiltado || j.estado !== 'jogando') return;
   tremor = .22;
-  for (const b of bolas) if (!b.presa && !b.fora && !b.rampa) { b.vx += (Math.random() < .5 ? -1 : 1) * aleat(50, 100); b.vy -= 160; }
+  for (const b of bolas) if (!b.presa && !b.fora && !b.trilha && !b.naNave) { b.vx += (Math.random() < .5 ? -1 : 1) * aleat(50, 100); b.vy -= 160; }
   j.tilt += 1;
   if (j.tilt >= regras.tilt) { j.tiltado = true; som('tilt'); msg('TILT', 5, 'pisca'); JO.vibrar([200, 80, 200]); palhetas.forEach(p => p.apertada = false); }
   else if (j.tilt >= regras.tilt - 1) { som('aviso'); msg('CUIDADO!', 1.5, 'pisca'); }
@@ -581,6 +689,8 @@ function colisoes() {
 }
 
 function moverBola(b, h) {
+  b.ox = b.x; b.oy = b.y;
+  if (b.naNave) return;
   if (b.presa) {
     if (relogio >= b.presa) {
       if (b.travar) { b.fora = true; b.travado = true; colocarNoLancador(true); }
@@ -591,7 +701,7 @@ function moverBola(b, h) {
     }
     return;
   }
-  if (b.rampa) { moverRampa(b, h); return; }
+  if (b.trilha) { moverTrilha(b, h); return; }
   B = b;
   b.vy += G * h;
   if (relogio > b.ignora) {
@@ -601,6 +711,10 @@ function moverBola(b, h) {
       const k = 1700 * (1 - d / 22) * h / (d || 1);
       b.vx += dx * k; b.vy += dy * k;
     }
+  }
+  if (nave.estado === 'pronta' && !j.tiltado && j.estado === 'jogando') {
+    const dx = BASE_NAVE.x - b.x, dy = BASE_NAVE.y - b.y;
+    if (dx * dx + dy * dy < 121 && Math.hypot(b.vx, b.vy) < 2200) { embarcar(b); return; }
   }
   b.vx *= 1 - .06 * h; b.vy *= 1 - .06 * h;
   const v2 = b.vx * b.vx + b.vy * b.vy;
@@ -624,7 +738,7 @@ function moverBola(b, h) {
 function choqueEntreBolas() {
   for (let i = 0; i < bolas.length; i++) for (let k = i + 1; k < bolas.length; k++) {
     const a = bolas[i], b = bolas[k];
-    if (a.presa || b.presa || a.fora || b.fora || !!a.rampa !== !!b.rampa || a.rampa) continue;
+    if (a.presa || b.presa || a.fora || b.fora || a.trilha || b.trilha || a.naNave || b.naNave) continue;
     const dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
     if (d2 >= 4 * R * R || d2 === 0) continue;
     const d = Math.sqrt(d2), nx = dx / d, ny = dy / d, pen = (2 * R - d) / 2;
@@ -640,6 +754,7 @@ function passo(h) {
 
   for (const p of palhetas) {
     const alvo = p.apertada ? p.cima : p.rep, ant = p.ang, dir = Math.sign(alvo - p.ang);
+    p.oang = ant;
     if (!dir) p.w = 0;
     else {
       if (Math.sign(p.w) !== dir) p.w = 0;
@@ -658,13 +773,12 @@ function passo(h) {
   if (gi > 0) gi -= h * 1.6;
   if (show > 0) show -= h;
   j.tilt = Math.max(0, j.tilt - .3 * h);
-  // catraca da órbita
   const voltas = Math.floor(spinner.ang / DPI);
   spinner.ang += spinner.w * h; spinner.w *= 1 - 1.3 * h;
   if (spinner.w < .3) spinner.w = 0;
   if (Math.floor(spinner.ang / DPI) > voltas && !j.tiltado && j.estado !== 'fim') { pontuar(100); som('giro'); }
-  // tacada de lançamento: a luz do topo vai trocando até a bola sair
   if (j.estado === 'pronto') j.skill = Math.floor(relogio * 2.2) % 3;
+  atualizarNave(h);
 
   for (const b of bolas.slice()) moverBola(b, h);
   if (bolas.length > 1) choqueEntreBolas();
@@ -773,13 +887,13 @@ document.querySelectorAll('[data-opc]').forEach(g => g.addEventListener('click',
   opc[k] = k === 'bolas' ? +v : k === 'musica' ? v === '1' : v;
   JO.salvar('pinball', dados);
   mostrarOpcoes();
-  if (k === 'efeitos') ajustarTamanho();
+  if (k === 'efeitos') { dprMax = 2; ajustarTamanho(); }
 }));
 mostrarOpcoes();
 
 // ================= Desenho =================
-let escala = 1, dpr = 1;
-const fundo = document.createElement('canvas'), frente = document.createElement('canvas'), camRampa = document.createElement('canvas');
+let escala = 1, dpr = 1, dprMax = 2;
+const fundo = document.createElement('canvas'), frente = document.createElement('canvas'), camRampa = document.createElement('canvas'), camTubo = document.createElement('canvas');
 
 function caminho(c, pts) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); }
 function circulo(c, x, y, r) { c.beginPath(); c.arc(x, y, r, 0, DPI); }
@@ -797,27 +911,66 @@ function texto(c, t, x, y, tam, cor, peso = '700', alinhar = 'center') {
   c.font = `${peso} ${tam}px "Trebuchet MS", Verdana, sans-serif`; c.textAlign = alinhar; c.textBaseline = 'middle';
   c.fillStyle = cor; c.fillText(t, x, y);
 }
+function estrela(c, x, y, r, pontas = 5) {
+  c.beginPath();
+  for (let i = 0; i < pontas * 2; i++) { const a = -Math.PI / 2 + i * Math.PI / pontas, rr = i % 2 ? r * .45 : r; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  c.closePath();
+}
 const SETAS = [
   { x: 41, y: 462, ang: -Math.PI / 2, ev: 'orbita', cor: '#ffd84a' },
   { x: 99, y: 374, ang: -Math.PI / 2 - .12, ev: 'rampa', cor: '#7fe3ff' },
-  { x: 258, y: 300, ang: -.95, ev: 'buraco', cor: '#c77dff' },
+  { x: 185, y: 381, ang: -Math.PI / 2, ev: 'nave', cor: '#ffffff' },
+  { x: 262, y: 378, ang: -Math.PI / 2 + .08, ev: 'tubo', cor: '#7dffb2' },
+  { x: 276, y: 290, ang: -1.19, ev: 'buraco', cor: '#c77dff' },
   { x: 283, y: 362, ang: -.08, ev: 'bancada', cor: '#ff5d5d' },
 ];
 const LUZES = [
   ...[145, 185, 225].map((x, i) => ({ x, y: 142, r: 6, cor: '#ffd84a', on: () => j.trilhas[i], pisca: () => false })),
   ...ALVOS.map(a => ({ x: (a.ax + a.bx) / 2 - 20, y: (a.ay + a.by) / 2, r: 4.5, cor: '#ff5d5d', on: () => !a.de_pe, pisca: () => false })),
   ...[2, 3, 4, 5].map((k, i) => ({ x: 140 + i * 30, y: 548, r: 10, cor: '#4dffa6', txt: k + 'x', on: () => j.mult >= k, pisca: () => false })),
+  ...X_FAIXAS.map((x, i) => ({ x, y: 575, r: 5, cor: '#7dffb2', estrela: true, on: () => j.faixas[i], pisca: () => false })),
   { x: 185, y: 579, r: 7, cor: '#ff8a3d', on: () => j.extras > 0, pisca: () => false },
   { x: 185, y: 693, r: 6, cor: '#49c6ff', on: () => relogio < j.salvaAte, pisca: () => j.salvaAte - relogio < 2.5 },
-  { x: 33, y: 540, r: 5, cor: '#ff5dd8', on: () => j.catapulta, pisca: () => false },
-  { x: 290, y: 291, r: 5, cor: '#c77dff', on: () => false, pisca: () => j.trava },
+  { x: 33, y: 622, r: 5, cor: '#ff5dd8', on: () => j.catapulta, pisca: () => false },
+  { x: 306, y: 280, r: 5, cor: '#c77dff', on: () => false, pisca: () => j.trava },
   { x: 99, y: 395, r: 6, cor: '#ffd84a', on: () => false, pisca: () => j.jackpot },
 ];
 
+// desenhos pintados na mesa: foguete, satélite e faixas de perigo
+function desenharFoguete(c, x, y, esc) {
+  c.save(); c.translate(x, y); c.scale(esc, esc);
+  c.fillStyle = 'rgba(255,120,40,.55)'; c.beginPath(); c.moveTo(-4, 14); c.lineTo(0, 26); c.lineTo(4, 14); c.fill();
+  c.fillStyle = 'rgba(255,230,120,.7)'; c.beginPath(); c.moveTo(-2, 14); c.lineTo(0, 20); c.lineTo(2, 14); c.fill();
+  c.fillStyle = '#e8ecf3'; c.beginPath(); c.moveTo(0, -18); c.quadraticCurveTo(7, -8, 6, 12); c.lineTo(-6, 12); c.quadraticCurveTo(-7, -8, 0, -18); c.fill();
+  c.fillStyle = '#e0303f'; c.beginPath(); c.moveTo(0, -18); c.quadraticCurveTo(4.5, -12, 5.2, -8); c.lineTo(-5.2, -8); c.quadraticCurveTo(-4.5, -12, 0, -18); c.fill();
+  c.beginPath(); c.moveTo(-6, 4); c.lineTo(-10, 14); c.lineTo(-6, 12); c.fill(); c.beginPath(); c.moveTo(6, 4); c.lineTo(10, 14); c.lineTo(6, 12); c.fill();
+  c.fillStyle = '#5fc8ff'; circulo(c, 0, -1, 2.8); c.fill(); c.strokeStyle = '#8a909c'; c.lineWidth = 1; c.stroke();
+  c.restore();
+}
+function desenharSatelite(c, x, y, esc) {
+  c.save(); c.translate(x, y); c.rotate(-.5); c.scale(esc, esc);
+  c.fillStyle = '#2f5fd0'; c.strokeStyle = '#9fb8ff'; c.lineWidth = .8;
+  for (const lado of [-1, 1]) { c.fillRect(lado > 0 ? 6 : -20, -4, 14, 8); c.strokeRect(lado > 0 ? 6 : -20, -4, 14, 8); for (let k = 1; k < 4; k++) { c.beginPath(); c.moveTo((lado > 0 ? 6 : -20) + k * 3.5, -4); c.lineTo((lado > 0 ? 6 : -20) + k * 3.5, 4); c.stroke(); } }
+  c.fillStyle = '#d9c070'; c.fillRect(-6, -6, 12, 12); c.strokeStyle = '#8a7a40'; c.strokeRect(-6, -6, 12, 12);
+  c.strokeStyle = '#c9cfd9'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, -6); c.lineTo(0, -13); c.stroke();
+  c.fillStyle = '#e8ecf3'; c.beginPath(); c.arc(0, -14, 4, Math.PI, 0); c.fill();
+  c.restore();
+}
+function faixaPerigo(c, x, y, w, h) {
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+  c.fillStyle = 'rgba(255,205,40,.55)'; c.fillRect(x, y, w, h);
+  c.fillStyle = 'rgba(20,20,20,.75)';
+  for (let k = -h; k < w + h; k += 8) { c.beginPath(); c.moveTo(x + k, y); c.lineTo(x + k + 4, y); c.lineTo(x + k + 4 - h, y + h); c.lineTo(x + k - h, y + h); c.fill(); }
+  c.restore();
+}
+
 function desenharFundo(c) {
+  // gabinete: madeira com friso de metal
   const gm = c.createLinearGradient(0, 0, W, 0);
-  gm.addColorStop(0, '#2a1a0e'); gm.addColorStop(.5, '#3b2615'); gm.addColorStop(1, '#2a1a0e');
+  gm.addColorStop(0, '#1d1209'); gm.addColorStop(.06, '#4a2f18'); gm.addColorStop(.5, '#3b2615'); gm.addColorStop(.94, '#4a2f18'); gm.addColorStop(1, '#1d1209');
   c.fillStyle = gm; c.fillRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = .7;
+  for (let y = 4; y < H; y += 7) { c.beginPath(); c.moveTo(0, y); c.bezierCurveTo(W * .3, y + 3, W * .6, y - 3, W, y + 1); c.stroke(); }
   c.save();
   caminho(c, CONTORNO); c.closePath(); c.clip();
   const g = c.createLinearGradient(0, 0, 0, H);
@@ -845,26 +998,44 @@ function desenharFundo(c) {
   c.fillStyle = gl; c.fillRect(350, 214, 30, 560);
   for (let y = 300; y < 660; y += 60) { c.fillStyle = 'rgba(255,216,74,.25)'; seta(c, 365, y, -Math.PI / 2, 6); c.fill(); }
   c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(20, 240, 42, 205);
-  // suportes da catraca
   c.fillStyle = '#8f96a3'; c.fillRect(23, 298, 4, 5); c.fillRect(55, 298, 4, 5);
+
+  // laterais de baixo: corredores pintados, desenhos e faixas de perigo
+  for (const [x0, x1] of [[23, 43], [49, 69], [301, 321], [327, 347]]) { c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(x0, 505, x1 - x0, 140); }
+  faixaPerigo(c, 24, 640, 19, 7); faixaPerigo(c, 327, 640, 19, 7);
+  for (const x of [59, 311]) for (let k = 0; k < 3; k++) { c.fillStyle = `rgba(125,255,178,${.18 + k * .08})`; seta(c, x, 600 + k * 11, Math.PI / 2, 5); c.fill(); }
+  desenharFoguete(c, 41, 474, .95);
+  desenharSatelite(c, 337, 462, .9);
+  c.save(); c.translate(337, 535); c.rotate(-Math.PI / 2); texto(c, 'ESCUDO', 0, 0, 5.5, 'rgba(125,255,178,.7)'); c.restore();
+  c.save(); c.translate(59, 535); c.rotate(-Math.PI / 2); texto(c, 'ESCUDO', 0, 0, 5.5, 'rgba(125,255,178,.7)'); c.restore();
 
   c.globalAlpha = .5;
   for (const p of PLANETAS) desenharPlaneta(c, p);
   c.globalAlpha = 1;
   for (const p of PLANETAS) texto(c, p.nome.toUpperCase(), p.x, p.y + p.r + 8, 6.5, 'rgba(255,255,255,.55)');
   for (const l of LUZES) {
-    circulo(c, l.x, l.y, l.r); c.fillStyle = l.cor; c.globalAlpha = .22; c.fill(); c.globalAlpha = 1;
+    if (l.estrela) estrela(c, l.x, l.y, l.r + 2); else circulo(c, l.x, l.y, l.r);
+    c.fillStyle = l.cor; c.globalAlpha = .22; c.fill(); c.globalAlpha = 1;
     c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = 1.2; c.stroke();
     if (l.txt) texto(c, l.txt, l.x, l.y + .5, 8, 'rgba(255,255,255,.55)', '800');
   }
   texto(c, 'BOLA EXTRA', 185, 592, 7, 'rgba(255,170,110,.75)');
   texto(c, 'ESCUDO', 185, 704, 6, 'rgba(120,210,255,.8)');
   texto(c, 'BÔNUS', 185, 532, 7, 'rgba(120,255,180,.7)');
-  texto(c, 'TRAVA', 290, 301, 5.5, 'rgba(210,170,255,.85)');
+  texto(c, 'TRAVA', 306, 290, 5.5, 'rgba(210,170,255,.85)');
   texto(c, 'JACKPOT', 99, 406, 6, 'rgba(255,216,74,.75)');
-  c.save(); c.translate(33, 575); c.rotate(-Math.PI / 2); texto(c, 'CATAPULTA', 0, 0, 6, 'rgba(255,140,230,.75)'); c.restore();
-  for (const s of SETAS) { c.fillStyle = s.cor; c.globalAlpha = .25; seta(c, s.x, s.y, s.ang, 11); c.fill(); c.globalAlpha = 1; }
+  texto(c, 'LOOPING', 262, 393, 6, 'rgba(125,255,178,.8)');
+  c.save(); c.translate(33, 660); c.rotate(-Math.PI / 2); texto(c, 'CATAPULTA', 0, 0, 5.5, 'rgba(255,140,230,.75)'); c.restore();
+  for (const s of SETAS) { c.fillStyle = s.cor; c.globalAlpha = .25; seta(c, s.x, s.y, s.ang, 10); c.fill(); c.globalAlpha = 1; }
   texto(c, 'ÓRBITA', 41, 380, 7, 'rgba(255,216,74,.6)');
+
+  // base da nave
+  const bx = BASE_NAVE.x, by = BASE_NAVE.y;
+  c.fillStyle = '#1a2036'; circulo(c, bx, by, 15); c.fill();
+  c.strokeStyle = '#8f96a3'; c.lineWidth = 2; c.stroke();
+  c.strokeStyle = 'rgba(255,216,74,.5)'; c.lineWidth = 1; circulo(c, bx, by, 11); c.stroke();
+  for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; c.fillStyle = 'rgba(255,216,74,.35)'; circulo(c, bx + Math.cos(a) * 13, by + Math.sin(a) * 13, 1); c.fill(); }
+  texto(c, 'NAVE', bx, by + 21, 6, 'rgba(255,255,255,.7)');
 
   c.save();
   c.translate(185, 496); c.rotate(-.04);
@@ -890,6 +1061,9 @@ function desenharFundo(c) {
     caminho(c, [s.a, s.b, s.c]); c.closePath();
     const ge = c.createLinearGradient(s.a[0], s.a[1], s.c[0], s.c[1]); ge.addColorStop(0, '#ff5f8a'); ge.addColorStop(1, '#8c0f3c');
     c.fillStyle = ge; c.fill();
+    const cx = (s.a[0] + s.b[0] + s.c[0]) / 3, cy = (s.a[1] + s.b[1] + s.c[1]) / 3;
+    c.fillStyle = 'rgba(255,255,255,.75)'; estrela(c, cx, cy, 5); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.45)'; estrela(c, cx - (s.a[0] < 185 ? 2 : -2), cy - 14, 2.5); c.fill();
   }
   const desenhaTrilho = (largura, cor, filtro) => {
     c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = cor; c.lineWidth = largura;
@@ -909,10 +1083,13 @@ function desenharFundo(c) {
     c.strokeStyle = '#c62f4f'; c.lineWidth = 8; c.stroke();
     c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 2; c.beginPath(); c.moveTo(p.ax - 1.5, p.ay + 2); c.lineTo(p.bx - 1.5, p.by - 2); c.stroke();
   }
-  // boca da rampa (chão de plástico)
   c.fillStyle = 'rgba(120,200,255,.18)'; c.fillRect(82, 336, 34, 16);
+  c.fillStyle = 'rgba(125,255,178,.16)'; c.fillRect(249, 344, 26, 16);
   c.restore();
-  c.lineWidth = 3; c.strokeStyle = '#120c07'; caminho(c, CONTORNO); c.stroke();
+  // borda do gabinete com friso cromado
+  c.lineJoin = 'round';
+  c.lineWidth = 5; c.strokeStyle = '#0d0905'; caminho(c, CONTORNO); c.stroke();
+  c.lineWidth = 1.4; c.strokeStyle = 'rgba(220,226,236,.55)'; caminho(c, CONTORNO); c.stroke();
 }
 
 function desenharPlaneta(c, p) {
@@ -926,36 +1103,48 @@ function desenharPlaneta(c, p) {
   if (p.anel) { c.save(); c.translate(p.x, p.y); c.rotate(-.35); c.scale(1, .32); c.strokeStyle = '#f6ebc0'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, p.r * 1.75, 0, Math.PI); c.stroke(); c.restore(); }
 }
 
-// linha paralela ao caminho da rampa, deslocada para o lado
-function bordaRampa(desloc, ini = 0, fim = 1) {
+// linha paralela ao caminho de uma trilha, deslocada para o lado
+function borda(T, desloc, ini = 0, fim = 1) {
   const pts = [];
-  for (const p of RAMPA) { const t = p.d / L_RAMPA; if (t < ini || t > fim) continue; pts.push([p.x - p.dy * desloc, p.y + p.dx * desloc]); }
+  for (const p of T.pts) { const t = p.d / T.L; if (t < ini || t > fim) continue; pts.push([p.x - p.dy * desloc, p.y + p.dx * desloc]); }
   return pts;
 }
 function desenharRampa(c) {
-  // sombra
+  const T = RAMPA;
   c.save(); c.translate(5, 7); c.strokeStyle = 'rgba(0,0,0,.28)'; c.lineWidth = 18; c.lineCap = 'round'; c.lineJoin = 'round';
-  caminho(c, bordaRampa(0, .06, .97)); c.stroke(); c.restore();
-  // entrada de plástico transparente
-  const a = bordaRampa(-11, 0, .2), b = bordaRampa(11, 0, .2).reverse();
+  caminho(c, borda(T, 0, .06, .97)); c.stroke(); c.restore();
+  const a = borda(T, -11, 0, .2), b = borda(T, 11, 0, .2).reverse();
   caminho(c, a.concat(b)); c.closePath();
   c.fillStyle = 'rgba(110,200,255,.22)'; c.fill();
   c.strokeStyle = 'rgba(170,230,255,.6)'; c.lineWidth = 1.5; caminho(c, a); c.stroke(); caminho(c, b); c.stroke();
-  // travessas
   c.strokeStyle = '#7d838f'; c.lineWidth = 1.6;
-  for (let d = 30; d < L_RAMPA - 10; d += 26) { const p = pontoRampa(d); c.beginPath(); c.moveTo(p.x - p.dy * 9, p.y + p.dx * 9); c.lineTo(p.x + p.dy * 9, p.y - p.dx * 9); c.stroke(); }
-  // trilhos de arame
+  for (let d = 30; d < T.L - 10; d += 26) { const p = pontoTrilha(T, d); c.beginPath(); c.moveTo(p.x - p.dy * 9, p.y + p.dx * 9); c.lineTo(p.x + p.dy * 9, p.y - p.dx * 9); c.stroke(); }
   for (const lado of [-8, 8]) {
-    const pts = bordaRampa(lado, .02, 1);
+    const pts = borda(T, lado, .02, 1);
     c.lineCap = 'round'; c.lineJoin = 'round';
     c.strokeStyle = '#1a1c22'; c.lineWidth = 3.4; caminho(c, pts); c.stroke();
     c.strokeStyle = '#c9cfd9'; c.lineWidth = 2.1; caminho(c, pts); c.stroke();
     c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = .7; caminho(c, pts); c.stroke();
   }
-  // aba de metal na entrada
-  const p0 = RAMPA[0];
+  const p0 = T.pts[0];
   c.strokeStyle = '#e8ecf3'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(p0.x - p0.dy * 12, p0.y + p0.dx * 12); c.lineTo(p0.x + p0.dy * 12, p0.y - p0.dx * 12); c.stroke();
   texto(c, 'RAMPA', p0.x, p0.y + 13, 6.5, 'rgba(170,230,255,.85)');
+}
+// cano de vidro: desenhado por cima da bola, que aparece "dentro"
+function desenharTubo(c) {
+  const T = TUBO, pts = borda(T, 0, 0, 1);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  c.save(); c.translate(6, 8); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 20; caminho(c, borda(T, 0, .08, .95)); c.stroke(); c.restore();
+  c.strokeStyle = 'rgba(10,40,30,.55)'; c.lineWidth = 21; caminho(c, pts); c.stroke();
+  c.strokeStyle = 'rgba(120,255,190,.16)'; c.lineWidth = 18; caminho(c, pts); c.stroke();
+  c.strokeStyle = 'rgba(190,255,220,.55)'; c.lineWidth = 1.2;
+  caminho(c, borda(T, -9, 0, 1)); c.stroke(); caminho(c, borda(T, 9, 0, 1)); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 2; caminho(c, borda(T, -5, 0, 1)); c.stroke();
+  // anéis de metal
+  c.strokeStyle = '#b9c0cc'; c.lineWidth = 2.2;
+  for (let d = 18; d < T.L - 5; d += 46) { const p = pontoTrilha(T, d); c.beginPath(); c.moveTo(p.x - p.dy * 11, p.y + p.dx * 11); c.lineTo(p.x + p.dy * 11, p.y - p.dx * 11); c.stroke(); }
+  const p0 = T.pts[0];
+  c.strokeStyle = '#e8ecf3'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(p0.x - p0.dy * 12, p0.y + p0.dx * 12); c.lineTo(p0.x + p0.dy * 12, p0.y - p0.dx * 12); c.stroke();
 }
 
 function desenharFrente(c) {
@@ -979,48 +1168,60 @@ function ajustarTamanho() {
   const w = mesa.clientWidth, h = mesa.clientHeight;
   if (!w || !h) return;
   escala = Math.min(w / W, h / H);
-  dpr = Math.min(window.devicePixelRatio || 1, efeitos() ? 2.5 : 1.5);
+  dpr = Math.min(window.devicePixelRatio || 1, efeitos() ? dprMax : Math.min(dprMax, 1.5));
   tela.style.width = W * escala + 'px'; tela.style.height = H * escala + 'px';
-  for (const cv of [tela, fundo, frente, camRampa]) { cv.width = Math.round(W * escala * dpr); cv.height = Math.round(H * escala * dpr); }
-  for (const [cv, fn] of [[fundo, desenharFundo], [frente, desenharFrente], [camRampa, desenharRampa]]) {
+  for (const cv of [tela, fundo, frente, camRampa, camTubo]) { cv.width = Math.round(W * escala * dpr); cv.height = Math.round(H * escala * dpr); }
+  for (const [cv, fn] of [[fundo, desenharFundo], [frente, desenharFrente], [camRampa, desenharRampa], [camTubo, desenharTubo]]) {
     const c = cv.getContext('2d'); c.setTransform(escala * dpr, 0, 0, escala * dpr, 0, 0); fn(c);
   }
 }
 new ResizeObserver(ajustarTamanho).observe(mesa);
 
-function brilho(x, y, r, cor) {
-  if (efeitos()) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.6);
+// brilho das luzes: imagens prontas, para não pesar no celular
+const sprites = new Map();
+function spriteBrilho(cor) {
+  if (!sprites.has(cor)) {
+    const s = document.createElement('canvas'); s.width = s.height = 64;
+    const c = s.getContext('2d'), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
     g.addColorStop(0, cor); g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.globalAlpha = .55; ctx.fillStyle = g; circulo(ctx, x, y, r * 2.6); ctx.fill();
-    ctx.restore();
+    c.fillStyle = g; c.fillRect(0, 0, 64, 64);
+    sprites.set(cor, s);
   }
-  ctx.fillStyle = gradRadial(ctx, x, y, r, ['#ffffff', cor, cor]); circulo(ctx, x, y, r); ctx.fill();
+  return sprites.get(cor);
+}
+function halo(x, y, r, cor, alfa = .55) {
+  if (!efeitos()) return;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alfa;
+  ctx.drawImage(spriteBrilho(cor), x - r, y - r, r * 2, r * 2);
+  ctx.restore();
+}
+function brilho(x, y, r, cor, estrelada) {
+  halo(x, y, r * 2.6, cor);
+  ctx.fillStyle = gradRadial(ctx, x, y, r, ['#ffffff', cor, cor]);
+  if (estrelada) estrela(ctx, x, y, r + 2); else circulo(ctx, x, y, r);
+  ctx.fill();
 }
 
 // gira as marcas da bola de acordo com o quanto ela andou
-function rolar(b) {
-  const dx = b.x - b.px, dy = b.y - b.py, d = Math.hypot(dx, dy);
-  b.px = b.x; b.py = b.y;
+function rolar(b, x, y) {
+  const dx = x - b.px, dy = y - b.py, d = Math.hypot(dx, dy);
+  b.px = x; b.py = y;
   if (d < .01 || d > 60) return;
   const ax = dy / d, ay = -dx / d, ang = d / R, co = Math.cos(ang), si = Math.sin(ang);
   for (const m of b.marcas) {
-    const [x, y, z] = m, dot = ax * x + ay * y;
-    const cx = ay * z, cy = -ax * z, cz = ax * y - ay * x;
-    m[0] = x * co + cx * si + ax * dot * (1 - co);
-    m[1] = y * co + cy * si + ay * dot * (1 - co);
-    m[2] = z * co + cz * si;
+    const [mx, my, mz] = m, dot = ax * mx + ay * my;
+    const cx = ay * mz, cy = -ax * mz, cz = ax * my - ay * mx;
+    m[0] = mx * co + cx * si + ax * dot * (1 - co);
+    m[1] = my * co + cy * si + ay * dot * (1 - co);
+    m[2] = mz * co + cz * si;
   }
 }
 
-function desenharBola(b) {
+function desenharBola(b, x, y) {
   let r = R, alt = 0;
-  if (b.rampa) { alt = alturaRampa(b.rampa.d / L_RAMPA); r = R * (1 + .18 * alt); }
+  if (b.trilha) { alt = b.trilha.h; r = R * (1 + .15 * alt); }
   if (b.presa) { const resta = b.presa - relogio; r = R * Math.max(.15, Math.min(1, (resta - 1) / .6, 1 - resta / .2)); }
-  const x = b.x, y = b.y, vel = Math.hypot(b.vx, b.vy);
-  // rastro quando está rápida
+  const vel = Math.hypot(b.vx, b.vy);
   if (efeitos()) {
     b.rastro.push([x, y]); if (b.rastro.length > 6) b.rastro.shift();
     if (vel > 700 && !b.presa) {
@@ -1032,30 +1233,62 @@ function desenharBola(b) {
       }
     }
   }
-  // sombra: a luz vem do alto da mesa
   const sx = 2 + (x - 185) / 70 + alt * 7, sy = 3 + (y + 100) / 260 + alt * 10;
   ctx.fillStyle = `rgba(0,0,0,${.45 - alt * .15})`; ctx.beginPath(); ctx.ellipse(x + sx, y + sy, r * 1.02, r * .92, 0, 0, DPI); ctx.fill();
-  // esfera de metal
   const g = ctx.createRadialGradient(x - r * .35, y - r * .4, r * .05, x, y, r);
   g.addColorStop(0, '#ffffff'); g.addColorStop(.22, '#e6eaf2'); g.addColorStop(.62, '#8a919e'); g.addColorStop(.9, '#3a3f49'); g.addColorStop(1, '#22252c');
   ctx.fillStyle = g; circulo(ctx, x, y, r); ctx.fill();
-  // marcas da superfície girando
   for (const [mx, my, mz] of b.marcas) if (mz < -.15) {
     ctx.fillStyle = `rgba(60,66,80,${-mz * .38})`;
     circulo(ctx, x + mx * r * .86, y + my * r * .86, r * .13 * (-mz + .3)); ctx.fill();
   }
-  // reflexo da mesa embaixo e brilho em cima
   ctx.fillStyle = 'rgba(130,110,255,.22)'; ctx.beginPath(); ctx.ellipse(x + r * .2, y + r * .5, r * .55, r * .25, 0, 0, DPI); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.beginPath(); ctx.ellipse(x - r * .38, y - r * .42, r * .24, r * .16, -.6, 0, DPI); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.5)'; circulo(ctx, x + r * .42, y - r * .18, r * .08); ctx.fill();
-  // cor dos cogumelos acesos refletida na bola
   for (const c of COGUMELOS) if (c.flash > 0 && Math.hypot(c.x - x, c.y - y) < 60) {
-    ctx.fillStyle = c.cor[1]; ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(x, y, r * .9, Math.atan2(c.y - y, c.x - x) - .7, Math.atan2(c.y - y, c.x - x) + .7); ctx.lineTo(x, y); ctx.fill(); ctx.globalAlpha = 1;
+    const a = Math.atan2(c.y - y, c.x - x);
+    ctx.fillStyle = c.cor[1]; ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(x, y, r * .9, a - .7, a + .7); ctx.lineTo(x, y); ctx.fill(); ctx.globalAlpha = 1;
   }
 }
 
-let ultimoQuadro = 0;
-function desenhar(dt) {
+function desenharNave() {
+  const voando = nave.estado !== 'pronta' && nave.estado !== 'recarga';
+  if (nave.estado === 'recarga') {
+    // nave guardada no hangar: só a tampa e a contagem
+    const f = Math.min(1, nave.t / 6);
+    ctx.strokeStyle = 'rgba(255,216,74,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(BASE_NAVE.x, BASE_NAVE.y, 11, -Math.PI / 2, -Math.PI / 2 + DPI * f); ctx.stroke();
+    return;
+  }
+  const x = nave.x, y = nave.y, alt = nave.alt, esc = 1 + .55 * alt;
+  ctx.fillStyle = `rgba(0,0,0,${.4 - alt * .15})`; ctx.beginPath(); ctx.ellipse(x + 4 + alt * 16, y + 5 + alt * 22, 17 * esc, 12 * esc, 0, 0, DPI); ctx.fill();
+  if (!voando) halo(x, y, 34, '#ffd84a', .35 + .25 * Math.sin(relogio * 6));
+  ctx.save(); ctx.translate(x, y); ctx.rotate(nave.ang + Math.PI / 2); ctx.scale(esc, esc);
+  if (voando) { // fogo dos motores
+    const fl = aleat(.8, 1.2);
+    ctx.fillStyle = 'rgba(255,140,40,.8)'; ctx.beginPath(); ctx.moveTo(-6, 10); ctx.lineTo(0, 10 + 14 * fl); ctx.lineTo(6, 10); ctx.fill();
+    ctx.fillStyle = 'rgba(255,240,150,.9)'; ctx.beginPath(); ctx.moveTo(-3, 10); ctx.lineTo(0, 10 + 8 * fl); ctx.lineTo(3, 10); ctx.fill();
+  }
+  // disco
+  const gd = ctx.createRadialGradient(-5, -5, 2, 0, 0, 17);
+  gd.addColorStop(0, '#ffffff'); gd.addColorStop(.5, '#b9c0cc'); gd.addColorStop(1, '#4a505c');
+  ctx.fillStyle = gd; ctx.beginPath(); ctx.ellipse(0, 0, 17, 14, 0, 0, DPI); ctx.fill();
+  ctx.strokeStyle = '#2a2e36'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.strokeStyle = '#e0303f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, 13, 10.5, 0, 0, DPI); ctx.stroke();
+  // luzes em volta piscando
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4 + relogio * (voando ? 8 : 2), on = (k + Math.floor(relogio * 10)) % 2 === 0;
+    ctx.fillStyle = on ? ['#ffd84a', '#7fe3ff', '#ff5d8a', '#7dffb2'][k % 4] : 'rgba(40,40,50,.8)';
+    circulo(ctx, Math.cos(a) * 15, Math.sin(a) * 12, 1.4); ctx.fill();
+  }
+  // cúpula de vidro, com a bola dentro quando está carregando
+  ctx.fillStyle = 'rgba(90,200,255,.35)'; circulo(ctx, 0, 0, 7); ctx.fill();
+  if (nave.bola) { const gb = ctx.createRadialGradient(-1.5, -1.5, .3, 0, 0, 4.5); gb.addColorStop(0, '#fff'); gb.addColorStop(.6, '#9aa1ad'); gb.addColorStop(1, '#2a2e36'); ctx.fillStyle = gb; circulo(ctx, 0, 0, 4.5); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(-2.5, -3, 2.5, 1.5, -.6, 0, DPI); ctx.fill();
+  ctx.strokeStyle = 'rgba(200,240,255,.8)'; ctx.lineWidth = 1; circulo(ctx, 0, 0, 7); ctx.stroke();
+  ctx.restore();
+}
+
+function desenhar(dt, alfa) {
   const k = escala * dpr;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#07091a'; ctx.fillRect(0, 0, tela.width, tela.height);
@@ -1068,9 +1301,8 @@ function desenhar(dt) {
   const atracao = j.estado === 'fim' || show > 0;
   LUZES.forEach((l, i) => {
     const on = atracao ? (i + Math.floor(relogio * (show > 0 ? 14 : 8))) % 5 === 0 : (l.on() || (l.pisca() && piscaOn));
-    if (on) { brilho(l.x, l.y, l.r, l.cor); if (l.txt) texto(ctx, l.txt, l.x, l.y + .5, 8, '#05200f', '800'); }
+    if (on) { brilho(l.x, l.y, l.r, l.cor, l.estrela); if (l.txt) texto(ctx, l.txt, l.x, l.y + .5, 8, '#05200f', '800'); }
   });
-  // anel branco na luz da tacada de lançamento
   if (j.estado === 'pronto' || relogio < j.skillAte) {
     const lx = 145 + j.skill * 40;
     ctx.strokeStyle = piscaOn ? '#ffffff' : 'rgba(255,255,255,.3)'; ctx.lineWidth = 1.5; circulo(ctx, lx, 142, 9); ctx.stroke();
@@ -1078,31 +1310,24 @@ function desenhar(dt) {
   PLANETAS.forEach((p, i) => {
     const feito = i < j.planetas, atual = i === j.missao && j.estado !== 'fim';
     if (feito || (atual && piscaOn) || (atracao && (i + Math.floor(relogio * 4)) % 5 === 0)) {
-      if (efeitos()) {
-        ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2.4); g.addColorStop(0, p.cor[1]); g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.globalAlpha = feito ? .6 : .4; ctx.fillStyle = g; circulo(ctx, p.x, p.y, p.r * 2.4); ctx.fill(); ctx.restore();
-      }
+      halo(p.x, p.y, p.r * 2.4, p.cor[1], feito ? .6 : .4);
       desenharPlaneta(ctx, p);
     }
   });
   for (const s of SETAS) {
-    const on = j.estado !== 'fim' && ((missaoAtual() === s.ev) || (s.ev === 'rampa' && j.jackpot) || (s.ev === 'buraco' && j.trava)) && piscaOn;
-    if (on) { ctx.save(); ctx.shadowColor = s.cor; ctx.shadowBlur = efeitos() ? 10 : 0; ctx.fillStyle = s.cor; seta(ctx, s.x, s.y, s.ang, 11); ctx.fill(); ctx.restore(); }
+    const on = j.estado !== 'fim' && ((missaoAtual() === s.ev) || (s.ev === 'rampa' && j.jackpot) || (s.ev === 'buraco' && j.trava) || (s.ev === 'nave' && nave.estado === 'pronta')) && piscaOn;
+    if (on) { halo(s.x, s.y, 16, s.cor, .5); ctx.fillStyle = s.cor; seta(ctx, s.x, s.y, s.ang, 10); ctx.fill(); }
   }
 
-  // buraco negro girando
   ctx.save(); ctx.translate(BURACO.x, BURACO.y); ctx.rotate(relogio * (bolas.some(b => b.presa) ? 9 : 2));
   ctx.strokeStyle = j.trava ? 'rgba(230,190,255,.85)' : 'rgba(200,150,255,.55)'; ctx.lineWidth = 1.3;
   for (let i = 0; i < 3; i++) { ctx.rotate(DPI / 3); ctx.beginPath(); ctx.arc(4, 0, 9, -1.2, .6); ctx.stroke(); }
   ctx.restore();
 
-  // catraca da órbita (placa de metal girando)
   const ac = Math.abs(Math.cos(spinner.ang));
   ctx.fillStyle = '#c9cfd9'; ctx.fillRect(26, 300 - 4 * ac, 30, 8 * ac + .6);
   ctx.fillStyle = 'rgba(255,216,74,.85)'; ctx.fillRect(26, 300 - 1.2 * ac, 30, 2.4 * ac + .2);
 
-  // alvos (descem com animação)
   ALVOS.forEach(a => {
     ctx.lineCap = 'butt';
     if (a.de_pe) {
@@ -1125,15 +1350,13 @@ function desenhar(dt) {
     ctx.fillStyle = 'rgba(0,0,0,.45)'; circulo(ctx, b.x + 3, b.y + 4, b.r + 1); ctx.fill();
     ctx.fillStyle = '#d9dce3'; circulo(ctx, b.x, b.y, b.r); ctx.fill();
     ctx.strokeStyle = '#555b66'; ctx.lineWidth = 1; ctx.stroke();
-    if ((aceso || (missaoCog && piscaOn)) && efeitos()) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(b.x, b.y, b.r * .5, b.x, b.y, b.r * 2.4); g.addColorStop(0, b.cor[1]); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; circulo(ctx, b.x, b.y, b.r * 2.4); ctx.fill(); ctx.restore(); }
-    // o anel desce quando bate
+    if (aceso || (missaoCog && piscaOn)) halo(b.x, b.y, b.r * 2.4, b.cor[1], .8);
     const desce = aceso ? 1.5 : 0;
     ctx.fillStyle = gradRadial(ctx, b.x, b.y - 1 + desce, b.r - 4, aceso ? ['#ffffff', b.cor[0], b.cor[1]] : [b.cor[0], b.cor[1], b.cor[2]]);
     circulo(ctx, b.x, b.y - 1 + desce, b.r - 4); ctx.fill();
     ctx.fillStyle = aceso ? '#fff' : 'rgba(255,255,255,.55)';
     ctx.font = '900 11px "Arial Black", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', b.x, b.y - 1 + desce);
   }
-  // lançador
   ctx.fillStyle = '#1b1f29'; ctx.fillRect(354, plY, 22, 770 - plY);
   ctx.strokeStyle = '#a7adb9'; ctx.lineWidth = 1.6; ctx.beginPath();
   const voltas = 9, alto = 750 - (plY + 8);
@@ -1143,22 +1366,31 @@ function desenhar(dt) {
   ctx.fillStyle = gp; ctx.fillRect(354, plY, 22, 8);
   if (puxando) { ctx.fillStyle = `rgba(255,${Math.round(220 - 160 * puxar)},60,.9)`; ctx.fillRect(352, 760 - 120 * puxar, 3, 120 * puxar); }
 
-  for (const b of bolas) { rolar(b); if (!b.rampa && !b.fora) desenharBola(b); }
-  for (const p of palhetas) desenharPalheta(p);
+  // nave parada na base (abaixo das bolas)
+  if (nave.estado === 'pronta' || nave.estado === 'recarga') desenharNave();
+
+  // posição suavizada entre dois passos da física: a bola anda sempre no mesmo ritmo
+  const pos = b => [b.ox + (b.x - b.ox) * alfa, b.oy + (b.y - b.oy) * alfa];
+  for (const b of bolas) {
+    if (b.fora || b.naNave) continue;
+    const [x, y] = pos(b); rolar(b, x, y);
+    if (!b.trilha) desenharBola(b, x, y);
+  }
+  for (const p of palhetas) desenharPalheta(p, p.oang + (p.ang - p.oang) * alfa);
 
   ctx.drawImage(camRampa, 0, 0, W, H);
-  // brilho correndo pela rampa quando a bola completa
-  const er = relogio - rampaBrilho;
-  if (er < .9 && efeitos()) {
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    for (let q = 0; q < 6; q++) { const d = L_RAMPA * Math.max(0, Math.min(1, er / .9 - q * .04)); const p = pontoRampa(d); brilho(p.x, p.y, 3, '#7fe3ff'); }
-    ctx.restore();
+  for (const nome of ['rampa', 'tubo']) {
+    const er = relogio - brilhoTrilha[nome], T = TRILHAS[nome];
+    if (er < .9 && efeitos()) for (let q = 0; q < 6; q++) { const p = pontoTrilha(T, T.L * Math.max(0, Math.min(1, er / .9 - q * .04))); brilho(p.x, p.y, 3, nome === 'tubo' ? '#7dffb2' : '#7fe3ff'); }
   }
-  for (const b of bolas) if (b.rampa) desenharBola(b);
+  for (const b of bolas) if (b.trilha && b.trilha.T === RAMPA) desenharBola(b, ...pos(b));
+  for (const b of bolas) if (b.trilha && b.trilha.T === TUBO) desenharBola(b, ...pos(b));
+  ctx.drawImage(camTubo, 0, 0, W, H);
+
+  if (nave.estado !== 'pronta' && nave.estado !== 'recarga') desenharNave();
 
   ctx.drawImage(frente, 0, 0, W, H);
 
-  // faíscas e pontos
   for (let i = particulas.length - 1; i >= 0; i--) {
     const p = particulas[i];
     if (!pausado) { p.vida -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 1 - 3 * dt; p.vy = p.vy * (1 - 3 * dt) + 200 * dt; }
@@ -1177,7 +1409,6 @@ function desenhar(dt) {
     ctx.fillStyle = p.cor; ctx.fillText(p.txt, p.x, p.y - p.t * 30);
   }
   ctx.globalAlpha = 1;
-  // clarão geral da mesa
   if (gi > 0) {
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     ctx.fillStyle = `rgba(${giCor},${Math.min(.35, gi * .35)})`; caminho(ctx, CONTORNO); ctx.closePath(); ctx.fill();
@@ -1198,12 +1429,12 @@ function desenhar(dt) {
   }
 }
 
-function desenharPalheta(p) {
-  const co = Math.cos(p.ang), si = Math.sin(p.ang), tx = p.px + co * p.len, ty = p.py + si * p.len;
+function desenharPalheta(p, ang) {
+  const co = Math.cos(ang), si = Math.sin(ang), tx = p.px + co * p.len, ty = p.py + si * p.len;
   const forma = (dx, dy) => {
     ctx.beginPath();
-    ctx.arc(p.px + dx, p.py + dy, p.rb, p.ang + Math.PI / 2, p.ang + Math.PI * 1.5);
-    ctx.arc(tx + dx, ty + dy, p.rt, p.ang - Math.PI / 2, p.ang + Math.PI / 2);
+    ctx.arc(p.px + dx, p.py + dy, p.rb, ang + Math.PI / 2, ang + Math.PI * 1.5);
+    ctx.arc(tx + dx, ty + dy, p.rt, ang - Math.PI / 2, ang + Math.PI / 2);
     ctx.closePath();
   };
   forma(3, 4); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill();
@@ -1243,7 +1474,7 @@ function desenharDMD() {
   if (m) {
     const el = relogio - msgIni, linhas = m.split('\n');
     const mostrar = !(msgAnim === 'pisca' && el > .3 && Math.floor(el * 5) % 2 === 1 && el < 1.5);
-    let esc = msgAnim === 'zoom' && el < .2 ? .3 + el / .2 * .7 : 1;
+    const esc = msgAnim === 'zoom' && el < .2 ? .3 + el / .2 * .7 : 1;
     if (mostrar) {
       bctx.save(); bctx.translate(64, 16); bctx.scale(esc, esc);
       if (linhas.length > 1) linhas.forEach((l, i) => dTexto(l, 0, (i - .5) * 15 + 1, cabe(l, 13, 124)));
@@ -1251,6 +1482,13 @@ function desenharDMD() {
       bctx.restore();
     }
     if (m !== anunciado) { anunciado = m; $('anuncio').textContent = m.replace('\n', ' '); }
+  } else if (nave.estado === 'voando' || nave.estado === 'decolando') {
+    // nave voando no placar
+    const f = (relogio * .6) % 1, x = -20 + f * 168;
+    bctx.beginPath(); bctx.ellipse(x, 18, 10, 4, 0, 0, DPI); bctx.fill();
+    bctx.beginPath(); bctx.arc(x, 15, 4, Math.PI, 0); bctx.fill();
+    for (let k = 1; k < 5; k++) bctx.fillRect(x - 10 - k * 6, 17 + (k % 2), 3, 2);
+    dTexto('EM VOO', 64, 5, 8);
   } else if (j.estado === 'fim') {
     const fase = Math.floor(relogio / 2.5) % 3;
     if (fase === 0) dTexto('FIM DE JOGO', 64, 16, cabe('FIM DE JOGO', 18, 124));
@@ -1284,24 +1522,37 @@ function painel() {
 }
 
 // ================= Ciclo principal =================
-let antes = performance.now(), acumulado = 0, somConf = true, contaQ = 0;
+// Física em passos fixos de 1/600 s; se o aparelho ficar lento, a imagem fica mais leve sozinha.
+let antes = performance.now(), acumulado = 0, somConf = true, contaQ = 0, tempos = [];
 function quadro(agora) {
-  const dt = Math.min(.05, (agora - antes) / 1000);
+  const bruto = (agora - antes) / 1000, dt = Math.min(.1, bruto);
   antes = agora;
-  const parado = pausado || dialogoAberto();
+  const parado = pausado || dialogoAberto(), inicio = performance.now();
   if (!parado) {
     acumulado += dt;
-    while (acumulado >= PASSO) { passo(PASSO); acumulado -= PASSO; }
+    let n = 0;
+    while (acumulado >= PASSO && n < 70) { passo(PASSO); acumulado -= PASSO; n++; }
+    if (n >= 70) acumulado = 0;
   } else acumulado = 0;
-  desenhar(parado ? 0 : dt);
+  desenhar(parado ? 0 : dt, parado ? 1 : Math.min(1, acumulado / PASSO));
   painel();
+  const trabalho = (performance.now() - inicio) / 1000;
   if (++contaQ % 20 === 0) somConf = JO.carregar('som', true);
   musica.ligar(!!(opc.musica && somConf && !parado && j.estado !== 'fim' && audio.ac && audio.ac.state === 'running'));
+  // aparelho lento: se desenhar e calcular passar de 12 ms por quadro, diminui a resolução
+  if (!parado && !document.hidden && bruto < .25) {
+    tempos.push(trabalho);
+    if (tempos.length >= 90) {
+      const media = tempos.reduce((a, b) => a + b) / tempos.length;
+      tempos = [];
+      if (media > .012 && dprMax > 1) { dprMax = Math.max(1, dprMax - .5); ajustarTamanho(); }
+    }
+  }
   requestAnimationFrame(quadro);
 }
 
 novoJogo();
-if (location.hostname === 'localhost') window.__pb = { get bolas() { return bolas; }, palhetas, ALVOS, get j() { return j; }, passo: s => { for (let i = 0; i < s / PASSO; i++) passo(PASSO); }, comecarPuxar, soltar, desenhar: () => { desenhar(0); painel(); }, get relogio() { return relogio; }, L_RAMPA }; // só para testes no computador
+if (location.hostname === 'localhost') window.__pb = { get bolas() { return bolas; }, palhetas, ALVOS, nave, get j() { return j; }, passo: s => { for (let i = 0; i < s / PASSO; i++) passo(PASSO); }, comecarPuxar, soltar, desenhar: () => { desenhar(0, 1); painel(); }, get relogio() { return relogio; }, RAMPA, TUBO, novaBola, get dprMax() { return dprMax; } }; // só para testes no computador
 mostrarRecordes();
 ajustarTamanho();
 requestAnimationFrame(quadro);

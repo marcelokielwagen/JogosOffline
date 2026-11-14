@@ -73,7 +73,24 @@ O roteiro completo das etapas está em `PROMPT.md`.
   - Testes: robô jogou 3 partidas longas (6 multibolas) sem bola presa nem
     escapando; rampa testada com várias forças; 60 quadros/s no navegador.
   - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v14`).
-- Versão atual do cache em `sw.js`: `jogos-offline-v14`. O `sw.js` busca os arquivos com
+- **Pinball 3.0 (14/11/2026)**, pedido do dono (fundo, velocidade, laterais vazias, mais interação):
+  - Velocidade constante: o desenho da bola e das palhetas é suavizado entre os
+    passos da física (antes cada quadro andava 9, 10 ou 11 passos e a bola
+    parecia acelerar e frear). Brilhos viraram imagens prontas (mais leve) e, se o
+    trabalho de um quadro passar de 12 ms, a resolução baixa sozinha.
+  - Nave espacial na base do centro: pega a bola, decola, voa pela mesa e solta a
+    bola no alto; recarrega em 6 s; a cada 3 voos, Super Voo. Missão de Marte.
+  - Cano de vidro com looping à direita do centro (sem força a bola volta antes
+    da volta); sai no alto da esquerda. Missão de Netuno.
+  - Laterais de baixo: estrelas nos 4 corredores (as 4 acesas recarregam o escudo
+    por 10 s), foguete, satélite, faixas de perigo, setas e estrelas nos estilingues.
+  - Fundo da página com céu estrelado e nebulosas, moldura cromada com brilho e
+    título com o mesmo dourado do logotipo.
+  - Testes: robô jogou 15 min (28 voos da nave, 59 entradas no cano, 4
+    multibolas) sem bola presa, sem escapar e sem erro; cano testado com várias
+    forças; desenho leva menos de 1 ms por quadro.
+  - Ainda não publicado.
+- Versão atual do cache em `sw.js`: `jogos-offline-v15`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta
