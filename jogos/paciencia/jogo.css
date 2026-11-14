@@ -1,7 +1,10 @@
 body { overflow-x: hidden; }
 .pagina { max-width: 720px; padding-left: 10px; padding-right: 10px; padding-bottom: 0; }
 
-.barra { display: flex; gap: 6px; align-items: stretch; margin-bottom: 12px; }
+.modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 40px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
+.modos button.ativo { background: var(--destaque); color: #fff; }
+.barra { display: flex; gap: 6px; align-items: stretch; margin: 8px 0 12px; }
 .chip { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 44px; padding: 3px 4px; border-radius: 14px; background: var(--superficie); border: 1px solid var(--borda); }
 .chip span { font-size: .68rem; color: var(--texto2); line-height: 1.2; }
 .chip b { font-size: .98rem; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -14,6 +17,7 @@ button.chip:active { transform: scale(.95); }
 .vaga { border: 2px dashed var(--borda); display: grid; place-items: center; color: var(--texto2); font-size: calc(var(--cw) * .5); background: color-mix(in srgb, var(--superficie) 60%, transparent); }
 .vaga[data-p^="f"]::after { content: "A"; font-weight: 700; opacity: .35; font-size: calc(var(--cw) * .45); }
 .vaga[data-p="e"]::after { content: "↻"; opacity: .7; }
+.vaga[data-p="e"].fim::after { content: "✕"; opacity: .45; }
 .vaga[data-p="d"] { border-color: transparent; background: none; }
 
 .carta {

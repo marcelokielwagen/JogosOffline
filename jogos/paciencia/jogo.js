@@ -6,12 +6,27 @@
   const naipe = c => Math.floor(c / 13), valor = c => c % 13, vermelha = c => naipe(c) % 2 === 1;
   const ROT = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
+  // ---------- Níveis ----------
+  // voltas: quantas vezes o baralho pode ser passado (0 = sem limite); ajuda: Ases e 2 ficam à mão.
+  const NIVEIS = {
+    facil: { nome: 'Fácil', vira: 1, voltas: 0, ajuda: true },
+    medio: { nome: 'Médio', vira: 3, voltas: 0, ajuda: false },
+    dificil: { nome: 'Difícil', vira: 3, voltas: 3, ajuda: false },
+  };
+
   // ---------- Estado ----------
-  function nova(vira, stats) {
+  function nova(nivel, stats) {
     const b = Array.from({ length: 52 }, (_, i) => i);
     for (let i = 51; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+    if (NIVEIS[nivel].ajuda) {
+      // Leva os 4 Ases e os 4 "2" para lugares fáceis: topo das colunas ou primeiras cartas do baralho.
+      const bons = [0, 2, 5, 9, 14, 20, 27, 44, 45, 46, 47, 48, 49, 50, 51];
+      for (let i = bons.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bons[i], bons[j]] = [bons[j], bons[i]]; }
+      const chave = b.filter(c => c % 13 <= 1).sort((x, y) => x % 13 - y % 13);
+      chave.forEach((c, k) => { const de = b.indexOf(c), para = bons[k]; [b[de], b[para]] = [b[para], b[de]]; });
+    }
     const c = []; for (let i = 0; i < 7; i++) c.push({ k: b.splice(0, i + 1), d: i });
-    return { s: b, w: [], f: [[], [], [], []], c, m: 0, t: 0, vira: vira || 1, hist: [], ganhou: false, stats: stats || { v: 0, melhor: null } };
+    return { s: b, w: [], f: [[], [], [], []], c, m: 0, t: 0, nivel, vira: NIVEIS[nivel].vira, voltas: 0, hist: [], ganhou: false, stats };
   }
   function valida(x) {
     try {
@@ -19,9 +34,17 @@
       return x.f.length === 4 && x.c.length === 7 && todas.length === 52 && new Set(todas).size === 52 && Array.isArray(x.hist);
     } catch (err) { return false; }
   }
+  function ajustarStats(s) {
+    s = s || {}; s.v = s.v || 0; if (s.melhor === undefined) s.melhor = null;
+    s.n = s.n || {}; for (const k in NIVEIS) s.n[k] = s.n[k] || { v: 0, melhor: null };
+    return s;
+  }
   let e = JO.carregar('paciencia', null);
-  if (!valida(e)) e = nova(e && e.vira, e && e.stats);
+  if (e && !NIVEIS[e.nivel]) e.nivel = e.vira === 3 ? 'medio' : 'facil'; // jogo salvo antes dos níveis
+  if (!valida(e)) e = nova((e && e.nivel) || 'facil', e && e.stats);
+  e.stats = ajustarStats(e.stats); e.vira = NIVEIS[e.nivel].vira; e.voltas = e.voltas || 0;
   const salvar = () => JO.salvar('paciencia', e);
+  const podeReciclar = () => !NIVEIS[e.nivel].voltas || e.voltas < NIVEIS[e.nivel].voltas - 1;
 
   let sel = null, toque = null, ultimoToque = { id: -1, t: 0 }, auto = null, festaId = 0, voa = new Set();
   let G = {}, onde = {}, xy = {};
@@ -48,7 +71,7 @@
   }
   function foto() {
     if (auto) return;
-    e.hist.push(JSON.stringify({ s: e.s, w: e.w, f: e.f, c: e.c, m: e.m }));
+    e.hist.push(JSON.stringify({ s: e.s, w: e.w, f: e.f, c: e.c, m: e.m, voltas: e.voltas }));
     if (e.hist.length > 300) e.hist.shift();
   }
   function tentar(g, p) {
@@ -76,9 +99,10 @@
   }
   function comprar() {
     if (!e.s.length && !e.w.length) return false;
+    if (!e.s.length && !podeReciclar()) { if (!auto) JO.som('erro'); return false; }
     foto();
     let ids = [];
-    if (!e.s.length) { e.s = e.w.reverse(); e.w = []; }
+    if (!e.s.length) { e.s = e.w.reverse(); e.w = []; e.voltas++; }
     else for (let n = 0; n < e.vira && e.s.length; n++) { const c = e.s.pop(); e.w.push(c); ids.push(c); }
     e.m++; sel = null; JO.som('carta'); salvar(); desenhar(ids);
     return true;
@@ -107,13 +131,16 @@
     clearInterval(auto); auto = null;
     e.ganhou = true; e.hist = []; e.stats.v++;
     if (e.stats.melhor == null || e.t < e.stats.melhor) e.stats.melhor = e.t;
+    const sn = e.stats.n[e.nivel]; sn.v++;
+    if (sn.melhor == null || e.t < sn.melhor) sn.melhor = e.t;
     salvar(); desenhar(ids);
     JO.vibrar([40, 60, 120]); JO.som('vitoria');
     const id = festaId;
     setTimeout(() => { if (id === festaId) festa(); }, 350);
     setTimeout(() => {
       if (!e.ganhou || (id !== festaId - 1 && id !== festaId)) return;
-      $('vitoria-txt').textContent = `Tempo ${relogio(e.t)} · ${e.m} jogadas · Vitórias: ${e.stats.v} · Melhor tempo: ${relogio(e.stats.melhor)}`;
+      const sn = e.stats.n[e.nivel];
+      $('vitoria-txt').textContent = `${NIVEIS[e.nivel].nome} · Tempo ${relogio(e.t)} · ${e.m} jogadas · Vitórias neste nível: ${sn.v} · Melhor tempo neste nível: ${relogio(sn.melhor)}`;
       if (!$('vitoria').open) $('vitoria').showModal();
     }, 3200);
   }
@@ -139,9 +166,9 @@
     })();
   }
 
-  function novoJogo() {
+  function novoJogo(nivel) {
     festaId++; clearInterval(auto); auto = null; sel = null;
-    e = nova(e.vira, e.stats); salvar();
+    e = nova(nivel || e.nivel, e.stats); salvar();
     cartas.forEach(el => { el.classList.add('arrasta'); el.style.transform = `translate(${G.x(0)}px,0px)`; el.style.visibility = ''; });
     void tab.offsetWidth; // força o navegador a aplicar a posição antes de distribuir
     desenhar();
@@ -204,7 +231,11 @@
     });
     $('jogadas').textContent = e.m;
     $('tempo').textContent = relogio(e.t);
-    $('vira-txt').textContent = e.vira === 3 ? '3 cartas' : '1 carta';
+    const lim = NIVEIS[e.nivel].voltas;
+    $('vira-txt').textContent = e.vira === 3 ? 'Vira 3 · voltas' : 'Vira 1 · voltas';
+    $('voltas').textContent = lim ? `${Math.min(e.voltas + 1, lim)} de ${lim}` : '∞';
+    vagas.e.classList.toggle('fim', !podeReciclar());
+    document.querySelectorAll('.modos button').forEach(b => b.classList.toggle('ativo', b.dataset.nivel === e.nivel));
     $('desfazer').disabled = !e.hist.length || e.ganhou || !!auto;
     $('completar').hidden = !podeCompletar();
   }
@@ -266,12 +297,18 @@
   tab.addEventListener('pointercancel', ev => { if (toque && ev.pointerId === toque.id) { toque = null; desenhar(); } });
 
   // ---------- Botões e relógio ----------
-  $('novo').addEventListener('click', () => (e.m > 0 && !e.ganhou) ? $('confirma').showModal() : novoJogo());
-  $('confirma-sim').addEventListener('click', () => { $('confirma').close(); novoJogo(); });
+  let nivelPedido = null;
+  function pedirNovo(nivel) {
+    nivelPedido = nivel || null;
+    $('confirma-tit').textContent = nivel ? `Mudar para ${NIVEIS[nivel].nome}?` : 'Começar um novo jogo?';
+    (e.m > 0 && !e.ganhou) ? $('confirma').showModal() : novoJogo(nivelPedido);
+  }
+  $('novo').addEventListener('click', () => pedirNovo());
+  document.querySelectorAll('.modos button').forEach(b => b.addEventListener('click', () => { if (b.dataset.nivel !== e.nivel) pedirNovo(b.dataset.nivel); }));
+  $('confirma-sim').addEventListener('click', () => { $('confirma').close(); novoJogo(nivelPedido); });
   $('vitoria-novo').addEventListener('click', () => { $('vitoria').close(); novoJogo(); });
   $('desfazer').addEventListener('click', desfazer);
   $('completar').addEventListener('click', completar);
-  $('vira').addEventListener('click', () => { e.vira = e.vira === 3 ? 1 : 3; salvar(); desenhar(); });
 
   setInterval(() => {
     if (e.m > 0 && !e.ganhou && !document.hidden) {

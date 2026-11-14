@@ -1,0 +1,49 @@
+body { overflow-x: hidden; }
+.pagina { max-width: 760px; padding-left: 8px; padding-right: 8px; padding-bottom: 0; }
+
+.modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 40px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
+.modos button.ativo { background: var(--destaque); color: #fff; }
+
+.barra { display: flex; gap: 5px; align-items: stretch; margin: 8px 0 10px; }
+.chip { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 44px; padding: 3px 4px; border-radius: 14px; background: var(--superficie); border: 1px solid var(--borda); }
+.chip span { font-size: .68rem; color: var(--texto2); line-height: 1.2; }
+.chip b { font-size: .98rem; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+button.chip { border-color: color-mix(in srgb, var(--destaque) 45%, var(--borda)); }
+button.chip:active { transform: scale(.95); }
+.barra .btn { min-height: 44px; padding: 0 12px; }
+.barra .icone-btn { flex: none; }
+.barra .icone-btn:disabled { opacity: .4; }
+#dica[hidden] { display: none; }
+
+.tab { position: relative; touch-action: none; --cw: 40px; --ch: 56px; }
+.vaga, .carta { position: absolute; left: 0; top: 0; width: var(--cw); height: var(--ch); border-radius: calc(var(--cw) * .12); }
+.vaga { border: 2px dashed var(--borda); display: grid; place-items: center; color: var(--texto2); background: color-mix(in srgb, var(--superficie) 60%, transparent); }
+.vaga[data-p^="f"]::after { content: "A"; font-weight: 700; opacity: .35; font-size: calc(var(--cw) * .45); }
+.vaga[data-p^="l"] { border-style: solid; border-color: color-mix(in srgb, var(--destaque) 35%, var(--borda)); background: color-mix(in srgb, var(--destaque) 10%, var(--superficie)); }
+.vaga[hidden] { display: none; }
+
+.carta {
+  background: #fdfdfb; color: #1d2136; border: 1px solid rgba(0,0,0,.22);
+  box-shadow: 0 1px 2px rgba(0,0,0,.35); cursor: pointer;
+  transition: transform .2s ease-out; will-change: transform;
+}
+.carta.r { color: #d6324a; }
+.carta > * { pointer-events: none; }
+.carta .v { position: absolute; left: 7%; top: 1%; font-weight: 800; font-size: calc(var(--cw) * .4); line-height: 1.15; letter-spacing: -.06em; }
+.carta svg { position: absolute; fill: currentColor; }
+.carta .n { right: 6%; top: 5%; width: 32%; height: auto; aspect-ratio: 1; }
+.carta .g { left: 22%; bottom: 7%; width: 56%; height: auto; aspect-ratio: 1; }
+.carta.sel { outline: 3px solid var(--ouro); outline-offset: -1px; filter: brightness(1.04); box-shadow: 0 0 14px color-mix(in srgb, var(--ouro) 60%, transparent); }
+.carta.arrasta { transition: none; box-shadow: 0 8px 18px rgba(0,0,0,.45); }
+.carta.dica, .vaga.dica { animation: piscaDica .5s ease-in-out 4 alternate; }
+@keyframes piscaDica { to { outline: 3px solid var(--o); outline-offset: 1px; box-shadow: 0 0 16px var(--o); } }
+
+.aviso { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 5000; padding: 10px 16px; border-radius: 14px; background: var(--superficie2); border: 1px solid var(--borda); box-shadow: var(--sombra); font-size: .9rem; white-space: nowrap; animation: surgir .25s ease-out; pointer-events: none; }
+.aviso[hidden] { display: none; }
+
+dialog .btn + .btn { margin-top: 6px; }
+.linha-num { display: flex; gap: 8px; }
+.linha-num input { flex: 1; min-width: 0; min-height: 48px; border-radius: 14px; border: 1px solid var(--borda); background: var(--fundo); color: var(--texto); font: inherit; font-size: 1.1rem; padding: 0 14px; }
+.linha-num .btn { width: auto; }
+.nota { font-size: .85rem; min-height: 1.2em; }

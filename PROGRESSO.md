@@ -90,7 +90,20 @@ O roteiro completo das etapas está em `PROMPT.md`.
     multibolas) sem bola presa, sem escapar e sem erro; cano testado com várias
     forças; desenho leva menos de 1 ms por quadro.
   - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v15`).
-- Versão atual do cache em `sw.js`: `jogos-offline-v15`. O `sw.js` busca os arquivos com
+- **FreeCell e níveis na Paciência (14/11/2026):**
+  - **FreeCell** (`jogos/freecell/`): jogos numerados de 1 a 32.000 com a mesma distribuição do
+    FreeCell clássico (jogo nº 1 conferido), escolher número e recomeçar, mover sequências (limite
+    pelas células e colunas livres), dois toques mandam para o monte ou célula, cartas sobem sozinhas,
+    aviso de "sem jogadas", desfazer sem limite, estatísticas por nível.
+    Níveis: Fácil (4 células, só jogos que um resolvedor fecha com 2 células, dica), Médio (4 células,
+    qualquer jogo, dica), Difícil (3 células, só jogos com solução, sem dica). As listas estão em
+    `jogos/freecell/jogos.js` (448 fáceis e 518 difíceis, entre os jogos 1 a 1.200). A dica 💡 usa o
+    mesmo resolvedor dentro do jogo.
+  - **Paciência**: o botão Virar 1/3 virou níveis: Fácil (vira 1, Ases e 2 à mão), Médio (vira 3) e
+    Difícil (vira 3, só 3 voltas no baralho). Jogo salvo e vitórias antigas continuam valendo.
+  - Testes: robô jogou partidas inteiras de FreeCell até vencer (Fácil e Difícil); níveis e limite de
+    voltas da Paciência testados no Node. Visual no celular não foi conferido pelo Claude.
+- Versão atual do cache em `sw.js`: `jogos-offline-v19`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta

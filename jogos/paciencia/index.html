@@ -27,10 +27,16 @@
     <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
   </header>
 
+  <div class="modos" role="group" aria-label="Dificuldade">
+    <button data-nivel="facil">Fácil</button>
+    <button data-nivel="medio">Médio</button>
+    <button data-nivel="dificil">Difícil</button>
+  </div>
+
   <div class="barra">
     <div class="chip"><span>Tempo</span><b id="tempo">00:00</b></div>
     <div class="chip"><span>Jogadas</span><b id="jogadas">0</b></div>
-    <button id="vira" class="chip" aria-label="Trocar entre virar 1 ou 3 cartas"><span>Virar</span><b id="vira-txt">1 carta</b></button>
+    <div class="chip"><span id="vira-txt">Vira 1</span><b id="voltas">∞</b></div>
     <button id="desfazer" class="icone-btn" aria-label="Desfazer">↶</button>
     <button id="novo" class="btn principal">Novo</button>
   </div>
@@ -50,11 +56,17 @@
     <li><b>Dois toques</b> rápidos mandam a carta direto para o monte de cima.</li>
     <li>Toque no baralho (canto de cima, à esquerda) para virar cartas novas.</li>
   </ul>
+  <h2>Níveis</h2>
+  <ul>
+    <li><b>Fácil:</b> vira 1 carta por vez, baralho sem limite de voltas, e os Ases e os 2 ficam fáceis de achar.</li>
+    <li><b>Médio:</b> vira 3 cartas por vez (só a de cima pode ser usada), sem limite de voltas.</li>
+    <li><b>Difícil:</b> vira 3 cartas e o baralho só pode ser passado <b>3 vezes</b>.</li>
+  </ul>
   <button class="btn principal" data-fecha>Entendi</button>
 </dialog>
 
 <dialog id="confirma">
-  <h2>Começar um novo jogo?</h2>
+  <h2 id="confirma-tit">Começar um novo jogo?</h2>
   <p>A partida atual será perdida.</p>
   <button id="confirma-sim" class="btn principal">Sim, novo jogo</button>
   <button class="btn discreto" data-fecha>Continuar jogando</button>
