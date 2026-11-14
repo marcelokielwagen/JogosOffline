@@ -72,7 +72,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   - Opções (⚙️): 3 ou 5 bolas, Fácil/Normal/Difícil, música, efeitos leves.
   - Testes: robô jogou 3 partidas longas (6 multibolas) sem bola presa nem
     escapando; rampa testada com várias forças; 60 quadros/s no navegador.
-  - Ainda não publicado.
+  - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v14`).
 - Versão atual do cache em `sw.js`: `jogos-offline-v14`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
