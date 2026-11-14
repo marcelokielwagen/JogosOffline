@@ -54,7 +54,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   lado direito para lançar. Estatísticas da tela inicial incluem o pinball.
   - Teste no computador: `window.__pb` (só em localhost) permite rodar a física
     sem animação; um robô jogou 150 bolas sem bola presa nem atravessando parede.
-  - Ainda não publicado.
+  - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v11`, 7 jogos).
 - Versão atual do cache em `sw.js`: `jogos-offline-v11`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
