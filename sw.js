@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v11';
+const VERSAO = 'jogos-offline-v13';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',

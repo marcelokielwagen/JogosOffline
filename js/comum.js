@@ -101,8 +101,34 @@ const JO = (() => {
     });
   });
 
+  // ---------- Atualizar jogos ----------
+  // Busca a versão nova de todos os arquivos, apaga a cópia guardada no aparelho e recarrega.
+  async function atualizarJogos(botao) {
+    if (botao) { botao.disabled = true; botao.textContent = '⏳ Atualizando…'; }
+    try {
+      const sw = await fetch(new URL('sw.js', raiz), { cache: 'reload' }).then(r => r.text());
+      const lista = (sw.match(/'\.\/[^']*'/g) || []).map(s => new URL(s.slice(1, -1), raiz));
+      await Promise.all(lista.map(u => fetch(u, { cache: 'reload' }).catch(() => {})));
+      if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+      if (window.caches) for (const n of await caches.keys()) await caches.delete(n);
+      location.replace(new URL('index.html?v=' + Date.now(), raiz));
+    } catch (e) {
+      if (botao) { botao.disabled = false; botao.textContent = '🔄 Atualizar jogos'; }
+      alert('Não deu para atualizar agora. Confira se o celular está com internet e tente de novo.');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-acao="atualizar"]').forEach(b => b.addEventListener('click', () => atualizarJogos(b)));
+  });
+
   // ---------- Offline ----------
   if ('serviceWorker' in navigator) {
+    // Quando chega uma versão nova, a tela inicial recarrega sozinha (nunca no meio de um jogo).
+    const tinhaVersao = !!navigator.serviceWorker.controller;
+    let recarregou = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (tinhaVersao && !recarregou && document.getElementById('status-offline')) { recarregou = true; location.reload(); }
+    });
     window.addEventListener('load', () => {
       navigator.serviceWorker.register(new URL('sw.js', raiz))
         .then(() => navigator.serviceWorker.ready)

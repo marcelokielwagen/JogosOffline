@@ -55,7 +55,10 @@ O roteiro completo das etapas está em `PROMPT.md`.
   - Teste no computador: `window.__pb` (só em localhost) permite rodar a física
     sem animação; um robô jogou 150 bolas sem bola presa nem atravessando parede.
   - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v11`, 7 jogos).
-- Versão atual do cache em `sw.js`: `jogos-offline-v11`. O `sw.js` busca os arquivos com
+- **Botão "🔄 Atualizar jogos" (14/11/2026)** no fim da tela inicial: baixa de novo todos
+  os arquivos, apaga a cópia guardada e recarrega. Além disso, a tela inicial
+  recarrega sozinha quando uma versão nova termina de baixar (nunca dentro de um jogo).
+- Versão atual do cache em `sw.js`: `jogos-offline-v13`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta

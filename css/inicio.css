@@ -22,6 +22,8 @@ a.cartao:active { transform: scale(.96); }
 }
 #status-offline { margin: 22px 0 0; text-align: center; font-size: .85rem; color: var(--texto2); }
 #status-offline.ok { color: var(--o); }
+.atualizar { margin: 10px 0 0; text-align: center; }
+.atualizar .btn { min-height: 44px; font-size: .9rem; }
 @media (min-width: 700px) { .pagina.larga { max-width: 860px; } .pagina.larga .grade { grid-template-columns: repeat(3, 1fr); } }
 
 /* Estatísticas e ajustes */
