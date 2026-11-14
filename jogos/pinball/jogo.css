@@ -20,9 +20,16 @@ body.pinball { overflow: hidden; background: #07091a; color: #eef0fa; }
   background: #0d0a03 radial-gradient(rgba(255,170,40,.07) 1px, transparent 1.4px) 0 0 / 4px 4px;
   border: 3px solid; border-color: #111 #8a8f9c #8a8f9c #111; border-radius: 4px; padding: 6px 10px;
 }
-.lcd-linha { display: flex; justify-content: space-between; font-size: .85rem; letter-spacing: .08em; }
-.lcd-pontos { font-size: 2rem; line-height: 1.1; text-align: right; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
-.lcd-msg { font-size: .95rem; min-height: 1.3em; text-align: center; color: #ffd25e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lcd { padding: 4px; }
+.dmd { display: block; width: 100%; aspect-ratio: 4 / 1; border-radius: 2px; background: #0a0500; box-shadow: 0 0 14px rgba(255,140,20,.25); }
+.lcd-missao { margin-top: 3px; }
+.so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.opc { display: flex; flex-direction: column; gap: 6px; margin: 0 0 14px; }
+.opc > span { font-weight: 600; font-size: .95rem; }
+.seg { display: flex; gap: 6px; }
+.seg button { flex: 1; min-height: 44px; border-radius: 12px; background: var(--superficie2); border: 2px solid transparent; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--destaque); color: #fff; border-color: rgba(255,255,255,.3); }
+.nota { font-size: .85rem; margin: 0 0 14px; }
 .lcd-missao { font-size: .72rem; min-height: 1.2em; text-align: center; color: #7fe3ff; text-shadow: 0 0 6px rgba(80,200,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .painel-btns { display: flex; gap: 6px; }
@@ -35,10 +42,7 @@ body.pinball { overflow: hidden; background: #07091a; color: #eef0fa; }
 @media (max-aspect-ratio: 3/4) {
   .pb-corpo { gap: 6px; }
   .painel { flex-direction: row; padding: 5px; gap: 5px; }
-  .lcd { flex: 1; min-width: 0; padding: 3px 8px; }
-  .lcd-linha { font-size: .72rem; }
-  .lcd-pontos { font-size: 1.45rem; }
-  .lcd-msg { font-size: .8rem; }
+  .lcd { flex: 1; min-width: 0; padding: 3px; }
   .lcd-missao { font-size: .66rem; }
   .painel-btns { flex-direction: column; width: 92px; }
   .painel-btns .btn { min-height: 0; padding: 0 6px; font-size: .85rem; }
@@ -57,8 +61,7 @@ body.pinball { overflow: hidden; background: #07091a; color: #eef0fa; }
 @media (min-aspect-ratio: 3/4) {
   .pb-corpo { flex-direction: row; align-items: stretch; }
   .painel { order: 0; width: 270px; overflow-y: auto; gap: 12px; padding: 12px; }
-  .lcd { padding: 10px 12px; }
-  .lcd-pontos { font-size: 2.1rem; }
+  .lcd { padding: 5px; }
   .painel-btns { flex-direction: column; }
   .recordes, .teclas { display: block; }
 }

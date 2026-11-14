@@ -17,6 +17,7 @@
     <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
     <h1>Pinball Galáxia</h1>
     <button id="pausa" class="icone-btn" aria-label="Pausar">⏸</button>
+    <button class="icone-btn" data-abre="opcoes" aria-label="Opções">⚙️</button>
     <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
   </header>
 
@@ -25,10 +26,9 @@
 
     <aside class="painel">
       <div class="lcd">
-        <div class="lcd-linha"><span id="bola">BOLA 1</span><span id="mult">x1</span></div>
-        <div id="pontos" class="lcd-pontos">0</div>
-        <div id="msg" class="lcd-msg">&nbsp;</div>
+        <canvas id="dmd" class="dmd" aria-hidden="true"></canvas>
         <div id="missao" class="lcd-missao">&nbsp;</div>
+        <div id="anuncio" class="so-leitor" role="status" aria-live="polite"></div>
       </div>
       <div class="painel-btns">
         <button id="novo" class="btn principal">Novo jogo</button>
@@ -54,13 +54,28 @@
     <li><b>Celular:</b> toque no lado <b>esquerdo</b> ou <b>direito</b> da mesa para bater com a palheta daquele lado.</li>
     <li><b>Lançar:</b> segure o lado direito (ou a tecla Espaço) e solte. Quanto mais tempo segurar, mais forte.</li>
     <li><b>Computador:</b> Z e / (ou as setas ← →) para as palhetas.</li>
-    <li>Você tem <b>3 bolas</b>. Nos primeiros segundos de cada bola o <b>escudo</b> azul devolve a bola se ela cair.</li>
+    <li>Nos primeiros segundos de cada bola o <b>escudo</b> azul devolve a bola se ela cair.</li>
+    <li><b>Tacada perfeita:</b> ao lançar, faça a bola passar pela luz do topo marcada com o anel branco.</li>
+    <li><b>Rampa:</b> acerte com força a entrada da rampa (à esquerda). Sem força, a bola volta.</li>
+    <li><b>Multibola:</b> a rampa acende a <b>trava</b>. Com a trava acesa, caia no <b>buraco negro</b> para travar a bola. Na segunda trava começa a multibola, com 3 bolas. Durante ela, cada rampa vale um <b>JACKPOT</b>.</li>
     <li><b>Viagem pela galáxia:</b> cumpra a missão de cada planeta (Lua, Marte, Júpiter, Saturno e Netuno). Ao completar os cinco você ganha uma bola extra.</li>
     <li>Acender as <b>3 luzes do topo</b> aumenta o multiplicador do bônus. As palhetas trocam as luzes de lugar.</li>
+    <li>A <b>catapulta</b> (luz rosa na saída esquerda) devolve a bola para o jogo uma vez. Derrubar os 3 alvos vermelhos acende de novo.</li>
+    <li>A <b>catraca</b> da órbita gira e dá pontos a cada volta.</li>
     <li><b>Sacudir</b> empurra a bola, mas sacudir demais dá <b>TILT</b> e você perde a bola.</li>
-    <li>Bola extra também aos <b>750.000 pontos</b>.</li>
+    <li>Bola extra também aos <b>750.000 pontos</b>. Em ⚙️ dá para escolher 3 ou 5 bolas, dificuldade, música e efeitos.</li>
   </ul>
   <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<dialog id="opcoes">
+  <h2>Opções</h2>
+  <div class="opc"><span>Bolas por jogo</span><div class="seg" data-opc="bolas"><button data-v="3">3</button><button data-v="5">5</button></div></div>
+  <div class="opc"><span>Dificuldade</span><div class="seg" data-opc="dific"><button data-v="facil">Fácil</button><button data-v="normal">Normal</button><button data-v="dificil">Difícil</button></div></div>
+  <div class="opc"><span>Música</span><div class="seg" data-opc="musica"><button data-v="1">Ligada</button><button data-v="0">Desligada</button></div></div>
+  <div class="opc"><span>Efeitos visuais</span><div class="seg" data-opc="efeitos"><button data-v="completos">Completos</button><button data-v="leves">Leves</button></div></div>
+  <p class="nota">Bolas e dificuldade valem a partir do próximo jogo. "Leves" deixa o jogo mais rápido em celular simples. O som geral liga e desliga nos Ajustes da tela inicial.</p>
+  <button class="btn principal" data-fecha>Fechar</button>
 </dialog>
 
 <dialog id="confirma">

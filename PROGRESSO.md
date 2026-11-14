@@ -58,7 +58,22 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Botão "🔄 Atualizar jogos" (14/11/2026)** no fim da tela inicial: baixa de novo todos
   os arquivos, apaga a cópia guardada e recarrega. Além disso, a tela inicial
   recarrega sozinha quando uma versão nova termina de baixar (nunca dentro de um jogo).
-- Versão atual do cache em `sw.js`: `jogos-offline-v13`. O `sw.js` busca os arquivos com
+- **Pinball 2.0 (14/11/2026)**, pedido do dono ("muito simples, bola robotizada"):
+  - Física: gravidade 1150, bola gira de verdade (marcas na superfície rodando),
+    quiques com pequena imperfeição e borracha mais macia em batidas fortes,
+    palhetas com arranque (aceleram), rastro quando a bola está rápida.
+  - Mesa nova: rampa de arame (sem força a bola volta), multibola de 3 bolas
+    (rampa acende a trava; 2 travas no buraco negro), jackpot na rampa durante a
+    multibola, catraca girando na órbita, catapulta na saída esquerda, tacada
+    perfeita no lançamento, missão de Saturno virou "suba a rampa".
+  - Efeitos: faíscas, pontos subindo, clarões, shows de luzes, cogumelo que desce
+    ao bater, alvos caindo animados, reflexo colorido na bola, música de fundo
+    própria e placar de pontinhos laranja (DMD) no lugar do texto.
+  - Opções (⚙️): 3 ou 5 bolas, Fácil/Normal/Difícil, música, efeitos leves.
+  - Testes: robô jogou 3 partidas longas (6 multibolas) sem bola presa nem
+    escapando; rampa testada com várias forças; 60 quadros/s no navegador.
+  - Ainda não publicado.
+- Versão atual do cache em `sw.js`: `jogos-offline-v14`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta
