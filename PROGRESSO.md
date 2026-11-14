@@ -89,7 +89,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   - Testes: robô jogou 15 min (28 voos da nave, 59 entradas no cano, 4
     multibolas) sem bola presa, sem escapar e sem erro; cano testado com várias
     forças; desenho leva menos de 1 ms por quadro.
-  - Ainda não publicado.
+  - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v15`).
 - Versão atual do cache em `sw.js`: `jogos-offline-v15`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
