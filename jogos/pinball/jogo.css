@@ -25,9 +25,11 @@ body.pinball {
 .pb .topo .icone-btn { background: rgba(26,30,51,.7); border-color: rgba(255,255,255,.12); color: #eef0fa; backdrop-filter: blur(4px); }
 .pb-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
 
-.mesa { flex: 1; min-height: 0; display: grid; place-items: center; touch-action: none; cursor: pointer; position: relative; }
+.mesa { flex: 1; min-height: 0; touch-action: none; cursor: pointer; position: relative; overflow: hidden; }
 .mesa::before { content: ""; position: absolute; inset: 4% 8%; border-radius: 40%; background: radial-gradient(closest-side, rgba(120,80,255,.28), rgba(40,180,255,.12) 60%, transparent); filter: blur(18px); pointer-events: none; }
-.mesa canvas { position: relative; display: block; border-radius: 12px; box-shadow: 0 0 0 2px #6b5236, 0 0 0 4px #1a1009, 0 0 0 5px rgba(220,226,236,.35), 0 0 34px rgba(120,90,255,.35), 0 18px 50px rgba(0,0,0,.7); }
+/* a mesa é inclinada em 3D (o alto fica mais longe); o JavaScript calcula tamanho e posição */
+#tela { position: absolute; display: block; transform-origin: 50% 100%; border-radius: 12px; box-shadow: 0 0 0 2px #6b5236, 0 0 0 4px #1a1009, 0 0 0 5px rgba(220,226,236,.35), 0 0 34px rgba(120,90,255,.35), 0 18px 50px rgba(0,0,0,.7); }
+#hud { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* Painel com bordas em relevo, como os botões de antigamente */
 .painel {

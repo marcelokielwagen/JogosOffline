@@ -22,7 +22,7 @@
   </header>
 
   <div class="pb-corpo">
-    <div id="mesa" class="mesa"><canvas id="tela" aria-label="Mesa de pinball"></canvas></div>
+    <div id="mesa" class="mesa"><canvas id="tela" aria-label="Mesa de pinball"></canvas><canvas id="hud" aria-hidden="true"></canvas></div>
 
     <aside class="painel">
       <div class="lcd">
@@ -55,15 +55,18 @@
     <li><b>Lançar:</b> segure o lado direito (ou a tecla Espaço) e solte. Quanto mais tempo segurar, mais forte.</li>
     <li><b>Computador:</b> Z e / (ou as setas ← →) para as palhetas.</li>
     <li>Nos primeiros segundos de cada bola o <b>escudo</b> azul devolve a bola se ela cair.</li>
-    <li><b>Tacada perfeita:</b> ao lançar, faça a bola passar pela luz do topo marcada com o anel branco.</li>
-    <li><b>Rampa:</b> acerte com força a entrada da rampa (à esquerda). Sem força, a bola volta.</li>
-    <li><b>Looping:</b> o cano de vidro verde (à direita do centro) dá uma volta completa. Precisa de força para passar pela volta.</li>
-    <li><b>Nave:</b> quando a nave está na base (no meio da mesa, luz amarela), passe a bola por ela. A nave decola, dá uma volta pela mesa e solta a bola lá no alto. A cada 3 voos vale um Super Voo.</li>
+    <li><b>Tacada perfeita:</b> depois de lançar, acerte a rampa lunar (o corredor da esquerda) nos primeiros segundos.</li>
+    <li><b>Estação orbital (andar de cima):</b> acerte com força a rampa à direita do centro. A bola sobe até a estação, que tem palheta própria (mexe junto com a palheta direita). Acerte os 3 alvos amarelos para acender o <b>Hipersalto</b> e mande a bola no buraco HIPER. Se a bola cair no ralo, ela desce pelo trilho de arame até o corredor da direita; pelo buraco HIPER, ela vai por cima até a Base Lunar.</li>
+    <li><b>Alienígena:</b> o monstro no meio dos cogumelos. Cada batida acende uma luz da estrela <b>FÚRIA</b> no centro. Na 4ª batida ele <b>agarra a bola</b> e depois cospe ela junto com <b>mais 3 bolas</b> pela mesa (multibola). Cada batida também tira uma luz vermelha do anel em volta dele; sem vida ele explode, vira ovo e volta mais forte.</li>
+    <li><b>Base Lunar (andar de cima, no alto à esquerda):</b> acerte o corredor da esquerda com força e a bola sobe pela rampa lunar. Lá tem palheta própria (mexe junto com a palheta esquerda), 3 corredores que acendem o multiplicador e a <b>CRATERA</b>. Com os 3 corredores acesos, a cratera vale ALUNISSAGEM. A bola volta por um trilho de arame que desce ao lado do looping.</li>
+    <li><b>Looping:</b> o cano de vidro no alto da esquerda (entrada à esquerda do centro) dá uma volta completa em pé e solta a bola nos cogumelos. Precisa de força.</li>
+    <li><b>Bola extra E-X-T-R-A:</b> cada jogada grande (estação, Base Lunar, looping, alien agarrando ou derrotado, cratera ou derrubar os 3 alvos) acende uma letra acima das palhetas. Com as cinco acesas, caia no <b>buraco negro</b> (anel laranja piscando) para ganhar uma bola extra (vale uma vez por bola).</li>
     <li><b>Corredores de baixo:</b> passar pelos 4 corredores (as estrelas verdes) recarrega o <b>escudo</b> por 10 segundos.</li>
     <li><b>Multibola:</b> a rampa acende a <b>trava</b>. Com a trava acesa, caia no <b>buraco negro</b> para travar a bola. Na segunda trava começa a multibola, com 3 bolas. Durante ela, cada rampa vale um <b>JACKPOT</b>.</li>
     <li><b>Viagem pela galáxia:</b> cumpra a missão de cada planeta (Lua, Marte, Júpiter, Saturno e Netuno). Ao completar os cinco você ganha uma bola extra.</li>
-    <li>Acender as <b>3 luzes do topo</b> aumenta o multiplicador do bônus. As palhetas trocam as luzes de lugar.</li>
+    <li>Acender as <b>3 luzes dos corredores da Base Lunar</b> aumenta o multiplicador do bônus. As palhetas trocam as luzes de lugar.</li>
     <li>A <b>catapulta</b> (luz rosa na saída esquerda) devolve a bola para o jogo uma vez. Derrubar os 3 alvos vermelhos acende de novo.</li>
+    <li>Missões: Lua (alvos), Marte (Base Lunar), Júpiter (alien), Saturno (estação) e Netuno (looping).</li>
     <li>A <b>catraca</b> da órbita gira e dá pontos a cada volta.</li>
     <li><b>Sacudir</b> empurra a bola, mas sacudir demais dá <b>TILT</b> e você perde a bola.</li>
     <li>Bola extra também aos <b>750.000 pontos</b>. Em ⚙️ dá para escolher 3 ou 5 bolas, dificuldade, música e efeitos.</li>

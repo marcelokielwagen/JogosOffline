@@ -90,6 +90,50 @@ O roteiro completo das etapas está em `PROMPT.md`.
     multibolas) sem bola presa, sem escapar e sem erro; cano testado com várias
     forças; desenho leva menos de 1 ms por quadro.
   - Publicado em 14/11/2026 e conferido no site (versão `jogos-offline-v15`).
+- **Pinball 4.0 (14/11/2026)**, pedido do dono (3D, braço travando, nave, bolas extras, textos, cromados, loop):
+  - Mesa inclinada em 3D (o alto fica mais longe), feita com inclinação do próprio navegador; o ângulo
+    se ajusta à tela (27° no computador, menos no celular em pé para a mesa ficar maior). Bola e nave
+    são esticadas para continuarem redondas; paredes, estilingues, cogumelos, alvos e palhetas com altura.
+  - Braço travado: as teclas agora são guardadas uma a uma; se o Windows perder o "soltou" (dois Shift
+    juntos), a janela perder o foco, abrir um aviso ou o mouse soltar fora, as palhetas descem.
+  - Nave virou ônibus espacial (tanque laranja e 2 foguetes que se soltam no voo, compartimento abre
+    com a bola). Ao pegar a bola solta **3 bolas** pela mesa (até 5 no total, escudo de 8 s). Recarga 8 s.
+  - Bola extra E-X-T-R-A: jogadas grandes acendem letras; com as 5, o buraco negro dá bola extra (1 por bola).
+  - Mensagens das jogadas em letras grandes por cima da mesa (camada `#hud`, fora da inclinação);
+    pontos que sobem maiores; textos pintados na mesa maiores.
+  - Bola cromada (reflexo de céu, horizonte e mesa), trilhos com topo cromado, rampa com arames e
+    colunas cromadas, cano de vidro com aros cromados.
+  - Looping refeito: a volta fica em pé no ar, com a saída passando na frente da entrada, colunas e sombra.
+  - Testes: robô jogou 15 min (até 5 bolas, 31 voos, 14 loopings completos) sem bola presa nem
+    escapando; casos do braço travado testados com teclas e mouse simulados; < 1 ms por quadro.
+- **Pinball 5.0 (14/11/2026)**, pedido do dono (mesa cheia como as profissionais, andar de cima, trilhos que voltam
+  por cima, looping no alto à esquerda, alienígena para matar, mais luzes). Ideias de gênero, desenho próprio:
+  - Física com **andares**: cada bola tem `andar` (0 = mesa, 1 = estação); paredes, cogumelos, palhetas e zonas
+    só valem no seu andar. Estação orbital no alto à direita (`DECK`), com palheta própria (`palhetas[2]`,
+    mexe com a direita), 3 alvos (`ALVOS_DECK`) que acendem o Hipersalto, buraco HIPER (`KICKER`) e cogumelo pequeno.
+  - Trilhas: `RAMPA` (direita do centro → estação), `DESCIDA` (ralo da estação → corredor direito),
+    `TRAVESSIA` (buraco HIPER → cruza o topo → corredor esquerdo) e `TUBO` (looping em pé no alto à esquerda,
+    entrada à esquerda do centro, solta a bola nos cogumelos).
+  - `ALIEN` no meio dos cogumelos (no lugar do cogumelo laranja): 8 golpes, anel de vida, explode, vira ovo e
+    volta em 14 s com +3 de vida (máx. 20). Missão de Júpiter virou "acerte o alien".
+  - Luzes: lâmpadas ao longo das paredes, 3 flashes, setas triplas que correm, anel na plataforma da nave,
+    circuitos pintados, ninho do alien, plásticos coloridos.
+  - Testes: robô jogou 15 min (até 5 bolas, 38 voos, 46 loopings, 49 travessias, 49 descidas, 24 mortes
+    do alien antes de aumentar a vida) sem bola presa nem escapando.
+- **Pinball 6.0 (14/11/2026)**, pedido do dono (desenho mostrado antes e aprovado). Versões 4.0 a 6.0 publicadas juntas em 14/11/2026 (`jogos-offline-v20`):
+  - **Base Lunar** (`LUA`, andar 1, no alto à esquerda): rampa lunar (`RAMPA_LUA`) sobe pelo corredor da
+    órbita; palheta pequena `palhetas[3]` (mexe com a esquerda); 3 corredores (multiplicador, saíram do topo
+    da mesa); `CRATERA` que segura e devolve a bola (ALUNISSAGEM com os 3 acesos); volta pela `DESCIDA_LUA`
+    ao lado do looping. A `TRAVESSIA` agora leva do buraco HIPER da estação até a Base Lunar.
+  - **Nave removida.** No lugar, a estrela FÚRIA: a cada 4 golpes no alien (fora de multibola) ele agarra a
+    bola, segura 2,2 s na boca e cospe ela + 3 bolas (multibola alienígena). Missão de Marte = Base Lunar.
+  - **Estilingues com mola**: borracha curva para dentro e volta balançando, mola e braço de metal que
+    encolhem, clarão; só de encostar a borracha treme.
+  - **Luzes de caminho**: trilhas de lâmpadas até cada jogada (correm quando a jogada vale), luzes no
+    corredor do lançador e LEDs ao longo de todos os trilhos de arame e do cano.
+  - Segurança: piso embaixo das palhetas pequenas e bola do andar de cima fora do chão volta para a mesa.
+  - Testes: robô jogou 15 min (até 4 bolas, 10 agarrões, 37 subidas à Lua, 83 à estação, 111 entradas no
+    looping) sem bola presa, escapando ou caindo do andar de cima.
 - **FreeCell e níveis na Paciência (14/11/2026):**
   - **FreeCell** (`jogos/freecell/`): jogos numerados de 1 a 32.000 com a mesma distribuição do
     FreeCell clássico (jogo nº 1 conferido), escolher número e recomeçar, mover sequências (limite
@@ -103,7 +147,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
     Difícil (vira 3, só 3 voltas no baralho). Jogo salvo e vitórias antigas continuam valendo.
   - Testes: robô jogou partidas inteiras de FreeCell até vencer (Fácil e Difícil); níveis e limite de
     voltas da Paciência testados no Node. Visual no celular não foi conferido pelo Claude.
-- Versão atual do cache em `sw.js`: `jogos-offline-v19`. O `sw.js` busca os arquivos com
+- Versão atual do cache em `sw.js`: `jogos-offline-v20`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta
