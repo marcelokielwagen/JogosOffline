@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f1220">
+<title>Pinball Galáxia — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body class="pinball">
+<div class="pb">
+  <header class="topo">
+    <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
+    <h1>Pinball Galáxia</h1>
+    <button id="pausa" class="icone-btn" aria-label="Pausar">⏸</button>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+  </header>
+
+  <div class="pb-corpo">
+    <div id="mesa" class="mesa"><canvas id="tela" aria-label="Mesa de pinball"></canvas></div>
+
+    <aside class="painel">
+      <div class="lcd">
+        <div class="lcd-linha"><span id="bola">BOLA 1</span><span id="mult">x1</span></div>
+        <div id="pontos" class="lcd-pontos">0</div>
+        <div id="msg" class="lcd-msg">&nbsp;</div>
+        <div id="missao" class="lcd-missao">&nbsp;</div>
+      </div>
+      <div class="painel-btns">
+        <button id="novo" class="btn principal">Novo jogo</button>
+        <button id="sacudir" class="btn">Sacudir</button>
+      </div>
+      <div class="recordes">
+        <h3>Recordes</h3>
+        <ol id="recordes"></ol>
+      </div>
+      <p class="teclas">
+        <b>Z</b> ou <b>←</b> palheta esquerda<br>
+        <b>/</b> ou <b>→</b> palheta direita<br>
+        <b>Espaço</b> ou <b>↓</b> segure e solte para lançar<br>
+        <b>X</b> ou <b>↑</b> sacudir a mesa · <b>P</b> pausa · <b>F2</b> novo jogo
+      </p>
+    </aside>
+  </div>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li><b>Celular:</b> toque no lado <b>esquerdo</b> ou <b>direito</b> da mesa para bater com a palheta daquele lado.</li>
+    <li><b>Lançar:</b> segure o lado direito (ou a tecla Espaço) e solte. Quanto mais tempo segurar, mais forte.</li>
+    <li><b>Computador:</b> Z e / (ou as setas ← →) para as palhetas.</li>
+    <li>Você tem <b>3 bolas</b>. Nos primeiros segundos de cada bola o <b>escudo</b> azul devolve a bola se ela cair.</li>
+    <li><b>Viagem pela galáxia:</b> cumpra a missão de cada planeta (Lua, Marte, Júpiter, Saturno e Netuno). Ao completar os cinco você ganha uma bola extra.</li>
+    <li>Acender as <b>3 luzes do topo</b> aumenta o multiplicador do bônus. As palhetas trocam as luzes de lugar.</li>
+    <li><b>Sacudir</b> empurra a bola, mas sacudir demais dá <b>TILT</b> e você perde a bola.</li>
+    <li>Bola extra também aos <b>750.000 pontos</b>.</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<dialog id="confirma">
+  <h2>Começar um novo jogo?</h2>
+  <p>A partida atual será perdida.</p>
+  <button id="confirma-sim" class="btn principal">Sim, novo jogo</button>
+  <button class="btn discreto" data-fecha>Continuar jogando</button>
+</dialog>
+
+<dialog id="nome">
+  <h2>Novo recorde!</h2>
+  <p id="nome-txt"></p>
+  <input id="nome-campo" maxlength="12" autocomplete="off" placeholder="Seu nome">
+  <button id="nome-ok" class="btn principal">Salvar</button>
+</dialog>
+
+<script src="jogo.js"></script>
+</body>
+</html>

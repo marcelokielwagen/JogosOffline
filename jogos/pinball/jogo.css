@@ -1,0 +1,70 @@
+/* Pinball Galáxia: a mesa sempre escura, painel com cara de máquina dos anos 90 */
+body.pinball { overflow: hidden; background: #07091a; color: #eef0fa; }
+.pb { height: 100dvh; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; padding: 0 10px; }
+.pb .topo { padding: 8px 0 6px; }
+.pb .topo .icone-btn { background: #1a1e33; border-color: rgba(255,255,255,.09); color: #eef0fa; }
+.pb-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+
+.mesa { flex: 1; min-height: 0; display: grid; place-items: center; touch-action: none; cursor: pointer; }
+.mesa canvas { display: block; border-radius: 10px; box-shadow: 0 0 0 3px #2b2117, 0 0 0 6px #120c07, 0 14px 40px rgba(0,0,0,.6); }
+
+/* Painel com bordas em relevo, como os botões de antigamente */
+.painel {
+  order: -1; flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px;
+  background: linear-gradient(#3b404c, #262a33); border-radius: 10px;
+  border: 2px solid; border-color: #7a8090 #111318 #111318 #7a8090;
+}
+.lcd {
+  font-family: "Courier New", Courier, monospace; font-weight: 700; color: #ffb12a;
+  text-shadow: 0 0 6px rgba(255,160,20,.75); text-transform: uppercase;
+  background: #0d0a03 radial-gradient(rgba(255,170,40,.07) 1px, transparent 1.4px) 0 0 / 4px 4px;
+  border: 3px solid; border-color: #111 #8a8f9c #8a8f9c #111; border-radius: 4px; padding: 6px 10px;
+}
+.lcd-linha { display: flex; justify-content: space-between; font-size: .85rem; letter-spacing: .08em; }
+.lcd-pontos { font-size: 2rem; line-height: 1.1; text-align: right; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.lcd-msg { font-size: .95rem; min-height: 1.3em; text-align: center; color: #ffd25e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lcd-missao { font-size: .72rem; min-height: 1.2em; text-align: center; color: #7fe3ff; text-shadow: 0 0 6px rgba(80,200,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.painel-btns { display: flex; gap: 6px; }
+.painel-btns .btn { flex: 1; min-height: 42px; border-radius: 6px; border: 2px solid; border-color: #9aa0ae #1a1c22 #1a1c22 #9aa0ae; background: #c3c7d0; color: #111; font-weight: 700; }
+.painel-btns .btn.principal { background: #3a56d4; color: #fff; border-color: #8ea0ff #18245e #18245e #8ea0ff; }
+.painel-btns .btn:active { border-color: #1a1c22 #9aa0ae #9aa0ae #1a1c22; transform: none; }
+
+.recordes, .teclas { display: none; }
+/* Celular em pé: painel numa linha só, para sobrar espaço para a mesa */
+@media (max-aspect-ratio: 3/4) {
+  .pb-corpo { gap: 6px; }
+  .painel { flex-direction: row; padding: 5px; gap: 5px; }
+  .lcd { flex: 1; min-width: 0; padding: 3px 8px; }
+  .lcd-linha { font-size: .72rem; }
+  .lcd-pontos { font-size: 1.45rem; }
+  .lcd-msg { font-size: .8rem; }
+  .lcd-missao { font-size: .66rem; }
+  .painel-btns { flex-direction: column; width: 92px; }
+  .painel-btns .btn { min-height: 0; padding: 0 6px; font-size: .85rem; }
+}
+.recordes h3 { margin: 4px 0; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: #ffb12a; }
+.recordes ol { margin: 0; padding: 0 0 0 22px; font-family: "Courier New", monospace; font-size: .9rem; color: #dfe3ee; }
+.recordes li { display: flex; justify-content: space-between; gap: 8px; }
+.recordes li span:last-child { font-variant-numeric: tabular-nums; }
+.recordes .vazio { list-style: none; margin-left: -22px; color: #9aa0c0; font-family: inherit; }
+.teclas { margin: 0; font-size: .8rem; line-height: 1.6; color: #b9bfd3; }
+.teclas b { display: inline-block; min-width: 1.6em; padding: 0 4px; border-radius: 4px; background: #c3c7d0; color: #111; text-align: center; font-size: .75rem; }
+
+#nome-campo { width: 100%; font: inherit; font-size: 1.1rem; padding: 10px 12px; margin: 4px 0 12px; border-radius: 10px; border: 1px solid var(--borda); background: var(--superficie2); color: var(--texto); user-select: text; -webkit-user-select: text; }
+
+/* Telas largas (computador, tablet deitado): painel do lado direito */
+@media (min-aspect-ratio: 3/4) {
+  .pb-corpo { flex-direction: row; align-items: stretch; }
+  .painel { order: 0; width: 270px; overflow-y: auto; gap: 12px; padding: 12px; }
+  .lcd { padding: 10px 12px; }
+  .lcd-pontos { font-size: 2.1rem; }
+  .painel-btns { flex-direction: column; }
+  .recordes, .teclas { display: block; }
+}
+/* Celular deitado: sobra pouca altura */
+@media (orientation: landscape) and (max-height: 520px) {
+  .pb .topo { padding: 4px 0; }
+  .painel { width: 230px; }
+  .teclas { display: none; }
+}

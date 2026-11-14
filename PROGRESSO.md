@@ -43,7 +43,19 @@ O roteiro completo das etapas está em `PROMPT.md`.
     centro. As 10 antigas viraram a categoria "Variadas". Total: 26 grades.
   - Estatísticas incluem os dois jogos novos.
   - Publicada em 13/11/2026 e conferida no site (versão `jogos-offline-v9`, 6 jogos na tela inicial).
-- Versão atual do cache em `sw.js`: `jogos-offline-v9`. O `sw.js` busca os arquivos com
+- **Etapa 7 (14/11/2026): Pinball Galáxia** (`jogos/pinball/`): pinball no estilo
+  dos anos 90, com mesa e nome próprios (não é cópia do Space Cadet). Física
+  própria a 600 passos/s, 2 palhetas, lançador com mola, 3 cogumelos, 2
+  estilingues, 3 alvos que caem, órbita esquerda com portinholas, buraco negro
+  que segura e devolve a bola, 3 luzes do topo (multiplicador até 5x), escudo de
+  9 s, bola extra aos 750.000, TILT ao sacudir demais, 5 missões (Lua → Netuno)
+  que se repetem mais difíceis, sons feitos pelo código, top 5 de recordes com
+  nome. Controles: toque nos lados da mesa / Z e / / setas; espaço ou segurar o
+  lado direito para lançar. Estatísticas da tela inicial incluem o pinball.
+  - Teste no computador: `window.__pb` (só em localhost) permite rodar a física
+    sem animação; um robô jogou 150 bolas sem bola presa nem atravessando parede.
+  - Ainda não publicado.
+- Versão atual do cache em `sw.js`: `jogos-offline-v11`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta

@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v10';
+const VERSAO = 'jogos-offline-v11';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
@@ -11,6 +11,7 @@ const ARQUIVOS = [
   './jogos/cruzadas/index.html', './jogos/cruzadas/jogo.css', './jogos/cruzadas/jogo.js', './jogos/cruzadas/grades.js', './jogos/cruzadas/grades-temas.js',
   './jogos/caca-palavras/index.html', './jogos/caca-palavras/jogo.css', './jogos/caca-palavras/jogo.js',
   './jogos/dobro/index.html', './jogos/dobro/jogo.css', './jogos/dobro/jogo.js',
+  './jogos/pinball/index.html', './jogos/pinball/jogo.css', './jogos/pinball/jogo.js',
 ];
 
 self.addEventListener('install', e => {
