@@ -1,6 +1,8 @@
 body { overflow-x: hidden; }
 .pagina { max-width: 720px; padding-left: 10px; padding-right: 10px; padding-bottom: 0; }
 
+@media (max-width: 600px) { .pagina { padding-left: 3px; padding-right: 3px; } }
+
 .modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
 .modos button { min-height: 40px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
 .modos button.ativo { background: var(--destaque); color: #fff; }
@@ -27,10 +29,11 @@ button.chip:active { transform: scale(.95); }
 }
 .carta.r { color: #d6324a; }
 .carta > * { pointer-events: none; }
-.carta .v { position: absolute; left: 7%; top: 1%; font-weight: 800; font-size: calc(var(--cw) * .4); line-height: 1.15; letter-spacing: -.06em; }
+.carta .v { position: absolute; left: 6%; top: 0; font-weight: 800; font-size: calc(var(--cw) * .54); line-height: 1.1; letter-spacing: -.06em; }
+.carta .v.dez { letter-spacing: -.14em; transform: scaleX(.82); transform-origin: left center; }
 .carta svg { position: absolute; fill: currentColor; }
-.carta .n { right: 6%; top: 5%; width: 32%; height: auto; aspect-ratio: 1; }
-.carta .g { left: 22%; bottom: 7%; width: 56%; height: auto; aspect-ratio: 1; }
+.carta .n { right: 5%; top: 5%; width: 34%; height: auto; aspect-ratio: 1; }
+.carta .g { left: 25%; bottom: 6%; width: 50%; height: auto; aspect-ratio: 1; }
 .carta.costas { background: repeating-linear-gradient(45deg, var(--destaque) 0 5px, color-mix(in srgb, var(--destaque) 70%, #000) 5px 10px); border: 2px solid #fdfdfb; }
 .carta.costas > * { display: none; }
 .carta.sel { outline: 3px solid var(--ouro); outline-offset: -1px; filter: brightness(1.04); box-shadow: 0 0 14px color-mix(in srgb, var(--ouro) 60%, transparent); }

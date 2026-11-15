@@ -182,13 +182,13 @@
   for (let id = 0; id < 52; id++) {
     const el = document.createElement('div');
     el.className = 'carta' + (vermelha(id) ? ' r' : ''); el.dataset.id = id;
-    el.innerHTML = `<span class="v">${ROT[valor(id)]}</span><svg class="n" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg><svg class="g" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg>`;
+    el.innerHTML = `<span class="v${valor(id) === 9 ? ' dez' : ''}">${ROT[valor(id)]}</span><svg class="n" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg><svg class="g" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg>`;
     tab.appendChild(el); cartas.push(el);
   }
 
   function medir() {
     // A carta cabe na largura e, em tela deitada, também na altura; o tabuleiro fica centralizado.
-    const W = tab.clientWidth, gap = Math.max(4, W * .012), livre = window.innerHeight - tab.getBoundingClientRect().top - 10;
+    const W = tab.clientWidth, gap = Math.max(2.5, W * .009), livre = window.innerHeight - tab.getBoundingClientRect().top - 10;
     const cw = Math.max(34, Math.min((W - 6 * gap) / 7, livre / (1.42 * 3.7))), ch = cw * 1.42, y0 = ch + gap * 3;
     const H = Math.max(livre, y0 + ch * 2.2), x0 = (W - 7 * cw - 6 * gap) / 2;
     G = { W, gap, cw, ch, y0, H, x0, x: j => x0 + j * (cw + gap) };
@@ -223,7 +223,7 @@
     e.w.forEach((id, i) => poe(id, G.x(1) + Math.max(0, i - base) * G.cw * .3, 0, 100 + i, false, 'd', i));
     e.f.forEach((pl, n) => pl.forEach((id, i) => poe(id, G.x(3 + n), 0, 200 + i, false, 'f' + n, i)));
     e.c.forEach((c, j) => {
-      const nu = c.k.length - c.d; let od = G.ch * .14, ou = G.ch * .32;
+      const nu = c.k.length - c.d; let od = G.ch * .14, ou = G.ch * .42;
       const total = c.d * od + Math.max(0, nu - 1) * ou + G.ch, cabe = G.H - G.y0 - 4;
       if (total > cabe) { const f = (cabe - G.ch) / (total - G.ch); od *= f; ou *= f; }
       let y = G.y0;

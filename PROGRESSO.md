@@ -147,7 +147,10 @@ O roteiro completo das etapas está em `PROMPT.md`.
     Difícil (vira 3, só 3 voltas no baralho). Jogo salvo e vitórias antigas continuam valendo.
   - Testes: robô jogou partidas inteiras de FreeCell até vencer (Fácil e Difícil); níveis e limite de
     voltas da Paciência testados no Node. Visual no celular não foi conferido pelo Claude.
-- Versão atual do cache em `sw.js`: `jogos-offline-v20`. O `sw.js` busca os arquivos com
+- **Cartas maiores no celular (14/11/2026):** Paciência e FreeCell com número/letra da carta ~35%
+  maior, naipe do canto maior, pedaço visível de cada carta na pilha mais alto (42% da carta),
+  menos margem lateral e espaço entre colunas; o "10" fica mais estreito. Conferido em tela de 375 px.
+- Versão atual do cache em `sw.js`: `jogos-offline-v21`. O `sw.js` busca os arquivos com
   `cache: 'reload'` para a atualização nunca guardar cópias antigas.
 
 ## Falta

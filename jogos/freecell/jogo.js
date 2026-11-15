@@ -310,12 +310,12 @@
   for (let id = 0; id < 52; id++) {
     const el = document.createElement('div');
     el.className = 'carta' + (vermelha(id) ? ' r' : ''); el.dataset.id = id;
-    el.innerHTML = `<span class="v">${ROT[valor(id)]}</span><svg class="n" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg><svg class="g" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg>`;
+    el.innerHTML = `<span class="v${valor(id) === 9 ? ' dez' : ''}">${ROT[valor(id)]}</span><svg class="n" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg><svg class="g" viewBox="0 0 24 24"><use href="#n${naipe(id)}"/></svg>`;
     tab.appendChild(el); cartas.push(el);
   }
 
   function medir() {
-    const W = tab.clientWidth, gap = Math.max(3, W * .011), livre = window.innerHeight - tab.getBoundingClientRect().top - 8;
+    const W = tab.clientWidth, gap = Math.max(2, W * .007), livre = window.innerHeight - tab.getBoundingClientRect().top - 8;
     const cw = Math.max(30, Math.min((W - 7 * gap) / 8, livre / (1.4 * 4.4), 86)), ch = cw * 1.4, y0 = ch + gap * 3.5;
     const H = Math.max(livre, y0 + ch * 3), x0 = (W - 8 * cw - 7 * gap) / 2;
     G = { W, gap, cw, ch, y0, H, x0, x: j => x0 + j * (cw + gap) };
@@ -347,7 +347,7 @@
     e.l.forEach((id, n) => { if (id != null) poe(id, G.x(n), 0, 100, 'l' + n, 0); });
     e.f.forEach((pl, n) => pl.forEach((id, i) => poe(id, G.x(4 + n), 0, 200 + i, 'f' + n, i)));
     e.c.forEach((col, j) => {
-      let ou = G.ch * .3;
+      let ou = G.ch * .42;
       const total = Math.max(0, col.length - 1) * ou + G.ch, cabe = G.H - G.y0 - 4;
       if (total > cabe) ou = (cabe - G.ch) / Math.max(1, col.length - 1);
       col.forEach((id, i) => poe(id, G.x(j), G.y0 + i * ou, 300 + i, 'c' + j, i));
