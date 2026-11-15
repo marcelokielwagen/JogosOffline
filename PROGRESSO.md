@@ -219,3 +219,9 @@ O roteiro completo das etapas está em `PROMPT.md`.
   inteira roda a 70% do tempo real (`RITMO = .7` no ciclo principal de `jogos/pinball/jogo.js`). Bola,
   palhetas, lançador e cogumelos ficam mais lentos na mesma proporção, então as jogadas continuam
   funcionando igual. Para ajustar, mude só esse número (1 = como antes). Cache `jogos-offline-v22`.
+- **Braço travado no celular (15/11/2026)**, relato do dono (braço esquerdo ficou levantado, jogando no
+  celular): às vezes o aparelho não avisa que o dedo saiu da tela, e a palheta ficava esperando para sempre.
+  No celular os toques agora usam os eventos de toque: a cada toque ou movimento o jogo confere a lista de
+  dedos que estão de fato na tela e esquece os que sumiram (`sincronizarToques`). Mouse e teclado não mudaram.
+  Testes: toques simulados no navegador (soltar normal, dedo sumido sem aviso, dois dedos, lançador).
+  Não testado num celular de verdade. Cache `jogos-offline-v23`.

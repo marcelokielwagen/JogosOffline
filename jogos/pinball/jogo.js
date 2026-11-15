@@ -1012,6 +1012,7 @@ window.addEventListener('pagehide', soltarTudo);
 const lancadores = new Set();
 mesa.addEventListener('pointerdown', e => {
   e.preventDefault();
+  if (e.pointerType === 'touch' && temToque) return;   // dedo na tela: quem cuida são os eventos de toque abaixo
   if (pausado) { alternarPausa(); return; }
   const r = tela.getBoundingClientRect();
   const lado = e.clientX < r.left + r.width / 2 ? 'E' : 'D';
@@ -1034,6 +1035,39 @@ window.addEventListener('pointercancel', fimToque);
 // mouse: se o botão já não está apertado, a palheta desce (o "soltou" pode ter se perdido fora da janela)
 window.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && e.buttons === 0 && toques.has(e.pointerId)) fimToque(e); });
 mesa.addEventListener('contextmenu', e => e.preventDefault());
+
+// Celular: às vezes o aparelho não avisa que o dedo saiu da tela e a palheta ficava levantada para sempre.
+// Agora, a cada toque/movimento, o jogo confere a lista de dedos que REALMENTE estão na tela (e.touches)
+// e esquece qualquer dedo que não esteja mais lá.
+const temToque = 'ontouchstart' in window;
+const ignorados = new Set();   // dedo que só tirou o jogo da pausa
+function sincronizarToques(e) {
+  const vivos = new Set(Array.from(e.touches, t => 't' + t.identifier));
+  for (const id of [...toques.keys()]) if (typeof id === 'string' && !vivos.has(id)) toques.delete(id);
+  for (const id of [...ignorados]) if (!vivos.has(id)) ignorados.delete(id);
+  let saiu = false;
+  for (const id of [...lancadores]) if (typeof id === 'string' && !vivos.has(id)) { lancadores.delete(id); saiu = true; }
+  if (saiu && !lancadores.size) soltar();
+}
+if (temToque) {
+  mesa.addEventListener('touchstart', e => {
+    e.preventDefault();
+    sincronizarToques(e);
+    const r = tela.getBoundingClientRect();
+    for (const t of e.changedTouches) {
+      const id = 't' + t.identifier;
+      if (pausado) { alternarPausa(); ignorados.add(id); continue; }
+      const lado = t.clientX < r.left + r.width / 2 ? 'E' : 'D';
+      toques.set(id, lado);
+      if (lado === 'D' && j.estado === 'pronto' && bolaNoLancador()) { lancadores.add(id); comecarPuxar(); }
+    }
+    atualizarPalhetas();
+  }, { passive: false });
+  const fimDedo = e => { sincronizarToques(e); atualizarPalhetas(); };
+  for (const ev of ['touchend', 'touchcancel', 'touchmove']) {
+    window.addEventListener(ev, fimDedo);
+  }
+}
 
 function alternarPausa(forcar) {
   pausado = forcar === undefined ? !pausado : forcar;
