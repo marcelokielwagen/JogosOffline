@@ -2141,13 +2141,15 @@ function painel() {
 
 // ================= Ciclo principal =================
 // Física em passos fixos de 1/600 s; se o aparelho ficar lento, a imagem fica mais leve sozinha.
+// RITMO: a mesa roda um pouco mais devagar que o relógio real (bola mais "pesada", como numa máquina grande vista de perto).
+const RITMO = .7;
 let antes = performance.now(), acumulado = 0, somConf = true, contaQ = 0, tempos = [];
 function quadro(agora) {
   const bruto = (agora - antes) / 1000, dt = Math.min(.1, bruto);
   antes = agora;
   const parado = pausado || dialogoAberto(), inicio = performance.now();
   if (!parado) {
-    acumulado += dt;
+    acumulado += dt * RITMO;
     let n = 0;
     while (acumulado >= PASSO && n < 70) { passo(PASSO); acumulado -= PASSO; n++; }
     if (n >= 70) acumulado = 0;

@@ -215,3 +215,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   conferido que tocar não gera erro.
 - Em um celular de verdade: instalação "Adicionar à tela inicial", arrasto com
   o dedo, vibração e som.
+- **Pinball mais lento (15/11/2026)**, pedido do dono ("bola muito rápida, deixar mais real"): a mesa
+  inteira roda a 70% do tempo real (`RITMO = .7` no ciclo principal de `jogos/pinball/jogo.js`). Bola,
+  palhetas, lançador e cogumelos ficam mais lentos na mesma proporção, então as jogadas continuam
+  funcionando igual. Para ajustar, mude só esse número (1 = como antes). Cache `jogos-offline-v22`.
