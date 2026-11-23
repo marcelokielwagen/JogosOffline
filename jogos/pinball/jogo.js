@@ -12,7 +12,8 @@ const aleat = (a, b) => a + Math.random() * (b - a);
 const DPI = Math.PI * 2;
 // Visão em 3D: a mesa é inclinada para trás (o alto fica mais longe), como quem olha a máquina de pé na frente dela.
 // O ângulo se ajusta à tela: telas altas (celular em pé) inclinam menos para a mesa ficar maior.
-const PERSP = 1300, ANG_MAX = 27 * Math.PI / 180, ANG_MIN = 16 * Math.PI / 180;
+let PERSP = 1300;
+const ANG_MAX = 27 * Math.PI / 180, ANG_MIN = 16 * Math.PI / 180;
 let ANG = ANG_MAX, SEN = Math.sin(ANG), COS = Math.cos(ANG);
 // quanto esticar na vertical um objeto "em pé" (bola, nave) para ele parecer redondo depois da inclinação
 const esticar = y => (PERSP + (H - y) * SEN) / (COS * PERSP);
@@ -166,7 +167,13 @@ const TUBO = (() => {
   T.CX = CX; T.CY = CY;
   return T;
 })();
-const TRILHAS = { rampa: RAMPA, tubo: TUBO, descida: DESCIDA, travessia: TRAVESSIA, lua: RAMPA_LUA, descidaLua: DESCIDA_LUA };
+// Ponte Galáctica: sai do ralo da estação (uma vez sim, outra não), cruza a mesa inteira na diagonal,
+// por cima do alien e dos planetas, e entrega a bola no corredor da palheta esquerda.
+const PONTE = montarTrilha(
+  catmull([[294, 224], [272, 246], [236, 284], [196, 320], [152, 358], [114, 398], [84, 440], [62, 478], [55, 500], [59, 524]]),
+  t => -.5 * t + .12 * Math.sin(Math.PI * t), { nome: 'ponte', vmin: 200, vmax: 520, andarIni: 1 });
+PONTE.pts.forEach(p => { const t = p.d / PONTE.L; p.zv = 12 + 16 * Math.sin(Math.PI * t) - 12 * t; });
+const TRILHAS = { rampa: RAMPA, tubo: TUBO, descida: DESCIDA, travessia: TRAVESSIA, lua: RAMPA_LUA, descidaLua: DESCIDA_LUA, ponte: PONTE };
 
 const PLANETAS = [
   { nome: 'Lua', x: 110, y: 456, r: 10, cor: ['#ffffff', '#b8bcc6', '#555a66'] },
@@ -215,7 +222,7 @@ let regras = DIFIC[opc.dific], totalBolas = opc.bolas;
 // ================= Estado =================
 let bolas = [], B = null;
 let plY = PL_BASE, puxar = 0, puxando = false;
-let relogio = 0, pausado = false, tremor = 0, gi = 0, giCor = '255,210,120', show = 0, brilhoTrilha = { rampa: -9, tubo: -9, descida: -9, travessia: -9, lua: -9, descidaLua: -9 };
+let relogio = 0, pausado = false, tremor = 0, gi = 0, giCor = '255,210,120', show = 0, brilhoTrilha = { rampa: -9, tubo: -9, descida: -9, travessia: -9, lua: -9, descidaLua: -9, ponte: -9 };
 const spinner = { ang: 0, w: 0 };
 let mensagem = '', msgAte = 0, msgIni = 0, msgAnim = 'zoom';
 const agenda = [], particulas = [], popups = [];
@@ -467,7 +474,11 @@ function aoEntrar(b, z) {
       if (!b.trilha && b.vy < -150) entrarTrilha(b, TRILHAS[z.trilha]);
       break;
     case 'ralo':   // caiu da estação: desce pelo trilho de arame
-      if (!b.trilha) { b.vx = 0; b.vy = Math.max(120, b.vy); entrarTrilha(b, TRILHAS[z.trilha]); }
+      if (!b.trilha) {
+        let T = TRILHAS[z.trilha];
+        if (z.trilha === 'descida') { j.raloVez = !j.raloVez; if (j.raloVez) T = PONTE; }   // alterna com a Ponte Galáctica
+        b.vx = 0; b.vy = Math.max(120, b.vy); entrarTrilha(b, T);
+      }
       break;
   }
 }
@@ -512,6 +523,11 @@ function sairTrilha(b, fim) {
 function trilhaFeita(b, T) {
   if (j.tiltado) return;
   brilhoTrilha[T.nome] = relogio;
+  if (T.nome === 'ponte') {
+    pontuar(25000 * j.rodada, 120, 420); j.bonus += 3000; som('rampaOk'); clarao(.45, '255,93,216');
+    faiscas(b.x, b.y, 20, '#ff5dd8', 1.1); msg('PONTE\nGALÁCTICA!', 2.2, 'pisca'); letraExtra();
+    return;
+  }
   if (T.nome === 'descida' || T.nome === 'descidaLua') { pontuar(2500, b.x, b.y - 10); j.bonus += 500; som('retorno'); return; }
   if (T.nome === 'lua' || T.nome === 'travessia') {
     pontuar(15000 * j.rodada, 180, 110); j.bonus += 2500; som('rampaOk'); evento('lua'); clarao(.35, '200,210,230');
@@ -1014,7 +1030,7 @@ mesa.addEventListener('pointerdown', e => {
   e.preventDefault();
   if (e.pointerType === 'touch' && temToque) return;   // dedo na tela: quem cuida são os eventos de toque abaixo
   if (pausado) { alternarPausa(); return; }
-  const r = tela.getBoundingClientRect();
+  const r = mesa.getBoundingClientRect();   // a mesa fica sempre centralizada: metade esquerda/direita
   const lado = e.clientX < r.left + r.width / 2 ? 'E' : 'D';
   toques.set(e.pointerId, lado);
   try { mesa.setPointerCapture(e.pointerId); } catch (_) {}
@@ -1053,7 +1069,7 @@ if (temToque) {
   mesa.addEventListener('touchstart', e => {
     e.preventDefault();
     sincronizarToques(e);
-    const r = tela.getBoundingClientRect();
+    const r = mesa.getBoundingClientRect();   // a mesa fica sempre centralizada: metade esquerda/direita
     for (const t of e.changedTouches) {
       const id = 't' + t.identifier;
       if (pausado) { alternarPausa(); ignorados.add(id); continue; }
@@ -1069,13 +1085,10 @@ if (temToque) {
   }
 }
 
-function alternarPausa(forcar) {
-  pausado = forcar === undefined ? !pausado : forcar;
-  if (pausado) { palhetas.forEach(p => p.apertada = false); apertadas.clear(); conferirTeclas(); toques.clear(); lancadores.clear(); puxando = false; }
-  $('pausa').textContent = pausado ? '▶' : '⏸';
-  $('pausa').setAttribute('aria-label', pausado ? 'Continuar' : 'Pausar');
+// A pausa é a janela comum a todos os jogos (js/comum.js, botão ⏸ do topo): com ela aberta a mesa congela.
+function alternarPausa() {
+  pausado = false; palhetas.forEach(p => p.apertada = false); soltarTudo(); JO.pausar();
 }
-$('pausa').addEventListener('click', () => alternarPausa());
 document.addEventListener('visibilitychange', () => { if (document.hidden) { soltarTudo(); if (j.estado !== 'fim') alternarPausa(true); } });
 $('sacudir').addEventListener('click', sacudir);
 function pedirNovo() {
@@ -1332,7 +1345,8 @@ function desenharFundo(c) {
   const emAltura = (z, fn) => { c.save(); c.translate(0, -z); fn(); c.restore(); };
   // sombras no chão
   c.save(); c.translate(2.5, 4); desenhaTrilho(9, 'rgba(0,0,0,.32)', p => metal(p) || borr(p) || p.tipo === 'poste'); c.restore();
-  // lateral das paredes (a face que fica de frente para quem joga)
+  // lateral das paredes (a face que fica de frente para quem joga). No modo 3D as paredes são de verdade.
+  if (!m3d) {
   for (let z = 0; z < DZ; z++) emAltura(z, () => desenhaTrilho(6.5, z === 0 ? '#0c0e13' : '#3a404c', metal));
   // topo cromado: escuro nas bordas, claro no meio e um fio de brilho
   emAltura(DZ, () => {
@@ -1353,6 +1367,7 @@ function desenharFundo(c) {
     c.strokeStyle = '#d23a58'; c.lineWidth = 7.5; c.stroke();
     c.strokeStyle = '#c9ced8'; c.lineWidth = 3.4; c.stroke();
     c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1.1; c.beginPath(); c.moveTo(p.ax - 1, p.ay - 5); c.lineTo(p.bx - 1, p.by - 7); c.stroke();
+  }
   }
   desenharSuportesTubo(c);
   c.fillStyle = 'rgba(125,255,178,.18)'; c.fillRect(82, 336, 34, 16);
@@ -1402,6 +1417,7 @@ function desenharSuportesTubo(c) {
   c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = 'rgba(0,0,0,.26)'; c.lineWidth = 17;
   c.beginPath(); P.forEach((p, i) => { const x = p.gx + 3 + p.z * .3, y = p.gy + 5 + p.z * .2; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
   c.restore();
+  if (m3d) return;   // colunas do cano: no 3D são de verdade
   const ida = TUBO.pts.findIndex(p => p.z >= 9.9);
   for (const i of [Math.round(ida * .45), ida, P.length - 14, P.length - 5]) { const p = P[i]; if (p) coluna(c, p.gx, p.gy + 4, p.x, p.y + 6); }
   // pilar do looping: sobe do chão até a parte de baixo da volta
@@ -1447,11 +1463,16 @@ const LAMPADAS = [];
 for (let i = 5; i <= 43; i += 3) { const [x, y] = ARCO[i], dx = 200 - x, dy = 175 - y, l = Math.hypot(dx, dy); LAMPADAS.push([x + dx / l * 8, y + dy / l * 8]); }
 LAMPADAS.push([70, 262], [70, 322], [70, 382], [54, 515], [54, 555], [316, 515], [316, 555], [312, 300], [306, 430], [116, 628], [254, 628]);
 const FLASHES = [{ x: 46, y: 497, cor: '#ff3355' }, { x: 324, y: 497, cor: '#33a0ff' }, { x: 342, y: 300, cor: '#ff3355' }];
+const flashAceso = () => gi > .25 || (show > 0 && Math.floor(relogio * 10) % 2 === 0);
 
 // trilho de arame genérico (rampa, descida, travessia): sombra, colunas, travessas e dois arames cromados
-function desenharArame(c, T, acrilico) {
+function sombraArame(c, T) {
   c.save(); c.strokeStyle = 'rgba(0,0,0,.26)'; c.lineWidth = 17; c.lineCap = 'round'; c.lineJoin = 'round';
   c.beginPath(); T.pts.forEach((p, i) => { const z = p.zv || 0, x = p.x + 3 + z * .35, y = p.y + 4 + z * .6; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); c.restore();
+}
+function desenharArame(c, T, acrilico) {
+  sombraArame(c, T);
+  if (m3d) return;   // no modo 3D o arame é de verdade; aqui fica só a sombra
   for (let d = 50; d < T.L - 30; d += 85) { const p = pontoTrilha(T, d); if ((p.zv || 0) > 5) coluna(c, p.x + p.zv * .2, p.y + 3 + p.zv * .6, p.x, p.y + 3); }
   if (acrilico) {
     const a = borda(T, -11, 0, .2), b = borda(T, 11, 0, .2).reverse();
@@ -1466,13 +1487,14 @@ function desenharArame(c, T, acrilico) {
   for (const lado of [-8, 8]) cromado(c, borda(T, lado, .01, 1), 2.2);
 }
 function desenharRampa(c) {
+  desenharArame(c, PONTE);
   desenharArame(c, DESCIDA_LUA);
   desenharArame(c, RAMPA_LUA, true);
   desenharArame(c, TRAVESSIA);
   desenharArame(c, DESCIDA);
   desenharArame(c, RAMPA, true);
   const p0 = RAMPA.pts[0];
-  cromado(c, [[p0.x - p0.dy * 12, p0.y + p0.dx * 12], [p0.x + p0.dy * 12, p0.y - p0.dx * 12]], 2.6);
+  if (!m3d) cromado(c, [[p0.x - p0.dy * 12, p0.y + p0.dx * 12], [p0.x + p0.dy * 12, p0.y - p0.dx * 12]], 2.6);
   texto(c, 'ESTAÇÃO', p0.x, p0.y + 14, 7.5, 'rgba(170,230,255,.95)', '800');
 }
 
@@ -1481,8 +1503,10 @@ const PISO_DECK = [...DECK, [334, 210], [306, 216]];
 const PISO_LUA = [...LUA, [214, 150], [192, 160]];
 function desenharLua(c) {
   c.save(); c.translate(8, 12); caminho(c, PISO_LUA); c.closePath(); c.fillStyle = 'rgba(0,0,0,.38)'; c.fill(); c.restore();
+  if (!m3d) {   // no 3D a Base Lunar é uma plataforma elevada de verdade
   coluna(c, 130, 140, 130, 124); coluna(c, 232, 140, 232, 124);
   for (let z = 9; z > 0; z--) { c.save(); c.translate(0, z); caminho(c, PISO_LUA); c.closePath(); c.fillStyle = z > 6 ? '#121318' : '#3a3e4a'; c.fill(); c.restore(); }
+  }
   caminho(c, PISO_LUA); c.closePath();
   const g = c.createLinearGradient(124, 50, 238, 160); g.addColorStop(0, 'rgba(170,176,190,.97)'); g.addColorStop(1, 'rgba(78,84,98,.97)');
   c.fillStyle = g; c.fill();
@@ -1502,7 +1526,7 @@ function desenharLua(c) {
   c.fillStyle = gk; circulo(c, CRATERA.x, CRATERA.y, 11); c.fill();
   cromado(c, (() => { const p = []; for (let a = 0; a <= DPI + .01; a += .3) p.push([CRATERA.x + Math.cos(a) * 10, CRATERA.y + Math.sin(a) * 10]); return p; })(), 1.8);
   texto(c, 'CRATERA', CRATERA.x + 2, CRATERA.y + 18, 6, 'rgba(20,24,34,.9)', '900');
-  for (const p of paredes) if (p.tipo === 'luaposte') {
+  if (!m3d) for (const p of paredes) if (p.tipo === 'luaposte') {
     c.lineCap = 'round';
     for (let z = 0; z < 5; z++) { c.strokeStyle = z ? '#3a404c' : '#0b0c10'; c.lineWidth = 7; c.beginPath(); c.moveTo(p.ax, p.ay - z); c.lineTo(p.bx, p.by - z); c.stroke(); }
     c.strokeStyle = '#2a2e37'; c.lineWidth = 7.5; c.beginPath(); c.moveTo(p.ax, p.ay - 5); c.lineTo(p.bx, p.by - 5); c.stroke();
@@ -1513,8 +1537,10 @@ function desenharLua(c) {
 function desenharDeck(c) {
   desenharLua(c);
   c.save(); c.translate(8, 12); caminho(c, PISO_DECK); c.closePath(); c.fillStyle = 'rgba(0,0,0,.38)'; c.fill(); c.restore();
+  if (!m3d) {
   coluna(c, 268, 216, 268, 196); coluna(c, 344, 214, 344, 196); coluna(c, 266, 112, 266, 100);
   for (let z = 9; z > 0; z--) { c.save(); c.translate(0, z); caminho(c, PISO_DECK); c.closePath(); c.fillStyle = z > 6 ? '#0c0a1a' : '#2a2150'; c.fill(); c.restore(); }
+  }
   caminho(c, PISO_DECK); c.closePath();
   const g = c.createLinearGradient(264, 60, 348, 216); g.addColorStop(0, 'rgba(70,52,150,.95)'); g.addColorStop(1, 'rgba(26,18,70,.95)');
   c.fillStyle = g; c.fill();
@@ -1540,6 +1566,7 @@ function desenharDeck(c) {
   // paredes cromadas da estação, com altura
   const segs = paredes.filter(p => p.tipo === 'deck');
   const tr = (w, cor) => { c.lineCap = 'round'; c.strokeStyle = cor; c.lineWidth = w; for (const p of segs) { c.beginPath(); c.moveTo(p.ax, p.ay); c.lineTo(p.bx, p.by); c.stroke(); } };
+  if (m3d) return;   // paredes da estação: no 3D são de verdade
   for (let z = 0; z < DZ; z++) { c.save(); c.translate(0, -z); tr(6, z ? '#3a404c' : '#0c0e13'); c.restore(); }
   c.save(); c.translate(0, -DZ); tr(6.5, '#2a2e37'); tr(4.8, '#8d95a4'); tr(2.8, '#e6eaf1'); c.translate(-.4, -.6); tr(.9, '#ffffff'); c.restore();
 }
@@ -1558,10 +1585,12 @@ function desenharAlien() {
   const sh = fl ? aleat(-2.5, 2.5) * fl : 0;
   const resp = Math.sin(t * (2.2 + raiva * 3)), boca = A.segurando ? 1.6 : .4 + .4 * Math.sin(t * 2.6) + fl * .8;
   const pele = fl ? ['#c8ffd0', '#4c9a5c', '#14301a'] : ['#6f8a78', '#1c2a22', '#040706'];
-  halo(A.x, A.y - 45, 60, raiva > .5 ? '#ff3a3a' : '#5dff7a', .14 + .15 * raiva + fl * .4);
+  if (!m3d) halo(A.x, A.y - 45, 60, raiva > .5 ? '#ff3a3a' : '#5dff7a', .14 + .15 * raiva + fl * .4);
+  else if (fl) halo(A.x, A.y - 40, 50, '#b6f0a0', fl * .25);   // no 3D ele é sóbrio: só um lampejo quando apanha
   const EA = 1.3;
   ctx.save(); ctx.translate(A.x + sh, A.y + 2); ctx.scale(EA, EA * esticar(A.y));
   ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(5, 2, 24, 7, 0, 0, DPI); ctx.fill();
+  if (m3d) { ctx.restore(); return; }   // no modo 3D o corpo do alien é um boneco com volume
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   // cauda com ferrão
   const ca = Math.sin(t * 1.7) * 5;
@@ -1630,6 +1659,7 @@ function desenharOvo() {
   const A = ALIEN, falta = A.renasce - relogio, treme = falta < 2.5 ? Math.sin(relogio * 40) * (2.5 - falta) : 0;
   const pul = .5 + .5 * Math.sin(relogio * 4);
   halo(A.x, A.y - 10, 30, '#5dff7a', .2 + .25 * pul);
+  if (!m3d) {   // no 3D o ovo é de verdade
   ctx.save(); ctx.translate(A.x + treme * .6, A.y); ctx.scale(1, esticar(A.y)); ctx.rotate(treme * .02);
   ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.ellipse(3, 1, 13, 4, 0, 0, DPI); ctx.fill();
   const g = ctx.createRadialGradient(-3, -16, 1, 0, -11, 13); g.addColorStop(0, '#a89a70'); g.addColorStop(.6, '#5a4a30'); g.addColorStop(1, '#241a10');
@@ -1639,6 +1669,7 @@ function desenharOvo() {
   ctx.strokeStyle = `rgba(120,255,110,${.3 + .4 * pul})`; ctx.lineWidth = .8;
   for (const [a, b] of [[-7, -4], [6, -8], [-3, -2]]) { ctx.beginPath(); ctx.moveTo(a, -2); ctx.quadraticCurveTo(a + 2, -10, b, -16); ctx.stroke(); }
   ctx.restore();
+  }
   ctx.strokeStyle = 'rgba(93,255,122,.7)'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.arc(A.x, A.y, 22, -Math.PI / 2, -Math.PI / 2 + DPI * (1 - Math.max(0, falta) / 14)); ctx.stroke();
 }
@@ -1647,6 +1678,7 @@ function desenharOvo() {
 function desenharDeckVivo(piscaOn) {
   for (const a of ALVOS_DECK) {
     const on = a.aceso || a.flash > 0;
+    if (m3d) { if (on) halo(a.ax, (a.ay + a.by) / 2 - 5, 14, '#ffe27a', .7); brilhoOuApagado(a.ax + 14, (a.ay + a.by) / 2, 3, '#ffe27a', a.aceso); continue; }
     ctx.lineCap = 'butt';
     for (let z = 0; z <= 4; z++) { ctx.strokeStyle = z < 4 ? '#6a5a10' : '#2a2408'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(a.ax, a.ay - z); ctx.lineTo(a.bx, a.by - z); ctx.stroke(); }
     ctx.strokeStyle = on ? '#fff3a0' : '#e0b820'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(a.ax, a.ay - 5); ctx.lineTo(a.bx, a.by - 5); ctx.stroke();
@@ -1665,6 +1697,7 @@ function brilhoOuApagado(x, y, r, cor, on) {
 function desenharCogumelo(b, missaoCog, piscaOn) {
   const aceso = b.flash > 0, HB = b.r > 14 ? 7 : 5, desce = aceso ? 2 : 0, topo = b.y - HB + desce;
   ctx.fillStyle = 'rgba(0,0,0,.45)'; circulo(ctx, b.x + 4, b.y + 5, b.r + 1); ctx.fill();
+  if (m3d) { if (aceso || (missaoCog && piscaOn)) halo(b.x, topo - 6, b.r * 2.6, b.cor[1], .8); return; }
   const gc = ctx.createLinearGradient(b.x - b.r, 0, b.x + b.r, 0);
   gc.addColorStop(0, '#3b414c'); gc.addColorStop(.3, '#f4f6fa'); gc.addColorStop(.55, '#8c93a0'); gc.addColorStop(.85, '#c9ced8'); gc.addColorStop(1, '#2c313a');
   ctx.fillStyle = gc; circulo(ctx, b.x, b.y, b.r); ctx.fill();
@@ -1690,7 +1723,7 @@ function desenharLuzesGerais(piscaOn, atracao) {
     });
   }
   for (const f of FLASHES) {
-    const on = gi > .25 || (show > 0 && Math.floor(relogio * 10) % 2 === 0);
+    const on = flashAceso();
     ctx.fillStyle = 'rgba(0,0,0,.45)'; circulo(ctx, f.x + 2, f.y + 3, 6.5); ctx.fill();
     ctx.fillStyle = gradRadial(ctx, f.x, f.y - 3, 6, on ? ['#ffffff', f.cor, f.cor] : ['rgba(255,255,255,.6)', f.cor, '#200810']);
     ctx.beginPath(); ctx.ellipse(f.x, f.y - 2, 6, 7 * esticar(f.y) * .8, 0, 0, DPI); ctx.fill();
@@ -1718,7 +1751,7 @@ function desenharLuzesGerais(piscaOn, atracao) {
     }
   }
 }
-const LEDS = [[RAMPA, '#7fe3ff'], [DESCIDA, '#7fe3ff'], [TRAVESSIA, '#ffd84a'], [RAMPA_LUA, '#e6ecff'], [DESCIDA_LUA, '#e6ecff'], [TUBO, '#7dffb2']].map(([T, cor]) => {
+const LEDS = [[RAMPA, '#7fe3ff'], [DESCIDA, '#7fe3ff'], [TRAVESSIA, '#ffd84a'], [RAMPA_LUA, '#e6ecff'], [DESCIDA_LUA, '#e6ecff'], [PONTE, '#ff5dd8'], [TUBO, '#7dffb2']].map(([T, cor]) => {
   const pts = []; for (let d = 14; d < T.L - 8; d += 24) { const p = pontoTrilha(T, d); pts.push([p.x + p.dy * 10.5, p.y - p.dx * 10.5]); }
   return { T, cor, pts };
 });
@@ -1735,6 +1768,13 @@ function desenharLeds() {
 }
 // estilingues com mola: a borracha estica para dentro, a mola encolhe e tudo volta balançando
 function desenharEstilingues() {
+  if (m3d) {   // no 3D o estilingue tem volume; aqui fica só o brilho da batida
+    for (const s of ESTILINGUES) {
+      const tt = relogio - s.toque;
+      if (s.flash > 0 || tt < .12) { const g = s.flash > 0 ? 1 : .45; halo((s.a[0] + s.c[0]) / 2, (s.a[1] + s.c[1]) / 2 - 5, 46 * g, '#ff7aa8', .8 * g); }
+    }
+    return;
+  }
   for (const s of ESTILINGUES) {
     const [ax, ay] = s.a, [cx, cy] = s.c, [bx, by] = s.b;
     const L = Math.hypot(cx - ax, cy - ay); let nx = -(cy - ay) / L, ny = (cx - ax) / L;
@@ -1778,11 +1818,15 @@ function plastico(c, pts, cor, borda) {
   }
 }
 
+// plásticos coloridos que ficam por cima da mesa (no 3D, presos em postes)
+const PLASTICOS = [
+  { pts: [[36, 492], [80, 492], [80, 506], [60, 512], [36, 506]], cor: '#e62850', cor2d: 'rgba(230,40,80,.55)', borda: 'rgba(255,190,200,.8)' },
+  { pts: [[290, 492], [334, 492], [334, 506], [310, 512], [290, 506]], cor: '#2878f0', cor2d: 'rgba(40,120,240,.55)', borda: 'rgba(180,220,255,.8)' },
+  { pts: [[328, 288], [352, 288], [352, 312], [334, 318]], cor: '#e62850', cor2d: 'rgba(230,40,80,.5)', borda: 'rgba(255,190,200,.8)' },
+  { pts: [[54, 236], [72, 236], [72, 254], [54, 254]], cor: '#2878f0', cor2d: 'rgba(40,120,240,.5)', borda: 'rgba(180,220,255,.8)' },
+];
 function desenharFrente(c) {
-  plastico(c, [[36, 492], [80, 492], [80, 506], [60, 512], [36, 506]], 'rgba(230,40,80,.55)', 'rgba(255,190,200,.8)');
-  plastico(c, [[290, 492], [334, 492], [334, 506], [310, 512], [290, 506]], 'rgba(40,120,240,.55)', 'rgba(180,220,255,.8)');
-  plastico(c, [[328, 288], [352, 288], [352, 312], [334, 318]], 'rgba(230,40,80,.5)', 'rgba(255,190,200,.8)');
-  plastico(c, [[54, 236], [72, 236], [72, 254], [54, 254]], 'rgba(40,120,240,.5)', 'rgba(180,220,255,.8)');
+  if (!m3d) for (const pl of PLASTICOS) plastico(c, pl.pts, pl.cor2d, pl.borda);
   for (const pts of [[[20, 686], [140, 700], [160, 770], [20, 770]], [[350, 686], [230, 700], [210, 770], [350, 770]]]) {
     caminho(c, pts); c.closePath();
     const g = c.createLinearGradient(0, 686, 0, 740); g.addColorStop(0, '#3a4150'); g.addColorStop(1, '#151820');
@@ -1799,9 +1843,26 @@ function desenharFrente(c) {
   c.restore();
 }
 
+// ----- Modo 3D (mesa3d.js com Three.js): se carregar, ele mostra a mesa; se não, fica o modo inclinado abaixo -----
+let m3d = null;
+function iniciar3D() {
+  if (m3d || !window.PB3D) return;
+  try { m3d = window.PB3D.criar({ container: mesa, fonte: tela, W, H }); }
+  catch (e) { m3d = null; console.warn('Pinball 3D indisponível, seguindo em 2D', e); return; }
+  tela.classList.add('fonte3d');
+  const tr = (T, extra) => Object.assign({ pts: T.pts.map(p => ({ x: p.x, y: p.y, dx: p.dx, dy: p.dy, zv: p.zv || 0, d: p.d })) }, extra);
+  m3d.pecas({ palhetas, cogumelos: COGUMELOS, alien: ALIEN, estilingues: ESTILINGUES, alvos: ALVOS, alvosDeck: ALVOS_DECK, paredes,
+    plataformas: [PISO_DECK, PISO_LUA], plasticos: PLASTICOS, trilhas: [
+    tr(RAMPA, { acrilico: .22 }), tr(RAMPA_LUA, { acrilico: .2 }), tr(DESCIDA), tr(TRAVESSIA), tr(DESCIDA_LUA),
+    tr(PONTE, { neon: '#ff5dd8' }), tr(TUBO, { tipo: 'tubo' }) ] });   // palhetas, cogumelos e alien ganham volume
+  ajustarTamanho();
+}
+window.addEventListener('pb3d', iniciar3D);
+
 function ajustarTamanho() {
   const w = mesa.clientWidth, h = mesa.clientHeight;
   if (!w || !h) return;
+  if (m3d) return ajustar3D(w, h);
   // a mesa inclinada ocupa menos altura na tela: cabe maior. Procura o ângulo que melhor enche o espaço.
   const altura = a => H * Math.cos(a) * PERSP / (PERSP + H * Math.sin(a));
   const alvo = (h / w) * W;   // altura que a mesa teria usando toda a largura
@@ -1817,10 +1878,25 @@ function ajustarTamanho() {
   Object.assign(vis, { ox: w / 2, oy: baixo, e: escala, pe: PERSP * escala });
   hudDpr = Math.min(window.devicePixelRatio || 1, 2); hudW = w; hudH = h;
   hud.width = Math.round(w * hudDpr); hud.height = Math.round(h * hudDpr);
+  redesenharCamadas(cw, ch);
+}
+function redesenharCamadas(cw, ch) {
   for (const cv of [tela, fundo, frente, camRampa, camTubo, camDeck]) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
   for (const [cv, fn] of [[fundo, desenharFundo], [frente, desenharFrente], [camRampa, desenharRampa], [camTubo, desenharTubo], [camDeck, desenharDeck]]) {
     const c = cv.getContext('2d'); c.setTransform(escala * dpr, 0, 0, escala * dpr, 0, 0); fn(c);
   }
+}
+function ajustar3D(w, h) {
+  const tela3 = Math.min(window.devicePixelRatio || 1, efeitos() ? dprMax : Math.min(dprMax, 1.5));
+  const r = m3d.ajustar(w, h, { dpr: tela3, angMax: 40 * Math.PI / 180, angMin: 15 * Math.PI / 180, bloom: efeitos() && dprMax >= 1.5 });
+  ANG = r.ang; SEN = Math.sin(ANG); COS = Math.cos(ANG); PERSP = r.persp;
+  escala = r.escala;
+  // a pintura da mesa é vista de longe e inclinada: não precisa de mais pontos que a tela mostra
+  dpr = Math.min(tela3, 1.75);
+  hudDpr = Math.min(window.devicePixelRatio || 1, 2); hudW = w; hudH = h;
+  hud.width = Math.round(w * hudDpr); hud.height = Math.round(h * hudDpr);
+  redesenharCamadas(W * escala, H * escala);
+  m3d.ambiente(fundo);
 }
 new ResizeObserver(ajustarTamanho).observe(mesa);
 
@@ -1870,6 +1946,14 @@ function desenharBola(b, x, y) {
   const sx = 2 + (x - 185) / 70 + alt * 7 + zc * .3, sy = 3 + (y + 100) / 260 + alt * 6 + zc * (KZ + .25);
   ctx.fillStyle = `rgba(0,0,0,${.45 - alt * .15})`; ctx.beginPath(); ctx.ellipse(x + sx, y + sy, r * 1.02, r * .92, 0, 0, DPI); ctx.fill();
   const k = esticar(y);
+  if (m3d) {   // bola cromada de verdade (3D), com o reflexo colorido dos cogumelos e dos flashes acesos
+    const perto = [];
+    for (const c of COGUMELOS) if (c.flash > 0 && Math.hypot(c.x - x, c.y - y) < 80) perto.push({ x: c.x, y: c.y, cor: c.cor[1], f: c.flash / .16 });
+    for (const f of FLASHES) if (flashAceso() && Math.hypot(f.x - x, f.y - y) < 140) perto.push({ x: f.x, y: f.y, cor: f.cor, f: .8 });
+    m3d.bola(ctx, x, y - z, r, k, { bx: x, by: y, perto, gi, giCor });
+    bolas3D.push({ x, y: y - z, r, andar: !b.trilha && !!b.andar, alto: !!(b.trilha || b.andar), tipo: b.trilha ? (b.trilha.T === TUBO ? 'tubo' : 'arame') : null, zv: b.trilha ? (b.trilha.z || 0) : 0 });
+    return;
+  }
   ctx.save(); ctx.translate(x, y - z); ctx.scale(1, k);
   // bola cromada: reflete o "céu" claro em cima, uma linha de horizonte escura no meio e a mesa roxa embaixo
   const g = ctx.createLinearGradient(-r * .3, -r, r * .3, r);
@@ -1899,12 +1983,14 @@ function desenharBola(b, x, y) {
   ctx.restore();
 }
 
+const bolas3D = [];   // bolas pintadas neste quadro (o 3D usa para saber o que fica na frente)
 function desenhar(dt, alfa) {
   const k = escala * dpr;
+  bolas3D.length = 0;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#07091a'; ctx.fillRect(0, 0, tela.width, tela.height);
   let ox = 0, oy = 0;
-  if (tremor > 0) { const f = Math.min(1, tremor / .22); ox = aleat(-3, 3) * f; oy = aleat(-2, 2) * f; }
+  if (tremor > 0 && !m3d) { const f = Math.min(1, tremor / .22); ox = aleat(-3, 3) * f; oy = aleat(-2, 2) * f; }
   ctx.setTransform(k, 0, 0, k, ox * k, oy * k);
   ctx.drawImage(fundo, 0, 0, W, H);
 
@@ -1936,10 +2022,12 @@ function desenhar(dt, alfa) {
   }
 
   const ac = Math.abs(Math.cos(spinner.ang));
+  if (!m3d) {
   ctx.fillStyle = '#c9cfd9'; ctx.fillRect(26, 300 - 4 * ac, 30, 8 * ac + .6);
   ctx.fillStyle = 'rgba(255,216,74,.85)'; ctx.fillRect(26, 300 - 1.2 * ac, 30, 2.4 * ac + .2);
+  }
 
-  ALVOS.forEach(a => {
+  if (!m3d) ALVOS.forEach(a => {
     ctx.lineCap = 'butt';
     if (a.de_pe) {
       for (let z = 0; z <= 5; z++) { ctx.strokeStyle = z < 5 ? '#7a1010' : '#3a0a0a'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(a.ax, a.ay - z); ctx.lineTo(a.bx, a.by - z); ctx.stroke(); }
@@ -1954,12 +2042,14 @@ function desenhar(dt, alfa) {
   desenharEstilingues();
   for (const b of COGUMELOS) if (!b.andar) desenharCogumelo(b, false, piscaOn);
   ctx.fillStyle = '#1b1f29'; ctx.fillRect(354, plY, 22, 770 - plY);
+  if (!m3d) {   // no 3D o lançador (ponta, haste e mola) é de verdade
   ctx.strokeStyle = '#a7adb9'; ctx.lineWidth = 1.6; ctx.beginPath();
   const voltas = 9, alto = 750 - (plY + 8);
   for (let i = 0; i <= voltas * 2; i++) { const y = plY + 8 + alto * i / (voltas * 2); ctx.lineTo(i % 2 ? 374 : 356, y); }
   ctx.stroke();
   const gp = ctx.createLinearGradient(354, 0, 376, 0); gp.addColorStop(0, '#7a0a14'); gp.addColorStop(.5, '#ff4d5e'); gp.addColorStop(1, '#7a0a14');
   ctx.fillStyle = gp; ctx.fillRect(354, plY, 22, 8);
+  }
   if (puxando) { ctx.fillStyle = `rgba(255,${Math.round(220 - 160 * puxar)},60,.9)`; ctx.fillRect(352, 760 - 120 * puxar, 3, 120 * puxar); }
 
 
@@ -1969,7 +2059,7 @@ function desenhar(dt, alfa) {
   const chao = bolas.filter(b => !b.fora && !b.naNave && !b.trilha && !b.andar && b.destino !== 'alien');
   for (const b of chao) { const [x, y] = pos(b); if (y < ALIEN.y) desenharBola(b, x, y); }
   desenharAlien();
-  for (const b of bolas) if (b.destino === 'alien' && !b.fora) desenharBola(b, b.x + aleat(-1, 1), b.y);
+  for (const b of bolas) if (b.destino === 'alien' && !b.fora && !m3d) desenharBola(b, b.x + aleat(-1, 1), b.y);
   for (const b of chao) { const [x, y] = pos(b); if (y >= ALIEN.y) desenharBola(b, x, y); }
   for (const p of palhetas) if (!p.andar) desenharPalheta(p, p.oang + (p.ang - p.oang) * alfa);
   // andar de cima: estação orbital
@@ -1980,13 +2070,13 @@ function desenhar(dt, alfa) {
   for (const p of palhetas) if (p.andar) desenharPalheta(p, p.oang + (p.ang - p.oang) * alfa);
 
   ctx.drawImage(camRampa, 0, 0, W, H);
-  for (const nome of ['rampa', 'tubo', 'descida', 'travessia', 'lua', 'descidaLua']) {
+  for (const nome of ['rampa', 'tubo', 'descida', 'travessia', 'lua', 'descidaLua', 'ponte']) {
     const er = relogio - brilhoTrilha[nome], T = TRILHAS[nome];
     if (er < .9 && efeitos()) for (let q = 0; q < 6; q++) { const p = pontoTrilha(T, T.L * Math.max(0, Math.min(1, er / .9 - q * .04))); brilho(p.x, p.y, 3, nome === 'tubo' ? '#7dffb2' : '#7fe3ff'); }
   }
   for (const b of bolas) if (b.trilha && b.trilha.T !== TUBO) desenharBola(b, ...pos(b));
   for (const b of bolas) if (b.trilha && b.trilha.T === TUBO) desenharBola(b, ...pos(b));
-  ctx.drawImage(camTubo, 0, 0, W, H);
+  if (!m3d) ctx.drawImage(camTubo, 0, 0, W, H);
   desenharLeds();
 
 
@@ -2006,7 +2096,19 @@ function desenhar(dt, alfa) {
     ctx.restore();
   }
 
+  if (m3d) m3d.render({ luzes: luzes3D(), tremor, gi, giCor, relogio, plY, spinner: spinner.ang, bolas: bolas3D, angulos: palhetas.map(p => p.oang + (p.ang - p.oang) * alfa) });
   desenharHud(dt);
+}
+// luzes que iluminam a mesa no modo 3D: cogumelos batidos, estilingues, flashes, alien e buraco negro
+function luzes3D() {
+  const L = [];
+  for (const c of COGUMELOS) if (c.flash > 0) L.push({ x: c.x, y: c.y, h: c.andar ? 40 : 24, cor: c.cor[1], f: c.flash / .16, forca: 1400 });
+  for (const s of ESTILINGUES) if (s.flash > 0) L.push({ x: (s.a[0] + s.c[0]) / 2, y: (s.a[1] + s.b[1]) / 2 + 20, cor: '#ffe9a0', f: s.flash / .14, forca: 900 });
+  if (flashAceso()) for (const f of FLASHES) L.push({ x: f.x, y: f.y, h: 30, cor: f.cor, f: 1, forca: 2600 });
+  if (ALIEN.flash > 0) L.push({ x: ALIEN.x, y: ALIEN.y - 10, h: 36, cor: '#9dff3a', f: ALIEN.flash / .3, forca: 1800 });
+  if (j.extraAcesa) L.push({ x: BURACO.x, y: BURACO.y, cor: '#ffa53d', f: .6 + .4 * Math.sin(relogio * 8), forca: 900 });
+  if (gi > 0) L.push({ x: 185, y: 380, h: 120, cor: `rgb(${giCor})`, f: Math.min(1, gi), forca: 26000 });
+  return L;
 }
 
 function desenharPalheta(p, ang) {
@@ -2018,6 +2120,7 @@ function desenharPalheta(p, ang) {
     ctx.closePath();
   };
   forma(4, 5); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill();
+  if (m3d) return;   // no modo 3D a palheta tem volume; aqui fica só a sombra
   // lateral (a borracha vermelha vista de frente)
   for (let z = 0; z < 4; z++) { forma(0, -z); ctx.fillStyle = z ? '#8e1520' : '#4a070d'; ctx.fill(); }
   forma(0, -4);
@@ -2038,6 +2141,7 @@ let hudDpr = 1, hudW = 0, hudH = 0;
 const vis = { ox: 0, oy: 0, e: 1, pe: 1 };   // meio da borda de baixo da mesa na tela, escala e perspectiva
 // ponto da mesa → ponto na tela (já com a inclinação)
 function proj(x, y) {
+  if (m3d) return m3d.proj(x, y);
   const py = (H - y) * vis.e, s = vis.pe / (vis.pe + py * SEN);
   return [vis.ox + (x - W / 2) * vis.e * s, vis.oy - py * COS * s, s];
 }
@@ -2062,7 +2166,7 @@ function desenharHud(dt) {
   if (!hudW) return;
   hctx.setTransform(hudDpr, 0, 0, hudDpr, 0, 0);
   hctx.clearRect(0, 0, hudW, hudH);
-  const larg = W * vis.e;
+  const larg = W * escala;
   // pontos subindo de onde a bola bateu
   for (let i = popups.length - 1; i >= 0; i--) {
     const p = popups[i];
@@ -2176,7 +2280,7 @@ function painel() {
 // ================= Ciclo principal =================
 // Física em passos fixos de 1/600 s; se o aparelho ficar lento, a imagem fica mais leve sozinha.
 // RITMO: a mesa roda um pouco mais devagar que o relógio real (bola mais "pesada", como numa máquina grande vista de perto).
-const RITMO = .7;
+const RITMO = .55;
 let antes = performance.now(), acumulado = 0, somConf = true, contaQ = 0, tempos = [];
 function quadro(agora) {
   const bruto = (agora - antes) / 1000, dt = Math.min(.1, bruto);
@@ -2206,8 +2310,9 @@ function quadro(agora) {
 }
 
 novoJogo();
-if (location.hostname === 'localhost') window.__pb = { get bolas() { return bolas; }, palhetas, ALVOS, get j() { return j; }, passo: s => { for (let i = 0; i < s / PASSO; i++) passo(PASSO); }, comecarPuxar, soltar, desenhar: () => { desenhar(0, 1); painel(); }, get relogio() { return relogio; }, RAMPA, TUBO, DESCIDA, TRAVESSIA, RAMPA_LUA, DESCIDA_LUA, ALIEN, ALVOS_DECK, novaBola, get dprMax() { return dprMax; } }; // só para testes no computador
+if (location.hostname === 'localhost') window.__pb = { get bolas() { return bolas; }, palhetas, ALVOS, get j() { return j; }, passo: s => { for (let i = 0; i < s / PASSO; i++) passo(PASSO); }, comecarPuxar, soltar, desenhar: () => { desenhar(0, 1); painel(); }, get relogio() { return relogio; }, RAMPA, TUBO, DESCIDA, TRAVESSIA, RAMPA_LUA, DESCIDA_LUA, ALIEN, ALVOS_DECK, novaBola, get dprMax() { return dprMax; }, get m3d() { return m3d; } }; // só para testes no computador
 mostrarRecordes();
 ajustarTamanho();
+iniciar3D();
 requestAnimationFrame(quadro);
 })();

@@ -16,7 +16,6 @@
   <header class="topo">
     <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
     <h1>Pinball Galáxia</h1>
-    <button id="pausa" class="icone-btn" aria-label="Pausar">⏸</button>
     <button class="icone-btn" data-abre="opcoes" aria-label="Opções">⚙️</button>
     <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
   </header>
@@ -99,5 +98,8 @@
 </dialog>
 
 <script src="jogo.js"></script>
+<!-- visual 3D (Three.js, guardado no próprio site). Se não carregar, o jogo continua no modo 2D. -->
+<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
+<script type="module" src="mesa3d.js"></script>
 </body>
 </html>

@@ -51,5 +51,17 @@ dialog h2 { margin: 0 0 10px; font-size: 1.2rem; }
 dialog p, dialog li { color: var(--texto2); }
 dialog ul { padding-left: 20px; margin: 0 0 16px; }
 dialog .btn { width: 100%; }
+/* Botões Sair e Pausar das telas de jogo (criados em js/comum.js) */
+.topo h1 { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icone-btn.jo-sair { width: auto; padding: 0 12px; gap: 5px; display: flex; font-size: .95rem; font-weight: 600; flex: none; }
+.icone-btn.jo-sair span { font-size: .85rem; opacity: .75; }
+.topo .icone-btn { flex: none; }
+.icone-btn[hidden] { display: none; }
+#jo-pausa { text-align: center; }
+#jo-pausa h2 { font-size: 1.4rem; }
+#jo-pausa .btn { display: flex; align-items: center; justify-content: center; margin-top: 10px; text-decoration: none; color: var(--texto); }
+#jo-pausa .btn.principal { color: #fff; }
+#jo-pausa::backdrop { background: rgba(5,7,18,.82); backdrop-filter: blur(8px); }
+@media (max-width: 380px) { .topo { gap: 6px; } .icone-btn.jo-sair { padding: 0 9px; } }
 @keyframes surgir { from { opacity: 0; transform: translateY(14px) scale(.97); } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

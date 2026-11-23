@@ -143,7 +143,7 @@
   $('vitoria-novo').addEventListener('click', () => { $('vitoria').close(); recomecar(e.nivel); });
   document.querySelectorAll('.modos button').forEach(b => b.addEventListener('click', () => { if (b.dataset.nivel !== e.nivel) recomecar(b.dataset.nivel); }));
   setInterval(() => {
-    if (!e.fim && !document.hidden) { e.t++; $('tempo').textContent = relogio(e.t); if (e.t % 5 === 0) salvar(); }
+    if (!e.fim && !document.hidden && !JO.pausado()) { e.t++; $('tempo').textContent = relogio(e.t); if (e.t % 5 === 0) salvar(); }
   }, 1000);
 
   salvar(); desenhar();

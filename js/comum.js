@@ -104,6 +104,39 @@ const JO = (() => {
     });
   });
 
+  // ---------- Sair e Pausar (em todas as telas de jogo) ----------
+  // A tela de jogo é reconhecida pelo link "←" do topo que leva para a tela inicial.
+  // Enquanto a janela de pausa está aberta, os relógios param (JO.pausado()) e o Pinball congela.
+  const inicio = () => new URL('index.html', raiz).href;
+  const pausado = () => !!document.querySelector('#jo-pausa[open]');
+  function pausar() {
+    const d = document.getElementById('jo-pausa');
+    if (d && !d.open) { document.querySelectorAll('dialog[open]').forEach(x => x.close()); d.showModal(); som('toque'); }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const topo = document.querySelector('.topo'), h1 = topo && topo.querySelector('h1');
+    const voltar = topo && [...topo.querySelectorAll('a')].find(a => a.href === inicio());
+    if (!voltar || !h1) return;
+    const sair = document.createElement('a');
+    sair.className = 'icone-btn jo-sair'; sair.href = inicio();
+    sair.setAttribute('aria-label', 'Sair para a tela inicial dos jogos');
+    sair.innerHTML = '<span aria-hidden="true">✕</span> Sair';
+    // Nas Cruzadas a seta também volta para a lista de grades; ali ela fica e o Sair entra antes.
+    if (voltar.id) voltar.before(sair); else voltar.replaceWith(sair);
+    const bp = document.createElement('button');
+    bp.className = 'icone-btn jo-pausar'; bp.type = 'button'; bp.textContent = '⏸';
+    bp.setAttribute('aria-label', 'Pausar o jogo');
+    bp.addEventListener('click', pausar);
+    h1.after(bp);
+    const d = document.createElement('dialog');
+    d.id = 'jo-pausa';
+    d.innerHTML = '<h2>⏸ Jogo pausado</h2><p>O jogo está parado. Volte quando quiser.</p>' +
+      '<button class="btn principal" data-continuar>▶ Continuar</button>' +
+      `<a class="btn jo-sair-grande" href="${inicio()}">✕ Sair para a tela de jogos</a>`;
+    d.querySelector('[data-continuar]').addEventListener('click', () => d.close());
+    document.body.appendChild(d);
+  });
+
   // ---------- Atualizar jogos ----------
   // Busca a versão nova de todos os arquivos, apaga a cópia guardada no aparelho e recarrega.
   async function atualizarJogos(botao) {
@@ -142,5 +175,5 @@ const JO = (() => {
     });
   }
 
-  return { carregar, salvar, som, vibrar };
+  return { carregar, salvar, som, vibrar, pausado, pausar };
 })();

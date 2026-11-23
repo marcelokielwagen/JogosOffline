@@ -29,6 +29,10 @@ body.pinball {
 .mesa::before { content: ""; position: absolute; inset: 4% 8%; border-radius: 40%; background: radial-gradient(closest-side, rgba(120,80,255,.28), rgba(40,180,255,.12) 60%, transparent); filter: blur(18px); pointer-events: none; }
 /* a mesa é inclinada em 3D (o alto fica mais longe); o JavaScript calcula tamanho e posição */
 #tela { position: absolute; display: block; transform-origin: 50% 100%; border-radius: 12px; box-shadow: 0 0 0 2px #6b5236, 0 0 0 4px #1a1009, 0 0 0 5px rgba(220,226,236,.35), 0 0 34px rgba(120,90,255,.35), 0 18px 50px rgba(0,0,0,.7); }
+/* modo 3D (mesa3d.js): o canvas 2D vira só a pintura da mesa, escondido; quem aparece é o canvas 3D */
+#tela.fonte3d { display: none; }
+#tela3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mesa.m3d::before { display: none; }
 #hud { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* Painel com bordas em relevo, como os botões de antigamente */

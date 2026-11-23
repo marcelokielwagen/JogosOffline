@@ -445,7 +445,7 @@
   $('travou-novo').addEventListener('click', () => { $('travou').close(); comecar(e.nivel); });
 
   setInterval(() => {
-    if (e.m > 0 && !e.ganhou && !document.hidden) {
+    if (e.m > 0 && !e.ganhou && !document.hidden && !JO.pausado()) {
       e.t++; $('tempo').textContent = relogio(e.t);
       if (e.t % 5 === 0) salvar();
     }

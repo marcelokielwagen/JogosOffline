@@ -12,7 +12,7 @@
   function totalCasas(g) { const s = new Set(); g.p.forEach(([l, c, d, p]) => { for (let i = 0; i < p.length; i++) s.add(d === 'h' ? l * g.t + c + i : (l + i) * g.t + c); }); return s.size; }
   function mostrarLista() {
     gi = -1;
-    $('lista').hidden = false; $('jogo').hidden = true; $('titulo').textContent = 'Palavras Cruzadas';
+    $('lista').hidden = false; $('jogo').hidden = true; $('titulo').textContent = 'Palavras Cruzadas'; $('voltar').hidden = true;
     $('lista').innerHTML = '';
     salvo.total = GRADES.length; JO.salvar('cruzadas', salvo);
     // Agrupa por categoria: primeiro as temáticas (palavra grande no centro), depois as variadas.
@@ -58,7 +58,7 @@
       if (ch) { el.className = 'cel'; el.addEventListener('click', () => tocar(x)); }
       grade.appendChild(el); return el;
     });
-    $('lista').hidden = true; $('jogo').hidden = false; $('titulo').textContent = g.n; $('aviso').textContent = '';
+    $('lista').hidden = true; $('jogo').hidden = false; $('titulo').textContent = g.n; $('voltar').hidden = false; $('aviso').textContent = '';
     const primeira = ordem.find(wi => palavras[wi].cels.some(x => !letras[x])) ?? ordem[0];
     irPara(primeira);
   }
