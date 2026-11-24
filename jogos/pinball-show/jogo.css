@@ -1,4 +1,4 @@
-/* Pinball Show: visual disco neon (anime anos 80). A mesa ocupa quase toda a tela; placar fino em cima. */
+/* Galatic Pinball: visual espacial neon. A mesa ocupa quase toda a tela; placar fino em cima. */
 html:has(body.pshow) { background: #0a0318; }
 body.pshow { overflow: hidden; color: #f3eaff; background: radial-gradient(ellipse 80% 50% at 50% 0%, #2a0a50, transparent 70%), linear-gradient(#12042a, #0a0318 60%); }
 .ps { height: 100dvh; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; padding: 0 10px; }
@@ -17,14 +17,19 @@ body.pshow { overflow: hidden; color: #f3eaff; background: radial-gradient(ellip
 .tela3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 .msg, .inicio, .sem3d { z-index: 2; }
 
-.msg { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); white-space: pre-line; text-align: center; pointer-events: none;
-  font-family: "Courier New", monospace; font-weight: 900; font-size: clamp(1.3rem, 6vw, 2.2rem); line-height: 1.1; color: #fff;
-  padding: 10px 18px; border-radius: 12px; background: rgba(20,4,44,.78); border: 2px solid #ff2fb4; box-shadow: 0 0 18px rgba(255,47,180,.6), 0 0 4px #22d8ff inset;
-  text-shadow: 0 0 10px #ff2fb4, 0 0 2px #fff; }
-.msg.anim { animation: aparece .35s ease-out; }
-@keyframes aparece { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+.msg { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-weight: 900; font-style: italic; line-height: 1.04; width: max-content; max-width: 96%; }
+.msg[hidden] { display: none; }
+.msg span { display: block; -webkit-text-stroke: 5px #14062c; paint-order: stroke fill; }
+.msg .titulo { font-size: clamp(1.5rem, 7.2vw, 2.7rem); color: #fff; text-shadow: 0 0 14px #ff2fa0, 0 3px 0 #14062c; }
+.msg .sub { font-size: clamp(1rem, 4.6vw, 1.6rem); color: #8fe8ff; text-shadow: 0 2px 0 #14062c; }
+.msg .pontos { font-size: clamp(2.1rem, 11vw, 4.2rem); letter-spacing: -.01em; color: #ffd23a; text-shadow: 0 0 18px #ff7a1a, 0 4px 0 #14062c; }
+.estouro { position: absolute; left: 50%; top: 30%; width: 0; height: 0; z-index: 2; pointer-events: none; }
+.estouro i { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform; }
+.estouro .risco { width: 26px; height: 4px; margin: -2px -13px; border-radius: 3px; }
+.estouro .estrela { width: 15px; height: 15px; margin: -7px; clip-path: polygon(50% 0, 62% 37%, 100% 37%, 69% 60%, 80% 100%, 50% 74%, 20% 100%, 31% 60%, 0 37%, 38% 37%); }
 
-.inicio { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86%, 340px); text-align: center;
+.inicio { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(86%, 340px); text-align: center;
   padding: 18px 16px; border-radius: 16px; background: rgba(20,4,44,.9); border: 2px solid rgba(255,47,180,.7); box-shadow: 0 0 30px rgba(255,47,180,.35), 0 10px 40px rgba(0,0,0,.6); }
 .inicio[hidden] { display: none; }
 .inicio h2 { margin: 4px 0 8px; }
@@ -33,5 +38,24 @@ body.pshow { overflow: hidden; color: #f3eaff; background: radial-gradient(ellip
 .inicio .btn.principal { background: linear-gradient(90deg, #ff2fb4, #a66bff); border: none; box-shadow: 0 0 16px rgba(255,47,180,.6); }
 .inicio .selo { margin: 0; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #ffc63a; }
 .inicio .btn { min-width: 160px; }
+/* faixas de combo e show (canto de cima) e dica do próximo passo (embaixo) */
+.faixas { position: absolute; left: 8px; bottom: 70px; z-index: 2; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+.faixa { position: relative; overflow: hidden; padding: 4px 10px 7px; border-radius: 8px; font-weight: 900; font-size: .8rem; letter-spacing: .04em; color: #fff; background: rgba(20,4,44,.85); border: 1px solid #22d8ff; }
+.faixa[hidden], .dica[hidden] { display: none; }
+.faixa i { position: absolute; left: 0; bottom: 0; width: 100%; height: 3px; background: #22d8ff; transform-origin: left; }
+.faixa.show { border-color: #ffc63a; color: #ffc63a; }
+.faixa.show i { background: #ffc63a; }
+.dica { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 2; max-width: 94%; padding: 4px 12px; border-radius: 999px; pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: .78rem; font-weight: 700; color: #ffe9b0; background: rgba(20,4,44,.8); border: 1px solid rgba(255,198,58,.5); }
+@media (max-width: 420px) { .placar b { font-size: .92rem; } .placar span { letter-spacing: .04em; } }
+.faixa.salva { border-color: #3dff8c; color: #b6ffd4; padding-bottom: 4px; }
+.objetivos { position: absolute; left: 50%; bottom: 38px; transform: translateX(-50%); z-index: 2; display: flex; gap: 5px; pointer-events: none; }
+.objetivos[hidden] { display: none; }
+.objetivos { align-items: center; }
+.objetivos b { font-size: .7rem; letter-spacing: .05em; color: #fff; text-shadow: 0 0 6px #22d8ff; padding: 2px 8px; border-radius: 6px; background: rgba(12,4,28,.75); white-space: nowrap; }
+.objetivos span.agora { color: #fff; border-color: #ffc63a; background: rgba(255,198,58,.4); }
+.ps .topo .desligado { opacity: .4; text-decoration: line-through; }
+.objetivos span { padding: 2px 7px; border-radius: 6px; font-size: .68rem; font-weight: 900; letter-spacing: .06em; color: #8f7fb0; background: rgba(12,4,28,.75); border: 1px solid rgba(160,130,220,.35); }
+.objetivos span.feito { color: #03240f; background: #35ff9a; border-color: #c8ffe2; }
 .sem3d { position: absolute; inset: 40% 10% auto; text-align: center; color: #ffb4b4; }
 .so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

@@ -225,3 +225,27 @@ O roteiro completo das etapas está em `PROMPT.md`.
   dedos que estão de fato na tela e esquece os que sumiram (`sincronizarToques`). Mouse e teclado não mudaram.
   Testes: toques simulados no navegador (soltar normal, dedo sumido sem aviso, dois dedos, lançador).
   Não testado num celular de verdade. Cache `jogos-offline-v23`.
+- **Pinball Show de um andar (24/11/2026)**, pedido do dono ("3 andares deixaram o jogo chato"): mesa principal única e
+  duas varandas no fundo, só por canos: cabine dos DJs (esquerda) e palco do casal (direita), com 4 personagens 3D
+  originais modelados por código (`mesa/personagens.js`). Passagens: 2 canos, elevador de vidro, ponte, túnel-canhão,
+  2 voltas com catraca, 3 corredores e 2 trilhos. Regras em `regras/conexoes.js` (4 objetivos → Hora do Show com 3
+  bolas). Visual realista (verniz, cromados, acrílico, luz de palco). Testes: regras e 16 partidas na simulação, uma
+  partida inteira no navegador. Não testado num celular de verdade. Cache `jogos-offline-v32`.
+- **Pinball Show, ajustes (24/11/2026)**, pedido do dono (looping em planeta, cometa que explode, mesa maior e mais clara,
+  mais peças e canos, varandas com mais ação, personagens com traço de anime): mesa de 960 de comprimento, 4 canos (2 com
+  looping em volta de planetas), cometa com 10 batidas que solta 3 bolas de bônus (`mesa/espaco.js`), varandas com 2
+  palhetas e para-choques (visita limitada a 14 s da mesa), acelerador na boca dos canos, personagens com contorno e
+  texturas. Testes: regras e 12 partidas na simulação, uma partida inteira no navegador. Não testado num celular de
+  verdade. Cache `jogos-offline-v33`.
+- **Galatic Pinball (24/11/2026)**, novo nome do Pinball Show (a pasta continua `jogos/pinball-show/`), pedido do dono: sai a
+  banda e entram um astronauta flutuando (hang loose) ligado por um cabo a um ônibus espacial (`mesa/astronauta.js`);
+  plataformas até o meio da mesa, planetas mais abaixo, 6 loopings, missões em 6 fases com níveis (`regras/conexoes.js`),
+  efeitos de cor (`mesa/efeitos.js`), música e sons originais gerados na hora (`audio/som.js`), velocidade 82% (era 60%).
+  Testes: regras e 12 partidas na simulação, uma partida inteira no navegador. Sons não ouvidos e não testado num
+  celular de verdade. Cache `jogos-offline-v34`.
+- **Galatic Pinball sem luz piscando (24/11/2026)**, pedido do dono ("incomoda muito"): nada pisca sozinho (saíram clarões
+  de tela, lasers, ondas e pulsos no ritmo da música). Efeitos só quando a bola bate ou completa algo. Cache `v35`.
+- **Galatic Pinball mais leve (24/11/2026)**, pedido do dono (meio travado): materiais mais simples, menos peças soltas,
+  tudo preparado antes de começar, qualidade que baixa sozinha e fica lembrada (galaticQualidade). Cache `v36`.
+- **Galatic Pinball, rastro e letreiros (24/11/2026)**, pedido do dono: rastro da bola só logo depois de bater numa peça;
+  letreiros de pontos entram com estouro, ficam menos tempo e saem explodindo. Cache `v37`. Próximo: som.
