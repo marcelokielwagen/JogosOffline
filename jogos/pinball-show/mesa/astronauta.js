@@ -93,7 +93,7 @@ export function criarNave() {
   // pintura: u em volta (0 = barriga, .5 = teto), v ao longo (0 = nariz)
   const W = 1024, H = 2048;
   const pintura = tela(W, H, c => {
-    c.fillStyle = '#f4f3f0'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#dedcd6'; c.fillRect(0, 0, W, H);
     for (let y = 0; y < H; y += 16) for (let x = 0; x < W; x += 16) { const k = Math.random(); c.fillStyle = `rgba(${k < .5 ? '120,120,130' : '255,255,255'},${Math.random() * .09})`; c.fillRect(x, y, 15, 15); }
     c.strokeStyle = 'rgba(90,95,110,.16)'; c.lineWidth = 1; for (let y = 0; y < H; y += 16) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); } for (let x = 0; x < W; x += 16) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); }
     const Y = v => H * (1 - v), X = u => W * u;                 // v cresce do nariz para a cauda
@@ -109,11 +109,13 @@ export function criarNave() {
     c.fillStyle = '#c9ced8'; for (const [a, b] of [[.31, .48], [.52, .69]]) for (let i = 0; i < 4; i++) c.fillRect(X(a) + 10, Y(.3 + i * .12), X(b - a) - 20, 8);
     // faixas e nome (texto ao longo do corpo, dos dois lados)
     c.fillStyle = '#d4202c'; c.fillRect(X(.232), Y(.9), 10, Y(.16) - Y(.9)); c.fillRect(X(.758), Y(.9), 10, Y(.16) - Y(.9)); c.fillStyle = '#1c3a8c'; c.fillRect(X(.248), Y(.9), 6, Y(.16) - Y(.9)); c.fillRect(X(.746), Y(.9), 6, Y(.16) - Y(.9));
-    for (const [u, rot] of [[.272, Math.PI / 2], [.728, -Math.PI / 2]]) { c.save(); c.translate(X(u), Y(.47)); c.rotate(rot); c.fillStyle = '#1a2a5c'; c.font = 'italic 900 62px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('GALATIC', 0, 0); c.restore(); }
+    for (const [u, rot] of [[.272, Math.PI / 2], [.728, -Math.PI / 2]]) { c.save(); c.translate(X(u), Y(.66)); c.rotate(rot); c.fillStyle = '#1a2a5c'; c.font = 'italic 900 62px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('GALATIC', 0, 0); c.restore(); }
+    // abertura da porta lateral
+    c.clearRect(X(.555), Y(.37), X(.205), Y(.2) - Y(.37));
     // escotilha e grades dos propulsores do nariz
     c.fillStyle = '#2a2c34'; for (const u of [.42, .5, .58]) for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(X(u), Y(.062 + i * .014), 9, 0, 7); c.fill(); }
   });
-  const casco = fis({ map: pintura, roughness: .42, clearcoat: .35, clearcoatRoughness: .25, emissive: 0xffffff, emissiveMap: pintura, emissiveIntensity: .07 });
+  const casco = fis({ map: pintura, alphaTest: .5, roughness: .42, clearcoat: .35, clearcoatRoughness: .25, emissive: 0xffffff, emissiveMap: pintura, emissiveIntensity: .02 });
   const est = [[0, .4, .4, .4, -3], [.015, 3.6, 2.6, 3, -3], [.05, 7.4, 5.2, 5.4, -2.2], [.1, 10.4, 8, 7, -1.2], [.145, 12.2, 12.4, 8.4, -.5], [.2, 13.4, 14.6, 9.4, 0], [.3, 14, 15, 9.8, 0], [.75, 14, 15, 9.8, 0], [.9, 14.6, 14.6, 9.8, 0], [1, 14.2, 13, 9.6, 0]];
   const L = 190, n = 90, seg = 56, pos = [], uv = [], idx = [];
   const pega = (s, k) => { let i = 0; while (i < est.length - 2 && est[i + 1][0] < s) i++; const a = est[i], b = est[i + 1], t = Math.max(0, Math.min(1, (s - a[0]) / (b[0] - a[0]))); const a0 = est[Math.max(0, i - 1)], b1 = est[Math.min(est.length - 1, i + 2)]; const m0 = (b[k] - a0[k]) / (b[0] - a0[0] || 1) * (b[0] - a[0]), m1 = (b1[k] - a[k]) / (b1[0] - a[0] || 1) * (b[0] - a[0]), t2 = t * t, t3 = t2 * t; return (2 * t3 - 3 * t2 + 1) * a[k] + (t3 - 2 * t2 + t) * m0 + (-2 * t3 + 3 * t2) * b[k] + (t3 - t2) * m1; };
@@ -154,10 +156,42 @@ export function criarNave() {
     const pc = geoC.attributes.position, cor = []; for (let i = 0; i < pc.count; i++) { const k = Math.pow(1 - pc.getX(i) / 70, 1.6); cor.push(k, k * (.55 + .4 * k), k * (.25 + .75 * k)); } geoC.setAttribute('color', new THREE.Float32BufferAttribute(cor, 3));
     const ch = new THREE.Mesh(geoC, new THREE.MeshBasicMaterial({ color: 0xffc890, vertexColors: true, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); ch.position.set(106, y, z); ch.userData.movel = true; g.add(ch); chamas.push(ch);
   }
+  // ---------- porta lateral aberta e cabine iluminada ----------
+  const naCasca = (u, v, fora = 0) => { const a = -Math.PI / 2 - u * Math.PI * 2, cs = Math.cos(a), sn = Math.sin(a), e = sn < 0 ? .5 : .86, w = pega(v, 1) + fora, al = pega(v, 2) + fora, ba = pega(v, 3) + fora; return new THREE.Vector3(-L / 2 + v * L, pega(v, 4) + Math.sign(sn) * Math.pow(Math.abs(sn), e) * (sn > 0 ? al : ba), Math.sign(cs) * Math.pow(Math.abs(cs), e) * w); };
+  {
+    const volta = []; for (let i = 0; i <= 8; i++) volta.push(naCasca(.555 + .205 * i / 8, .2, .3)); for (let i = 1; i <= 8; i++) volta.push(naCasca(.76, .2 + .17 * i / 8, .3)); for (let i = 1; i <= 8; i++) volta.push(naCasca(.76 - .205 * i / 8, .37, .3)); for (let i = 1; i < 8; i++) volta.push(naCasca(.555, .37 - .17 * i / 8, .3));
+    const curvaP = new THREE.CatmullRomCurve3(volta, true, 'catmullrom', .1); g.add(new THREE.Mesh(new THREE.TubeGeometry(curvaP, 90, .85, 8, true), metal(0xc8a04a, .28)));
+    const dentro = new THREE.CatmullRomCurve3(volta.map(p => p.clone().multiply(new THREE.Vector3(1, 1, .96))), true, 'catmullrom', .1); g.add(new THREE.Mesh(new THREE.TubeGeometry(dentro, 90, .4, 6, true), luz(0xffe2b0, 1.6)));
+    const parede = new THREE.MeshStandardMaterial({ color: 0xc9ced8, roughness: .55, emissive: 0x8a94a8, emissiveIntensity: .4 }), piso = new THREE.MeshStandardMaterial({ color: 0x3a4050, roughness: .6, emissive: 0x20283a, emissiveIntensity: .5 });
+    const painel = tela(1024, 448, (c, w, h) => {
+      c.fillStyle = '#b8bec9'; c.fillRect(0, 0, w, h); c.strokeStyle = '#7d8594'; c.lineWidth = 3; for (let x = 0; x < w; x += 128) c.strokeRect(x + 4, 4, 120, h - 8);
+      for (let i = 0; i < 7; i++) { const x = 20 + i * 144, y = 50, W2 = 122, H2 = 100; c.fillStyle = '#04121c'; c.fillRect(x, y, W2, H2); c.strokeStyle = ['#3dffb0', '#4ad8ff', '#ffb84a'][i % 3]; c.lineWidth = 3; c.beginPath(); for (let k = 0; k < 20; k++) c.lineTo(x + 6 + k * 5.6, y + 50 + Math.sin(k * .7 + i) * 26 * Math.random()); c.stroke(); c.fillStyle = c.strokeStyle; for (let k = 0; k < 4; k++) c.fillRect(x + 8, y + 74 + k * 6, 20 + Math.random() * 80, 3); }
+      for (let i = 0; i < 260; i++) { c.fillStyle = ['#ff4a4a', '#4aff8a', '#ffd24a', '#4ac8ff', '#2a3040', '#2a3040', '#e8ecf4'][i % 7]; c.fillRect(24 + (i % 52) * 19, 190 + Math.floor(i / 52) * 26, 11, 10); }
+      c.fillStyle = '#4a5262'; for (let i = 0; i < 8; i++) c.fillRect(20 + i * 126, 340, 108, 84); c.fillStyle = '#e8ecf4'; for (let i = 0; i < 8; i++) for (let k = 0; k < 3; k++) c.fillRect(34 + i * 126, 354 + k * 22, 80, 8);
+    });
+    const bx = (w, h, d, m, x, y, z, ry = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.rotation.y = ry; o.userData.semSombra = true; g.add(o); return o; };
+    const px = -L / 2 + .285 * L;
+    bx(44, 17, .6, new THREE.MeshStandardMaterial({ map: painel, emissiveMap: painel, emissive: 0xffffff, emissiveIntensity: .75, roughness: .5 }), px, 3.4, -7.5); bx(44, .6, 19, piso, px, -5, 1.4); bx(.6, 17, 18, parede, px - 21, 3.4, 1); bx(.6, 17, 18, parede, px + 21, 3.4, 1);
+    bx(36, .6, .6, luz(0xfff4e0, 2.4), px, 11.2, -6.8);
+    // mesa com monitores e cadeira
+    const cinzaE = fis({ color: 0x2c3240, roughness: .5 });
+    bx(5, 1, 14, cinzaE, px - 10.5, .6, 1.5); bx(4, 5.6, 13, cinzaE, px - 11, -2.4, 1.5);
+    [-3.6, 1.4, 6.2].forEach((z, i) => { const tx = tela(160, 120, c => { c.fillStyle = '#02101a'; c.fillRect(0, 0, 160, 120); c.strokeStyle = ['#4affc0', '#58c8ff', '#ffb04a'][i]; c.lineWidth = 3; c.beginPath(); c.arc(80, 56, 34, 0, 7); c.stroke(); c.beginPath(); c.ellipse(80, 56, 52, 14, .4, 0, 7); c.stroke(); for (let k = 0; k < 5; k++) c.strokeRect(8, 8 + k * 20, 16 + k * 3, 8); c.fillStyle = c.strokeStyle; c.fillRect(8, 108, 130, 4); }); bx(.5, 4, 4.8, [cinzaE, cinzaE, cinzaE, cinzaE, cinzaE, cinzaE].map((m, k) => k === 0 ? new THREE.MeshStandardMaterial({ map: tx, emissiveMap: tx, emissive: 0xffffff, emissiveIntensity: 1.5 }) : m), px - 11, 3.4, z, -.55 + (i - 1) * -.2); });
+    bx(5, .9, 5, cinzaE, px + 1, -1.6, 1.8); bx(1, 8, 5, cinzaE, px + 3.6, 2, 1.8); bx(1.4, 3.4, 1.4, cinzaE, px + 1, -3.4, 1.8);
+    // porta de correr aberta para trás, acompanhando a curva do casco
+    { const nu = 18, nv = 10, pp = [], uu = [], ii = []; for (let a = 0; a <= nu; a++) for (let b = 0; b <= nv; b++) { const q = naCasca(.557 + .2 * a / nu, .385 + .165 * b / nv, 2); pp.push(q.x, q.y, q.z); uu.push(b / nv, a / nu); }
+      for (let a = 0; a < nu; a++) for (let b = 0; b < nv; b++) { const q = a * (nv + 1) + b; ii.push(q, q + 1, q + nv + 1, q + 1, q + nv + 2, q + nv + 1); }
+      const gp = new THREE.BufferGeometry(); gp.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3)); gp.setAttribute('uv', new THREE.Float32BufferAttribute(uu, 2)); gp.setIndex(ii); gp.computeVertexNormals();
+      const tp = tela(512, 512, c => { c.fillStyle = '#e2e0da'; c.fillRect(0, 0, 512, 512); c.strokeStyle = 'rgba(80,86,100,.5)'; c.lineWidth = 6; c.strokeRect(14, 14, 484, 484); c.lineWidth = 1; for (let q = 0; q < 512; q += 32) { c.strokeStyle = 'rgba(80,86,100,.16)'; c.strokeRect(q, 0, 32, 512); c.strokeRect(0, q, 512, 32); } c.fillStyle = '#d4202c'; c.fillRect(30, 60, 452, 16); c.fillStyle = '#0a1420'; c.beginPath(); c.arc(256, 250, 70, 0, 7); c.fill(); c.strokeStyle = '#b8944a'; c.lineWidth = 18; c.stroke(); c.fillStyle = 'rgba(140,200,255,.35)'; c.beginPath(); c.ellipse(236, 225, 34, 18, -.6, 0, 7); c.fill(); for (let q = 0; q < 12; q++) { c.fillStyle = '#8a909c'; c.beginPath(); c.arc(40 + q * 39, 480, 5, 0, 7); c.arc(40 + q * 39, 34, 5, 0, 7); c.fill(); } });
+      const m = new THREE.Mesh(gp, fis({ map: tp, roughness: .4, side: THREE.DoubleSide })); m.castShadow = true; g.add(m);
+      for (const u of [.553, .763]) { const tr = []; for (let b = 0; b <= 10; b++) tr.push(naCasca(u, .2 + .37 * b / 10, 1)); g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(tr), 30, .5, 6), metal(0xa8adb8, .3))); } }
+  }
   // escotilha do cabo, no teto
-  const esc = new THREE.Mesh(new THREE.TorusGeometry(4, 1, 10, 30), metal(0xe0a83a, .2)); esc.rotation.x = Math.PI / 2; esc.position.set(-28, 15, 0); g.add(esc);
-  const nav = g.userData.nav; fundir(g); g.userData.nav = nav;
-  return { g, chamas, brilhoMotor, nav, escotilha: new THREE.Vector3(-28, 16, 0) };
+  const piloto = criarAstronauta(); piloto.g.scale.setScalar(.145); piloto.g.position.set(-L / 2 + .285 * L + .6, 2.6, 1.8); piloto.g.rotation.y = -1.2;
+  for (const q of piloto.pernas) q.o.rotation.x = -1.15; for (const q of piloto.bracos) { q.o.rotation.x = -.5; q.o.rotation.z = -q.lado * .75; }
+  piloto.g.traverse(o => { if (o.isMesh) { o.castShadow = false; o.userData.semSombra = true; if (o.material.emissive && o.material.emissiveIntensity < 1 && o.material.metalness < .9) { o.material.emissive.set(0x9aa4b8); o.material.emissiveIntensity = .28; } } });
+  const nav = g.userData.nav; fundir(g); g.userData.nav = nav; g.add(piloto.g);
+  return { g, chamas, brilhoMotor, nav, piloto, escotilha: naCasca(.76, .215, .6) };
 }
 
 // ---------- Cabo entre os dois (balança no espaço) ----------
@@ -178,7 +212,7 @@ export function criarCabo() {
     }
     for (let i = 0; i <= N; i++) {
       T.copy(pts[Math.min(N, i + 1)]).sub(pts[Math.max(0, i - 1)]).normalize(); N1.crossVectors(cima, T).normalize(); B1.crossVectors(T, N1);
-      for (let k = 0; k <= LADOS; k++) { const a = k / LADOS * Math.PI * 2, c = Math.cos(a), s = Math.sin(a), j = (i * (LADOS + 1) + k) * 3; A.copy(N1).multiplyScalar(c).addScaledVector(B1, s); nor[j] = A.x; nor[j + 1] = A.y; nor[j + 2] = A.z; pos[j] = pts[i].x + A.x * 1.5; pos[j + 1] = pts[i].y + A.y * 1.5; pos[j + 2] = pts[i].z + A.z * 1.5; }
+      for (let k = 0; k <= LADOS; k++) { const a = k / LADOS * Math.PI * 2, c = Math.cos(a), s = Math.sin(a), j = (i * (LADOS + 1) + k) * 3; A.copy(N1).multiplyScalar(c).addScaledVector(B1, s); nor[j] = A.x; nor[j + 1] = A.y; nor[j + 2] = A.z; pos[j] = pts[i].x + A.x * 1.9; pos[j + 1] = pts[i].y + A.y * 1.9; pos[j + 2] = pts[i].z + A.z * 1.9; }
     }
     geo.attributes.position.needsUpdate = geo.attributes.normal.needsUpdate = true;
   }

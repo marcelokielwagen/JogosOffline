@@ -101,12 +101,23 @@ export function criarCometa(raio) {
     p.setXYZ(i, v.x * raio * k, v.y * raio * k, v.z * raio * k);
   }
   geo.setAttribute('color', new THREE.Float32BufferAttribute(cor, 3)); geo.computeVertexNormals();
-  const rocha = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .92, metalness: .05, flatShading: true })); rocha.castShadow = true; g.add(rocha);
+  // veios de energia que se movem dentro da pedra: azuis no começo, viram lava conforme ele racha
+  const uv = { tt: { value: 0 }, dano: { value: 0 }, bate: { value: 0 } };
+  const matR = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .9, metalness: .05, flatShading: true });
+  matR.onBeforeCompile = s => {
+    Object.assign(s.uniforms, uv);
+    s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vL;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvL = position / ' + raio.toFixed(1) + ';');
+    s.fragmentShader = s.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vL; uniform float tt, dano, bate;').replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n float nn = sin(vL.x*5.+sin(vL.y*6.+tt*.7)*1.5)+sin(vL.y*7.+sin(vL.z*5.-tt*.6)*1.6)+sin(vL.z*6.+sin(vL.x*7.+tt*.5)*1.4); float veio = smoothstep(.34+dano*.25, .0, abs(nn)); vec3 corV = mix(vec3(.12,.6,1.), vec3(1.,.3,.04), dano); totalEmissiveRadiance += corV * veio * (.9 + dano * 2. + bate * 1.6) + corV * pow(1. - saturate(dot(normalize(vViewPosition), normal)), 2.5) * .35;');
+  };
+  const rocha = new THREE.Mesh(geo, matR); rocha.castShadow = true; g.add(rocha);
   // miolo em brasa: aparece nas partes fundas e cresce a cada batida
   const miolo = new THREE.Mesh(new THREE.SphereGeometry(raio, 32, 24), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff7a1a, emissiveIntensity: 2.4 })); g.add(miolo);
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0x66c8ff, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false })); halo.scale.setScalar(raio * 5); g.add(halo);
+  // pedrinhas em órbita
+  const orbita = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(raio * .13, 0), new THREE.MeshStandardMaterial({ color: 0x6a7286, roughness: .9, flatShading: true }), 16); orbita.castShadow = true; orbita.frustumCulled = false; g.add(orbita);
+  const orb = Array.from({ length: 16 }, (_, i) => [1.45 + (i * 37 % 10) / 10 * .7, i * 2.39, .5 + (i * 53 % 10) / 10 * .9, (i * 29 % 10) / 10 * 1.2 - .6, .5 + (i * 71 % 10) / 10]);
   // cauda de poeira e gás
-  const N = 320, pos = new Float32Array(N * 3), cores = new Float32Array(N * 3), sem = Array.from({ length: N }, () => [Math.random(), Math.random() * 6.28, Math.sqrt(Math.random()), Math.random()]);
+  const N = 380, pos = new Float32Array(N * 3), cores = new Float32Array(N * 3), sem = Array.from({ length: N }, () => [Math.random(), Math.random() * 6.28, Math.sqrt(Math.random()), Math.random()]);
   const gp = new THREE.BufferGeometry(); gp.setAttribute('position', new THREE.BufferAttribute(pos, 3)); gp.setAttribute('color', new THREE.BufferAttribute(cores, 3));
   const cauda = new THREE.Points(gp, new THREE.PointsMaterial({ map: tex, size: 13, transparent: true, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false })); cauda.frustumCulled = false; g.add(cauda);
   // explosão
@@ -127,7 +138,12 @@ export function criarCometa(raio) {
     // dano 0..1, vivo, pancada 0..1
     atualizar(t, dano, vivo, pancada) {
       g.visible = vivo;
-      rocha.rotation.set(t * .5, t * .7, 0); miolo.rotation.copy(rocha.rotation);
+      rocha.rotation.set(t * .75, t * 1.05, Math.sin(t * .6) * .4); miolo.rotation.copy(rocha.rotation);
+      uv.tt.value = t; uv.dano.value = dano; uv.bate.value = pancada;
+      // respira, e amassa quando leva pancada
+      const res = 1 + Math.sin(t * 1.9) * .035; g.scale.set(res + pancada * .2, res - pancada * .24, res + pancada * .2);
+      for (let i = 0; i < 16; i++) { const [q, f, v, inc, tm] = orb[i], an = t * v + f, rr = raio * (q + pancada * .7); p3.set(Math.cos(an) * rr, Math.sin(an) * rr * inc, Math.sin(an) * rr); e3.set(t * v * 2, t * v, 0); q4.setFromEuler(e3); um.setScalar(tm); m4.compose(p3, q4, um); orbita.setMatrixAt(i, m4); }
+      orbita.instanceMatrix.needsUpdate = true;
       miolo.scale.setScalar(.86 + dano * .13 + pancada * .03); miolo.material.emissiveIntensity = 1.4 + dano * 2 + pancada * 3;
       halo.material.color.setHSL(.56 - dano * .5, .9, .6); halo.material.opacity = .34 + pancada * .4 + dano * .16;
       if (vivo) {

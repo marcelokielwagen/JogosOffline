@@ -74,8 +74,8 @@ export function criarCena(container) {
   // luz de rosto: perto da banda, na frente de cada palco
   const rosto = (x, cor) => { const l = new THREE.PointLight(cor, 5200, 170, 1.5); l.position.copy(P(x, 128, ZV + 92)); cena.add(l); return l; };
   const rostoDJ = rosto(82, 0xd8f2ff), rostoCasal = rosto(310, 0xffe6cc);
-  const luzE = new THREE.PointLight(CORES.rosa, 0, 420, 1.2); luzE.position.copy(P(60, 600, 130));
-  const luzD = new THREE.PointLight(CORES.ciano, 0, 420, 1.2); luzD.position.copy(P(310, 600, 130));
+  const luzE = new THREE.PointLight(CORES.rosa, 0, 420, 1.2); luzE.position.copy(P(60, 440, 130));
+  const luzD = new THREE.PointLight(CORES.ciano, 0, 420, 1.2); luzD.position.copy(P(310, 440, 130));
   const luzB = new THREE.PointLight(0xffc27a, 0, 260, 1.2); luzB.position.copy(P(185, 240, 80));
   cena.add(luzE, luzD, luzB);
 
@@ -173,7 +173,7 @@ export function criarCena(container) {
   const arte = tela(1024, 2458, (g, w, h) => {
     g.scale(w / W, h / H);
     const gr = g.createLinearGradient(0, 0, 0, H);
-    gr.addColorStop(0, '#10104a'); gr.addColorStop(.3, '#1e1268'); gr.addColorStop(.55, '#2c1066'); gr.addColorStop(.78, '#4a1258'); gr.addColorStop(1, '#1e0828');
+    gr.addColorStop(0, '#10104a'); gr.addColorStop(.3, '#18104e'); gr.addColorStop(.48, '#120a36'); gr.addColorStop(.62, '#090520'); gr.addColorStop(1, '#040210');
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     let s = 77; const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
     // nebulosas
@@ -181,42 +181,28 @@ export function criarCena(container) {
     // raios saindo do planeta
     const cx = 185, cy = 668;
     g.save(); g.globalCompositeOperation = 'screen';
-    for (let i = 0; i < 36; i++) { const a = i / 36 * Math.PI * 2, rr = g.createRadialGradient(cx, cy, 70, cx, cy, 380); rr.addColorStop(0, i % 2 ? 'rgba(255,170,60,.22)' : 'rgba(255,60,160,.18)'); rr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rr; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 380, a, a + Math.PI / 44); g.fill(); }
+    for (let i = 0; i < 36; i++) { const a = i / 36 * Math.PI * 2, rr = g.createRadialGradient(cx, cy, 70, cx, cy, 380); rr.addColorStop(0, i % 2 ? 'rgba(90,120,255,.07)' : 'rgba(150,70,255,.06)'); rr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rr; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 380, a, a + Math.PI / 44); g.fill(); }
     g.restore();
     // faixas anos 70 que correm das palhetas até os canos
+    g.globalAlpha = .3;
     const faixa = (lado, desl, cor) => { const X = x => lado < 0 ? x : 370 - x; g.strokeStyle = cor; g.lineWidth = 4.4; g.beginPath(); g.moveTo(X(150 + desl), 884); g.bezierCurveTo(X(70 + desl), 800, X(128 + desl), 740, X(112 + desl), 660); g.bezierCurveTo(X(96 + desl), 656, X(78 + desl), 652, X(72 + desl), 642); g.stroke(); };
     [['#ffcf5c', 0], ['#ff8a3a', 5.4], ['#ff3f8e', 10.8], ['#8a46ff', 16.2], ['#22b8ff', 21.6]].forEach(([c, d]) => { faixa(-1, d, c); faixa(1, d, c); });
-    // planeta-disco
-    const pl = g.createRadialGradient(cx - 24, cy - 28, 6, cx, cy, 76); pl.addColorStop(0, '#ffe9a8'); pl.addColorStop(.3, '#ff9a4a'); pl.addColorStop(.65, '#d42a86'); pl.addColorStop(1, '#3a0f6a');
-    g.save(); g.shadowColor = 'rgba(255,120,120,.8)'; g.shadowBlur = 60; g.fillStyle = pl; g.beginPath(); g.arc(cx, cy, 72, 0, 7); g.fill(); g.restore();
-    g.save(); g.beginPath(); g.arc(cx, cy, 72, 0, 7); g.clip();
-    for (let r = 70; r > 24; r -= 2.4) { g.strokeStyle = `rgba(30,0,50,${.10 + (r % 3) * .04})`; g.lineWidth = .7; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke(); }
-    g.fillStyle = 'rgba(255,255,255,.10)'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 72, -2.4, -2); g.fill(); g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 72, .74, 1.14); g.fill();
-    g.restore();
-    g.fillStyle = '#160a38'; g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.fill();
-    g.strokeStyle = '#ffcf5c'; g.lineWidth = 1.6; g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.stroke(); g.beginPath(); g.arc(cx, cy, 75, 0, 7); g.stroke();
-    g.fillStyle = '#ffcf5c'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 6 : 15; g.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); } g.fill();
-    // anel do planeta
-    g.save(); g.translate(cx, cy); g.rotate(-.28); g.scale(1, .24);
-    [['#22d8ff', 108], ['#ff5cc0', 115], ['#ffcf5c', 121]].forEach(([c, r]) => { g.strokeStyle = c; g.lineWidth = 4.5; g.beginPath(); g.arc(0, 0, r, .42, Math.PI - .42); g.stroke(); g.globalAlpha = .55; g.beginPath(); g.arc(0, 0, r, Math.PI + .9, Math.PI * 2 - .9); g.stroke(); g.globalAlpha = 1; });
-    g.restore();
+    g.globalAlpha = 1;
     // estrelas
     for (let i = 0; i < 420; i++) { const x = rnd() * W, y = rnd() * H, r = rnd() < .92 ? .45 : 1.1; g.fillStyle = `rgba(255,${220 + rnd() * 35 | 0},255,${.35 + rnd() * .6})`; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
     // sol atrás de cada para-choque
     for (const b of BUMPERS.filter(u => !u.andar)) { for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; g.fillStyle = i % 2 ? '#ffcf5c' : '#ff3f8e'; g.beginPath(); g.moveTo(b.x + 18 * Math.cos(a - .12), b.y + 18 * Math.sin(a - .12)); g.lineTo(b.x + 30 * Math.cos(a), b.y + 30 * Math.sin(a)); g.lineTo(b.x + 18 * Math.cos(a + .12), b.y + 18 * Math.sin(a + .12)); g.fill(); } g.fillStyle = '#12082e'; g.beginPath(); g.arc(b.x, b.y, 20, 0, 7); g.fill(); }
-    // cidade ao longe entre as palhetas
-    g.save(); g.globalAlpha = .9; for (let x = 70; x < 300; x += 7 + rnd() * 8) { const a = 12 + rnd() * 40 * (1 - Math.abs(x - 185) / 150); g.fillStyle = '#1d0a34'; g.fillRect(x, 936 - a, 8, a); g.fillStyle = 'rgba(255,210,110,.8)'; for (let k = 0; k < a / 7; k++) if (rnd() < .5) g.fillRect(x + 1.5 + rnd() * 4, 936 - a + 3 + k * 6, 1.4, 1.6); } g.restore();
     // corredores marcados
     g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = .8; for (const x of [39, 331]) { g.setLineDash([4, 5]); g.beginPath(); g.moveTo(x, 600); g.lineTo(x, 180); g.stroke(); } g.setLineDash([]);
     // órbita do cometa e moldura dos objetivos
     g.strokeStyle = 'rgba(120,220,255,.5)'; g.lineWidth = 1.2; g.setLineDash([3, 4]); g.beginPath(); g.ellipse(185, 448, 54, 20, 0, 0, 7); g.stroke(); g.setLineDash([]);
-    for (let i = 0; i < 9; i++) { g.strokeStyle = `rgba(255,${150 + i * 10},90,${.5 - i * .05})`; g.lineWidth = 2; g.beginPath(); g.arc(185, 668, 80 + i * 3, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); }
+    for (let i = 0; i < 9; i++) { g.strokeStyle = `rgba(80,170,255,${.22 - i * .02})`; g.lineWidth = 2; g.beginPath(); g.arc(185, 668, 80 + i * 3, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); }
     // nome da mesa
     g.textAlign = 'center'; g.font = 'italic 900 20px system-ui, sans-serif'; g.lineJoin = 'round';
-    g.strokeStyle = '#14062c'; g.lineWidth = 6; g.strokeText('GALATIC PINBALL', 185, 806); g.strokeStyle = '#22d8ff'; g.lineWidth = 2; g.strokeText('GALATIC PINBALL', 185, 806); g.fillStyle = '#fff0c0'; g.fillText('GALATIC PINBALL', 185, 806);
+    g.strokeStyle = '#14062c'; g.lineWidth = 6; g.strokeText('GALATIC PINBALL', 185, 806); g.strokeStyle = '#12407a'; g.lineWidth = 2; g.strokeText('GALATIC PINBALL', 185, 806); g.fillStyle = '#8fa4d8'; g.fillText('GALATIC PINBALL', 185, 806);
   });
   arte.repeat.set(1 / W, 1 / H); arte.offset.set(.5, .5);
-  const matChao = new THREE.MeshPhysicalMaterial({ map: arte, emissiveMap: arte, emissive: 0xffffff, emissiveIntensity: .2, roughness: .55, clearcoat: .7, clearcoatRoughness: .09, envMapIntensity: .28 });
+  const matChao = new THREE.MeshPhysicalMaterial({ map: arte, emissiveMap: arte, emissive: 0xffffff, emissiveIntensity: .12, roughness: .6, clearcoat: .55, clearcoatRoughness: .12, envMapIntensity: .12 });
   extrudar([[14, 10], [386, 10], [386, 968], [14, 968]], -14, 0, [matChao, M.madeira]);
 
   // ---------- Gabinete ----------
@@ -269,7 +255,7 @@ export function criarCena(container) {
       case 'rampa': murete(l.pts, 5, 0, 14, M.escuro); murete(l.pts, 3, 14, 15.4, M.cromo); break;
       case 'varanda': murete(l.pts, 3, z0, z0 + 8, acrilico(0xbfe8ff, .25)); tubo(l.pts.map(p => P(p[0], p[1], z0 + 12)), 1.1, M.cromo, 60); l.pts.forEach(p => reto(P(p[0], p[1], z0), P(p[0], p[1], z0 + 12), .9, M.cromo)); break;
       case 'desvio': {
-        const t = extrudar([...l.pts], 0, 13, fisico({ color: ini[0] < 185 ? 0xc81f78 : 0x1686c8, roughness: .25, clearcoat: 1, transparent: true, opacity: .92 }), 0);
+        const t = extrudar([...l.pts], 0, 13, fisico({ color: ini[0] < 185 ? 0x4a1440 : 0x123c62, roughness: .25, clearcoat: 1, transparent: true, opacity: .92 }), 0);
         t.castShadow = true; tubo(l.pts.map(p => P(p[0], p[1], 8)), 2, M.borrachaClara, 40); break;
       }
     }
@@ -281,7 +267,7 @@ export function criarCena(container) {
 
   // ---------- Estilingues ----------
   const matEst = ESTILINGUES.map((s, i) => {
-    const arteP = tela(256, 256, g => { g.fillStyle = i ? '#0e5fa8' : '#a81468'; g.fillRect(0, 0, 256, 256); for (let k = 0; k < 14; k++) { g.fillStyle = k % 2 ? 'rgba(255,220,120,.5)' : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(128, 128); g.arc(128, 128, 260, k * .449, k * .449 + .22); g.fill(); } });
+    const arteP = tela(256, 256, g => { g.fillStyle = i ? '#0a2f58' : '#4a0c34'; g.fillRect(0, 0, 256, 256); for (let k = 0; k < 14; k++) { g.fillStyle = k % 2 ? 'rgba(255,220,120,.22)' : 'rgba(255,255,255,.06)'; g.beginPath(); g.moveTo(128, 128); g.arc(128, 128, 260, k * .449, k * .449 + .22); g.fill(); } });
     arteP.wrapS = arteP.wrapT = THREE.RepeatWrapping; arteP.repeat.set(.02, .02);
     const m = fisico({ map: arteP, roughness: .2, clearcoat: 1, transparent: true, opacity: .9, emissiveMap: arteP, emissive: 0xffffff, emissiveIntensity: .25 });
     const c = [(s.a[0] + s.b[0] + s.c[0]) / 3, (s.a[1] + s.b[1] + s.c[1]) / 3], enc = p => [c[0] + (p[0] - c[0]) * .86, c[1] + (p[1] - c[1]) * .86];
@@ -294,7 +280,7 @@ export function criarCena(container) {
 
   for (const s of [1, -1]) {
     const X = x => s > 0 ? x : 370 - x, pl = [[41, 754], [51, 754], [51, 800], [112, 833], [108, 842], [41, 806]].map(([x, y]) => [X(x), y]);
-    const m = fisico({ color: s > 0 ? 0xff5aa8 : 0x4ab8ff, roughness: .15, clearcoat: 1, transparent: true, opacity: .55, side: THREE.DoubleSide });
+    const m = fisico({ color: s > 0 ? 0x3a1636 : 0x14304e, roughness: .25, clearcoat: 1, transparent: true, opacity: .7, side: THREE.DoubleSide });
     const t = extrudar(s > 0 ? pl : pl.reverse(), 16, 17.4, m); t.castShadow = false;
     for (const [x, y] of [[46, 760], [46, 800], [106, 836]]) cilindro(2.2, 2.2, 2, M.cromo, X(x), y, 18.2, 6);
   }
@@ -342,15 +328,26 @@ export function criarCena(container) {
   function cano(T, material, led, de = 0) {
     const pts = T.pts.filter(p => p.d >= de).map(p => ponto(p, R));
     const c = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .5), L = c.getLength();
-    const m = new THREE.Mesh(new THREE.TubeGeometry(c, Math.min(280, pts.length * 2), 10.5, 16, false), material); m.renderOrder = 3; add(m);
+    const m = new THREE.Mesh(new THREE.TubeGeometry(c, Math.min(280, pts.length * 2), 9.2, 14, false), material); m.renderOrder = 3; add(m);
     const n = Math.max(2, Math.round(L / 84));
     for (let i = 0; i <= n; i++) {
-      const t = i / n, a = new THREE.Mesh(new THREE.TorusGeometry(10.8, .75, 6, 24), M.cromo);
+      const t = i / n, a = new THREE.Mesh(new THREE.TorusGeometry(9.5, .6, 6, 22), M.cromo);
       a.position.copy(c.getPointAt(t)); a.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), c.getTangentAt(t)); a.castShadow = true; add(a);
     }
     // fio de luz por fora do cano
-    const fio = pts.map(p => p.clone().add(new THREE.Vector3(0, -10.4, 0)));
+    const fio = pts.map(p => p.clone().add(new THREE.Vector3(0, -9.2, 0)));
     const f = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(fio), pts.length * 2, .9, 6), led); add(f);
+  }
+  // trilho fino (dois fios, um fio de luz e argolas discretas): loopings dos planetas
+  function trilhoFino(T, led, de = 0) {
+    const pts = T.pts.filter(p => p.d >= de).map(p => ponto(p, R)), E = [], D = [], B = [], cima = new THREE.Vector3(0, 1, 0), tg = new THREE.Vector3(), la = new THREE.Vector3(), ba = new THREE.Vector3();
+    pts.forEach((p, i) => {
+      tg.copy(pts[Math.min(pts.length - 1, i + 1)]).sub(pts[Math.max(0, i - 1)]).normalize(); la.crossVectors(tg, cima).normalize(); ba.crossVectors(tg, la).normalize();
+      E.push(p.clone().addScaledVector(la, 6).addScaledVector(ba, 5)); D.push(p.clone().addScaledVector(la, -6).addScaledVector(ba, 5)); B.push(p.clone().addScaledVector(ba, 8));
+      if (i % 9 === 4) tubo([E[i].clone(), B[i].clone(), D[i].clone()], .45, M.cromo, 6, false, 5);
+    });
+    for (const f of [E, D]) tubo(f, .75, M.cromo, Math.min(260, f.length), false, 6);
+    add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(B), Math.min(260, B.length), .6, 5), led));
   }
   // rampa aberta na boca do cano (chapa que vai estreitando)
   function bocaRampa(T, ate, led) {
@@ -362,7 +359,7 @@ export function criarCena(container) {
     for (const b of [E, D]) { tubo(b.map(v => v.clone().add(new THREE.Vector3(0, 7, 0))), 1.3, M.cromo, 30); tubo(b, 1, led, 30); }
   }
   const ledCano = { canoE: fluxo(CORES.ciano), canoD: fluxo(CORES.rosa), loopE: fluxo(CORES.roxo), loopD: fluxo(CORES.laranja), miniE: fluxo(CORES.verde), miniD: fluxo(CORES.ouro), elevador: fluxo(CORES.verde), ponte: fluxo(CORES.ouro) };
-  for (const [n, c] of [['canoE', 0x6fdcff], ['canoD', 0xff7acc], ['loopE', 0xb99cff], ['loopD', 0xffb070], ['miniE', 0x90ffc8], ['miniD', 0xffe08a]]) { bocaRampa(TRILHAS[n], 58, ledCano[n]); cano(TRILHAS[n], acrilico(c, .24), ledCano[n], 52); }
+  for (const [n, c] of [['canoE', 0x6fdcff], ['canoD', 0xff7acc], ['loopE', 0xb99cff], ['loopD', 0xffb070], ['miniE', 0x90ffc8], ['miniD', 0xffe08a]]) { bocaRampa(TRILHAS[n], 58, ledCano[n]); if (n[0] === 'l') trilhoFino(TRILHAS[n], ledCano[n], 52); else cano(TRILHAS[n], acrilico(c, .16), ledCano[n], 52); }
   cano(TRILHAS.elevE, acrilico(0xc8ffe6, .16), ledCano.elevador, 34); cano(TRILHAS.elevD, acrilico(0xc8ffe6, .16), ledCano.elevador, 84);
   cano(TRILHAS.ponte, acrilico(0xffe2a0, .22), ledCano.ponte, 12);
   // trilhos de arame: 4 fios e argolas, como nas mesas de verdade
@@ -385,7 +382,7 @@ export function criarCena(container) {
   // ---------- Planetas (no meio dos loopings) e cometa ----------
   const planetas = PLANETAS.map(p => {
     const g = criarPlaneta(p.nome, p.r); g.position.copy(P(p.x, p.y, p.z + R)); add(g);
-    for (const a of [.5, 2.6, 4.7]) { const d = new THREE.Vector3(Math.cos(a), Math.sin(a) * .82, Math.sin(a) * -.57); reto(g.position.clone().addScaledVector(d, p.r * .98), g.position.clone().addScaledVector(d, 28.5), .8, M.cromo); }
+    for (const a of [.5, 2.6, 4.7]) { const d = new THREE.Vector3(Math.cos(a), Math.sin(a) * .82, Math.sin(a) * -.57); reto(g.position.clone().addScaledVector(d, p.r * .98), g.position.clone().addScaledVector(d, 27.5), .8, M.cromo); }
     return g;
   });
   const cometa = criarCometa(COMETA.r); cometa.g.position.copy(P(COMETA.x, COMETA.y, COMETA.r)); add(cometa.g); add(cometa.efeitos);
@@ -434,6 +431,27 @@ export function criarCena(container) {
   };
   const letras = LETRAS.map(l => luzLetra(l, 9)), altas = ALTAS.map(l => luzLetra(l, 8));
 
+  // ---------- Logo no centro: arte iluminada (astronauta em hang loose com a nave ao fundo) ----------
+  {
+    const cs = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 1, 900), alvoR = new THREE.WebGLRenderTarget(1024, 1024, { samples: 4, type: THREE.HalfFloatType });
+    cs.environment = cena.environment; cs.environmentIntensity = .5;
+    const ceu = tela(1024, 1024, (g, w, h) => {
+      const q = g.createRadialGradient(w * .5, h * .42, 30, w * .5, h * .5, 560); q.addColorStop(0, '#2a3cc0'); q.addColorStop(.35, '#5a1f9a'); q.addColorStop(.7, '#1c0c4c'); q.addColorStop(1, '#050214'); g.fillStyle = q; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 30; i++) { const x = Math.random() * w, y = Math.random() * h, z = 60 + Math.random() * 180, n = g.createRadialGradient(x, y, 0, x, y, z); n.addColorStop(0, ['rgba(255,60,170,.22)', 'rgba(40,200,255,.2)', 'rgba(255,170,60,.12)'][i % 3]); n.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = n; g.fillRect(x - z, y - z, z * 2, z * 2); }
+      for (let i = 0; i < 420; i++) { g.fillStyle = 'rgba(255,255,255,' + Math.random() + ')'; g.beginPath(); g.arc(Math.random() * w, Math.random() * h, Math.random() < .93 ? 1.3 : 3, 0, 7); g.fill(); }
+      g.lineWidth = 4; for (let k = 0; k < 30; k++) { g.strokeStyle = 'rgba(90,200,255,' + (.5 * (1 - k / 30)) + ')'; g.beginPath(); g.arc(w / 2, h + 560, 760 + k * 4, 0, 7); g.stroke(); }
+    });
+    cs.background = ceu;
+    const a2 = criarAstronauta(), n2 = criarNave(); a2.g.scale.setScalar(.74); a2.g.position.set(-7, -19, 40); a2.g.rotation.set(-.05, .2, .1); n2.g.scale.setScalar(.66); n2.g.position.set(16, 27, -60); n2.g.rotation.set(.5, .3, .34); n2.chamas.forEach(f => f.scale.set(1.2, 1.2, 1.2)); cs.add(a2.g, n2.g);
+    cs.add(new THREE.HemisphereLight(0x9fb4ff, 0x40104a, .7));
+    for (const [cor, k, x, y, z] of [[0xff3fb0, 5, -120, 40, -30], [0x2fd8ff, 5, 130, 60, -20], [0xfff0d8, 1.6, 40, 90, 160]]) { const l = new THREE.DirectionalLight(cor, k); l.position.set(x, y, z); cs.add(l); }
+    cam.position.set(0, 4, 205); cam.lookAt(0, 4, 0);
+    renderer.setRenderTarget(alvoR); renderer.render(cs, cam); renderer.setRenderTarget(null); renderer.shadowMap.needsUpdate = true;
+    cs.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    const disco = new THREE.Mesh(new THREE.CircleGeometry(74, 72), new THREE.MeshBasicMaterial({ map: alvoR.texture, color: 0xb4b4c0 })); disco.rotation.x = -Math.PI / 2; disco.position.copy(P(185, 668, .45)); disco.userData.movel = true; add(disco);
+    anelNo(185, 668, .8, 75, 1.1, umSo('aroLogo', () => neon(CORES.ciano, .9))); anelNo(185, 668, .7, 78, .5, umSo('aroLogo2', () => neon(CORES.rosa, .6)));
+  }
+
   // luzes do cometa (quantas batidas já levou) e dos 4 objetivos
   const luzCometa = Array.from({ length: COMETA.precisa }, (_, i) => { const a = Math.PI * (1.12 + .76 * i / (COMETA.precisa - 1)), m = new THREE.Mesh(new THREE.CircleGeometry(4.6, 20), new THREE.MeshBasicMaterial()); m.rotation.x = -Math.PI / 2; m.position.copy(P(185 + Math.cos(a) * 80, 674 + Math.sin(a) * 80, .5)); add(m); anelNo(185 + Math.cos(a) * 80, 674 + Math.sin(a) * 80, .5, 4.8, .5, M.cromo); return m; });
   const luzObj = Array.from({ length: 6 }, (_, i) => {
@@ -460,9 +478,9 @@ export function criarCena(container) {
   // ---------- Astronauta, ônibus espacial e o cabo ----------
   const astro = criarAstronauta(); astro.g.scale.setScalar(1.06); add(astro.g);
   for (const q of astro.bracos) q.r0 = q.h.rotation.clone();
-  const nave = criarNave(); nave.g.scale.setScalar(.92); add(nave.g);
+  const nave = criarNave(); nave.g.scale.setScalar(1); add(nave.g);
   const cabo = criarCabo(); add(cabo.m);
-  const baseAstro = P(84, 82, 148), baseNave = P(284, 66, 146), pA = new THREE.Vector3(), pN = new THREE.Vector3();
+  const baseAstro = P(88, 78, 150), baseNave = P(286, 62, 148), pA = new THREE.Vector3(), pN = new THREE.Vector3();
   const E = criarEfeitos(cena, P, W, H);
 
   // alvos em pé das varandas
@@ -483,12 +501,9 @@ export function criarCena(container) {
   vinil.position.copy(P(VINIL.x, VINIL.y, ZV + .8)); vinil.receiveShadow = true; add(vinil);
   const matAroVinil = neon(CORES.ouro); anelNo(VINIL.x, VINIL.y, ZV + 1, VINIL.r + 1.2, 1, matAroVinil);
 
-  // globo espelhado entre as varandas
-  const globo = new THREE.Mesh(new THREE.IcosahedronGeometry(12, 3), mat(0xffffff, { metalness: 1, roughness: .06, flatShading: true, envMapIntensity: 2.2 })); globo.position.copy(P(191, 30, 172)); add(globo);
-  reto(P(191, 34, 187), P(191, 4, 200), .5, M.aco);
   // lampadinhas de iluminação geral nas beiradas
   const lampadas = [];
-  for (const [x, y] of [[26, 600], [344, 600], [26, 766], [344, 766], [60, 836], [310, 836], [130, 420], [240, 420], [112, 660], [258, 660], [26, 470], [344, 470], [160, 520], [210, 520]]) { const m = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 8), umSo('lampada', () => neon(0xffd9a0, 1.8))); m.position.copy(P(x, y, 12)); add(m); lampadas.push(m); }
+  for (const [x, y] of [[26, 600], [344, 600], [130, 420], [240, 420], [26, 470], [344, 470], [160, 520], [210, 520]]) { const m = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 8), umSo('lampada', () => neon(0xffd9a0, 1.8))); m.position.copy(P(x, y, 12)); add(m); lampadas.push(m); }
 
   // ---------- Lançador ----------
   const pistao = new THREE.Group();
@@ -496,7 +511,7 @@ export function criarCena(container) {
   const molas = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(Array.from({ length: 90 }, (_, i) => new THREE.Vector3(Math.cos(i * .7) * 5.4, Math.sin(i * .7) * 5.4, i * .4))), 260, .7, 6), M.aco); add(molas);
   cilindro(8, 8, 10, M.cromo, LANCADOR.x, 992, 22).rotation.x = Math.PI / 2;
 
-  for (const m of [pistao, molas, globo, vinil, portinhola, tampaTunel, tampaPonte]) m.userData.movel = true;
+  for (const m of [pistao, molas, vinil, portinhola, tampaTunel, tampaPonte]) m.userData.movel = true;
   fundir(cena);
   for (const m of cena.children) if (m.isMesh && !m.userData.movel) { m.updateMatrix(); m.matrixAutoUpdate = false; }
   for (const g of [pistao, ...catracas, ...alvoTecla.map(a => a.g), ...malhaPalheta]) fundir(g);
@@ -614,31 +629,30 @@ export function criarCena(container) {
     relogioT = t;
     const b = batida === undefined ? t * 2.1 : batida, pulso = .35, pisca = 1, show = X.show > 0;
     for (const n of Object.values(NEON)) n.emissiveIntensity = 1.3 + pulso * .7;
-    const cl = cometa.clarao(t); luzE.intensity = luzD.intensity = 1350 + cl * 1200;
+    const cl = cometa.clarao(t); luzE.intensity = luzD.intensity = 700 + cl * 1200;
     luzB.intensity = 1100 + BUMPERS.reduce((s, u) => s + Math.max(0, u.flash), 0) * 1500;
     matLetreiro.emissiveIntensity = .7 + pulso * .25;
-    globo.rotation.y = t * (show ? 2.4 : .6);
 
     // energia do show: sobe com a ação e cai sozinha
     energia += ((show ? .85 : .28 + Math.min(.4, X.combo * .07)) - energia) * Math.min(1, dt * .9); energia = Math.min(1, energia);
     fluxos.forEach(m => m.uniforms.t.value = t);
     for (const k of [1, 2]) { const perto = show || F.bolas.some(u => u.andar === k || (u.trilha && u.trilha.andarFim === k && u.s > u.trilha.L * .5)); festa[k] += ((perto ? 1 : 0) - festa[k]) * Math.min(1, dt * 4); ledVaranda[k].emissive.copy(E.paleta[k]); ledVaranda[k].emissiveIntensity = 1 + pulso * .9 + festa[k] * 1.2; }
-    rostoDJ.intensity = 620 + festa[1] * 350 + pulso * 120; rostoCasal.intensity = 800 + festa[2] * 400 + pulso * 120;
+    rostoDJ.intensity = 420 + festa[1] * 250 + pulso * 120; rostoCasal.intensity = 260 + festa[2] * 120 + pulso * 120;
     luzE.color.copy(E.paleta[0]); luzD.color.copy(E.paleta[1]); luzB.color.copy(E.paleta[2]);
     // astronauta flutuando e fazendo "hang loose"
     const f1 = festa[1], f2 = festa[2], ag = astro.g;
     ag.position.copy(baseAstro); ag.position.x += Math.sin(t * .5) * 11; ag.position.y += Math.sin(t * .8) * 6 + f1 * Math.abs(Math.sin(b * Math.PI)) * 4; ag.position.z += Math.cos(t * .42) * 7;
-    ag.rotation.set(-.32 + Math.sin(t * .6) * .13, .12 + Math.sin(t * .35) * .34, .1 + Math.sin(t * .45) * .2 + f1 * Math.sin(b * Math.PI) * .1);
+    ag.rotation.set(-.18 + Math.sin(t * .6) * .12, .22 + Math.sin(t * .35) * .22, 1.22 + Math.sin(t * .45) * .13 + f1 * Math.sin(b * Math.PI) * .06);
     astro.cab.rotation.set(Math.sin(t * .7) * .1, Math.sin(t * .5) * .25, 0);
     for (const q of astro.bracos) { q.o.rotation.z = q.lado * (.05 + Math.sin(t * 1.1 + q.lado) * .13 + f1 * (.1 + Math.sin(b * Math.PI) * .18)); q.o.rotation.x = Math.sin(t * .9 + q.lado * 2) * .12; q.h.rotation.z = q.r0.z + Math.sin(t * 6.5 + q.lado) * (.12 + f1 * .2); q.h.rotation.y = q.r0.y + Math.sin(t * 6.5 + q.lado) * (.1 + f1 * .18); }
     for (const q of astro.pernas) q.o.rotation.x = Math.sin(t * .9 + q.lado * 1.4) * .14;
     // ônibus espacial
     const ng = nave.g, motor = Math.max(f2, X.fase === 0 || show ? .75 : .18);
     ng.position.copy(baseNave); ng.position.y += Math.sin(t * .6 + 1) * 4 + f2 * 3; ng.position.x += Math.sin(t * .4) * 5;
-    ng.rotation.set(.5 + Math.sin(t * .5) * .06, .34 + Math.sin(t * .3) * .08, .1 + Math.sin(t * .7) * .04 + f2 * .05);
+    ng.rotation.set(.3 + Math.sin(t * .5) * .05, .3 + Math.sin(t * .3) * .07, .1 + Math.sin(t * .7) * .04 + f2 * .05);
     nave.chamas.forEach((c, i) => { c.scale.set(motor * (.85 + Math.sin(t * 5 + i * 2) * .06) + .02, .7 + motor * .5, .7 + motor * .5); c.material.opacity = .35 + motor * .6; });
     nave.brilhoMotor.emissiveIntensity = 1.2 + motor * 3; nave.nav.forEach((m, i) => m.emissiveIntensity = 2);
-    ag.updateMatrixWorld(); ng.updateMatrixWorld(); cabo.atualizar(ag.localToWorld(pA.set(0, -8, -18)), ng.localToWorld(pN.copy(nave.escotilha)), t);
+    ag.updateMatrixWorld(); ng.updateMatrixWorld(); cabo.atualizar(ag.localToWorld(pA.set(11.5, -9, -3)), ng.localToWorld(pN.copy(nave.escotilha)), t);
 
     // peças que conversam
     for (const s of setas) { const l = X.luz(s.nome); s.m.color.copy(s.cor).multiplyScalar(l === 0 ? .07 : l === 1 ? .55 : 1.15); }
@@ -655,7 +669,7 @@ export function criarCena(container) {
     matAroVinil.emissive.setHex([CORES.ouro, CORES.ouro, CORES.verde, CORES.laranja, CORES.rosa][X.vinil]); matAroVinil.emissiveIntensity = .8 + X.vinil * .5 + pulso * .5;
     TECLAS.forEach((tc, i) => { const k = alvoTecla[i]; k.g.position.y += ((tc.acesa ? -21 : 0) - k.g.position.y) * Math.min(1, dt * 16); });
     ALVOS.forEach((a, i) => { const k = alvos[i], bate = F.relogio - a.toque < .12; k.m.emissiveIntensity = a.aceso ? 1.8 : bate ? 2.4 : .22 + pulso * .12; k.b.rotation.x = bate && a.andar ? -.25 : 0; });
-    ESTILINGUES.forEach((s, i) => { const f = s.flash > 0; matEst[i].m.emissiveIntensity = f ? 1.4 : .22; matEst[i].lamp.material.emissiveIntensity = f ? 5 : 1.4; });
+    ESTILINGUES.forEach((s, i) => { const f = s.flash > 0; matEst[i].m.emissiveIntensity = f ? .6 : .03; matEst[i].lamp.material.emissiveIntensity = f ? 1.6 : .3; });
     BUMPERS.forEach((u, i) => { const f = Math.max(0, u.flash) / .16, k = bumpers[i]; k.mc.emissiveIntensity = .35 + pulso * .15 + f * 1.2; k.anel.position.y = k.za - f * 6 * k.k; });
     portinhola.position.y += ((PORTAS.arco.aberta ? -16 : 0) - portinhola.position.y) * Math.min(1, dt * 12);
     CATRACAS.forEach((q, i) => catracas[i].rotation.x = q.ang);
@@ -665,7 +679,7 @@ export function criarCena(container) {
     pistao.position.copy(P(LANCADOR.x, yp, 9)); molas.position.copy(P(LANCADOR.x, yp + 3, 9)); molas.scale.z = Math.max(.2, 1 - F.puxar * .7);
     moverFaiscas(agora);
     planetas.forEach((g, i) => { g.rotation.y = t * (i ? .22 : .3); if (g.userData.nuvens) g.userData.nuvens.rotation.y = t * .12; });
-    cometa.g.position.copy(P(COMETA.x, COMETA.y, COMETA.r + 1 + Math.sin(t * 2) * 1.2));
+    cometa.g.position.copy(P(COMETA.x, COMETA.y, COMETA.r + 2 + Math.sin(t * 2.4) * 2));
     cometa.atualizar(t, COMETA.batidas / COMETA.precisa, COMETA.vivo, Math.max(0, 1 - (F.relogio - COMETA.toque) / .25));
 
     F.bolas.forEach((bl, i) => {
@@ -708,7 +722,7 @@ export function criarCena(container) {
       case 'perdeu': E.estourar(P(185, 900, 10), 40, 140, [0xff2040, 0xff8040]); E.tremer(2); energia *= .4; break;
     }
   }
-  { const ocultos = []; cena.traverse(o => { if (!o.visible) { ocultos.push(o); o.visible = true; } }); cena.traverse(o => { if (o.isMesh && o.material.isMeshStandardMaterial) o.receiveShadow = true; });
+  { const ocultos = []; cena.traverse(o => { if (!o.visible) { ocultos.push(o); o.visible = true; } }); cena.traverse(o => { if (o.isMesh && o.material.isMeshStandardMaterial && !o.userData.semSombra) o.receiveShadow = true; });
     const ouro = bolaMalha(0), dourada = new THREE.Mesh(geoBola, M.bolaOuro); dourada.receiveShadow = true; ouro.receiveShadow = true; ouro.visible = true; cena.add(dourada);
     renderer.shadowMap.needsUpdate = true; composer.render(); cena.remove(dourada); ouro.visible = false; ocultos.forEach(o => { o.visible = false; }); }
   return { atualizar, enquadrar, faisca, explodir, evento, modo, renderer, energia: () => energia };

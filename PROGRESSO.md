@@ -249,3 +249,8 @@ O roteiro completo das etapas está em `PROMPT.md`.
   tudo preparado antes de começar, qualidade que baixa sozinha e fica lembrada (galaticQualidade). Cache `v36`.
 - **Galatic Pinball, rastro e letreiros (24/11/2026)**, pedido do dono: rastro da bola só logo depois de bater numa peça;
   letreiros de pontos entram com estouro, ficam menos tempo e saem explodindo. Cache `v37`. Próximo: som.
+- **Galatic Pinball, música e cena (24/11/2026)**, pedido do dono: área das palhetas escura; logo do astronauta com a nave
+  no centro (no lugar do planeta-disco); loopings dos planetas em trilho fino; asteroide com veios de energia e pedrinhas em
+  órbita; astronauta na horizontal, cabo na porta lateral aberta da nave com outro astronauta nos computadores; sem o globo.
+  Música nova no estilo house francês (técnica, não cópia): disco original fabricado por código e recortado, filtro, phaser,
+  distorção, bombeio do bumbo e voz de robô. Cache `v38`.

@@ -83,7 +83,7 @@ for (const s of ESTILINGUES) {
 }
 
 // Pinos de borracha soltos (asteroides)
-export const PINOS = [[124, 690], [246, 690]];
+export const PINOS = [[98, 722], [272, 722]];
 for (const [x, y] of PINOS) seg(0, x, y, x, y, { r: 5, e: .7, tipo: 'pino' });
 
 // Para-choques redondos (bumpers): 3 na mesa e 3 em cada plataforma
@@ -156,7 +156,7 @@ export const ALTAS = [159.5, 186.5, 213.5].map((x, i) => ({ i, x, y: 126, andar:
 // Sensores das voltas (para saber que a bola deu a volta inteira)
 export const VOLTAS = [{ lado: 'E', x: 38, y: 250, toque: -9 }, { lado: 'D', x: 331, y: 260, toque: -9 }];
 // Cometa: vai e volta no meio da mesa; depois de muitas batidas ele explode
-export const COMETA = { x: 185, y: 448, x0: 185, amplitude: 34, r: 17, vx: 0, fase: 0, vivo: true, batidas: 0, precisa: 10, toque: -9, volta: 0 };
+export const COMETA = { x: 185, y: 448, x0: 185, y0: 448, amplitude: 34, r: 17, vx: 0, vy: 0, fase: 0, vivo: true, batidas: 0, precisa: 10, toque: -9, volta: 0 };
 // Planetas: cada cano de cima faz um looping em volta de um
 export const PLANETAS = [
   { nome: 'azul', x: 98, y: 478, z: 92, r: 25 },
@@ -200,10 +200,10 @@ TRILHAS.canoE = trilha(curva([...fora, [28, 182, 98], [38, 158, 86], [52, 152, Z
 TRILHAS.canoD = trilha(curva([...espelho(fora).map(([x, y, z], i, a) => [i > a.length - 5 ? x + (y < 470 ? 18 : 0) : x, y, z]), [363, 190, 98], [352, 162, 86], [338, 152, ZV]], 6), { nome: 'canoD', andarIni: 0, andarFim: 2, k: 1500, cano: true, vmax: 420, boca: { x0: 267, x1: 307, y: 637, dir: -1 } });
 // Canos de dentro: duas voltas em torno de um planeta e travessia para a outra plataforma
 const dentro = [[132, 560, 0], [132, 538, 10], [126, 522, 26], [112, 512, 44]];
-TRILHAS.loopE = trilha(curva([...dentro, ...looping(PLANETAS[0], 1, 40, 44, 2),
+TRILHAS.loopE = trilha(curva([...dentro, ...looping(PLANETAS[0], 1, 35, 40, 2),
   [140, 470, 112], [185, 420, 126], [224, 372, 130], [252, 300, 122], [272, 230, 104], [290, 170, 84], [304, 152, ZV]], 6),
   { nome: 'loopE', andarIni: 0, andarFim: 2, k: 1300, cano: true, vmax: 420, boca: { x0: 114, x1: 150, y: 557, dir: -1 } });
-TRILHAS.loopD = trilha(curva([...espelho(dentro), ...looping(PLANETAS[1], -1, 40, 44, 2),
+TRILHAS.loopD = trilha(curva([...espelho(dentro), ...looping(PLANETAS[1], -1, 35, 40, 2),
   [230, 462, 98], [185, 424, 99], [148, 378, 106], [122, 310, 112], [108, 240, 102], [96, 174, 84], [84, 152, ZV]], 6),
   { nome: 'loopD', andarIni: 0, andarFim: 1, k: 1300, cano: true, vmax: 420, boca: { x0: 220, x1: 256, y: 557, dir: -1 } });
 // Loopings das plataformas: boca no canto, uma volta no ar e de volta ao fundo da própria plataforma

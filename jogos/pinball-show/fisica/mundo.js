@@ -148,7 +148,7 @@ export function criarFisica(aoEvento) {
     if (andar === 0 && COMETA.vivo) {
       const c = contato(COMETA.x, COMETA.y, COMETA.x, COMETA.y, COMETA.r);
       if (c) {
-        const forca = rebater(c, .55, .02, COMETA.vx, 0);
+        const forca = rebater(c, .55, .02, COMETA.vx, COMETA.vy);
         if (forca > 80 && M.relogio - COMETA.toque > .12) { COMETA.toque = M.relogio; B.vx += c.nx * 160; B.vy += c.ny * 160; B.bateu = M.relogio; ev('cometa', { x: c.qx, y: c.qy }); }
       }
     }
@@ -308,9 +308,10 @@ export function criarFisica(aoEvento) {
       if (Math.floor(q.ang / Math.PI) !== meia) ev('catraca');
     }
     // cometa: vai e volta devagar
-    COMETA.fase += h * .9;
+    COMETA.fase += h * 1.15;
     const xc = COMETA.x0 + Math.sin(COMETA.fase) * COMETA.amplitude;
-    COMETA.vx = (xc - COMETA.x) / h; COMETA.x = xc;
+    const yc = COMETA.y0 + Math.sin(COMETA.fase * 2) * 11;
+    COMETA.vx = (xc - COMETA.x) / h; COMETA.vy = (yc - COMETA.y) / h; COMETA.x = xc; COMETA.y = yc;
     if (!COMETA.vivo && M.relogio > COMETA.volta) { COMETA.vivo = true; COMETA.batidas = 0; ev('cometaVoltou'); }
     for (const b of M.bolas.slice()) { moverBola(b, h); alturaVisual(b, h); }
     if (M.bolas.length > 1) choqueEntreBolas();
