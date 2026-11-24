@@ -56,7 +56,7 @@ const JO = (() => {
   function estatisticas() {
     const v = carregar('velha', null), r = carregar('resta-um', null), p = carregar('paciencia', null), c = carregar('cruzadas', null);
     const k = carregar('caca', null), d = carregar('dobro', null), fc = carregar('freecell', null);
-    const ps = carregar('pinballShow', null);
+    const ps = carregar('pinballShow', null), pz = carregar('ponteZero', null);
     const fcn = (n, nome) => { const s = fc && fc.stats && fc.stats[n]; return [nome, s && s.j ? `${s.v} de ${s.j} (${Math.round(100 * s.v / s.j)}%)` : '–']; };
     const pn = (n, nome) => { const s = p && p.stats && p.stats.n && p.stats.n[n]; return [nome, s && s.v ? `${s.v} · melhor ${relogio(s.melhor)}` : '–']; };
     const temposCaca = k && k.stats ? Object.values(k.stats.melhor || {}) : [];
@@ -72,6 +72,7 @@ const JO = (() => {
       ['Caça-Palavras', [['Jogos completos', k && k.stats ? k.stats.v : 0], ['Melhor tempo', temposCaca.length ? relogio(Math.min(...temposCaca)) : '–']]],
       ['Dobro', [['Recorde de pontos', d && d.stats ? d.stats.melhor : 0], ['Maior peça', d && d.stats && d.stats.maior ? d.stats.maior : '–']]],
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
+      ['Ponte Zero', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Travessias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–']]],
     ];
   }
   function preencherEstatisticas(cx) {

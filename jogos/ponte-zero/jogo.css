@@ -1,0 +1,33 @@
+/* Ponte Zero */
+body.ponte-zero { margin: 0; overflow: hidden; background: #140d0a; overscroll-behavior: none; padding: 0; }
+.pz-pagina { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.pz-pagina .topo { flex: none; background: #1a1210; color: #f4e8dc; margin: 0; padding: max(6px, env(safe-area-inset-top)) 10px 6px; }
+.pz-caixa { flex: 1; min-height: 0; position: relative; }
+.pz { position: absolute; inset: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; color: #fff; background: #3a241a; cursor: grab; }
+.pz.jogando:active { cursor: grabbing; }
+.pz [hidden] { display: none !important; }
+.pz-tela { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pz-vinheta { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, transparent 52%, rgba(16, 6, 4, .5) 100%); }
+.pz-hud { position: absolute; inset: 0; pointer-events: none; }
+.pz-caminho { position: absolute; top: 10px; left: 50%; width: min(70%, 340px); height: 8px; transform: translateX(-50%); border-radius: 8px; background: rgba(0, 0, 0, .45); overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
+.pz-caminho i, .pz-arma i, .pz-carga i { display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(0); }
+.pz-caminho i { background: linear-gradient(90deg, #ffb35a, #ffe3a6); }
+.pz-arma { position: absolute; left: 12px; bottom: max(14px, env(safe-area-inset-bottom)); min-width: 138px; padding: 8px 12px 9px; border-radius: 10px; background: rgba(14, 9, 7, .62); border: 1px solid rgba(255, 220, 180, .2); }
+.pz-arma b { display: block; font-size: 15px; }
+.pz-arma span { display: block; height: 5px; margin: 6px 0 5px; border-radius: 5px; background: rgba(255, 255, 255, .18); overflow: hidden; }
+.pz-arma i { background: #ffc24a; }
+.pz-arma small { font-size: 12px; color: #f0dccb; font-variant-numeric: tabular-nums; }
+.pz-conta { position: absolute; left: 0; top: 0; min-width: 40px; padding: 2px 12px 3px; border-radius: 20px; text-align: center; font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; background: rgba(18, 88, 190, .9); border: 2px solid rgba(255, 255, 255, .85); pointer-events: none; will-change: transform; }
+.pz-aviso { position: absolute; left: 50%; top: 15%; transform: translateX(-50%); opacity: 0; font-size: clamp(30px, 8vw, 52px); font-weight: 900; white-space: nowrap; pointer-events: none; text-shadow: 0 2px 0 rgba(0, 0, 0, .45), 0 0 18px rgba(0, 0, 0, .55); }
+.pz-aviso.bom { color: #bfe2ff; } .pz-aviso.ruim { color: #ff9c86; }
+.pz-dica { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); padding: 10px 18px; border-radius: 30px; background: rgba(10, 6, 5, .66); font-size: 16px; white-space: nowrap; pointer-events: none; }
+.pz-painel { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 100%; box-sizing: border-box; padding: 90px 24px max(30px, env(safe-area-inset-bottom)); text-align: center; background: linear-gradient(to top, rgba(14, 7, 5, .94) 55%, transparent); }
+.pz-selo { margin: 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #ffc98f; }
+.pz-painel h2 { margin: 4px 0 8px; font-size: clamp(38px, 11vw, 58px); line-height: 1; font-weight: 900; letter-spacing: -.02em; color: #fff2e3; }
+.pz-painel p[data-texto] { margin: 0 auto 18px; max-width: 36ch; color: #f1dfce; line-height: 1.45; }
+.pz-carga { height: 6px; max-width: 260px; margin: 0 auto 14px; border-radius: 6px; background: rgba(255, 255, 255, .16); overflow: hidden; } .pz-carga i { background: #ffb35a; transition: transform .2s; }
+.pz-painel .btn { min-width: 210px; min-height: 52px; font-size: 18px; color: #2a1407; background: #ffb35a; border: 0; }
+.pz-sangue { display: block; margin: 12px auto 0; min-height: 44px; padding: 0 16px; border: 0; background: none; color: #f1dfce; font: inherit; font-size: 15px; cursor: pointer; }
+.pz-placar { display: flex; justify-content: center; gap: 26px; margin: 0 0 18px; } .pz-placar b { display: block; font-size: 27px; font-variant-numeric: tabular-nums; } .pz-placar span { font-size: 13px; color: #e6cdb6; }
+.pz .so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-height: 480px) { .pz-painel { padding-top: 40px; } .pz-painel h2 { font-size: 34px; } .pz-painel p[data-texto] { margin-bottom: 10px; } }

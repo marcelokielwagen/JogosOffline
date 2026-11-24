@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0}#c{position:relative;width:720px;height:900px}</style><div id="c"></div>
+<script>window.JO={}</script>
+<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
+<script type="module">
+import { ZombieBridgeGame } from '../../jogos/ponte-zero/ZombieBridgeGame.js';
+const g = new ZombieBridgeGame({ carregar: (c, d) => c === 'ponteZeroQualidade' ? 2 : d });
+window.capa = async () => {
+  await g.init(document.getElementById('c')); g.pause();
+  const C = g.cena, S = C.S; let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  S.arma = 2; S.tempo = 5; S.d = 40; S.x = 0; S.portoes.length = 0; S.barris.length = 0; C.portoes.dispose(); C.novaPartida(S); C.arma = -1; S.portoes.forEach(p => { p.usado = 0; });
+  S.soldados = [[0, 0, .3], [-1.05, -.5, .55], [1.1, -.55, .12], [-1.95, -1.3, .8], [2.0, -1.35, .42]].map(([x, d, q], i) => ({ x, d: 41.1 + d, semente: q, fase: .06 + i * .21, nasceu: 0, inclina: 0, tiro: i < 4 ? 5 - .02 * i : 0 })); S.n = 5;
+  S.zumbis = []; for (let i = 0; i < 85; i++) { const d = 8 + i * .36 + r() * 1.5; S.zumbis.push({ x: (r() - .5) * (8 + d * .05), d: 40 + d, tipo: i % 7 === 3 ? 'corredor' : i % 17 === 8 ? 'blindado' : 'comum', esc: i % 17 === 8 ? 1.35 : .95 + r() * .1, jeito: r() < .5 ? 0 : 1, fase: r(), semente: r(), dano: 0, ang: (r() - .5) * .5, T: {} }); }
+  S.tiros = []; for (let i = 0; i < 26; i++) S.tiros.push({ x: (r() - .5) * 4, d: 41.5 + r() * 9, vx: (r() - .5) * 3, vel: 62, resta: 20 });
+  C.camera = function () { this.camD = 40; this.camX = 0; const f = this.camD; this.cam.fov = 40; this.cam.updateProjectionMatrix(); this.cam.position.set(.75, 2.7, -f + 5.6); this.cam.lookAt(-.05, 1.0, -f - 8); const z = -f - 8; this.sol.target.position.set(0, 0, z); this.sol.position.set(15, 14, z - 40); this.preenche.target.position.set(0, 1, z); this.preenche.position.set(-6, 8, z + 20); this.preenche.intensity = 2.6; this.cenario.atualizar(f, 12, this.cam); };
+  C.R.setPixelRatio(2); C.comp.setPixelRatio(2); C.comp.setSize(720, 900);
+  for (let i = 0; i < 3; i++) C.quadro(.016, S); C.quadro(.001, S);
+  const k = document.createElement('canvas'); k.width = 720; k.height = 900; const x = k.getContext('2d'); x.imageSmoothingQuality = 'high'; x.filter = "saturate(1.3) contrast(1.1)"; x.drawImage(C.R.domElement, 0, 0, 720, 900); x.filter = "none";
+  let gr = x.createLinearGradient(0, 600, 0, 900); gr.addColorStop(0, 'rgba(12,5,3,0)'); gr.addColorStop(.55, 'rgba(12,5,3,.72)'); gr.addColorStop(1, 'rgba(12,5,3,.95)'); x.fillStyle = gr; x.fillRect(0, 600, 720, 300);
+  gr = x.createRadialGradient(360, 400, 300, 360, 420, 620); gr.addColorStop(0, 'rgba(12,5,3,0)'); gr.addColorStop(1, 'rgba(12,5,3,.55)'); x.fillStyle = gr; x.fillRect(0, 0, 720, 900); x.filter = "none";
+  const letra = (t, y, tam) => { x.font = `900 ${tam}px "Arial Black", Impact, sans-serif`; const w = x.measureText(t).width, e = Math.min(1, 640 / w); x.save(); x.translate(360, y); x.scale(e, 1.12); x.textAlign = 'center'; x.lineJoin = 'round'; for (let i = 9; i > 0; i--) { x.fillStyle = i > 7 ? '#150805' : '#5a1d0c'; x.fillText(t, 0, i); } x.lineWidth = 10; x.strokeStyle = '#190a06'; x.strokeText(t, 0, 0); const q = x.createLinearGradient(0, -tam * .75, 0, 0); q.addColorStop(0, '#fff4dd'); q.addColorStop(.5, '#ffc163'); q.addColorStop(.52, '#e8842f'); q.addColorStop(1, '#ffd489'); x.fillStyle = q; x.fillText(t, 0, 0);
+    x.globalCompositeOperation = 'source-atop'; x.restore(); };
+  letra('PONTE', 752, 128); letra('ZERO', 868, 128);
+  return k.toDataURL('image/webp', .86);
+};
+</script>

@@ -265,3 +265,10 @@ O roteiro completo das etapas está em `PROMPT.md`.
   capa ficam em `guardados/pinball/`. Os recordes continuam salvos no aparelho. Para reativar: devolver a pasta a `jogos/pinball/`, a
   capa a `capas/pinball.webp`, o cartão em `index.html`, a linha em `js/comum.js` e os arquivos em `sw.js`. Menu com 8 jogos: 2 colunas
   no celular e 4 no computador (a capa larga do Galatic ficou guardada em `capas/`, sem uso). Cache `v41`.
+- **Ponte Zero, Fase 2 (24/11/2026)**, jogo novo 3D de ponte contra zumbis (`jogos/ponte-zero/`, módulo `ZombieBridgeGame.js` com
+  init/pause/resume/destroy). Fase 1 (proposta) aprovada inteira pelo dono. Protótipo jogável: ponte no pôr do sol, pelotão, 3 armas,
+  zumbis (comum, corredor, blindado), portões, barris, vitória e derrota. Personagens montados por `ferramentas/ponte-zero/personagens.js`
+  a partir do corpo livre (CC0) do MakeHuman; texturas CC0 do Poly Haven (asphalt_04, concrete_layers_02, rusty_painted_metal).
+  Recursos somam 0,7 MB, então o armazenamento separado no sw.js deixou de ser necessário. Capa feita com a cena do jogo (`ferramentas/ponte-zero/capa.mjs`). Publicado como "em construção" a pedido do dono, para testar no celular. Cache `v42`.
+  Teste: abrir `jogos/ponte-zero/index.html?teste=1` (expõe `jogo`). Testado: robô em 16 partidas, partida inteira no navegador em pé e
+  deitado, pausa, abrir e fechar 20 vezes (0 texturas presas). Não testado num celular de verdade; sons não ouvidos. Próxima: Fase 3.

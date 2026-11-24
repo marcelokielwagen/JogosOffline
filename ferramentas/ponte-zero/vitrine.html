@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><title>Vitrine dos personagens</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style>
+<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { carregarModelos, texturaRuido, Multidao } from '../../jogos/ponte-zero/cena/personagens.js';
+import { pistola, submetralhadora, fuzil } from '../../jogos/ponte-zero/cena/armas.js';
+const R = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); document.body.append(R.domElement); R.setSize(innerWidth, innerHeight); R.setPixelRatio(devicePixelRatio);
+R.toneMapping = THREE.ACESFilmicToneMapping; R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+const C = new THREE.Scene(); C.background = new THREE.Color('#8a7464');
+const cam = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, .1, 100);
+C.add(new THREE.HemisphereLight('#9fb4d8', '#6b5038', 1.4)); const sol = new THREE.DirectionalLight('#ffcf9a', 3.4); sol.position.set(4, 5, 3); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048); Object.assign(sol.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5 }); sol.shadow.bias = -.001; C.add(sol);
+const chao = new THREE.Mesh(new THREE.PlaneGeometry(30, 30).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#55504a' })); chao.receiveShadow = true; C.add(chao);
+const mods = await carregarModelos('../../jogos/ponte-zero/recursos/personagens.bin'), ru = texturaRuido();
+const p = new URLSearchParams(location.search), lod = +(p.get('lod') || 0), arma = +(p.get('arma') || 2);
+const S = new Multidao(C, mods.soldado, 'soldado', { max: 20, tipo: 0, ruido: ru, qual: 1, lods: [lod] }), Z = new Multidao(C, mods.zumbi, 'zumbi', { max: 20, tipo: 1, ruido: ru, qual: 1, lods: [lod] });
+[pistola, submetralhadora, fuzil].forEach(f => S.acessorio(f())); S.usar(arma); const pg = ['pistola', 'curta', 'longa'][arma];
+window.ver = (t, camPos, alvo, modo) => {
+  cam.position.set(...camPos); cam.lookAt(...alvo); S.limpar(); Z.limpar();
+  for (let i = 0; i < 4; i++) S.por(-3.2 + i * .95, 0, 0, i === 1 ? Math.PI : i * .8, 1, 1, modo ? S.quadro('morre_' + pg, (i + 1) / 4, false) : S.quadro('corre_' + pg, t + i * .25), i * .23 + .1, 0, 0);
+  for (let i = 0; i < 5; i++) Z.por(.7 + i * .8, 0, 0, -.3 + i * .25, 1, 1, modo ? Z.quadro(i % 2 ? 'morre1' : 'morre0', (i + .5) / 5, false) : Z.quadro(['anda0', 'anda1', 'corre'][i % 3], t + i * .2), i * .19 + .07, 0, 0);
+  S.fechar(); Z.fechar(); R.render(C, cam);
+};
+ver(0, [0, 2, 9], [0, .95, 0]); window.pronto = true;
+</script>

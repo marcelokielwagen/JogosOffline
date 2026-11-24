@@ -1,12 +1,12 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v41';
+const VERSAO = 'jogos-offline-v42';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
   './icones/icone-192.png', './icones/icone-512.png',
   './capas/velha.webp', './capas/resta-um.webp', './capas/paciencia.webp', './capas/freecell.webp', './capas/cruzadas.webp', './capas/caca-palavras.webp', './capas/dobro.webp',
-  './capas/pinball-show.webp',
+  './capas/pinball-show.webp', './capas/ponte-zero.webp',
   './jogos/velha/index.html', './jogos/velha/jogo.css', './jogos/velha/jogo.js',
   './jogos/resta-um/index.html', './jogos/resta-um/jogo.css', './jogos/resta-um/jogo.js',
   './jogos/paciencia/index.html', './jogos/paciencia/jogo.css', './jogos/paciencia/jogo.js',
@@ -16,6 +16,10 @@ const ARQUIVOS = [
   './jogos/dobro/index.html', './jogos/dobro/jogo.css', './jogos/dobro/jogo.js',
   './jogos/pinball-show/index.html', './jogos/pinball-show/jogo.css', './jogos/pinball-show/principal.js',
   './jogos/pinball-show/fisica/mundo.js', './jogos/pinball-show/regras/conexoes.js', './jogos/pinball-show/mesa/layout.js', './jogos/pinball-show/mesa/cena3d.js', './jogos/pinball-show/mesa/modelagem.js', './jogos/pinball-show/mesa/astronauta.js', './jogos/pinball-show/mesa/efeitos.js', './jogos/pinball-show/audio/som.js', './jogos/pinball-show/mesa/espaco.js',
+  './jogos/ponte-zero/index.html', './jogos/ponte-zero/jogo.css', './jogos/ponte-zero/principal.js', './jogos/ponte-zero/ZombieBridgeGame.js',
+  './jogos/ponte-zero/nucleo/simulacao.js', './jogos/ponte-zero/dados/balanco.js', './jogos/ponte-zero/audio/som.js',
+  './jogos/ponte-zero/cena/cena.js', './jogos/ponte-zero/cena/animacoes.js', './jogos/ponte-zero/cena/armas.js', './jogos/ponte-zero/cena/personagens.js', './jogos/ponte-zero/cena/ponte.js', './jogos/ponte-zero/cena/efeitos.js', './jogos/ponte-zero/cena/portoes.js',
+  './jogos/ponte-zero/recursos/personagens.bin', './jogos/ponte-zero/recursos/asfalto_cor.webp', './jogos/ponte-zero/recursos/asfalto_relevo.webp', './jogos/ponte-zero/recursos/concreto_cor.webp', './jogos/ponte-zero/recursos/concreto_relevo.webp', './jogos/ponte-zero/recursos/ferrugem_cor.webp', './jogos/ponte-zero/recursos/ferrugem_relevo.webp',
   './lib/three/three.module.min.js',
   './lib/three/addons/EffectComposer.js', './lib/three/addons/RenderPass.js', './lib/three/addons/ShaderPass.js',
   './lib/three/addons/MaskPass.js', './lib/three/addons/Pass.js', './lib/three/addons/UnrealBloomPass.js',

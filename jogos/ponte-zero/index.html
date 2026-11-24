@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1210">
+<title>Ponte Zero — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body class="ponte-zero">
+<div class="pz-pagina">
+  <header class="topo">
+    <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
+    <h1>Ponte Zero</h1>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+  </header>
+  <main id="jogo" class="pz-caixa"></main>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li><b>Celular:</b> arraste o dedo para mover o pelotão para os lados, para frente e para trás.</li>
+    <li><b>Computador:</b> arraste com o mouse ou use WASD / setas. P pausa.</li>
+    <li>Os soldados avançam e atiram <b>sozinhos</b>.</li>
+    <li><b>Portões azuis</b> ajudam, <b>vermelhos</b> atrapalham, <b>dourados</b> melhoram a arma. O número mostrado é sempre o que vale.</li>
+    <li><b>Portão "ATIRE":</b> cada acerto aumenta o número. Atire bastante e ele vira azul.</li>
+    <li><b>Barris:</b> o número é a vida. Ao explodir, levam os zumbis de perto. Encostar neles custa um soldado.</li>
+    <li>Zumbi que encosta leva <b>1 soldado</b>; o <b>grandão</b> leva 4.</li>
+    <li>A arma também evolui com as <b>eliminações</b> (barra no canto).</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
+<script type="module" src="principal.js"></script>
+</body>
+</html>
