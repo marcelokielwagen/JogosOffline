@@ -1,16 +1,17 @@
-/* Pinball Show: protótipo cinza (Fase 3). A mesa ocupa quase toda a tela; placar fino em cima. */
-html:has(body.pshow) { background: #0c0d12; }
-body.pshow { overflow: hidden; color: #eef0fa; background: #0c0d12; }
+/* Pinball Show: visual disco neon (anime anos 80). A mesa ocupa quase toda a tela; placar fino em cima. */
+html:has(body.pshow) { background: #0a0318; }
+body.pshow { overflow: hidden; color: #f3eaff; background: radial-gradient(ellipse 80% 50% at 50% 0%, #2a0a50, transparent 70%), linear-gradient(#12042a, #0a0318 60%); }
 .ps { height: 100dvh; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; padding: 0 10px; }
 .ps .topo { padding: 8px 0 4px; }
-.ps .topo h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; font-weight: 900; letter-spacing: .02em; }
-.ps .topo .icone-btn { background: rgba(40,42,52,.8); border-color: rgba(255,255,255,.12); color: #eef0fa; }
+.ps .topo h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; font-weight: 900; letter-spacing: .02em; padding-right: 4px;
+  background: linear-gradient(90deg, #ff2fb4, #ffc63a 50%, #22d8ff); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 6px rgba(255,47,180,.5)); }
+.ps .topo .icone-btn { background: rgba(42,10,80,.8); border-color: rgba(255,47,180,.4); color: #f3eaff; }
 @media (max-width: 420px) { .ps .topo h1 { font-size: 1.05rem; } .ps .topo { gap: 6px; } }
 
 .placar { display: flex; gap: 6px; padding: 2px 0 6px; }
-.placar div { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 3px 4px; border-radius: 8px; background: #1b1d25; border: 1px solid #2c2f3a; }
-.placar span { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: #9aa0b4; }
-.placar b { font-family: "Courier New", monospace; font-size: 1.05rem; font-variant-numeric: tabular-nums; color: #ffd36a; }
+.placar div { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 3px 4px; border-radius: 8px; background: rgba(20,4,44,.85); border: 1px solid rgba(34,216,255,.45); box-shadow: 0 0 10px rgba(34,216,255,.2) inset; }
+.placar span { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: #c9a8ff; }
+.placar b { font-family: "Courier New", monospace; font-size: 1.05rem; font-variant-numeric: tabular-nums; color: #ffc63a; text-shadow: 0 0 8px rgba(255,198,58,.6); }
 
 .mesa { flex: 1; min-height: 0; position: relative; overflow: hidden; touch-action: none; border-radius: 12px; margin-bottom: 8px; -webkit-user-select: none; user-select: none; }
 .tela3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
@@ -18,16 +19,19 @@ body.pshow { overflow: hidden; color: #eef0fa; background: #0c0d12; }
 
 .msg { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); white-space: pre-line; text-align: center; pointer-events: none;
   font-family: "Courier New", monospace; font-weight: 900; font-size: clamp(1.3rem, 6vw, 2.2rem); line-height: 1.1; color: #fff;
-  padding: 10px 18px; border-radius: 12px; background: rgba(12,13,18,.72); border: 2px solid rgba(255,211,106,.7); text-shadow: 0 2px 0 #000; }
+  padding: 10px 18px; border-radius: 12px; background: rgba(20,4,44,.78); border: 2px solid #ff2fb4; box-shadow: 0 0 18px rgba(255,47,180,.6), 0 0 4px #22d8ff inset;
+  text-shadow: 0 0 10px #ff2fb4, 0 0 2px #fff; }
 .msg.anim { animation: aparece .35s ease-out; }
 @keyframes aparece { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
 .inicio { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86%, 340px); text-align: center;
-  padding: 18px 16px; border-radius: 16px; background: rgba(20,21,28,.9); border: 1px solid #3a3d4a; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  padding: 18px 16px; border-radius: 16px; background: rgba(20,4,44,.9); border: 2px solid rgba(255,47,180,.7); box-shadow: 0 0 30px rgba(255,47,180,.35), 0 10px 40px rgba(0,0,0,.6); }
 .inicio[hidden] { display: none; }
 .inicio h2 { margin: 4px 0 8px; }
-.inicio p { margin: 0 0 14px; font-size: .9rem; color: #b9bfd3; }
-.inicio .selo { margin: 0; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #ffd36a; }
+.inicio p { margin: 0 0 14px; font-size: .9rem; color: #d6c4f5; }
+.inicio h2 { color: #fff; text-shadow: 0 0 12px rgba(34,216,255,.7); }
+.inicio .btn.principal { background: linear-gradient(90deg, #ff2fb4, #a66bff); border: none; box-shadow: 0 0 16px rgba(255,47,180,.6); }
+.inicio .selo { margin: 0; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #ffc63a; }
 .inicio .btn { min-width: 160px; }
 .sem3d { position: absolute; inset: 40% 10% auto; text-align: center; color: #ffb4b4; }
 .so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
