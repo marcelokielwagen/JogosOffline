@@ -33,7 +33,7 @@ const X = criarConexoes({
     F.bolasBonus(COMETA.x, COMETA.y, Math.min(n, Math.max(1, 6 - F.bolas.length)));
   },
   fase: (i, nivel) => { if (!cena) return; cena.evento('fase', { i }); som.fase(i); if (j.estado === 'jogando') som.efeito('fase'); },
-  efeito: (tipo, lugar, n) => { if (tipo === 'missao') cena.evento('missao'); else if (n > 1) cena.evento('combo', { n }); },
+  efeito: (tipo, lugar, n) => { if (tipo === 'missao') { cena.evento('missao'); som.efeito('missao'); } else if (n > 1) cena.evento('combo', { n }); },
   bolaExtra: n => { while (n-- > 0 && F.bolas.length < 3) F.bolaNoLancador(true); },
 });
 $('objetivos').innerHTML = FASES.map((f, i) => `<span id="obj-${i}">${i + 1}</span>`).join('') + '<b id="fase-nome"></b>';
@@ -98,7 +98,8 @@ function placar() {
 function aoEvento(nome, d) {
   if (j.estado !== 'jogando') return;
   if (nome !== 'perdeu') cena.evento(nome, d);
-  som.efeito(nome === 'trilha' ? (d.sobe && d.nome[0] !== 't' ? 'cano' : '') : nome, d ? d.i || (nome === 'cometa' ? COMETA.batidas : 0) : 0);
+  const qualSom = nome === 'trilha' ? (d.sobe && d.nome[0] !== 't' ? 'cano' : '') : nome === 'chegou' && d.nome === 'lancador' || nome === 'perdeu' && F.bolas.length ? '' : nome;
+  if (qualSom) som.efeito(qualSom, nome === 'cometa' ? COMETA.batidas : nome === 'chegou' ? X.combo : d ? d.i || d.forca || 0 : 0, d ? ((d.x ?? d.ax ?? 185) - 185) / 185 : 0);
   switch (nome) {
     case 'estilingue': pontuar(100); JO.vibrar(12); break;
     case 'tecla': X.tecla(d); break;
@@ -164,6 +165,7 @@ const parado = () => JO.pausado() || document.hidden || [...document.querySelect
 const teclas = { KeyZ: 'E', ArrowLeft: 'E', ShiftLeft: 'E', Slash: 'D', ArrowRight: 'D', ShiftRight: 'D', IntlRo: 'D' };
 addEventListener('keydown', e => {
   if (e.repeat || parado()) return;
+  if (e.code === 'KeyP') { JO.pausar(); return; }
   if (teclas[e.code]) { apertar(teclas[e.code], true); e.preventDefault(); }
   else if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'Enter') {
     e.preventDefault();

@@ -54,6 +54,7 @@ body.pshow { overflow: hidden; color: #f3eaff; background: radial-gradient(ellip
 .objetivos { align-items: center; }
 .objetivos b { font-size: .7rem; letter-spacing: .05em; color: #fff; text-shadow: 0 0 6px #22d8ff; padding: 2px 8px; border-radius: 6px; background: rgba(12,4,28,.75); white-space: nowrap; }
 .objetivos span.agora { color: #fff; border-color: #ffc63a; background: rgba(255,198,58,.4); }
+.ps .topo .jo-pausar { background: linear-gradient(180deg, #ffd23a, #ff9a2a); border-color: #ffe9a0; color: #2a0a30; font-weight: 900; }
 .ps .topo .desligado { opacity: .4; text-decoration: line-through; }
 .objetivos span { padding: 2px 7px; border-radius: 6px; font-size: .68rem; font-weight: 900; letter-spacing: .06em; color: #8f7fb0; background: rgba(12,4,28,.75); border: 1px solid rgba(160,130,220,.35); }
 .objetivos span.feito { color: #03240f; background: #35ff9a; border-color: #c8ffe2; }

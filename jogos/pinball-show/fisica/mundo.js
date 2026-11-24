@@ -136,7 +136,7 @@ export function criarFisica(aoEvento) {
         p.est.flash = .14;
         B.bateu = M.relogio;
         ev('estilingue', { x: c.qx, y: c.qy });
-      } else if (forca > 400 && p.tipo !== 'borracha') ev('batida', { forca });
+      } else if (forca > 220) ev('batida', { forca, x: c.qx });
     }
     for (const u of BUMPERS) {
       if (u.andar !== andar) continue;
@@ -170,7 +170,7 @@ export function criarFisica(aoEvento) {
       const c = contato(p.px, p.py, tx, ty, p.rb + (p.rt - p.rb) * t);
       if (!c) continue;
       const forca = rebater(c, p.wReal ? .34 : .22, .03, -p.wReal * (c.qy - p.py), p.wReal * (c.qx - p.px));
-      if (forca > 900) ev('batida', { forca });
+      if (forca > 350) ev('batida', { forca, x: c.qx });
     }
   }
 

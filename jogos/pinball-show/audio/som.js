@@ -55,9 +55,54 @@ async function gravarDisco(harmonia, taxa) {
   return c.startRendering();
 }
 
+// ---------- Fabrica os sons das peças ----------
+// Cada som é gravado uma vez, no começo, e depois só tocado (fica mais encorpado e mais leve para o celular).
+// Os afinados são gravados em dó (nota 72) e tocados na nota do acorde que a música está fazendo.
+const BASE = 72, NIVEL_EFEITOS = .9, NIVEL_FUNDO = .7;
+const PECAS = {
+  // afinados
+  stab: [.6, 2.4, o => { for (const d of [-14, -5, 6, 15]) o.osc('sawtooth', 523.25, 0, .46, .3, { afina: d, corte: 7500, corteAte: 900, q: 3 }); o.osc('sawtooth', 261.6, 0, .4, .3, { corte: 3000, corteAte: 500 }); o.osc('square', 1046.5, 0, .14, .16); }],
+  sino: [1.2, 1.3, o => { o.fm(523.25, 3.5, 5, 0, 1.1, .5); o.fm(1046.5, 1.41, 3, 0, .5, .35); o.osc('triangle', 1046.5, 0, .7, .3); o.osc('square', 2093, 0, .03, .25); }],
+  pluck: [.5, 3.2, o => { o.osc('square', 523.25, 0, .38, .45, { corte: 6500, corteAte: 420, q: 9 }); o.osc('sawtooth', 1046.5, 0, .3, .4, { afina: 8, corte: 8000, corteAte: 600, q: 5 }); }, 12],
+  voz: [.6, 2.6, o => { for (const [i, f] of [[0, 760], [1, 1180], [2, 2500]]) for (const [m, d] of [[1, -7], [1, 8], [.5, 0]]) o.osc('sawtooth', 523.25 * m, 0, .5, [1, .8, .6][i], { afina: d, corte: f * .55, corteAte: f, q: 6, filtro: 'bandpass', ataque: .012 }); }, 14],
+  // batidas
+  tum: [.42, 3, o => { o.osc('sine', 260, 0, .36, 1, { ate: 50, em: .08 }); o.osc('triangle', 1100, 0, .07, .7, { ate: 220 }); o.ruido(0, .02, .6, 'highpass', 2500); }],
+  estalo: [.32, 2.4, o => { for (const [t, v] of [[0, .7], [.011, .5], [.023, .9]]) o.ruido(t, .16, v, 'bandpass', 1900, 1300, .8); o.osc('triangle', 420, 0, .12, .7, { ate: 190 }); }],
+  clique: [.16, 2.4, o => { o.ruido(0, .05, 1.4, 'bandpass', 1900); o.ruido(0, .012, .6, 'highpass', 5000); o.osc('square', 210, 0, .06, .5, { ate: 85 }); o.osc('sine', 120, 0, .12, .6, { ate: 60 }); }],
+  toc: [.2, 1.6, o => { o.osc('triangle', 1300, 0, .07, .8, { ate: 780 }); o.fm(930, 2.76, 3, 0, .16, .5); o.ruido(0, .03, .5, 'bandpass', 3200); }],
+  tic: [.07, 1.6, o => { o.ruido(0, .035, .8, 'highpass', 5500); o.osc('square', 2400, 0, .022, .5); }],
+  zap: [.36, 2.8, o => { o.osc('sawtooth', 2600, 0, .3, .7, { ate: 170, em: .16, corte: 7500, corteAte: 600, q: 8 }); o.osc('square', 1300, 0, .22, .4, { ate: 90, em: .14 }); }],
+  prato: [1.7, 1.3, o => { o.ruido(0, 1.6, .8, 'highpass', 5200, 7500); o.ruido(0, .3, .5, 'bandpass', 3600); for (const f of [3120, 4370, 5230]) o.osc('square', f, 0, .7, .05); }],
+  boom: [2.3, 3.4, o => { o.ruido(0, 2.1, 1.1, 'lowpass', 6000, 80); o.ruido(0, .5, .7, 'bandpass', 1500, 300, .7); o.osc('sine', 150, 0, 1.5, 1, { ate: 28 }); for (let i = 0; i < 9; i++) o.osc('square', 500 + i * 310 % 1500, i * .06, .14, .22, { ate: 110 }); }],
+  sobe: [1, 1.8, o => { o.ruido(0, .95, .7, 'bandpass', 400, 5500, 1.6); for (const d of [-9, 9]) o.osc('sawtooth', 130.8, 0, .9, .3, { afina: d, ate: 1046, corte: 700, corteAte: 6500, q: 4, ataque: .12 }); }],
+  cai: [.9, 2, o => { for (const d of [-10, 10]) o.osc('sawtooth', 988, 0, .85, .45, { afina: d, ate: 62, corte: 5000, corteAte: 300, q: 5 }); o.osc('sine', 494, 0, .8, .4, { ate: 40 }); }],
+};
+async function gravarPeca([dur, garra, monta, degraus], taxa) {
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, c = new OC(1, Math.ceil(dur * taxa), taxa);
+  const entra = c.createWaveShaper(); entra.curve = SATURA(garra);
+  if (degraus) { const q = c.createWaveShaper(); q.curve = DEGRAUS(degraus); entra.connect(q); q.connect(c.destination); } else entra.connect(c.destination);
+  const chia = c.createBuffer(1, taxa, taxa), dd = chia.getChannelData(0); for (let i = 0; i < dd.length; i++) dd[i] = Math.random() * 2 - 1;
+  const envelope = (t, d, vol, ataque = .002) => { const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + ataque); g.gain.exponentialRampToValueAtTime(.0001, t + d); g.connect(entra); return g; };
+  const filtro = (tipo, f, fAte, t, d, q, para) => { const b = c.createBiquadFilter(); b.type = tipo; b.Q.value = q; b.frequency.setValueAtTime(f, t); if (fAte) b.frequency.exponentialRampToValueAtTime(fAte, t + d); b.connect(para); return b; };
+  monta({
+    osc(tipo, f, t, d, vol, o = {}) {
+      const s = c.createOscillator(), g = envelope(t, d, vol, o.ataque); s.type = tipo; s.detune.value = o.afina || 0; s.frequency.setValueAtTime(f, t);
+      if (o.ate) s.frequency.exponentialRampToValueAtTime(o.ate, t + (o.em || d));
+      s.connect(o.corte ? filtro(o.filtro || 'lowpass', o.corte, o.corteAte, t, o.filtro ? .07 : d, o.q || 1, g) : g); s.start(t); s.stop(t + d + .01);
+    },
+    ruido(t, d, vol, tipo, f, fAte, q = 1) { const s = c.createBufferSource(); s.buffer = chia; s.loop = true; s.connect(filtro(tipo, f, fAte, t, d, q, envelope(t, d, vol, .001))); s.start(t); s.stop(t + d + .01); },
+    fm(f, razao, indice, t, d, vol) { const s = c.createOscillator(), m = c.createOscillator(), q = c.createGain(); s.frequency.value = f; m.frequency.value = f * razao; q.gain.setValueAtTime(f * indice, t); q.gain.exponentialRampToValueAtTime(f * .05, t + d * .6); m.connect(q); q.connect(s.frequency); s.connect(envelope(t, d, vol)); s.start(t); m.start(t); s.stop(t + d + .01); m.stop(t + d + .01); },
+  });
+  const buf = await c.startRendering(), a = buf.getChannelData(0);
+  // todos saem com o mesmo pico, e o fim é suavizado para não estalar
+  let pico = 1e-6; for (const v of a) pico = Math.max(pico, Math.abs(v));
+  const fim = Math.min(a.length, Math.ceil(taxa * .02)); for (let i = 0; i < a.length; i++) a[i] *= Math.min(1, (a.length - i) / fim) / pico;
+  return buf;
+}
+
 export function criarSom(permitido) {
-  let ctx = null, mestre, musica, efeitos, bombeia, entradaDisco, filtro, filtro2, vozIn, gravaBaixo, ruido, bumboCurva, passo = 0, proximo = 0, inicio = 0, fase = 0, energia = 0, ligada = true, destaque = -99;
-  const discos = [], fazendo = [];
+  let ctx = null, mestre, musica, efeitos, bombeia, entradaDisco, filtro, filtro2, vozIn, gravaBaixo, ruido, bumboCurva, passo = 0, proximo = 0, inicio = 0, fase = 0, energia = 0, ligada = true, destaque = -99, abaixa, entradaEco, vozes = 0;
+  const discos = [], fazendo = [], pecas = {};
   const pode = () => ctx && ctx.state === 'running' && permitido();
 
   async function prepararDisco(i) {
@@ -65,12 +110,18 @@ export function criarSom(permitido) {
     try { discos[i] = await gravarDisco(HARMONIAS[i], 32000); } catch { /* aparelho sem suporte: fica sem esta camada */ }
     fazendo[i] = false;
   }
+  async function prepararPecas() {
+    for (const nome in PECAS) try { pecas[nome] = await gravarPeca(PECAS[nome], 32000); } catch { /* aparelho sem suporte: fica sem este som */ }
+  }
   function acordar() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
       ctx = new AC();
       const nivel = (v, para) => { const g = ctx.createGain(); g.gain.value = v; g.connect(para); return g; }, forma = (c, para) => { const s = ctx.createWaveShaper(); s.curve = c; s.connect(para); return s; };
-      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8; comp.attack.value = .004; comp.release.value = .16; comp.connect(ctx.destination);
+      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8; comp.attack.value = .004; comp.release.value = .16;
+      // saída final: um limitador que só segura os picos, para nada estourar quando música e batidas somam
+      const limite = ctx.createDynamicsCompressor(); limite.threshold.value = -2; limite.knee.value = 0; limite.ratio.value = 20; limite.attack.value = .001; limite.release.value = .08; limite.connect(nivel(.88, ctx.destination));
+      abaixa = nivel(1, limite); comp.connect(nivel(NIVEL_FUNDO, abaixa));                         // a música abaixa um instante quando a bola bate
       mestre = nivel(.85, comp);
       const ar = ctx.createBiquadFilter(); ar.type = 'highshelf'; ar.frequency.value = 4200; ar.gain.value = 7; ar.connect(mestre);              // brilho nos agudos
       musica = nivel(ligada ? .5 : 0, forma(SATURA(1.35), ar));           // a música toda passa por uma saturação leve
@@ -86,11 +137,14 @@ export function criarSom(permitido) {
       vozIn = nivel(1.5, forma(SATURA(2.4), crush));
       gravaBaixo = nivel(.5, forma(SATURA(4.5), nivel(.52, bombeia)));
       bumboCurva = forma(SATURA(2.8), nivel(.82, musica));
-      efeitos = nivel(.55, mestre);
+      // os sons das peças têm caminho próprio: não passam pelo compressor da música (era ele que os escondia)
+      efeitos = nivel(.8, forma(SATURA(1.3), nivel(NIVEL_EFEITOS, limite)));
+      const ecoF = ctx.createBiquadFilter(), ecoE = ctx.createDelay(1), ecoV = nivel(.34, ecoE); ecoF.type = 'bandpass'; ecoF.frequency.value = 1700; ecoF.Q.value = .5; ecoE.delayTime.value = SEMI * 3;
+      ecoF.connect(ecoE); ecoE.connect(ecoV); ecoE.connect(nivel(.5, efeitos)); entradaEco = ecoF;
       ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       inicio = proximo = ctx.currentTime + .1;
       setInterval(agendar, 25);
-      prepararDisco(0);
+      prepararPecas().then(() => prepararDisco(0));
     }
     if (ctx.state === 'suspended') ctx.resume();
   }
@@ -164,30 +218,67 @@ export function criarSom(permitido) {
   }
 
   // ---------- Sons das peças ----------
+  // passo da música que está soando em t, e o próximo instante que cai no ritmo
+  const passoEm = t => passo + Math.floor((t - proximo) / SEMI + 1e-6), noRitmo = t => proximo + Math.ceil((t - proximo) / SEMI + .25) * SEMI;
+  // nota do acorde do momento: k sobe pelo acorde, uma oitava a cada 4
+  function grau(k, t) {
+    const ac = HARMONIAS[fase][((Math.floor(passoEm(t) / 16) % 4) + 4) % 4].map(n => n % 12).sort((a, b) => a - b);
+    return 60 + ac[k % 4] + 12 * Math.floor(k / 4);
+  }
+  function tocar(nome, t, vol, o = {}) {
+    const buf = pecas[nome]; if (!buf || vozes > 26) return;
+    const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = buf; g.gain.value = vol;
+    s.playbackRate.value = o.n ? Math.pow(2, (o.n - BASE) / 12) : o.vel || 1;
+    s.connect(g); let sai = g;
+    if (lugar && ctx.createStereoPanner) { sai = ctx.createStereoPanner(); sai.pan.value = lugar; g.connect(sai); }
+    sai.connect(efeitos); if (o.eco) { const q = ctx.createGain(); q.gain.value = o.eco; g.connect(q); q.connect(entradaEco); }
+    vozes++; s.onended = () => { vozes--; }; s.start(t);
+  }
+  // batidas seguidas sobem a melodia; depois de um respiro ela recomeça
+  let degrau = 3, ultimaBatida = -9, ultimaResposta = -9, lugar = 0;
+  function sobeDegrau(t) { degrau = t - ultimaBatida > 1.6 ? 3 : degrau >= 11 ? 5 : degrau + 1; ultimaBatida = t; return degrau; }
+  // a música "responde" à batida: notas do acorde, dentro do ritmo
+  function resposta(nome, t, k, vol, quantas = 3) {
+    if (t - ultimaResposta < .3 || vozes > 14) return; ultimaResposta = t;
+    const r = noRitmo(t); for (let i = 0; i < quantas; i++) tocar(nome, r + i * SEMI, vol * Math.pow(.72, i), { n: grau(Math.min(12, k + 1 + i), r + i * SEMI) });
+  }
+  function frase(nome, t, graus, vol, passoT = SEMI, eco = .25) { graus.forEach((k, i) => tocar(nome, t + i * passoT, vol, { n: grau(k, t), eco })); }
+  const varia = v => v * (.95 + Math.random() * .1);
+  // [quanto a música abaixa (0 a 1), som]
   const EF = {
-    palheta: t => { chiado(t, .04, .3, efeitos, 'bandpass', 1400); tom('square', 130, t, .04, .16, efeitos, { ate: 70 }); },
-    bumper: (t, i) => { tom('sine', 520 + (i % 5) * 90, t, .16, .5, efeitos, { ate: 180 }); tom('square', 1040 + (i % 5) * 180, t, .07, .12, efeitos); chiado(t, .05, .3, efeitos, 'highpass', 3000); },
-    estilingue: t => { tom('triangle', 300, t, .12, .5, efeitos, { ate: 900 }); chiado(t, .05, .3, efeitos, 'bandpass', 2200); },
-    tecla: (t, i) => { const n = [72, 74, 76, 79, 81][i % 5]; tom('square', nota(n), t, .22, .18, efeitos, { corte: 3600 }); tom('sine', nota(n + 12), t, .3, .14, efeitos); },
-    alvo: (t, i) => { tom('triangle', nota(76 + (i % 3) * 4), t, .2, .4, efeitos); tom('sine', nota(88 + (i % 3) * 4), t + .03, .2, .18, efeitos); },
-    letra: t => { tom('sine', 1200, t, .12, .3, efeitos); tom('sine', 1800, t + .06, .16, .25, efeitos); },
-    catraca: t => { chiado(t, .025, .28, efeitos, 'highpass', 5000); tom('square', 1500, t, .02, .08, efeitos); },
-    cano: t => { chiado(t, .9, .32, efeitos, 'bandpass', 500, 4200, 2); tom('sawtooth', 160, t, .8, .12, efeitos, { ate: 900, corte: 2200 }); },
-    chegou: (t, i) => { [0, 4, 7, 12].forEach((k, j) => tom('triangle', nota(72 + (i % 5) * 2 + k), t + j * .055, .22, .3, efeitos)); },
-    buraco: t => { tom('sine', 700, t, .4, .45, efeitos, { ate: 90 }); chiado(t, .3, .2, efeitos, 'lowpass', 900, 200); },
-    lancou: t => { chiado(t, .7, .4, efeitos, 'bandpass', 300, 3600, 1.2); tom('sawtooth', 90, t, .6, .22, efeitos, { ate: 520, corte: 1500 }); },
-    cometa: (t, i) => { tom('sine', 190 - i * 6, t, .3, .7, efeitos, { ate: 50 }); chiado(t, .16, .45, efeitos, 'lowpass', 1800, 300); tom('square', 700 + i * 60, t, .06, .1, efeitos); },
-    explosao: t => { chiado(t, 1.8, .9, efeitos, 'lowpass', 3200, 70); tom('sine', 120, t, 1.2, .9, efeitos, { ate: 26 }); for (let i = 0; i < 8; i++) tom('square', 400 + Math.random() * 1600, t + i * .05, .12, .07, efeitos, { ate: 120 }); },
-    fase: t => { [0, 4, 7, 12, 16, 19, 24].forEach((k, j) => { tom('sawtooth', nota(60 + k), t + j * .08, .4, .16, efeitos, { corte: 4200, corteAte: 1200 }); tom('square', nota(72 + k), t + j * .08, .25, .06, efeitos); }); chiado(t, 1, .2, efeitos, 'highpass', 4000, 9000); },
-    perdeu: t => { tom('sawtooth', 420, t, .9, .22, efeitos, { ate: 55, corte: 1800, corteAte: 200 }); },
-    salva: t => { [67, 71, 74, 79].forEach((n, j) => tom('square', nota(n), t + j * .07, .16, .13, efeitos)); },
-    batida: t => { chiado(t, .04, .16, efeitos, 'bandpass', 2600); },
+    palheta: [0, t => tocar('clique', t, .8, { vel: varia(1) })],
+    batida: [0, (t, f) => tocar('toc', t, .22 + .55 * Math.min(1, f / 1800), { vel: varia(.8 + Math.min(.4, f / 4000)) })],
+    bumper: [.45, (t, i) => { const k = sobeDegrau(t); tocar('tum', t, .65, { vel: varia(1.1 - (i % 3) * .08) }); tocar('stab', t, 1.15, { n: grau(k, t), eco: .35 }); resposta('pluck', t, k, .4); }],
+    estilingue: [.4, t => { const k = sobeDegrau(t); tocar('estalo', t, .8, { vel: varia(1) }); tocar('zap', t, .6, { vel: varia(1) }); tocar('stab', t, .4, { n: grau(Math.max(0, k - 3), t) }); }],
+    tecla: [.45, (t, i) => { tocar('tum', t, .5, { vel: 1.3 }); tocar('pluck', t, .9, { n: grau(4 + i % 5, t), eco: .5 }); tocar('voz', t, .45, { n: grau(2 + i % 4, t) }); resposta('pluck', t, 4 + i % 5, .45); }],
+    alvo: [.45, (t, i) => { const k = 4 + i % 4; sobeDegrau(t); tocar('estalo', t, .5, { vel: 1.25 }); tocar('sino', t, .9, { n: grau(k, t), eco: .5 }); tocar('voz', t, .5, { n: grau(k - 2, t) }); resposta('sino', t, k, .4, 2); }],
+    letra: [.3, (t, i) => { tocar('sino', t, .7, { n: grau(5 + i % 4, t) }); tocar('sino', t + SEMI, .55, { n: grau(7 + i % 4, t), eco: .4 }); }],
+    alta: [.3, (t, i) => { tocar('pluck', t, .7, { n: grau(5 + i % 4, t) }); tocar('sino', t + SEMI, .55, { n: grau(8, t), eco: .4 }); }],
+    catraca: [0, t => tocar('tic', t, .6, { vel: varia(1) })],
+    vinil: [.2, t => { tocar('zap', t, .45, { vel: 1.4 }); tocar('pluck', t, .5, { n: grau(sobeDegrau(t), t), eco: .3 }); }],
+    volta: [.4, t => frase('pluck', t, [0, 2, 4, 6, 8, 10], .5, SEMI / 2)],
+    cano: [.35, t => { tocar('sobe', t, .65); frase('pluck', t, [2, 3, 4, 5, 6, 7], .3); }],
+    chegou: [.5, (t, i) => { const b = Math.min(4, Math.max(0, i - 1)); tocar('tum', t, .7); tocar('prato', t, .4); for (const k of [0, 2, 3]) tocar('stab', t, .32, { n: grau(b + k, t) }); frase('sino', t + SEMI, [b + 3, b + 4, b + 5, b + 7], .5); }],
+    buraco: [.4, t => { tocar('tum', t, .7, { vel: .8 }); tocar('cai', t, .65, { vel: 1.5 }); }],
+    lancou: [.35, t => { tocar('tum', t, .8, { vel: .9 }); tocar('sobe', t, .75, { vel: 1.3 }); }],
+    pouso: [0, (t, f) => { if (f > 150) tocar('tum', t, .3 + .3 * Math.min(1, f / 900), { vel: 1.25 }); }],
+    voltouMola: [0, t => tocar('toc', t, .35, { vel: .7 })],
+    // cada batida no cometa é mais aguda que a anterior, até ele explodir
+    cometa: [.55, (t, i) => { tocar('tum', t, .95, { vel: .75 }); tocar('estalo', t, .6, { vel: .8 }); tocar('voz', t, .8, { n: grau(Math.min(11, i), t), eco: .5 }); tocar('zap', t, .4, { vel: .8 + i * .06 }); resposta('stab', t, Math.min(10, i), .4, 2); }],
+    cometaVoltou: [.2, t => frase('sino', t, [7, 5, 4], .45)],
+    explosao: [.8, t => { tocar('boom', t, 1); tocar('prato', t, .6); for (const k of [0, 2, 3, 5]) tocar('stab', t, .4, { n: grau(k, t), eco: .4 }); frase('voz', noRitmo(t), [8, 7, 6, 4, 3, 2, 0], .5); }],
+    missao: [.4, t => { tocar('voz', t, .7, { n: grau(4, t) }); tocar('voz', t + SEMI * 2, .75, { n: grau(6, t), eco: .4 }); }],
+    fase: [.65, t => { tocar('sobe', t, .6); const r = noRitmo(t); frase('stab', r, [0, 2, 3, 4, 5, 6, 7, 8], .7); frase('voz', r + SEMI * 8, [4, 8], .8, SEMI * 2); tocar('prato', r + SEMI * 8, .7); tocar('tum', r + SEMI * 8, .8); }],
+    perdeu: [.6, t => { tocar('cai', t, .65); frase('voz', t + SEMI, [5, 3, 2, 0], .5, SEMI * 1.5); }],
+    salva: [.4, t => frase('pluck', t, [3, 4, 6, 7], .55)],
   };
   const ultimo = {};
-  function efeito(nome, i = 0) {
+  // i = qual peça (ou a força, nas pancadas); x = lugar da mesa, de -1 (esquerda) a 1 (direita)
+  function efeito(nome, i = 0, x = 0) {
     if (!pode() || !EF[nome]) return;
-    const t = ctx.currentTime; if (t - (ultimo[nome] || -1) < .035) return; ultimo[nome] = t;
-    EF[nome](t, i);
+    const t = ctx.currentTime; if (t - (ultimo[nome] || -1) < (nome === 'batida' ? .06 : .035)) return; ultimo[nome] = t;
+    const [quanto, som] = EF[nome]; lugar = Math.max(-.6, Math.min(.6, x * .6)); som(t, i);
+    if (quanto) { abaixa.gain.cancelScheduledValues(t); abaixa.gain.setTargetAtTime(1 - quanto, t, .006); abaixa.gain.setTargetAtTime(1, t + .07 + quanto * .12, .11); }
   }
   return {
     acordar, pausar, efeito,

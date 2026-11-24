@@ -254,3 +254,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   órbita; astronauta na horizontal, cabo na porta lateral aberta da nave com outro astronauta nos computadores; sem o globo.
   Música nova no estilo house francês (técnica, não cópia): disco original fabricado por código e recortado, filtro, phaser,
   distorção, bombeio do bumbo e voz de robô. Cache `v38`.
+- **Galatic Pinball, sons das batidas (24/11/2026)**, pedido do dono: música de fundo aprovada (30% mais baixa); sons das peças
+  refeitos e cerca de 12 dB mais fortes, com caminho próprio (não passam mais pelo compressor da música). Cada batida toca nota do
+  acorde do momento, batidas seguidas sobem a melodia, a música abaixa um instante e responde no ritmo. Botão de pausa dourado e
+  tecla P. Volumes medidos no navegador; não testado num celular de verdade. Cache `v39`.
