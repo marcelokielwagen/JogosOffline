@@ -258,3 +258,6 @@ O roteiro completo das etapas está em `PROMPT.md`.
   refeitos e cerca de 12 dB mais fortes, com caminho próprio (não passam mais pelo compressor da música). Cada batida toca nota do
   acorde do momento, batidas seguidas sobem a melodia, a música abaixa um instante e responde no ritmo. Botão de pausa dourado e
   tecla P. Volumes medidos no navegador; não testado num celular de verdade. Cache `v39`.
+- **Capas 3D (24/11/2026)**, pedido do dono: os 9 jogos ganharam capa em 3D na tela inicial (pasta `capas/`, imagens prontas, uns 700 KB no
+  total). Pinball Galáxia e Galatic Pinball têm desenho próprio; o Galatic usa uma capa larga no celular. As cenas ficam em
+  `ferramentas/capas/` e as imagens são refeitas com `node ferramentas/capas/gerar.mjs` (não vai para o celular). Cache `v40`.

@@ -1,10 +1,12 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v39';
+const VERSAO = 'jogos-offline-v40';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
   './icones/icone-192.png', './icones/icone-512.png',
+  './capas/velha.webp', './capas/resta-um.webp', './capas/paciencia.webp', './capas/freecell.webp', './capas/cruzadas.webp', './capas/caca-palavras.webp', './capas/dobro.webp',
+  './capas/pinball.webp', './capas/pinball-show.webp', './capas/pinball-show-larga.webp',
   './jogos/velha/index.html', './jogos/velha/jogo.css', './jogos/velha/jogo.js',
   './jogos/resta-um/index.html', './jogos/resta-um/jogo.css', './jogos/resta-um/jogo.js',
   './jogos/paciencia/index.html', './jogos/paciencia/jogo.css', './jogos/paciencia/jogo.js',
