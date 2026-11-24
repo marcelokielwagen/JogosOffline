@@ -1,9 +1,17 @@
-// Cenário: ponte suspensa, carros abandonados, cidade em ruínas, rio e céu do pôr do sol.
+// Cenário de desenho: ponte suspensa, carros abandonados, cidade em ruínas, rio e céu. Cada nível tem seu clima.
 import * as THREE from 'three';
+import { materialDesenho, contorno, LUZ } from './desenho.js';
 
 export const PERIODO = 120;   // a ponte se repete a cada 120 m
 const CABO_X = 9.4, LARG = 7.6;
 export const SOL = new THREE.Vector3(.42, .2, -1).normalize();
+// clima de cada nível: céu (alto, meio, horizonte), nuvens (luz e sombra), disco, névoa, asfalto, água, prédios e luzes
+export const CLIMAS = {
+  tarde: { alto: '#2f6fd0', meio: '#f58a5a', baixo: '#ffd07a', nuvem: '#fff0c8', nuvemS: '#e8736a', disco: '#fff6c0', tamDisco: .9965, nevoa: '#f7a766', asfalto: '#6a5a78', faixa: '#ffe9a8', agua: '#2f8fb0', predio: '#a8657a', aco: '#d9542f', conc: '#e8c9a6', chave: '#ffe2b0', forca: 3.2, ceu: '#b9d4ff', chao: '#b06a58', hemi: 1.55, cidade: '#c46a66' },
+  manha: { alto: '#1f7fe0', meio: '#74c6f7', baixo: '#e9fbff', nuvem: '#ffffff', nuvemS: '#a8d4f0', disco: '#fffbe0', tamDisco: .9978, nevoa: '#bfe6f5', asfalto: '#5f6f86', faixa: '#fff3c0', agua: '#26b0c9', predio: '#7fa0b8', aco: '#f2a21d', conc: '#e6e2d4', chave: '#fff6dc', forca: 3.4, ceu: '#d4ecff', chao: '#8a9a80', hemi: 1.6, cidade: '#8fb6cc' },
+  noite: { alto: '#1c1450', meio: '#5a2f9a', baixo: '#e0589a', nuvem: '#b46ad0', nuvemS: '#3d2478', disco: '#f5f0ff', tamDisco: .997, nevoa: '#7a3f98', asfalto: '#4c4580', faixa: '#ffe07a', agua: '#3a2f8c', predio: '#4a3a80', aco: '#8a3fc0', conc: '#b3a3d8', chave: '#dcd0ff', forca: 3.1, ceu: '#b49cff', chao: '#6a3f80', hemi: 1.7, cidade: '#5c3a92' },
+  tempestade: { alto: '#0f3a4a', meio: '#2f8a80', baixo: '#c8f08a', nuvem: '#7cc8a0', nuvemS: '#1d4f58', disco: '#f0ffd0', tamDisco: .9985, nevoa: '#6fae92', asfalto: '#4f5f68', faixa: '#ffe680', agua: '#1f6f74', predio: '#4a7078', aco: '#c8452f', conc: '#bcc7b4', chave: '#eaffd8', forca: 3, ceu: '#b0e8d8', chao: '#5a6a4a', hemi: 1.65, cidade: '#4f8480' },
+};
 
 // ---------- junta peças por material, com textura em metros ----------
 class Mescla {
@@ -28,6 +36,8 @@ class Mescla {
     return g;
   }
 }
+// normais contínuas por posição, para o contorno não abrir nas quinas
+function suavizar(g) { const p = g.attributes.position, n = g.attributes.normal, m = new Map(), ch = i => Math.round(p.getX(i) * 200) + ',' + Math.round(p.getY(i) * 200) + ',' + Math.round(p.getZ(i) * 200); for (let i = 0; i < p.count; i++) { const k = ch(i), a = m.get(k) || [0, 0, 0]; a[0] += n.getX(i); a[1] += n.getY(i); a[2] += n.getZ(i); m.set(k, a); } for (let i = 0; i < p.count; i++) { const a = m.get(ch(i)), l = Math.hypot(...a) || 1; n.setXYZ(i, a[0] / l, a[1] / l, a[2] / l); } return g; }
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 function semente(s) { return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
@@ -36,107 +46,70 @@ function perfil(pts, larg, ch) { const s = new THREE.Shape(pts.map(([z, y]) => n
 function carro(M, x, z, ry, cor, tipo, queimado) {
   const por = (g, m, c) => { g.rotateY(ry); g.translate(x, 0, z); m.juntar(g, .4, c); };
   const alto = tipo === 'van' ? .42 : tipo === 'suv' ? .16 : 0, L = tipo === 'van' ? 2.45 : 2.2;
-  const lata = queimado ? new THREE.Color(.1, .075, .06) : cor;
+  const lata = queimado ? new THREE.Color(.09, .07, .1) : cor;
   por(perfil([[-L, .34], [-L, .72 + alto * .4], [-L + .12, .86 + alto * .6], [-1.1, .93 + alto * .6], [1.0, .9 + alto * .6], [L - .25, .78 + alto * .4], [L, .62], [L, .34], [1.75, .28], [-1.75, .28]], 1.78, .12), M.lata, lata);
   const teto = 1.42 + alto, tras = tipo === 'sedan' ? -1.55 : -L + .12;
   por(perfil([[tras, .88 + alto * .6], [tras + (tipo === 'sedan' ? .55 : .22), teto - .04], [tras + .9, teto], [.15, teto], [.5, teto - .07], [1.15, .88 + alto * .6]], 1.5, .13), M.lata, lata);
   // vidros
-  const vid = new THREE.Color(queimado ? .01 : .02, queimado ? .01 : .028, queimado ? .01 : .034);
+  const vid = queimado ? new THREE.Color(.03, .025, .04) : new THREE.Color('#8fd0ee');
   por(perfil([[tras + .22, .98 + alto * .6], [tras + (tipo === 'sedan' ? .6 : .36), teto - .1], [.12, teto - .1], [.42, teto - .14], [.98, .98 + alto * .6]], 1.565, .05), M.vidro, vid);
   por(perfil([[.5, teto - .1], [1.16, .95 + alto * .6], [1.2, .93 + alto * .6], [.56, teto - .12]], 1.3, .02), M.vidro, vid);
-  for (const [wx, wz] of [[-.8, 1.35], [.8, 1.35], [-.8, -1.35], [.8, -1.35]]) { const g = new THREE.CylinderGeometry(.33, .33, .24, 14); g.rotateZ(Math.PI / 2); g.translate(wx, .33, wz); por(g, M.vidro, new THREE.Color(.018, .018, .018)); const c = new THREE.CylinderGeometry(.19, .19, .26, 8); c.rotateZ(Math.PI / 2); c.translate(wx, .33, wz); por(c, M.lata, new THREE.Color(.16, .15, .14)); }
-  for (const s of [-.62, .62]) { const f = new THREE.BoxGeometry(.34, .12, .06); f.translate(s, .68, L + .02); por(f, M.vidro, new THREE.Color(.25, .23, .2)); const t = new THREE.BoxGeometry(.3, .13, .06); t.translate(s, .74, -L - .02); por(t, M.vidro, new THREE.Color(.16, .012, .01)); }
+  for (const [wx, wz] of [[-.8, 1.35], [.8, 1.35], [-.8, -1.35], [.8, -1.35]]) { const g = new THREE.CylinderGeometry(.33, .33, .24, 14); g.rotateZ(Math.PI / 2); g.translate(wx, .33, wz); por(g, M.vidro, new THREE.Color('#2a2430')); const c = new THREE.CylinderGeometry(.19, .19, .26, 8); c.rotateZ(Math.PI / 2); c.translate(wx, .33, wz); por(c, M.lata, new THREE.Color('#b8b4c0')); }
+  for (const s of [-.62, .62]) { const f = new THREE.BoxGeometry(.34, .12, .06); f.translate(s, .68, L + .02); por(f, M.vidro, new THREE.Color('#fff3c0')); const t = new THREE.BoxGeometry(.3, .13, .06); t.translate(s, .74, -L - .02); por(t, M.vidro, new THREE.Color('#e0352b')); }
 }
 function onibus(M, x, z, ry) {
   const por = (g, m, c) => { g.rotateY(ry); g.translate(x, 0, z); m.juntar(g, .4, c); };
-  por(perfil([[-5, .4], [-5.05, 1.2], [-4.95, 3], [-4.7, 3.15], [4.6, 3.15], [4.95, 2.95], [5.1, 1.4], [5.05, .4]], 2.4, .12), M.lata, new THREE.Color(.34, .25, .07));
-  for (let k = 0; k < 7; k++) { const g = new THREE.BoxGeometry(2.46, .85, 1.05); g.translate(0, 2.2, -4.1 + k * 1.28); por(g, M.vidro, new THREE.Color(.02, .025, .03)); }
-  for (const s of [-1, 1]) { const g = new THREE.BoxGeometry(2.1, 1.2, .1); g.translate(0, 2.1, s * 5.06); por(g, M.vidro, new THREE.Color(.02, .025, .03)); }
-  for (const [wx, wz] of [[-1.05, 3.2], [1.05, 3.2], [-1.05, -3], [1.05, -3]]) { const g = new THREE.CylinderGeometry(.48, .48, .34, 14); g.rotateZ(Math.PI / 2); g.translate(wx, .48, wz); por(g, M.vidro, new THREE.Color(.018, .018, .018)); }
+  por(perfil([[-5, .4], [-5.05, 1.2], [-4.95, 3], [-4.7, 3.15], [4.6, 3.15], [4.95, 2.95], [5.1, 1.4], [5.05, .4]], 2.4, .12), M.lata, new THREE.Color('#ffb81f'));
+  for (let k = 0; k < 7; k++) { const g = new THREE.BoxGeometry(2.46, .85, 1.05); g.translate(0, 2.2, -4.1 + k * 1.28); por(g, M.vidro, new THREE.Color('#8fd0ee')); }
+  for (const s of [-1, 1]) { const g = new THREE.BoxGeometry(2.1, 1.2, .1); g.translate(0, 2.1, s * 5.06); por(g, M.vidro, new THREE.Color('#8fd0ee')); }
+  for (const [wx, wz] of [[-1.05, 3.2], [1.05, 3.2], [-1.05, -3], [1.05, -3]]) { const g = new THREE.CylinderGeometry(.48, .48, .34, 14); g.rotateZ(Math.PI / 2); g.translate(wx, .48, wz); por(g, M.vidro, new THREE.Color('#2a2430')); }
 }
 
 // ---------- céu ----------
 const CEU_FRAG = /* glsl */`
-  varying vec3 vDir; uniform sampler2D tRuido; uniform vec3 uSol; uniform float uDisco;
+  varying vec3 vDir; uniform sampler2D tRuido; uniform vec3 uSol, uAlto, uMeio, uBaixo, uNuvem, uNuvemS, uDiscoC, uCid; uniform float uTam;
   void main() {
     vec3 d = normalize(vDir); float h = d.y, s = max(0., dot(d, uSol));
-    vec3 alto = vec3(.10, .16, .30), meio = vec3(.46, .30, .30), baixo = vec3(1.05, .50, .20);
-    vec3 c = mix(baixo, meio, smoothstep(-.02, .24, h)); c = mix(c, alto, smoothstep(.12, .62, h));
-    c = mix(c * vec3(.62, .66, .86), c, .25 + .75 * smoothstep(-.3, .9, dot(normalize(d.xz + 1e-4), normalize(uSol.xz))));
-    c += vec3(1., .5, .18) * (pow(s, 7.) * .55 + pow(s, 48.) * 1.1);
-    if (h > .015) {
-      vec2 q = d.xz / (h + .12); float n = texture2D(tRuido, q * vec2(.075, .03)).r * .6 + texture2D(tRuido, q * vec2(.2, .075) + .3).r * .3 + texture2D(tRuido, q * .45).g * .12;
-      float nu = smoothstep(.48, .74, n) * smoothstep(.015, .16, h);
-      vec3 cn = mix(vec3(.20, .16, .22), vec3(1.7, .78, .38), pow(s, 2.2) * .75 + .22 * (1. - smoothstep(.1, .5, h)));
-      c = mix(c, cn, nu * .82);
+    vec3 c = mix(uBaixo, uMeio, smoothstep(.0, .2, h)); c = mix(c, uAlto, smoothstep(.14, .55, h));
+    // raios largos e parados em volta do sol
+    float raio = step(.5, fract(atan(d.x - uSol.x, d.y - uSol.y) * 3.2 + .2)); c = mix(c, uBaixo, raio * .16 * smoothstep(.86, .99, s));
+    c = mix(c, uDiscoC, smoothstep(.0, .0012, s - (uTam - .012)) * .28); c = mix(c, uDiscoC, smoothstep(.0, .0006, s - uTam));
+    if (h > .02) {
+      vec2 q = d.xz / (h + .16); float n = texture2D(tRuido, q * vec2(.07, .04)).r * .62 + texture2D(tRuido, q * vec2(.16, .09) + .3).r * .3 + texture2D(tRuido, q * .34).g * .1;
+      float lim = .56, nu = smoothstep(lim, lim + .012, n) * smoothstep(.03, .1, h), so = smoothstep(lim + .05, lim + .062, n);
+      c = mix(c, mix(uNuvem, uNuvemS, so * .75), nu * .92);
     }
-    float disco = smoothstep(.9987, .9992, dot(d, uSol)); c += vec3(14., 8., 3.4) * disco * uDisco;
-    // silhueta distante da cidade
-    float a = atan(d.x, -d.z) * 40., b = floor(a), pr = fract(sin(b * 12.98) * 4375.5), pr2 = fract(sin(b * 4.1 + 2.) * 911.7);
-    float topo = .005 + .05 * pr * pr2 + .02 * step(.75, pr) + .012 * fract(sin(floor(a * 3.) * 7.7) * 99.3);
-    c = mix(c, mix(vec3(.5, .28, .17), vec3(.95, .48, .22), pow(s, 6.)) * .8, (1. - smoothstep(topo - .0012, topo + .0012, h)) * .75);
-    if (h < 0.) c = mix(c, vec3(.34, .22, .16), smoothstep(0., -.25, h));
+    // cidade ao longe
+    float a = atan(d.x, -d.z) * 34., b = floor(a), pr = fract(sin(b * 12.98) * 4375.5), pr2 = fract(sin(b * 4.1 + 2.) * 911.7);
+    float topo = .012 + .06 * pr * pr2 + .02 * step(.75, pr); c = mix(c, uCid, (1. - smoothstep(topo - .001, topo + .001, h)) * .8);
+    if (h < 0.) c = mix(c, uCid * .8, smoothstep(0., -.2, h));
     gl_FragColor = vec4(c, 1.);
-    #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }`;
-function ceu(ruido, disco) {
-  const m = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, depthTest: true, fog: false, uniforms: { tRuido: { value: ruido }, uSol: { value: SOL }, uDisco: { value: disco } }, vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }', fragmentShader: CEU_FRAG });
+function ceu(ruido) {
+  const C = () => ({ value: new THREE.Color() }), m = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false, uniforms: { tRuido: { value: ruido }, uSol: { value: SOL }, uAlto: C(), uMeio: C(), uBaixo: C(), uNuvem: C(), uNuvemS: C(), uDiscoC: C(), uCid: C(), uTam: { value: .996 } }, vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }', fragmentShader: CEU_FRAG });
   const o = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 20), m); o.frustumCulled = false; o.renderOrder = -10; return o;
 }
 
-// ---------- asfalto molhado ----------
-function asfalto(tx, ruido) {
-  const m = new THREE.MeshStandardMaterial({ map: tx.asfalto_cor, normalMap: tx.asfalto_relevo, roughness: .8, metalness: 0, normalScale: new THREE.Vector2(.7, .7), envMapIntensity: 2.2 });
-  m.onBeforeCompile = sh => {
-    sh.uniforms.tRuido = { value: ruido };
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vMundo;').replace('#include <project_vertex>', '#include <project_vertex>\nvMundo = (modelMatrix * vec4(transformed, 1.)).xyz;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D tRuido; varying vec3 vMundo;')
-      .replace('#include <map_fragment>', /* glsl */`#include <map_fragment>
-        vec2 w = vMundo.xz; float r1 = texture2D(tRuido, w * .021).r, r2 = texture2D(tRuido, w * .09 + .4).g, r3 = texture2D(tRuido, w * .33).r;
-        float poca = smoothstep(.535, .565, r1 * .9 + r2 * .13 - .01), umido = smoothstep(.3, .62, r1 * .7 + r3 * .3);
-        float trilha = exp(-pow(abs(abs(w.x) - 2.1) - .85, 2.) * 5.);
-        diffuseColor.rgb *= vec3(.62, .6, .6) * mix(1., .72, trilha * .5) * (.8 + .4 * r2);
-        // remendos e rachaduras
-        float rem = step(.66, texture2D(tRuido, floor(w / vec2(2.4, 5.)) * .137).r) * step(.12, fract(w.x / 2.4)) ; diffuseColor.rgb *= 1. - .22 * rem;
-        float rac = 1. - smoothstep(.0, .022, abs(texture2D(tRuido, w * .055 + .2).r + (r3 - .5) * .12 - .5)); diffuseColor.rgb *= 1. - .55 * rac * smoothstep(.45, .6, r2);
-        // faixas pintadas, gastas
-        float z = w.y, gasto = smoothstep(.36, .6, r3 * .6 + r2 * .4 + .06), lin = 0.;
-        lin = max(lin, 1. - smoothstep(.065, .085, abs(abs(w.x) - 5.35)));
-        lin = max(lin, (1. - smoothstep(.06, .08, abs(abs(w.x) - 1.85))) * step(.5, fract(z / 6.)));
-        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.62, .58, .5) * (.7 + .3 * r3), lin * gasto * .8);
-        // junta de dilatação
-        float jz = abs(fract(z / 30.) - .5) * 30.; diffuseColor.rgb *= 1. - .8 * (1. - smoothstep(14.86, 14.9, 15. - (15. - jz)) ) * step(14.82, jz) ;
-        float molhado = max(poca, umido * .45); diffuseColor.rgb *= mix(1., .34, molhado);`)
-      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = mix(.82, .5, umido); roughnessFactor = mix(roughnessFactor, .045, poca);')
-      .replace('#include <normal_fragment_maps>', 'vec3 nLiso = normal;\n#include <normal_fragment_maps>\nnormal = normalize(mix(normal, nLiso, max(poca * .97, umido * .3)));');
-  };
-  return m;
-}
+// ---------- asfalto pintado ----------
+const PISO = /* glsl */`
+  vec2 w = vMundo.xz; float r1 = texture2D(tRuido, w * .021).r, r2 = texture2D(tRuido, w * .07 + .4).r, r3 = texture2D(tRuido, w * .33).r;
+  diffuseColor.rgb *= mix(.86, 1.05, step(.5, r1 * .7 + r2 * .3)); diffuseColor.rgb *= 1. - .1 * exp(-pow(abs(abs(w.x) - 2.1) - .85, 2.) * 5.);
+  float rem = step(.66, texture2D(tRuido, floor(w / vec2(2.4, 5.)) * .137).r) * step(.08, fract(w.x / 2.4)) * step(.04, fract(w.y / 5.)); diffuseColor.rgb *= 1. - .2 * rem;
+  float rac = 1. - smoothstep(.0, .016, abs(texture2D(tRuido, w * .055 + .2).r + (r3 - .5) * .1 - .5)); diffuseColor.rgb *= 1. - .55 * rac * step(.52, r2);
+  float gasto = step(.4, r3 * .6 + r2 * .4 + .1), lin = max(1. - smoothstep(.11, .13, abs(abs(w.x) - 5.35)), (1. - smoothstep(.1, .12, abs(abs(w.x) - 1.85))) * step(.45, fract(w.y / 6.)));
+  diffuseColor.rgb = mix(diffuseColor.rgb, uFaixa, lin * gasto * .9);
+  float jz = abs(fract(w.y / 30.) - .5) * 30.; diffuseColor.rgb *= 1. - .6 * step(14.85, jz);`;
 
 export function criarCenario(cena, renderer, tx, ruido, qual) {
   const lixo = [], D = o => (lixo.push(o), o), rnd = semente(4242);
   // céu e luz do céu
-  const domo = ceu(ruido, 1); cena.add(domo); D(domo.geometry); D(domo.material);
-  const pm = new THREE.PMREMGenerator(renderer), cs = new THREE.Scene(), domo2 = ceu(ruido, .12); domo2.scale.setScalar(.1); cs.add(domo2);
-  const env = D(pm.fromScene(cs, .01, .1, 200)); pm.dispose(); domo2.geometry.dispose(); domo2.material.dispose();
-  cena.environment = env.texture; cena.environmentIntensity = .85;
-  cena.fog = new THREE.Fog('#b9764c', 34, 290);
-
-  for (const n of ['asfalto_cor', 'asfalto_relevo']) tx[n].repeat.set(1, 1);
-  const mAsf = D(asfalto(tx, ruido));
-  const mConc = D(new THREE.MeshStandardMaterial({ map: tx.concreto_cor, normalMap: tx.concreto_relevo, roughness: .88, vertexColors: true, color: '#b7aea3' }));
-  const mAco = D(new THREE.MeshStandardMaterial({ map: tx.ferrugem_cor, normalMap: tx.ferrugem_relevo, roughness: .62, metalness: .35, vertexColors: true, color: '#a8887a' }));
-  const mLata = D(new THREE.MeshStandardMaterial({ roughness: .5, metalness: .25, vertexColors: true }));
-  const mVidro = D(new THREE.MeshStandardMaterial({ roughness: .14, metalness: .2, vertexColors: true }));
-  // ferrugem e sujeira por cima da lataria
-  mLata.onBeforeCompile = sh => {
-    sh.uniforms.tRuido = { value: ruido };
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vMundo;').replace('#include <project_vertex>', '#include <project_vertex>\nvMundo = transformed;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D tRuido; varying vec3 vMundo;')
-      .replace('#include <color_fragment>', '#include <color_fragment>\nfloat fe = texture2D(tRuido, vMundo.xz * .31 + vMundo.y * .37).r * .6 + texture2D(tRuido, vMundo.zy * .8).g * .4; float fer = smoothstep(.5, .62, fe + (1. - smoothstep(.2, .8, vMundo.y)) * .1); diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.12, .05, .025) * (.6 + .8 * texture2D(tRuido, vMundo.zy * 1.7).g), fer); diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.2, .16, .12), .3 * texture2D(tRuido, vMundo.xz * .7).g);')
-      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = mix(roughness, .9, fer);');
-  };
+  const domo = ceu(ruido); cena.add(domo); D(domo.geometry); D(domo.material);
+  cena.fog = new THREE.Fog('#f7a766', 40, 250);
+  const pinta = 'diffuseColor.rgb *= .9 + .2 * step(.5, texture2D(tRuido, vMundo.xz * .09 + vMundo.y * .13).r);';
+  const mAsf = D(materialDesenho({ vertexColors: false }, { ruido, pinta: PISO })), mConc = D(materialDesenho({}, { ruido, pinta })), mAco = D(materialDesenho({}, { ruido, pinta: pinta + ' ' })), mLata = D(materialDesenho({}, { ruido, borda: 1 })), mVidro = D(materialDesenho({}, { ruido }));
+  const uFaixa = { value: new THREE.Color() }, antes = mAsf.onBeforeCompile; mAsf.onBeforeCompile = sh => { antes(sh); sh.uniforms.uFaixa = uFaixa; sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 uFaixa;'); };
+  const mBorda = D(contorno({ esp: .02, cor: '#231530' }));
 
   // ---------- trecho de ponte de 120 m (z de 0 a -120) ----------
   const M = { conc: new Mescla(), aco: new Mescla(), lata: new Mescla(), vidro: new Mescla() };
@@ -174,31 +147,33 @@ export function criarCenario(cena, renderer, tx, ruido, qual) {
   // postes de luz
   for (let k = 0; k < 4; k++) { const s = k % 2 ? 1 : -1, z = -15 - k * 30, x = s * (LARG + .75), q = k === 2 ? .16 : 0; M.aco.barra(v(x, 0, z), v(x + s * q * 6, 7.4, z + q * 9), .09, 6, .45); M.aco.barra(v(x + s * q * 6, 7.4, z + q * 9), v(x + s * q * 6 - s * 1.7, 7.9, z + q * 9), .06, 5, .45); M.aco.caixa(x + s * q * 6 - s * 1.9, 7.9, z + q * 9, .7, .12, .28, { cor: .4 }); }
   // placas
-  M.aco.barra(v(-LARG - .6, 0, -88), v(-LARG - .6, 4.4, -88), .08, 6, .5); M.lata.caixa(-LARG - .35, 3.6, -87.9, 2.1, 1.3, .06, { rz: -.12, cor: new THREE.Color(.03, .14, .08) });
+  M.aco.barra(v(-LARG - .6, 0, -88), v(-LARG - .6, 4.4, -88), .08, 6, .5); M.lata.caixa(-LARG - .35, 3.6, -87.9, 2.1, 1.3, .06, { rz: -.12, cor: new THREE.Color('#1f8a5a') });
   // carros, ônibus, contêiner e entulho no acostamento
-  const CORES = ['#5a1d18', '#1f3246', '#6d6a64', '#26282a', '#73603a', '#35412f', '#7d7c78'].map(c => new THREE.Color(c));
+  const CORES = ['#d63a2c', '#2d7bd0', '#f2b51d', '#3fa34d', '#f5efe0', '#e8662a', '#7a4fc0'].map(c => new THREE.Color(c));
   const lista = [[6.45, -9, .06, 'sedan'], [-6.5, -22, 3.2, 'suv'], [6.4, -34, -.1, 'van'], [-6.35, -43, .22, 'sedan'], [6.5, -63, 3.1, 'sedan'], [-6.55, -78, -.04, 'van'], [6.35, -92, .3, 'suv'], [-6.45, -106, 3.0, 'sedan'], [6.6, -112, .04, 'sedan']];
   lista.forEach(([x, z, r, t], i) => carro(M, x, z, r, CORES[i % CORES.length], t, i % 4 === 2));
   onibus(M, -6.7, -59, .035);
-  M.aco.caixa(6.55, 1.25, -78, 2.3, 2.5, 6, { ry: .05, esc: .28, cor: 1.25 }); M.lata.caixa(6.55, 2.52, -78, 2.36, .08, 6.1, { ry: .05, cor: new THREE.Color(.2, .12, .1) });
+  M.aco.caixa(6.55, 1.25, -78, 2.3, 2.5, 6, { ry: .05, esc: .28, cor: 1.25 }); M.lata.caixa(6.55, 2.52, -78, 2.36, .08, 6.1, { ry: .05, cor: new THREE.Color('#2d7bd0') });
   for (let k = 0; k < 70; k++) { const s = rnd() < .5 ? -1 : 1, t = .08 + rnd() * rnd() * .5; M.conc.caixa(s * (5.5 + rnd() * 1.8), t * .3, -rnd() * 120, t, t * .7, t * (.6 + rnd()), { rx: rnd(), ry: rnd() * 3, rz: rnd(), cor: .5 + rnd() * .5 }); }
-  for (let k = 0; k < 9; k++) { const s = rnd() < .5 ? -1 : 1, z = -8 - rnd() * 105, x = s * 5.75; for (let a = 0; a < 5; a++) for (let l = 0; l < 2; l++) { const g = new THREE.SphereGeometry(.3, 8, 5); g.scale(1, .45, .62); g.translate(x + (l % 2) * .1, .14 + l * .23, z + a * .42 + l * .2); M.conc.juntar(g, .8, new THREE.Color(.62, .5, .36)); } }
+  for (let k = 0; k < 9; k++) { const s = rnd() < .5 ? -1 : 1, z = -8 - rnd() * 105, x = s * 5.75; for (let a = 0; a < 5; a++) for (let l = 0; l < 2; l++) { const g = new THREE.SphereGeometry(.3, 8, 5); g.scale(1, .45, .62); g.translate(x + (l % 2) * .1, .14 + l * .23, z + a * .42 + l * .2); M.conc.juntar(g, .8, new THREE.Color('#e0c08a')); } }
 
   const geos = { conc: D(M.conc.pronta()), aco: D(M.aco.pronta()), lata: D(M.lata.pronta()), vidro: D(M.vidro.pronta()) };
   const gPista = new THREE.PlaneGeometry(LARG * 2 + .4, PERIODO); gPista.rotateX(-Math.PI / 2); gPista.translate(0, 0, -PERIODO / 2); { const u = gPista.attributes.uv, p = gPista.attributes.position; for (let i = 0; i < u.count; i++) u.setXY(i, p.getX(i) / 4, p.getZ(i) / 4); } D(gPista);
+  const gBordas = [geos.lata].map(g => { const b = g.clone(); b.deleteAttribute('color'); return D(suavizar(b)); });
   const trechos = [0, 1, 2].map(() => {
     const g = new THREE.Group();
     for (const [geo, mat, proj] of [[gPista, mAsf, false], [geos.conc, mConc, true], [geos.aco, mAco, true], [geos.lata, mLata, true], [geos.vidro, mVidro, false]]) { const m = new THREE.Mesh(geo, mat); m.receiveShadow = true; m.castShadow = proj && qual > 0; g.add(m); }
+    if (qual > 0) for (const b of gBordas) { const m = new THREE.Mesh(b, mBorda); m.userData.borda = true; g.add(m); }
     cena.add(g); return g;
   });
 
   // ---------- rio ----------
-  const mAgua = D(new THREE.MeshStandardMaterial({ color: '#1d2a2e', roughness: .16, metalness: .1, normalMap: tx.asfalto_relevo, normalScale: new THREE.Vector2(.35, .35) }));
-  const gAgua = D(new THREE.PlaneGeometry(700, 700)); gAgua.rotateX(-Math.PI / 2); { const u = gAgua.attributes.uv; for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * 22, u.getY(i) * 22); }
+  const uT = { value: 0 }, mAgua = D(new THREE.ShaderMaterial({ fog: true, uniforms: { ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog), tRuido: { value: ruido }, uT, uCor: { value: new THREE.Color() } }, vertexShader: 'varying vec3 vP;\n#include <fog_pars_vertex>\nvoid main(){ vec4 w = modelMatrix * vec4(position, 1.); vP = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;\n#include <fog_vertex>\n }', fragmentShader: 'uniform sampler2D tRuido; uniform float uT; uniform vec3 uCor; varying vec3 vP;\n#include <common>\n#include <fog_pars_fragment>\nvoid main(){ float n = texture2D(tRuido, vP.xz * vec2(.011, .03) + uT * .006).r * .6 + texture2D(tRuido, vP.xz * vec2(.03, .07) - uT * .008).r * .4; vec3 c = uCor * (n > .56 ? 1.5 : n > .47 ? 1.15 : 1.); gl_FragColor = vec4(c, 1.);\n#include <colorspace_fragment>\n#include <fog_fragment>\n }' }));
+  const gAgua = D(new THREE.PlaneGeometry(700, 700).rotateX(-Math.PI / 2));
   const agua = new THREE.Mesh(gAgua, mAgua); agua.position.y = -46; cena.add(agua);
 
   // ---------- cidade ----------
-  const fach = document.createElement('canvas'); fach.width = fach.height = 256; { const c = fach.getContext('2d'); c.fillStyle = '#6f675e'; c.fillRect(0, 0, 256, 256); for (let k = 0; k < 900; k++) { c.fillStyle = `rgba(${rnd() * 60 | 0},${rnd() * 50 | 0},${rnd() * 40 | 0},.12)`; c.fillRect(rnd() * 256, rnd() * 256, 3 + rnd() * 14, 8 + rnd() * 50); } for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const q = rnd(); c.fillStyle = q < .62 ? '#15171a' : q < .8 ? '#2c2f33' : q < .93 ? '#0a0a0a' : '#4b4238'; c.fillRect(x * 32 + 6, y * 32 + 5, 20, 20); if (q > .5) { c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(x * 32 + 4, y * 32 + 25, 24, 4 + rnd() * 18); } c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(x * 32 + 4, y * 32 + 2, 24, 2); } }
+  const fach = document.createElement('canvas'); fach.width = fach.height = 256; { const c = fach.getContext('2d'); c.fillStyle = '#ffffff'; c.fillRect(0, 0, 256, 256); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const q = rnd(); c.fillStyle = q < .55 ? '#5b4a6a' : q < .8 ? '#7d6a8a' : q < .92 ? '#3d3150' : '#ffd98a'; c.fillRect(x * 32 + 6, y * 32 + 5, 20, 20); c.fillStyle = 'rgba(60,40,80,.35)'; c.fillRect(x * 32 + 4, y * 32 + 25, 24, 4); } }
   const tFach = D(new THREE.CanvasTexture(fach)); tFach.colorSpace = THREE.SRGBColorSpace; tFach.wrapS = tFach.wrapT = THREE.RepeatWrapping; tFach.anisotropy = 4;
   const MC = new Mescla();
   for (const s of [-1, 1]) for (let f = 0; f < 3; f++) for (let z = 0; z < 360;) {
@@ -207,21 +182,21 @@ export function criarCenario(cena, renderer, tx, ruido, qual) {
     for (let k = 0; k < 2 + rnd() * 3; k++) { const ww = w * (.2 + rnd() * .4); MC.caixa(x + (rnd() - .5) * (w - ww), -47 + h + rnd() * 2.5, -z - dp * rnd(), ww, 1 + rnd() * 7, dp * (.2 + rnd() * .3), { cor: cor * .85, rz: rz + (rnd() - .5) * .1, esc: 1 / 24 }); }
     z += dp + 3 + rnd() * 18;
   }
-  const gCid = D(MC.pronta()), mCid = D(new THREE.MeshStandardMaterial({ map: tFach, roughness: .95, vertexColors: true, envMapIntensity: .5 }));
+  const gCid = D(MC.pronta()), mCid = D(new THREE.MeshLambertMaterial({ map: tFach, vertexColors: true }));
   const cidades = [0, 1].map(() => { const m = new THREE.Mesh(gCid, mCid); m.frustumCulled = false; cena.add(m); return m; });
 
   // ---------- névoa no abismo e fumaça ----------
   const mNev = D(new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, fog: false, side: THREE.DoubleSide, uniforms: { tRuido: { value: ruido }, uT: { value: 0 }, uF: { value: [.5, .36, .24][qual] }, uCor: { value: new THREE.Color(.75, .42, .25) } },
+    transparent: true, depthWrite: false, fog: false, side: THREE.DoubleSide, uniforms: { tRuido: { value: ruido }, uT: { value: 0 }, uF: { value: [.45, .32, .2][qual] }, uCor: { value: new THREE.Color(.75, .42, .25) } },
     vertexShader: 'varying vec2 vU; varying vec3 vP; void main(){ vU = uv; vec4 w = modelMatrix * vec4(position, 1.); vP = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
-    fragmentShader: 'varying vec2 vU; varying vec3 vP; uniform sampler2D tRuido; uniform float uT, uF; uniform vec3 uCor; void main(){ float n = texture2D(tRuido, vP.xz * .004 + uT * .004).r * .6 + texture2D(tRuido, vP.xz * .011 - uT * .003).r * .4; float b = 1. - smoothstep(.25, .5, distance(vU, vec2(.5))); gl_FragColor = vec4(uCor, smoothstep(.35, .75, n) * uF * b); \n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n }',
+    fragmentShader: 'varying vec2 vU; varying vec3 vP; uniform sampler2D tRuido; uniform float uT, uF; uniform vec3 uCor; void main(){ float n = texture2D(tRuido, vP.xz * .004 + uT * .004).r * .6 + texture2D(tRuido, vP.xz * .011 - uT * .003).r * .4; float b = 1. - smoothstep(.25, .5, distance(vU, vec2(.5))); gl_FragColor = vec4(uCor, smoothstep(.48, .54, n) * uF * b); \n#include <colorspace_fragment>\n }',
   }));
   const gNev = D(new THREE.PlaneGeometry(520, 520)); gNev.rotateX(-Math.PI / 2);
   const nevoas = [[-28], [-20, -28, -36], [-15, -20, -25, -30, -35, -40]][qual].map(y => { const m = new THREE.Mesh(gNev, mNev); m.position.y = y; m.frustumCulled = false; m.renderOrder = 1; cena.add(m); return m; });
   const mFum = D(new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, fog: false, uniforms: { tRuido: { value: ruido }, uT: mNev.uniforms.uT },
+    transparent: true, depthWrite: false, fog: false, uniforms: { tRuido: { value: ruido }, uT: mNev.uniforms.uT, uCor: mNev.uniforms.uCor },
     vertexShader: 'varying vec2 vU; varying float vS; void main(){ vU = uv; vec4 c = modelMatrix * vec4(0., 0., 0., 1.); vS = c.x * .013; vec3 p = c.xyz + vec3(position.x + pow(uv.y, 1.6) * 26., position.y, 0.); gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.); }',
-    fragmentShader: 'varying vec2 vU; varying float vS; uniform sampler2D tRuido; uniform float uT; void main(){ float n = texture2D(tRuido, vec2(vU.x * .5 + vS, vU.y * 1.1 - uT * .012)).r * .6 + texture2D(tRuido, vec2(vU.x * 1.4 + vS, vU.y * 2.6 - uT * .03)).g * .4; float l = mix(.16, .48, vU.y), m = 1. - smoothstep(l * .4, l, abs(vU.x - .5)); float a = smoothstep(.3, .62, n + m * .3 - .12) * m * (1. - smoothstep(.55, 1., vU.y)) * smoothstep(0., .05, vU.y); vec3 c = mix(vec3(.06, .045, .04), vec3(.5, .27, .16), smoothstep(.3, .8, n) * .5 + vU.y * .3); c += vec3(1.3, .4, .06) * (1. - smoothstep(0., .12, vU.y)) * m; gl_FragColor = vec4(c, a * .82); \n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n }',
+    fragmentShader: 'varying vec2 vU; varying float vS; uniform sampler2D tRuido; uniform float uT; uniform vec3 uCor; void main(){ float n = texture2D(tRuido, vec2(vU.x * .5 + vS, vU.y * 1.1 - uT * .012)).r * .6 + texture2D(tRuido, vec2(vU.x * 1.4 + vS, vU.y * 2.6 - uT * .03)).g * .4; float l = mix(.16, .48, vU.y), m = 1. - smoothstep(l * .4, l, abs(vU.x - .5)); float a = smoothstep(.3, .62, n + m * .3 - .12) * m * (1. - smoothstep(.55, 1., vU.y)) * smoothstep(0., .05, vU.y); a = smoothstep(.3, .42, a); vec3 c = n > .5 ? uCor * .62 : uCor * .45; gl_FragColor = vec4(c, a * .6 * (1. - smoothstep(.3, .8, vU.y))); \n\n#include <colorspace_fragment>\n }',
   }));
   const gFum = D(new THREE.PlaneGeometry(46, 110, 1, 12)); gFum.translate(0, 55, 0);
   const fumos = [[-78, -120], [64, -210], [-120, -300], [104, -60]].map(([x, z]) => { const m = new THREE.Mesh(gFum, mFum); m.position.set(x, -10, z); m.userData.z = z; m.frustumCulled = false; m.renderOrder = 2; cena.add(m); return m; });
@@ -232,13 +207,18 @@ export function criarCenario(cena, renderer, tx, ruido, qual) {
     atualizar(d, t, cam) {
       const b = Math.floor((d - 24) / PERIODO) * PERIODO; trechos.forEach((g, i) => { g.position.z = -(b + i * PERIODO); });
       // só o trecho perto do pelotão faz sombra
-      trechos.forEach((g, i) => { const z0 = b + i * PERIODO, sim = ligado && z0 < d + 46 && z0 + PERIODO > d - 14; if (g.userData.s !== sim) { g.userData.s = sim; for (const m of g.children) if (m.material !== mAsf && m.material !== mVidro) m.castShadow = sim; } });
+      trechos.forEach((g, i) => { const z0 = b + i * PERIODO, sim = ligado && z0 < d + 46 && z0 + PERIODO > d - 14; if (g.userData.s !== sim) { g.userData.s = sim; for (const m of g.children) if (m.material !== mAsf && m.material !== mVidro && !m.userData.borda) m.castShadow = sim; } });
       const c = Math.floor((d - 60) / 360) * 360; cidades.forEach((m, i) => { m.position.z = -(c + i * 360); });
       for (const f of fumos) { let z = f.userData.z; while (z > -d + 20) z -= 360; f.position.z = z; }
-      domo.position.copy(cam.position); agua.position.z = -d - 150; mNev.uniforms.uT.value = t;
+      domo.position.copy(cam.position); agua.position.z = -d - 150; mNev.uniforms.uT.value = uT.value = t;
       for (const n of nevoas) n.position.z = -d - 120;
     },
+    // muda as cores do lugar: cada nível tem seu clima
+    clima(nome) {
+      const c = CLIMAS[nome] || CLIMAS.tarde, u = domo.material.uniforms; u.uAlto.value.set(c.alto); u.uMeio.value.set(c.meio); u.uBaixo.value.set(c.baixo); u.uNuvem.value.set(c.nuvem); u.uNuvemS.value.set(c.nuvemS); u.uDiscoC.value.set(c.disco); u.uCid.value.set(c.cidade); u.uTam.value = c.tamDisco;
+      cena.fog.color.set(c.nevoa); mAsf.color.set(c.asfalto); uFaixa.value.set(c.faixa); mAgua.uniforms.uCor.value.set(c.agua); mCid.color.set(c.predio); mAco.color.set(c.aco); mConc.color.set(c.conc); mNev.uniforms.uCor.value.set(c.nevoa); return c;
+    },
     sombras(sim) { ligado = sim; },
-    dispose() { for (const o of lixo) o.dispose(); cena.environment = null; },
+    dispose() { for (const o of lixo) o.dispose(); cena.fog = null; },
   };
 }

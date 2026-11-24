@@ -7,19 +7,21 @@ const g = new ZombieBridgeGame({ carregar: (c, d) => c === 'ponteZeroQualidade' 
 window.capa = async () => {
   await g.init(document.getElementById('c')); g.pause();
   const C = g.cena, S = C.S; let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  S.arma = 2; S.tempo = 5; S.d = 40; S.x = 0; S.portoes.length = 0; S.barris.length = 0; C.portoes.dispose(); C.novaPartida(S); C.arma = -1; S.portoes.forEach(p => { p.usado = 0; });
-  S.soldados = [[0, 0, .3], [-1.05, -.5, .55], [1.1, -.55, .12], [-1.95, -1.3, .8], [2.0, -1.35, .42]].map(([x, d, q], i) => ({ x, d: 41.1 + d, semente: q, fase: .06 + i * .21, nasceu: 0, inclina: 0, tiro: i < 4 ? 5 - .02 * i : 0 })); S.n = 5;
-  S.zumbis = []; for (let i = 0; i < 85; i++) { const d = 8 + i * .36 + r() * 1.5; S.zumbis.push({ x: (r() - .5) * (8 + d * .05), d: 40 + d, tipo: i % 7 === 3 ? 'corredor' : i % 17 === 8 ? 'blindado' : 'comum', esc: i % 17 === 8 ? 1.35 : .95 + r() * .1, jeito: r() < .5 ? 0 : 1, fase: r(), semente: r(), dano: 0, ang: (r() - .5) * .5, T: {} }); }
-  S.tiros = []; for (let i = 0; i < 26; i++) S.tiros.push({ x: (r() - .5) * 4, d: 41.5 + r() * 9, vx: (r() - .5) * 3, vel: 62, resta: 20 });
-  C.camera = function () { this.camD = 40; this.camX = 0; const f = this.camD; this.cam.fov = 40; this.cam.updateProjectionMatrix(); this.cam.position.set(.75, 2.7, -f + 5.6); this.cam.lookAt(-.05, 1.0, -f - 8); const z = -f - 8; this.sol.target.position.set(0, 0, z); this.sol.position.set(15, 14, z - 40); this.preenche.target.position.set(0, 1, z); this.preenche.position.set(-6, 8, z + 20); this.preenche.intensity = 2.6; this.cenario.atualizar(f, 12, this.cam); };
+  S.arma = 2; S.tempo = 5; S.d = 40; S.x = 0; S.ritmo = 1; S.portoes.length = 0; S.barris.length = 0; C.novaPartida(S); C.noMenu = false; C.menu = 0; document.querySelector('.pz-painel').hidden = true; C.fx.limpar();
+  S.soldados = [[0, .5, .1, 0], [-.95, 0, .55, 3], [1.0, -.05, .3, 4], [-1.85, -.75, .8, 5], [1.9, -.8, .42, 0]].map(([x, d, q, a], i) => ({ x, d: 42.1 + d, semente: q, fase: .06 + i * .23, nasceu: 0, inclina: 0, vx: 0, vd: 5.2, arma: a, calor: i < 4 ? .9 : 0, mira: 0 })); S.n = 5;
+  S.zumbis = []; for (let i = 0; i < 60; i++) { const d = 8.5 + i * .34 + r() * 1.4; S.zumbis.push({ x: (r() - .5) * (8 + d * .05), d: 40 + d, tipo: i % 7 === 3 ? 'corredor' : i % 15 === 8 ? 'blindado' : 'comum', esc: i % 15 === 8 ? 1.4 : .95 + r() * .1, jeito: r() < .5 ? 0 : 1, fase: r(), semente: r(), dano: 0, ang: (r() - .5) * .5, fogo: i % 6 === 0 ? 1 : 0, T: {} }); }
+  S.tiros = []; for (let i = 0; i < 18; i++) S.tiros.push({ x: (r() - .5) * 4, d: 43 + r() * 9, vx: (r() - .5) * 3, vel: 52, resta: 20, arma: i % 3 ? 2 : 3, nasceu: r() }); S.tiros.push({ x: 1.3, d: 46, vx: 1, vel: 21, resta: 20, arma: 4, nasceu: .3 });
+  S.chefe = { id: 'cancela', T: C.chefe.T, vida: 1, max: 1, x: .6, d: 40 + 20, alt: 0, estado: 'ruge', t: .6, dur: 2, fase: 0, dano: 0, passo: 0, vel: 0, golpe: null, placas: [] };
+  C.camera = function () { this.camD = 40; this.camX = 0; const f = this.camD; this.cam.fov = 44; this.cam.updateProjectionMatrix(); this.cam.position.set(.9, 3.1, -f + 5.2); this.cam.lookAt(.1, .75, -f - 8); const z = -f - 8; this.sol.target.position.set(0, 0, z); this.sol.position.set(-21, 42, z + 17); this.cenario.atualizar(f, 12, this.cam); };
+  for (let i = 0; i < 5; i++) C.fx.explosao(i === 0 ? 2.6 : -3 + i * .2, -54 - i * .5, 2.4); C.fx.explosao(-2.5, -51, 3);
   C.R.setPixelRatio(2); C.comp.setPixelRatio(2); C.comp.setSize(720, 900);
-  for (let i = 0; i < 3; i++) C.quadro(.016, S); C.quadro(.001, S);
-  const k = document.createElement('canvas'); k.width = 720; k.height = 900; const x = k.getContext('2d'); x.imageSmoothingQuality = 'high'; x.filter = "saturate(1.3) contrast(1.1)"; x.drawImage(C.R.domElement, 0, 0, 720, 900); x.filter = "none";
-  let gr = x.createLinearGradient(0, 600, 0, 900); gr.addColorStop(0, 'rgba(12,5,3,0)'); gr.addColorStop(.55, 'rgba(12,5,3,.72)'); gr.addColorStop(1, 'rgba(12,5,3,.95)'); x.fillStyle = gr; x.fillRect(0, 600, 720, 300);
-  gr = x.createRadialGradient(360, 400, 300, 360, 420, 620); gr.addColorStop(0, 'rgba(12,5,3,0)'); gr.addColorStop(1, 'rgba(12,5,3,.55)'); x.fillStyle = gr; x.fillRect(0, 0, 720, 900); x.filter = "none";
-  const letra = (t, y, tam) => { x.font = `900 ${tam}px "Arial Black", Impact, sans-serif`; const w = x.measureText(t).width, e = Math.min(1, 640 / w); x.save(); x.translate(360, y); x.scale(e, 1.12); x.textAlign = 'center'; x.lineJoin = 'round'; for (let i = 9; i > 0; i--) { x.fillStyle = i > 7 ? '#150805' : '#5a1d0c'; x.fillText(t, 0, i); } x.lineWidth = 10; x.strokeStyle = '#190a06'; x.strokeText(t, 0, 0); const q = x.createLinearGradient(0, -tam * .75, 0, 0); q.addColorStop(0, '#fff4dd'); q.addColorStop(.5, '#ffc163'); q.addColorStop(.52, '#e8842f'); q.addColorStop(1, '#ffd489'); x.fillStyle = q; x.fillText(t, 0, 0);
+  for (let i = 0; i < 14; i++) C.quadro(.016, S); C.quadro(.001, S);
+  const k = document.createElement('canvas'); k.width = 720; k.height = 900; const x = k.getContext('2d'); x.imageSmoothingQuality = 'high'; x.filter = "saturate(1.08) contrast(1.04)"; x.drawImage(C.R.domElement, 0, 0, 720, 900); x.filter = "none";
+  let gr = x.createLinearGradient(0, 680, 0, 900); gr.addColorStop(0, 'rgba(24,14,52,0)'); gr.addColorStop(.55, 'rgba(24,14,52,.72)'); gr.addColorStop(1, 'rgba(24,14,52,.95)'); x.fillStyle = gr; x.fillRect(0, 680, 720, 220);
+  gr = x.createRadialGradient(360, 400, 300, 360, 420, 620); gr.addColorStop(0, 'rgba(24,14,52,0)'); gr.addColorStop(1, 'rgba(24,14,52,.55)'); x.fillStyle = gr; x.fillRect(0, 0, 720, 900); x.filter = "none";
+  const letra = (t, y, tam) => { x.font = `900 ${tam}px "Arial Black", Impact, sans-serif`; const w = x.measureText(t).width, e = Math.min(1, 640 / w); x.save(); x.translate(360, y); x.scale(e, 1.12); x.textAlign = 'center'; x.lineJoin = 'round'; for (let i = 9; i > 0; i--) { x.fillStyle = i > 7 ? '#1a1220' : '#b8401c'; x.fillText(t, 0, i); } x.lineWidth = 10; x.strokeStyle = '#1a1220'; x.strokeText(t, 0, 0); const q = x.createLinearGradient(0, -tam * .75, 0, 0); q.addColorStop(0, '#fff4dd'); q.addColorStop(.5, '#ffc163'); q.addColorStop(.52, '#e8842f'); q.addColorStop(1, '#ffd489'); x.fillStyle = q; x.fillText(t, 0, 0);
     x.globalCompositeOperation = 'source-atop'; x.restore(); };
-  letra('PONTE', 752, 128); letra('ZERO', 868, 128);
+  letra('SOLDIER', 792, 84); letra('SURVIVOR', 874, 88);
   return k.toDataURL('image/webp', .86);
 };
 </script>

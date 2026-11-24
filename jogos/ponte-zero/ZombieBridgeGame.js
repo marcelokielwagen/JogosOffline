@@ -1,35 +1,39 @@
-// Ponte Zero — módulo independente. Uso:
+// Soldier Survivor — módulo independente (a pasta e as chaves salvas seguem o nome antigo, ponte-zero). Uso:
 //   const jogo = new ZombieBridgeGame(plataforma);
 //   await jogo.init(container);  jogo.pause();  jogo.resume();  jogo.destroy();
 // "plataforma" é a tomada com o pacote de jogos: { carregar, salvar, som, vibrar, somLigado } (tudo opcional).
 import { criarSimulacao } from './nucleo/simulacao.js';
 import { carregarRecursos, Cena } from './cena/cena.js';
 import { criarSom } from './audio/som.js';
-import { ARMAS, TRECHO } from './dados/balanco.js';
+import { ARMAS, NIVEIS, CHEFES } from './dados/balanco.js';
 
 const BASE = new URL('./', import.meta.url);
 const HTML = `
-  <div class="pz-vinheta" aria-hidden="true"></div>
   <div class="pz-hud" aria-hidden="true" hidden>
-    <div class="pz-linha"><div class="pz-caminho"><i data-caminho></i></div></div>
-    <div class="pz-arma"><b data-arma></b><span><i data-evolui></i></span><small data-mortos></small></div>
+    <div class="pz-caminho" data-trilho><i data-caminho></i></div>
+    <div class="pz-chefe" data-chefe hidden><b data-chefenome></b><div class="pz-vida"><i data-vida></i><s></s><s></s></div></div>
+    <div class="pz-arma"><b data-arma></b><span><i data-evolui></i></span><small data-mortos></small><div class="pz-esp" data-esp></div></div>
   </div>
   <div class="pz-conta" data-conta hidden></div>
   <div class="pz-aviso" data-aviso aria-hidden="true"></div>
+  <div class="pz-entrada" data-entrada aria-hidden="true"><b></b><span></span></div>
   <div class="pz-dica" data-dica hidden>Arraste para mover o pelotão</div>
   <div class="so-leitor" role="status" aria-live="polite" data-leitor></div>
   <div class="pz-painel" data-painel>
-    <p class="pz-selo" data-selo>Protótipo · Fase 2</p>
-    <h2 data-titulo>Ponte Zero</h2>
+    <p class="pz-selo" data-selo>Em construção</p>
+    <h2 data-titulo>Soldier Survivor</h2>
     <p data-texto>Preparando a ponte…</p>
     <div class="pz-carga"><i data-carga></i></div>
     <div class="pz-placar" data-placar hidden></div>
+    <p class="pz-premio" data-premio hidden></p>
+    <div class="pz-niveis" data-niveis role="group" aria-label="Escolha o nível" hidden></div>
     <button class="btn principal" data-jogar hidden>Jogar</button>
     <button class="pz-sangue" data-sangue hidden aria-pressed="true">Sangue: <b>ligado</b></button>
   </div>`;
+const CADEADO = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M6 9V6.5a4 4 0 0 1 8 0V9" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="4" y="9" width="12" height="8.5" rx="2" fill="currentColor"/></svg>';
 
 export class ZombieBridgeGame {
-  #p; #raiz; #cena; #rec; #som; #S; #raf = 0; #ult = 0; #pausado = false; #parado = true; #fim = 0; #ouvintes = []; #obs; #teclas = new Set(); #dedo = null; #dados; #resto = 0; #lento = { t: 0, n: 0, ok: 0 }; #avisoAte = 0; #vivo = false; #qual; #css;
+  #p; #raiz; #cena; #rec; #som; #S; #raf = 0; #ult = 0; #pausado = false; #parado = true; #fim = 0; #ouvintes = []; #obs; #teclas = new Set(); #dedo = null; #dados; #resto = 0; #lento = { t: 0, n: 0, ok: 0 }; #vivo = false; #qual; #css; #nivel = 0; #espTxt = '';
 
   constructor(plataforma = {}) {
     this.#p = { carregar: (c, d) => d, salvar() {}, som() {}, vibrar() {}, somLigado: () => true, ...plataforma };
@@ -38,7 +42,8 @@ export class ZombieBridgeGame {
   async init(container) {
     if (this.#vivo) throw new Error('jogo já iniciado'); this.#vivo = true;
     this.#css = document.createElement('link'); this.#css.rel = 'stylesheet'; this.#css.href = new URL('jogo.css', BASE).href; const cssPronto = new Promise(ok => { this.#css.onload = this.#css.onerror = ok; }); document.head.append(this.#css); await cssPronto; if (!this.#vivo) return;
-    this.#dados = this.#p.carregar('ponteZero', { melhor: 0, jogos: 0, vitorias: 0, sangue: true });
+    this.#dados = { melhor: 0, jogos: 0, vitorias: 0, sangue: true, aberto: 0, medalhas: {}, ...this.#p.carregar('ponteZero', {}) };
+    this.#nivel = Math.min(this.#dados.nivel ?? this.#dados.aberto, this.#dados.aberto, NIVEIS.length - 1);
     const r = this.#raiz = document.createElement('div'); r.className = 'pz'; r.innerHTML = HTML; container.append(r);
     this.#som = criarSom(() => this.#p.somLigado());
     const celular = matchMedia('(pointer: coarse)').matches; this.#qual = this.#p.carregar('ponteZeroQualidade', celular ? 1 : 2);
@@ -48,51 +53,74 @@ export class ZombieBridgeGame {
       this.#cena = new Cena(r, this.#rec, this.#qual); this.#nova(); await this.#cena.preparar();
     } catch (e) { if (!this.#vivo) return; this.#q('texto').textContent = 'Este aparelho não conseguiu abrir o jogo em 3D.'; console.error(e); throw e; }
     if (!this.#vivo) return;
-    this.#q('texto').textContent = 'Atravesse a ponte. Escolha os portões, some soldados e não deixe os zumbis encostarem.';
-    this.#q('carga').parentElement.hidden = true; this.#mostrar('jogar', true); this.#mostrar('sangue', true); this.#sangue(this.#dados.sangue !== false);
+    this.#q('carga').parentElement.hidden = true; this.#mostrar('jogar', true); this.#mostrar('sangue', true); this.#sangue(this.#dados.sangue !== false); this.#menu();
     this.#ouvir(this.#q('jogar'), 'click', () => this.#comecar());
-    this.#ouvir(this.#q('sangue'), 'click', () => { this.#dados.sangue = this.#dados.sangue === false; this.#p.salvar('ponteZero', this.#dados); this.#sangue(this.#dados.sangue); });
+    this.#ouvir(this.#q('niveis'), 'click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; this.#nivel = +b.dataset.n; this.#som.acordar(); this.#nova(); this.#cena.noMenu = true; this.#menu(); });
+    this.#ouvir(this.#q('sangue'), 'click', () => { this.#dados.sangue = this.#dados.sangue === false; this.#salvar(); this.#sangue(this.#dados.sangue); });
     this.#controles();
     this.#obs = new ResizeObserver(() => { if (this.#cena) { this.#cena.medir(); this.#cena.quadro(0, this.#S); } }); this.#obs.observe(r);
     this.#ult = performance.now(); this.#raf = requestAnimationFrame(this.#laco);
   }
-  pause() { if (!this.#vivo || this.#pausado) return; this.#pausado = true; cancelAnimationFrame(this.#raf); this.#soltar(); this.#som.pausar(true); }
-  resume() { if (!this.#vivo || !this.#pausado) return; this.#pausado = false; this.#som.pausar(false); this.#ult = performance.now(); this.#raf = requestAnimationFrame(this.#laco); }
+  pause() { if (!this.#vivo || this.#pausado) return; this.#pausado = true; cancelAnimationFrame(this.#raf); this.#soltar(); this.#som?.pausar(true); }
+  resume() { if (!this.#vivo || !this.#pausado) return; this.#pausado = false; this.#som?.pausar(false); this.#ult = performance.now(); if (this.#cena) this.#raf = requestAnimationFrame(this.#laco); }
   destroy() {
     if (!this.#vivo) return null; this.#vivo = false; cancelAnimationFrame(this.#raf); this.#obs?.disconnect();
     for (const [a, t, f, o] of this.#ouvintes) a.removeEventListener(t, f, o); this.#ouvintes = [];
     this.#som?.dispose(); this.#rec?.dispose(); this.#cena?.dispose(); this.#raiz?.remove(); this.#css?.remove(); const restou = this.#cena?.restou || null; this.#cena = this.#rec = this.#S = null; return restou;
   }
   // para testes e para o pacote mostrar informações
-  get info() { const S = this.#S, i = this.#cena?.R?.info; return S && { estado: S.estado, d: S.d, n: S.n, arma: S.arma, mortos: S.mortos, zumbis: S.zumbis.length, tiros: S.tiros.length, chamadas: i.render.calls, triangulos: i.render.triangles, memoria: { ...i.memory }, qualidade: this.#qual, jogando: !this.#parado, quadroMs: this.#lento.media }; }
+  get info() { const S = this.#S, i = this.#cena?.R?.info, c = S?.chefe; return S && { nivel: this.#nivel + 1, estado: S.estado, luta: S.luta, d: S.d, n: S.n, esp: S.esp, arma: S.arma, mortos: S.mortos, chefe: c && { vida: c.vida, max: c.max, d: c.d - S.d, estado: c.estado, golpe: c.golpe, fase: c.fase, marcas: S.marcas.length }, zumbis: S.zumbis.length, tiros: S.tiros.length, chamadas: i.render.calls, triangulos: i.render.triangles, memoria: { ...i.memory }, qualidade: this.#qual, jogando: !this.#parado, quadroMs: this.#lento.media }; }
   // avança o jogo na marra (testes): segundos de jogo, com piloto opcional
-  avancar(seg, piloto) { for (let t = 0; t < seg; t += 1 / 60) { piloto?.(this.#S); this.#S.passo(1 / 60); this.#cena.fx.atualizar(1 / 60, this.#S); } for (let k = 0; k < 40; k++) { this.#S.passo(1 / 60); piloto?.(this.#S); this.#cena.camera(.1, this.#S); } this.#cena.quadro(1 / 60, this.#S); this.#hud(1); this.#conferirFim(0); }
+  avancar(seg, piloto) { for (let t = 0; t < seg; t += 1 / 60) { piloto?.(this.#S); this.#S.passo(1 / 60); this.#cena.camera(1 / 60, this.#S); this.#cena.fx.atualizar(1 / 60, this.#S); this.#cena.chefe.atualizar(1 / 60, this.#S); this.#cena.portoes.atualizar(1 / 60, t, this.#S.d); const E = this.#cena.espera; for (let i = E.length - 1; i >= 0; i--) if ((E[i][0] -= 1 / 60) <= 0) E.splice(i, 1)[0][1](); } this.#cena.quadro(1 / 60, this.#S); this.#hud(1); this.#conferirFim(0); }
+  get sim() { return this.#S; }
+  escolher(n) { this.#nivel = n; this.#nova(); this.#menu(); }
   comecar() { this.#comecar(); }
   get cena() { return this.#cena; }
+  get somInterno() { return this.#som; }
   // mede o custo real de desenhar um quadro (ms), esperando a placa de vídeo terminar
   medir(n = 30) { const gl = this.#cena.R.getContext(), px = new Uint8Array(4), um = () => { this.#cena.quadro(1 / 60, this.#S); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }; um(); const t = performance.now(); for (let i = 0; i < n; i++) um(); return (performance.now() - t) / n; }
 
   #q(n) { return this.#raiz.querySelector(`[data-${n}]`); }
   #mostrar(n, v) { this.#q(n).hidden = !v; }
   #ouvir(a, t, f, o) { a.addEventListener(t, f, o); this.#ouvintes.push([a, t, f, o]); }
-  #sangue(v) { this.#q('sangue').setAttribute('aria-pressed', v); this.#q('sangue').querySelector('b').textContent = v ? 'ligado' : 'desligado'; this.#cena.fx.sangueLigado(v); this.#cena.zum.mat.userData.u.uSangue.value = v ? 1 : 0; }
+  #salvar() { this.#p.salvar('ponteZero', this.#dados); }
+  #sangue(v) { this.#q('sangue').setAttribute('aria-pressed', v); this.#q('sangue').querySelector('b').textContent = v ? 'ligado' : 'desligado'; const c = this.#cena; c.fx.sangueLigado(v); for (const m of [c.zum, c.gor]) m.mat.userData.u.uSangue.value = v ? 1 : 0; }
 
-  #nova() { this.#S = criarSimulacao(TRECHO, { aoEvento: (n, d) => this.#evento(n, d), maxZumbis: this.#qual > 1 ? 220 : this.#qual ? 150 : 100, maxSoldados: this.#qual > 1 ? 100 : 60 }); this.#cena.novaPartida(this.#S); this.#fim = 0; this.#resto = 0; }
+  // prêmios dos chefes já vencidos valem em toda partida
+  #melhorias() { const r = { soldados: 0, dano: 0, cadencia: 0, bazuca: 0 }; for (const id in this.#dados.medalhas) { const p = CHEFES[id]?.premio || {}; for (const k in r) r[k] += p[k] || 0; } return r; }
+  #nova() { this.#S = criarSimulacao(NIVEIS[this.#nivel], { aoEvento: (n, d) => this.#evento(n, d), melhorias: this.#melhorias(), maxZumbis: this.#qual > 1 ? 220 : this.#qual ? 150 : 100, maxSoldados: this.#qual > 1 ? 100 : 60 }); this.#cena.novaPartida(this.#S); this.#fim = 0; this.#resto = 0; }
+  #menu() {
+    const N = NIVEIS[this.#nivel], C = CHEFES[N.chefe], d = this.#dados; this.#q('selo').textContent = `Nível ${this.#nivel + 1} · ${N.nome}`; this.#q('titulo').textContent = 'Soldier Survivor'; this.#q('texto').textContent = `Chefe no fim da ponte: ${C.nome}. Some soldados, pegue armas e desvie das marcas no chão.`; this.#q('jogar').textContent = 'Jogar'; this.#mostrar('placar', false); this.#mostrar('premio', false); this.#niveis();
+  }
+  #niveis() { const d = this.#dados; this.#mostrar('niveis', true); this.#q('niveis').innerHTML = NIVEIS.map((n, i) => { const ab = i <= d.aberto, me = d.medalhas[n.chefe]; return `<button data-n="${i}" ${ab ? '' : 'disabled'} aria-pressed="${i === this.#nivel}" aria-label="Nível ${i + 1}, ${n.nome}${ab ? me ? ', vencido' : '' : ', bloqueado'}"><b>${ab ? i + 1 : CADEADO}</b><span>${n.nome}</span>${me ? '<i>★</i>' : ''}</button>`; }).join(''); }
   #comecar() {
-    this.#som.acordar(); if (this.#S.estado !== 'jogando' || this.#S.d > 0) this.#nova();
-    this.#parado = false; this.#cena.noMenu = false; this.#dados.jogos++; this.#p.salvar('ponteZero', this.#dados); this.#raiz.querySelector('.pz-painel').hidden = true; this.#raiz.querySelector('.pz-hud').hidden = false; this.#mostrar('conta', true); this.#mostrar('dica', true); this.#raiz.classList.add('jogando'); this.#q('jogar').blur();
+    this.#som.acordar(); this.#nova(); this.#som.musica('acao');
+    this.#parado = false; this.#cena.noMenu = false; this.#dados.jogos++; this.#dados.nivel = this.#nivel; this.#salvar(); this.#mostrar('painel', false); this.#raiz.querySelector('.pz-hud').hidden = false; this.#mostrar('trilho', true); this.#mostrar('chefe', false); this.#mostrar('conta', true); this.#mostrar('dica', true); this.#raiz.classList.add('jogando'); this.#q('jogar').blur();
   }
   #evento(n, d) {
-    if (!this.#cena) return;
+    if (!this.#cena) return; const S = this.#S;
     this.#cena.evento(n, d);
-    if (n === 'tiro') this.#som.tiro(this.#S.arma, this.#S.n, this.#S.x / 5); else this.#som.evento(n, d);
-    if (n === 'portao') { const t = d.l.tipo; this.#p.vibrar(d.bom ? 25 : 60); if (t !== 'arma' && t !== 'cadencia') this.#avisar(d.q >= 0 ? `+${d.q}` : `−${-d.q}`, d.bom); else if (t === 'cadencia') this.#avisar(`Cadência +${d.l.v}%`, true); }
-    if (n === 'arma') { this.#avisar(d.arma.nome, true); this.#p.vibrar(40); }
-    if (n === 'cadencia') this.#avisar('Cadência +15%', true);
-    if (n === 'virou') this.#avisar('Portão virou!', true);
-    if (n === 'soldado') this.#p.vibrar(15); if (n === 'barril') this.#p.vibrar(60);
+    if (n === 'tiro') { this.#som.tiro(d.arma, S.n, d.s.x / 6); return; }
+    this.#som.evento(n, d);
+    switch (n) {
+      case 'portao': { const l = d.l; this.#p.vibrar(d.bom ? 25 : 60); if (l.tipo === 'especial') this.#avisar(`+${l.v} ${l.v > 1 ? ARMAS[l.arma].plural : ARMAS[l.arma].nome}`, true); else if (l.tipo === 'cadencia') this.#avisar(`Cadência +${l.v}%`, true); else if (l.tipo !== 'arma') this.#avisar(d.q >= 0 ? `+${d.q}` : `−${-d.q}`, d.bom); break; }
+      case 'arma': this.#avisar(d.arma.nome, true); this.#p.vibrar(40); break;
+      case 'cadencia': this.#avisar('Cadência +15%', true); break;
+      case 'virou': this.#avisar('Portão virou!', true); break;
+      case 'reforco': this.#avisar(`Reforço +${d.q}`, true); this.#p.vibrar(40); break;
+      case 'atordoado': this.#avisar('Atordoados!', false); break;
+      case 'soldado': this.#p.vibrar(15); break;
+      case 'barril': this.#p.vibrar(60); break;
+      case 'golpe': if (d.dentro) this.#p.vibrar(80); break;
+      case 'placaCaiu': this.#avisar('Placa solta!', true); this.#p.vibrar(40); break;
+      case 'fase': this.#avisar('Ele ficou furioso!', false); break;
+      case 'chefeEntra': this.#mostrar('trilho', false); this.#mostrar('dica', false); this.#som.musica('chefe'); break;
+      case 'chefePousa': { this.#p.vibrar(120); this.#q('chefenome').textContent = d.T.nome; this.#mostrar('chefe', true); const e = this.#q('entrada'); e.querySelector('b').textContent = d.T.nome; e.querySelector('span').textContent = d.T.lema; e.getAnimations().forEach(a => a.cancel()); e.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(1.25)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .16 }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .78 }, { opacity: 0, transform: 'translate(-50%, -58%) scale(1)' }], { duration: 2100, fill: 'both', easing: 'ease-out' }); this.#q('leitor').textContent = `Chefe: ${d.T.nome}`; break; }
+      case 'chefeMorre': this.#avisar(`${d.T.nome} caiu!`, true); this.#p.vibrar(200); this.#som.musica(null); break;
+      case 'derrota': this.#som.musica(null); break;
+    }
   }
-  #avisar(t, bom) { const e = this.#q('aviso'); e.textContent = t; e.className = 'pz-aviso ' + (bom ? 'bom' : 'ruim'); this.#avisoAte = performance.now() + 1100; e.getAnimations().forEach(a => a.cancel()); e.animate([{ transform: 'translate(-50%, 12px) scale(.7)', opacity: 0 }, { transform: 'translate(-50%, 0) scale(1)', opacity: 1, offset: .18 }, { transform: 'translate(-50%, 0) scale(1)', opacity: 1, offset: .7 }, { transform: 'translate(-50%, -22px) scale(1)', opacity: 0 }], { duration: 1100, fill: 'both', easing: 'ease-out' }); this.#q('leitor').textContent = t; }
+  #avisar(t, bom) { const e = this.#q('aviso'); e.textContent = t; e.className = 'pz-aviso ' + (bom ? 'bom' : 'ruim'); e.getAnimations().forEach(a => a.cancel()); e.animate([{ transform: 'translate(-50%, 12px) scale(.7)', opacity: 0 }, { transform: 'translate(-50%, 0) scale(1)', opacity: 1, offset: .18 }, { transform: 'translate(-50%, 0) scale(1)', opacity: 1, offset: .7 }, { transform: 'translate(-50%, -22px) scale(1)', opacity: 0 }], { duration: 1100, fill: 'both', easing: 'ease-out' }); this.#q('leitor').textContent = t; }
 
   // ---------- controles ----------
   #controles() {
@@ -122,7 +150,7 @@ export class ZombieBridgeGame {
       this.#resto += dt; while (this.#resto >= 1 / 60) { this.#S.passo(1 / 60); this.#resto -= 1 / 60; }
       this.#conferirFim(dt); this.#vigiar(real);
     }
-    this.#cena.quadro(dt, this.#S);
+    this.#cena.quadro(dt, this.#S); this.#som.atualizar(this.#S, this.#parado);
     if (!this.#parado) this.#hud(dt);
   };
   // se ficar lento, experimenta baixar a qualidade; se não adiantar (aparelho limitado a 30 quadros, por exemplo), volta como estava
@@ -133,15 +161,25 @@ export class ZombieBridgeGame {
     if (m > 23 && this.#qual > 0) { if (++l.ok >= 2) { l.ok = 0; l.antes = m; this.#qual--; this.#cena.ajustar(this.#qual); } } else l.ok = 0;
   }
   #conferirFim(dt) {
-    const S = this.#S; if (S.estado === 'jogando') return; if (!this.#fim) { this.#fim = .001; const d = this.#dados; d.melhor = Math.max(d.melhor || 0, S.mortos); if (S.estado === 'vitoria') d.vitorias = (d.vitorias || 0) + 1; this.#p.salvar('ponteZero', d); }
-    this.#fim += dt; if (this.#fim < 1.9 || this.#parado) return;
-    const venceu = S.estado === 'vitoria'; this.#parado = true; this.#soltar(); this.#cena.noMenu = venceu ? .4 : .15; this.#raiz.querySelector('.pz-hud').hidden = true; this.#raiz.classList.remove('jogando'); this.#mostrar('conta', false); this.#mostrar('dica', false);
-    this.#q('selo').textContent = venceu ? 'Trecho concluído' : `Parou em ${Math.floor(S.d)} m de ${S.trecho.comprimento} m`; this.#q('titulo').textContent = venceu ? 'Vocês passaram!' : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? 'O chefe da ponte chega na Fase 4.' : 'Some soldados antes das hordas grandes e use os barris.';
-    this.#q('placar').innerHTML = `<div><b>${S.n}</b><span>soldados</span></div><div><b>${S.mortos}</b><span>eliminações</span></div><div><b>${this.#dados.melhor}</b><span>recorde</span></div>`; this.#mostrar('placar', true); this.#q('jogar').textContent = venceu ? 'Jogar de novo' : 'Tentar de novo'; this.#raiz.querySelector('.pz-painel').hidden = false;
+    const S = this.#S, d = this.#dados; if (S.estado === 'jogando') return; const venceu = S.estado === 'vitoria';
+    if (!this.#fim) {
+      this.#fim = .001; d.melhor = Math.max(d.melhor || 0, S.mortos); this.premioNovo = false; if (venceu) { d.vitorias = (d.vitorias || 0) + 1; const id = S.trecho.chefe; this.premioNovo = !d.medalhas[id]; d.medalhas = { ...d.medalhas, [id]: true }; d.aberto = Math.max(d.aberto, Math.min(NIVEIS.length - 1, this.#nivel + 1)); }
+      this.#salvar();
+    }
+    this.#fim += dt; if (this.#fim < (venceu ? 2.6 : 1.9) || this.#parado) return;
+    const N = S.trecho, C = CHEFES[N.chefe], ultimo = this.#nivel === NIVEIS.length - 1;
+    this.#parado = true; this.#soltar(); this.#cena.noMenu = venceu ? .4 : .15; this.#raiz.querySelector('.pz-hud').hidden = true; this.#raiz.classList.remove('jogando'); this.#mostrar('conta', false); this.#mostrar('dica', false);
+    this.#q('selo').textContent = venceu ? `Nível ${this.#nivel + 1} concluído` : S.luta ? `${C.nome} ainda tinha ${Math.max(1, Math.round(S.chefe.vida / S.chefe.max * 100))}% de vida` : `Parou em ${Math.floor(S.d)} m de ${N.comprimento} m`;
+    this.#q('titulo').textContent = venceu ? `${C.nome} caiu!` : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? ultimo ? 'Você venceu todos os chefes que já existem. Vem mais por aí.' : `Próxima parada: ${NIVEIS[this.#nivel + 1].nome}.` : S.luta ? 'Saia das marcas no chão e pegue as caixas verdes de reforço.' : 'Some soldados antes das hordas grandes e use os barris.';
+    this.#q('placar').innerHTML = `<div><b>${S.n}</b><span>soldados</span></div><div><b>${S.mortos}</b><span>eliminações</span></div><div><b>${d.melhor}</b><span>recorde</span></div>`; this.#mostrar('placar', true);
+    this.#q('premio').textContent = `Prêmio: ${C.premio.texto}`; this.#mostrar('premio', venceu && this.premioNovo);
+    if (venceu && !ultimo) this.#nivel++; this.#niveis(); this.#q('jogar').textContent = venceu ? ultimo ? 'Jogar de novo' : 'Próximo nível' : 'Tentar de novo'; this.#mostrar('painel', true);
   }
   #hud() {
     const S = this.#S, A = ARMAS[S.arma], ant = S.arma ? ARMAS[S.arma - 1].meta : 0, txt = (n, v) => { const e = this.#q(n); if (e.textContent !== v) e.textContent = v; };
     this.#q('caminho').style.transform = `scaleX(${Math.min(1, S.d / S.trecho.comprimento)})`; txt('arma', A.nome); this.#q('evolui').style.transform = `scaleX(${A.meta === Infinity ? 1 : Math.max(0, Math.min(1, (S.mortos - ant) / (A.meta - ant)))})`; txt('mortos', `${S.mortos} eliminações`);
-    const c = this.#q('conta'); txt('conta', String(S.n)); const [x, y] = this.#cena.naTela(S.x, 2.3, S.d + S.frente + .5 + Math.sqrt(Math.min(100, S.n)) * .22); c.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+    let e = ''; if (S.esp) { const q = {}; for (const s of S.soldados) if (s.arma) q[s.arma] = (q[s.arma] || 0) + 1; for (const k in q) e += `<span class="e${k}">${q[k]} ${q[k] > 1 ? ARMAS[k].plural : ARMAS[k].nome}</span>`; } if (e !== this.#espTxt) { this.#espTxt = e; this.#q('esp').innerHTML = e; }
+    if (S.chefe) this.#q('vida').style.transform = `scaleX(${S.chefe.vida / S.chefe.max})`;
+    const c = this.#q('conta'); txt('conta', String(S.n)); const [x, y] = this.#cena.naTela(S.x, 2.1, S.d + S.frente + .5 + Math.sqrt(Math.min(100, S.n)) * .22); c.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
   }
 }

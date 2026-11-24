@@ -272,3 +272,13 @@ O roteiro completo das etapas está em `PROMPT.md`.
   Recursos somam 0,7 MB, então o armazenamento separado no sw.js deixou de ser necessário. Capa feita com a cena do jogo (`ferramentas/ponte-zero/capa.mjs`). Publicado como "em construção" a pedido do dono, para testar no celular. Cache `v42`.
   Teste: abrir `jogos/ponte-zero/index.html?teste=1` (expõe `jogo`). Testado: robô em 16 partidas, partida inteira no navegador em pé e
   deitado, pausa, abrir e fechar 20 vezes (0 texturas presas). Não testado num celular de verdade; sons não ouvidos. Próxima: Fase 3.
+- **Soldier Survivor (24/11/2026)**, novo nome do Ponte Zero (a pasta `jogos/ponte-zero/` e as chaves salvas continuam), retorno do dono ao
+  protótipo. Visual de desenho: personagens próprios modelados por fórmula em `ferramentas/ponte-zero/personagens.js` (o MakeHuman e as texturas
+  saíram), luz em faixas e contorno em `cena/desenho.js`, cenário com clima por nível. Tiros com cor por arma; metralhadora, bazuca e lança-chamas
+  como especialistas dos portões dourados. 4 níveis com chefe (Cancela, Operário, Sirene, Carcaça) em `cena/chefes.js` e `nucleo/simulacao.js`:
+  marca no chão antes do golpe, 3 fases, caixas de reforço, prêmio permanente e próximo nível aberto. Sons e 2 músicas refeitos por conta em
+  `audio/sintese.js` (Worker) e tocados por `audio/som.js`. Cache `jogos-offline-v43`.
+  Ferramentas: `robo.mjs` (equilíbrio), `medir-som.mjs` (volume), `vitrine.html`, `capa.mjs`. Testado: robô em 5 jeitos de jogar por nível, os 4
+  níveis inteiros no navegador, em pé e deitado, 8 aberturas (0 texturas presas), offline com servidor desligado, máximo de 266 mil triângulos no
+  modo celular. Não testado num celular de verdade; sons medidos, não ouvidos. Faltam: 6 chefes, níveis 5 a 20, melhorias, infinito, ponte que
+  desaba, adrenalina e veteranos.
