@@ -261,3 +261,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Capas 3D (24/11/2026)**, pedido do dono: os 9 jogos ganharam capa em 3D na tela inicial (pasta `capas/`, imagens prontas, uns 700 KB no
   total). Pinball Galáxia e Galatic Pinball têm desenho próprio; o Galatic usa uma capa larga no celular. As cenas ficam em
   `ferramentas/capas/` e as imagens são refeitas com `node ferramentas/capas/gerar.mjs` (não vai para o celular). Cache `v40`.
+- **Pinball Galáxia desativado (24/11/2026)**, pedido do dono: saiu do menu, das estatísticas e do uso offline. O projeto inteiro e a
+  capa ficam em `guardados/pinball/`. Os recordes continuam salvos no aparelho. Para reativar: devolver a pasta a `jogos/pinball/`, a
+  capa a `capas/pinball.webp`, o cartão em `index.html`, a linha em `js/comum.js` e os arquivos em `sw.js`. Menu com 8 jogos: 2 colunas
+  no celular e 4 no computador (a capa larga do Galatic ficou guardada em `capas/`, sem uso). Cache `v41`.

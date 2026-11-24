@@ -1,12 +1,12 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v40';
+const VERSAO = 'jogos-offline-v41';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
   './icones/icone-192.png', './icones/icone-512.png',
   './capas/velha.webp', './capas/resta-um.webp', './capas/paciencia.webp', './capas/freecell.webp', './capas/cruzadas.webp', './capas/caca-palavras.webp', './capas/dobro.webp',
-  './capas/pinball.webp', './capas/pinball-show.webp', './capas/pinball-show-larga.webp',
+  './capas/pinball-show.webp',
   './jogos/velha/index.html', './jogos/velha/jogo.css', './jogos/velha/jogo.js',
   './jogos/resta-um/index.html', './jogos/resta-um/jogo.css', './jogos/resta-um/jogo.js',
   './jogos/paciencia/index.html', './jogos/paciencia/jogo.css', './jogos/paciencia/jogo.js',
@@ -14,7 +14,6 @@ const ARQUIVOS = [
   './jogos/cruzadas/index.html', './jogos/cruzadas/jogo.css', './jogos/cruzadas/jogo.js', './jogos/cruzadas/grades.js', './jogos/cruzadas/grades-temas.js',
   './jogos/caca-palavras/index.html', './jogos/caca-palavras/jogo.css', './jogos/caca-palavras/jogo.js',
   './jogos/dobro/index.html', './jogos/dobro/jogo.css', './jogos/dobro/jogo.js',
-  './jogos/pinball/index.html', './jogos/pinball/jogo.css', './jogos/pinball/jogo.js', './jogos/pinball/mesa3d.js',
   './jogos/pinball-show/index.html', './jogos/pinball-show/jogo.css', './jogos/pinball-show/principal.js',
   './jogos/pinball-show/fisica/mundo.js', './jogos/pinball-show/regras/conexoes.js', './jogos/pinball-show/mesa/layout.js', './jogos/pinball-show/mesa/cena3d.js', './jogos/pinball-show/mesa/modelagem.js', './jogos/pinball-show/mesa/astronauta.js', './jogos/pinball-show/mesa/efeitos.js', './jogos/pinball-show/audio/som.js', './jogos/pinball-show/mesa/espaco.js',
   './lib/three/three.module.min.js',

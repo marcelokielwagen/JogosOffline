@@ -12,10 +12,8 @@
 a.cartao:active { transform: scale(.96); }
 .cartao .arte { position: relative; aspect-ratio: 4 / 5; margin: -16px -16px 0; background: var(--superficie2); overflow: hidden; }
 .cartao .arte img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease-out; }
-.cartao .arte picture { display: contents; }
 .cartao .arte::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(0,0,0,.3); background: linear-gradient(125deg, rgba(255,255,255,.1), rgba(255,255,255,0) 34%); pointer-events: none; }
 @media (hover: hover) { .cartao:hover { transform: perspective(700px) rotateX(3deg) translateY(-5px); } .cartao:hover .arte img { transform: scale(1.06); } }
-@media (max-width: 699px) { .cartao.destaque { grid-column: 1 / -1; } .cartao.destaque .arte { aspect-ratio: 8 / 5; } }
 .cartao h2 { margin: 0; font-size: 1.05rem; }
 .cartao p { margin: 0; font-size: .85rem; color: var(--texto2); }
 .cartao.breve { box-shadow: none; }
@@ -28,7 +26,7 @@ a.cartao:active { transform: scale(.96); }
 #status-offline.ok { color: var(--o); }
 .atualizar { margin: 10px 0 0; text-align: center; }
 .atualizar .btn { min-height: 44px; font-size: .9rem; }
-@media (min-width: 700px) { .pagina.larga { max-width: 860px; } .pagina.larga .grade { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 700px) { .pagina.larga { max-width: 1040px; } .pagina.larga .grade { grid-template-columns: repeat(4, 1fr); } }
 
 /* Estatísticas e ajustes */
 .stat { padding: 10px 0; border-bottom: 1px solid var(--borda); }
