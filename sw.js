@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v28';
+const VERSAO = 'jogos-offline-v29';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js',
@@ -13,6 +13,8 @@ const ARQUIVOS = [
   './jogos/caca-palavras/index.html', './jogos/caca-palavras/jogo.css', './jogos/caca-palavras/jogo.js',
   './jogos/dobro/index.html', './jogos/dobro/jogo.css', './jogos/dobro/jogo.js',
   './jogos/pinball/index.html', './jogos/pinball/jogo.css', './jogos/pinball/jogo.js', './jogos/pinball/mesa3d.js',
+  './jogos/pinball-show/index.html', './jogos/pinball-show/jogo.css', './jogos/pinball-show/principal.js',
+  './jogos/pinball-show/fisica/mundo.js', './jogos/pinball-show/mesa/layout.js', './jogos/pinball-show/mesa/cena3d.js',
   './lib/three/three.module.min.js',
   './lib/three/addons/EffectComposer.js', './lib/three/addons/RenderPass.js', './lib/three/addons/ShaderPass.js',
   './lib/three/addons/MaskPass.js', './lib/three/addons/Pass.js', './lib/three/addons/UnrealBloomPass.js',

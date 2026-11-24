@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0c0d12">
+<title>Pinball Show — Jogos Offline</title>
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icones/icone-192.png">
+<link rel="stylesheet" href="../../css/base.css">
+<link rel="stylesheet" href="jogo.css">
+<script src="../../js/comum.js"></script>
+</head>
+<body class="pshow">
+<div class="ps">
+  <header class="topo">
+    <a class="icone-btn" href="../../index.html" aria-label="Voltar para a tela inicial">←</a>
+    <h1>Pinball Show</h1>
+    <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+  </header>
+
+  <div class="placar" aria-label="Placar">
+    <div><span>Pontos</span><b id="pontos">0</b></div>
+    <div><span>Bola</span><b id="bola">1/3</b></div>
+    <div><span>Recorde</span><b id="recorde">0</b></div>
+  </div>
+
+  <div id="mesa" class="mesa">
+    <div id="msg" class="msg" hidden></div>
+    <div id="anuncio" class="so-leitor" role="status" aria-live="polite"></div>
+    <div id="inicio" class="inicio">
+      <p class="selo">Protótipo · Fase 3</p>
+      <h2 id="inicio-titulo">Mesa de 3 andares</h2>
+      <p>Mesa cinza para testar a física. Cores, música e a banda chegam nas próximas fases.</p>
+      <button id="jogar" class="btn principal">Jogar</button>
+    </div>
+    <p id="sem3d" class="sem3d" hidden>Este aparelho não conseguiu abrir o desenho em 3D (WebGL).</p>
+  </div>
+</div>
+
+<dialog id="ajuda">
+  <h2>Como jogar</h2>
+  <ul>
+    <li><b>Celular:</b> toque na metade <b>esquerda</b> ou <b>direita</b> da mesa para bater com as palhetas daquele lado.</li>
+    <li><b>Lançar:</b> segure a metade direita (ou Espaço) e solte. Quanto mais tempo segurar, mais forte. Sem força, a bola volta.</li>
+    <li><b>Computador:</b> Z e / (ou as setas ← →) para as palhetas.</li>
+    <li><b>Três andares:</b> embaixo ficam as palhetas grandes. As duas rampas levam ao <b>andar do meio</b>, onde gira o <b>vinil</b>. A rampa do meio leva ao <b>andar de cima</b>, com o <b>teclado gigante</b>.</li>
+    <li><b>Elevador:</b> o buraco no centro, na frente do degrau. Ele leva a bola direto ao teclado.</li>
+    <li><b>Palhetas pequenas:</b> a do meio mexe com o botão direito; a de cima, com o esquerdo.</li>
+    <li>A bola que passa da beirada de um andar <b>cai</b> no andar de baixo.</li>
+    <li>Acenda as <b>10 teclas</b> do teclado para ganhar 50.000 pontos.</li>
+    <li>Nos primeiros 8 segundos depois do lançamento, a bola perdida <b>volta</b>.</li>
+  </ul>
+  <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
+<script type="module" src="principal.js"></script>
+</body>
+</html>
