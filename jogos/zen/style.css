@@ -3,15 +3,15 @@
 
 /* Registradas como cor, as variáveis mudam aos poucos quando a paleta troca.
    Navegador antigo ignora isto e troca de uma vez. */
-@property --areia  { syntax: '<color>'; inherits: true; initial-value: #1c2238; }
-@property --areia2 { syntax: '<color>'; inherits: true; initial-value: #141a2c; }
-@property --sulco  { syntax: '<color>'; inherits: true; initial-value: #2a3250; }
-@property --tinta  { syntax: '<color>'; inherits: true; initial-value: #e9ecf6; }
-@property --tinta2 { syntax: '<color>'; inherits: true; initial-value: #a3acc8; }
-@property --luz    { syntax: '<color>'; inherits: true; initial-value: #f0c9a0; }
-@property --sobre  { syntax: '<color>'; inherits: true; initial-value: #1c2238; }
-@property --pedra  { syntax: '<color>'; inherits: true; initial-value: #56618a; }
-@property --sombra { syntax: '<color>'; inherits: true; initial-value: #10152a; }
+@property --areia  { syntax: '<color>'; inherits: true; initial-value: #ece5d6; }
+@property --areia2 { syntax: '<color>'; inherits: true; initial-value: #dfd5c1; }
+@property --sulco  { syntax: '<color>'; inherits: true; initial-value: #d2c6ae; }
+@property --tinta  { syntax: '<color>'; inherits: true; initial-value: #3b3a30; }
+@property --tinta2 { syntax: '<color>'; inherits: true; initial-value: #5f5b4b; }
+@property --luz    { syntax: '<color>'; inherits: true; initial-value: #5c7050; }
+@property --sobre  { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
+@property --pedra  { syntax: '<color>'; inherits: true; initial-value: #a99d85; }
+@property --sombra { syntax: '<color>'; inherits: true; initial-value: #c6baa0; }
 
 /* areia/areia2: fundo · sulco: riscos · tinta/tinta2: textos · luz: destaque
    sobre: texto em cima do destaque · pedra: formas · sombra: sombra das pedras */
@@ -26,17 +26,17 @@
 }
 
 /* ---------- paletas: 2 temas x 5 (uma a cada 10 fases) ---------- */
-[data-tema=noite]                  { color-scheme: dark;  --areia:#1c2238; --areia2:#141a2c; --sulco:#2a3250; --tinta:#e9ecf6; --tinta2:#a3acc8; --luz:#f0c9a0; --sobre:#241a10; --pedra:#56618a; --sombra:#10152a; }
-[data-tema=noite][data-paleta="1"] { --areia:#14292f; --areia2:#0e1f25; --sulco:#21404a; --tinta:#e6f1f0; --tinta2:#9bb8ba; --luz:#9fe0c8; --sobre:#0d241d; --pedra:#43707a; --sombra:#09161b; }
-[data-tema=noite][data-paleta="2"] { --areia:#2a1f36; --areia2:#1e1628; --sulco:#40304f; --tinta:#f1eaf6; --tinta2:#bba9cb; --luz:#f2b6c6; --sobre:#33131d; --pedra:#72588a; --sombra:#160f1f; }
-[data-tema=noite][data-paleta="3"] { --areia:#1b2a22; --areia2:#131f19; --sulco:#2d4236; --tinta:#eaf2ec; --tinta2:#a2bba9; --luz:#e3d68c; --sobre:#262007; --pedra:#55775f; --sombra:#0c1510; }
-[data-tema=noite][data-paleta="4"] { --areia:#2b2428; --areia2:#1e191d; --sulco:#43373d; --tinta:#f5edee; --tinta2:#c0aeb2; --luz:#f3b08a; --sobre:#32170a; --pedra:#7b636b; --sombra:#151114; }
+[data-tema=noite]                  { color-scheme: dark;  --areia:#2d2b25; --areia2:#23211c; --sulco:#413e34; --tinta:#f0ebdf; --tinta2:#b9b19d; --luz:#d9c08c; --sobre:#2a2210; --pedra:#6f6a58; --sombra:#171511; }
+[data-tema=noite][data-paleta="1"] { --areia:#2d3328; --areia2:#22271d; --sulco:#414938; --tinta:#edf0e6; --tinta2:#abb9a7; --luz:#dcb291; --sobre:#2b190d; --pedra:#5e7560; --sombra:#121712; }
+[data-tema=noite][data-paleta="2"] { --areia:#2f2f22; --areia2:#242419; --sulco:#444432; --tinta:#f0efdf; --tinta2:#b9b89a; --luz:#c5cd8a; --sobre:#23260c; --pedra:#71724f; --sombra:#18180f; }
+[data-tema=noite][data-paleta="3"] { --areia:#352a25; --areia2:#291f1b; --sulco:#4c3d36; --tinta:#f4eae3; --tinta2:#c4b0a4; --luz:#e2ad8f; --sobre:#32180b; --pedra:#806657; --sombra:#1b1411; }
+[data-tema=noite][data-paleta="4"] { --areia:#322d29; --areia2:#26221e; --sulco:#47413b; --tinta:#f0eeea; --tinta2:#b7b2ab; --luz:#d3b4b8; --sobre:#2f161b; --pedra:#706c67; --sombra:#161414; }
 
-[data-tema=pastel]                  { color-scheme: light; --areia:#dfe7f0; --areia2:#cfdae8; --sulco:#c5d1e1; --tinta:#26344a; --tinta2:#4f6079; --luz:#2f6f9f; --sobre:#ffffff; --pedra:#8fa3bb; --sombra:#b3c2d5; }
-[data-tema=pastel][data-paleta="1"] { --areia:#dde8df; --areia2:#cdddd0; --sulco:#c1d3c5; --tinta:#243a2d; --tinta2:#4a6252; --luz:#2c7a5a; --sobre:#ffffff; --pedra:#8daa95; --sombra:#b0c6b5; }
-[data-tema=pastel][data-paleta="2"] { --areia:#e6e0ef; --areia2:#d8cfe6; --sulco:#cdc3de; --tinta:#352a4a; --tinta2:#5f5278; --luz:#6b4fa0; --sobre:#ffffff; --pedra:#a393bd; --sombra:#c1b4d4; }
-[data-tema=pastel][data-paleta="3"] { --areia:#f1e0e0; --areia2:#e6cfd0; --sulco:#dcc2c4; --tinta:#472a30; --tinta2:#735058; --luz:#a8485f; --sobre:#ffffff; --pedra:#c3979e; --sombra:#d6b5b9; }
-[data-tema=pastel][data-paleta="4"] { --areia:#f2e3d3; --areia2:#e8d3bd; --sulco:#dec7ae; --tinta:#43311f; --tinta2:#6d5740; --luz:#93541b; --sobre:#ffffff; --pedra:#c2a281; --sombra:#d8bd9f; }
+[data-tema=pastel]                  { color-scheme: light; --areia:#ece5d6; --areia2:#dfd5c1; --sulco:#d2c6ae; --tinta:#3b3a30; --tinta2:#5f5b4b; --luz:#5c7050; --sobre:#ffffff; --pedra:#a99d85; --sombra:#c6baa0; }
+[data-tema=pastel][data-paleta="1"] { --areia:#dfe6d8; --areia2:#cfd9c7; --sulco:#bfcbb5; --tinta:#2f3b2e; --tinta2:#51604d; --luz:#965839; --sobre:#ffffff; --pedra:#93a386; --sombra:#b2c0a8; }
+[data-tema=pastel][data-paleta="2"] { --areia:#e8e7d0; --areia2:#dad9ba; --sulco:#cbcba8; --tinta:#3a3b22; --tinta2:#5c5d3e; --luz:#646b2c; --sobre:#ffffff; --pedra:#a6a67a; --sombra:#c2c29c; }
+[data-tema=pastel][data-paleta="3"] { --areia:#eddfd3; --areia2:#e1cebe; --sulco:#d4beac; --tinta:#45342a; --tinta2:#695346; --luz:#4d6a55; --sobre:#ffffff; --pedra:#b89b87; --sombra:#ccb4a1; }
+[data-tema=pastel][data-paleta="4"] { --areia:#e5e1da; --areia2:#d6d1c8; --sulco:#c8c2b7; --tinta:#38342f; --tinta2:#5c574f; --luz:#7a4f5a; --sobre:#ffffff; --pedra:#a19a8e; --sombra:#bdb6aa; }
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -186,7 +186,7 @@ body[data-tela=partida] .jardim { opacity: 0; }
   width: min(400px, calc(100% - 32px)); margin: auto; padding: 24px; border: 0; border-radius: 28px;
   background: var(--areia2); color: var(--tinta); box-shadow: inset 0 0 0 1.5px var(--sulco);
 }
-.folha::backdrop { background: rgba(8, 10, 20, .5); }
+.folha::backdrop { background: rgba(30, 26, 18, .45); }
 .folha[open] { animation: aparecer .4s var(--suave); }
 @keyframes aparecer { from { opacity: 0; } }
 .folha form { display: grid; gap: 18px; }

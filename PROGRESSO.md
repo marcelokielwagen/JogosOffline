@@ -366,3 +366,4 @@ O roteiro completo das etapas está em `PROMPT.md`.
   No menu, nas Estatísticas e no modo offline. Cache `jogos-offline-v60`. Testado: as 300 fases conferidas (solução, repetição), 10.800 lançamentos sem atravessar nada, app inteiro
   com toque simulado (`app-testes.mjs`), sons medidos, regras do iPhone simuladas. Não testado num celular de verdade. Publicado com autorização do dono.
   Depois, a pedido do dono, virou dois cartões no menu (`?jogo=loop` e `?jogo=okay`), cada um com sua capa, só com o seu jogo na tela. Cache `jogos-offline-v61`.
+  O dono não gostou do azul-escuro: cores refeitas em tons naturais (areia, musgo, chá, argila, pedra), claro como padrão. Cache `jogos-offline-v62`.

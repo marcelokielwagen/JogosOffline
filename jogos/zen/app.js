@@ -25,7 +25,8 @@ function carregar() {
     jogo: JOGOS.includes(d.jogo) ? d.jogo : 'loop', dif: Zen.DIFS.includes(d.dif) ? d.dif : 'facil',
     fase: {}, feitas: {}, melhor: {}, andamento: {},
     som: { musica: fracao(obj(d.som).musica, .7), efeitos: fracao(obj(d.som).efeitos, .8), mudo: obj(d.som).mudo === true },
-    tema: d.tema === 'pastel' ? 'pastel' : 'noite', calmo: d.calmo === true
+    tema: d.cores === 2 && d.tema === 'noite' ? 'noite' : 'pastel', cores: 2,   // cores novas (tons naturais): todos começam no claro
+    calmo: d.calmo === true
   };
   for (const j of JOGOS) for (const x of Zen.DIFS) {
     const k = j + '/' + x, t = obj(d.feitas)[k];
