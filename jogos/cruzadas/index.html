@@ -8,25 +8,25 @@
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../icones/icone-192.png">
 <link rel="stylesheet" href="../../css/base.css">
-<link rel="stylesheet" href="../../css/palavras.css">
 <link rel="stylesheet" href="jogo.css">
 <script src="../../js/comum.js"></script>
-<script type="importmap">{ "imports": { "three": "../../lib/three/three.module.min.js" } }</script>
 </head>
 <body>
 <div class="pagina">
   <header class="topo">
-    <a id="voltar" class="icone-btn" href="../../index.html" aria-label="Voltar" hidden>←</a>
+    <a id="voltar" class="icone-btn" href="../../index.html" aria-label="Voltar para a lista de grades">←</a>
     <h1 id="titulo">Palavras Cruzadas</h1>
-    <button class="icone-btn" id="musica" aria-label="Ligar ou desligar a música">🎵</button>
     <button class="icone-btn" data-abre="ajuda" aria-label="Como jogar">?</button>
+    <button class="icone-btn" data-acao="tema" aria-label="Trocar tema claro ou escuro">☀️</button>
   </header>
 
+  <!-- Tela 1: escolha da grade -->
   <main id="lista" class="lista"></main>
 
+  <!-- Tela 2: jogo -->
   <main id="jogo" hidden>
-    <div class="info"><span id="feitas"></span><div class="barrinha"><i id="info-barra"></i></div><b id="tempo">00:00</b></div>
-    <div class="palco"><canvas id="tela3d" aria-label="Grade de palavras cruzadas"></canvas><div id="placa" class="placa"></div></div>
+    <div id="info" class="info" hidden><span id="feitas"></span><div class="barrinha"><i id="info-barra"></i></div><b id="tempo">00:00</b></div>
+    <div class="grade-caixa"><div id="grade" class="grade"></div></div>
 
     <div class="dica-barra">
       <button id="ant" class="icone-btn" aria-label="Palavra anterior">‹</button>
@@ -35,7 +35,7 @@
     </div>
 
     <div class="acoes">
-      <button id="c-letra" class="btn">💡 Letra</button>
+      <button id="c-letra" class="btn">✓ Letra</button>
       <button id="c-palavra" class="btn">✓ Palavra</button>
       <button id="revelar" class="btn">Revelar</button>
       <button class="btn" data-abre="todas" id="abre-todas">Dicas</button>
@@ -49,15 +49,17 @@
 <dialog id="ajuda">
   <h2>Como jogar</h2>
   <ul>
-    <li>Escolha um tema. Cada um tem <b>10 fases</b>: ao vencer uma, o jogo pula sozinho para a próxima, um pouco maior.</li>
-    <li>Toque em uma peça e use o teclado da tela para escrever.</li>
-    <li>Toque de novo na mesma peça (ou na dica) para trocar entre horizontal e vertical.</li>
-    <li>Palavra certa fica verde e o jogo <b>pula</b> para a próxima. Letra errada aparece em vermelho quando a palavra enche.</li>
-    <li><b>💡 Letra</b> dá a letra da peça marcada. <b>Revelar</b> dá a palavra toda.</li>
-    <li><b>Estrelas:</b> 3 sem ajuda, 2 com uma ou duas letras, 1 com mais.</li>
+    <li><b>Partida rápida:</b> escolha o tamanho (Mini ou Média) e um tema. A grade é sorteada na hora, sempre diferente.</li>
+    <li>Palavra certa fica verde e o jogo <b>pula sozinho</b> para a próxima. Letra errada aparece em vermelho quando a palavra enche.</li>
+    <li><b>💡 Letra</b> dá a letra da casa marcada.</li>
+    <li><b>Grades grandes</b> (no fim da lista): as grades prontas, para jogar com calma.</li>
+    <li>Toque em uma casa e use o teclado da tela para escrever.</li>
+    <li>Toque de novo na mesma casa (ou na dica) para trocar entre horizontal e vertical.</li>
+    <li>As setas ‹ › pulam para a palavra anterior ou a próxima.</li>
     <li>As respostas <b>não têm acento</b> (PÃO vira PAO), mas o <b>Ç</b> é usado.</li>
-    <li><b>Grades grandes</b> (no fim da lista): para jogar com calma, sem fases.</li>
-    <li>🎵 liga ou desliga a música. Tudo fica salvo: você pode sair e continuar depois.</li>
+    <li><b>✓ Letra / ✓ Palavra:</b> nas grades grandes, mostram o que está certo (verde) e errado (vermelho).</li>
+    <li><b>Revelar:</b> preenche a palavra atual com a resposta.</li>
+    <li>Tudo fica salvo: você pode sair e continuar depois.</li>
   </ul>
   <button class="btn principal" data-fecha>Entendi</button>
 </dialog>
@@ -69,13 +71,18 @@
   <button id="limpar" class="btn discreto">Limpar esta grade</button>
 </dialog>
 
-<dialog id="vitoria"></dialog>
+<dialog id="vitoria">
+  <h2>Grade completa! 🎉</h2>
+  <p id="vitoria-txt"></p>
+  <button id="vitoria-prox" class="btn principal">Próxima grade</button>
+  <button id="vitoria-lista" class="btn discreto">Ver todas as grades</button>
+</dialog>
 
 <script src="grades.js"></script>
 <script src="grades-temas.js"></script>
 <script src="banco.js"></script>
 <script src="banco-geral.js"></script>
 <script src="gerador.js"></script>
-<script type="module" src="jogo.js"></script>
+<script src="jogo.js"></script>
 </body>
 </html>

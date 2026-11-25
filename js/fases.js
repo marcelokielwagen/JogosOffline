@@ -1,4 +1,4 @@
-// Temas com 10 fases, usado pelas Palavras Cruzadas e pelo Caça-Palavras.
+// Temas com 10 fases, usado pelo Caça-Palavras.
 // prog = { tema: { 1: { e: estrelas, t: tempo }, ... } }. Cada fase vencida abre a seguinte.
 import { CLIMA, cenarioDe } from './cenarios3d.js';
 import { PELES } from './tabuleiro3d.js';

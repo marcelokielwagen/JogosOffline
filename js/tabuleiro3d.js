@@ -1,4 +1,4 @@
-// Tabuleiro 3D de letras, usado pelas Palavras Cruzadas e pelo Caça-Palavras.
+// Tabuleiro 3D de letras, usado pelo Caça-Palavras.
 // O tabuleiro mede sempre 10 x 10; as peças encolhem conforme o número de casas. y é a altura, -z é o fundo.
 import * as THREE from 'three';
 import { montarCenario } from './cenarios3d.js';

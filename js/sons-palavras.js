@@ -1,4 +1,4 @@
-// Sons das Palavras Cruzadas e do Caça-Palavras, todos fabricados na hora (sem arquivos).
+// Sons do Caça-Palavras, todos fabricados na hora (sem arquivos).
 // Os efeitos são bem mais altos que a música; a música abaixa um instante em cada acerto.
 export function criarSons() {
   let ctx = null, mestre, efeitos, musG, eco, estilo = null, relogio = null, prox = 0, passoM = 0, ruido = null;

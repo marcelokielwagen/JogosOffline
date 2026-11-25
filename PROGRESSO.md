@@ -324,3 +324,6 @@ O roteiro completo das etapas está em `PROMPT.md`.
   cartão em `index.html`, a linha em `js/comum.js` e os arquivos em `sw.js`. Cache `jogos-offline-v47`.
   Testado com toque simulado no Chrome: 10 fases seguidas nos dois jogos, fase trancada, pulo sozinho, dica, pausa, música, grade grande, continuar,
   360x640 a 1366x768 e deitado, sem internet, processador 6x mais lento (57 a 61 quadros/s). Não testado num celular de verdade; sons medidos, não ouvidos.
+- **Cruzadas de volta à versão anterior (24/11/2026)**, pedido do dono: a versão 3D ficou "muito infantil". Voltou a 2D das partidas rápidas (Mini e
+  Média) do commit `a65c85a`, com as 270 palavras extras de `banco-geral.js`; a versão 3D fica no histórico (commit `4f676c6`). O Caça-Palavras segue em
+  3D. Cache `jogos-offline-v49`.
