@@ -341,3 +341,6 @@ O roteiro completo das etapas está em `PROMPT.md`.
   por semente: mudar `gen` ou `spec` muda todas. No menu, nas Estatísticas e no modo offline. Cache `jogos-offline-v52`. Testado: solução conferida nas 100,
   robô venceu as 100, toque, teclado, em pé e deitado, 61 quadros/s, sem internet. Não testado num celular de verdade; sons medidos, não ouvidos.
   Publicado em 25/11/2026, com autorização do dono.
+- **Caça-Palavras com diagonal em todas as fases (25/11/2026)**, pedido do dono (estava fácil): quantidade garantida de palavras na diagonal, de 3 em 5
+  (fase 1) a 8 em 10 (fase 10); fase 8 ganhou diagonal de trás para frente. Se as palavras da vez não cabem juntas, sorteia outras (antes podia faltar
+  palavra). Cache `jogos-offline-v53`. Testado: 17.400 quadros (29 temas x 10 fases) sem falha; fase 1 jogada arrastando. Não testado num celular de verdade.

@@ -5,9 +5,9 @@ import { criarSons, estiloDe } from '../../js/sons-palavras.js';
 import { criarFases, janelaVitoria, relogio, TOTAL } from '../../js/fases.js';
 
 const $ = id => document.getElementById(id);
-const RETAS = [[0, 1], [1, 0]], DIAG = [...RETAS, [1, 1], [-1, 1]], VOLTA = [...RETAS, [0, -1], [-1, 0], [1, 1], [-1, 1]], TODAS = [...DIAG, [0, -1], [-1, 0], [-1, -1], [1, -1]];
-// [lado do quadro, quantas palavras, direções] de cada fase
-const FASES = [[7, 5, RETAS], [8, 6, RETAS], [8, 6, RETAS], [8, 7, DIAG], [9, 7, DIAG], [9, 8, DIAG], [10, 8, DIAG], [10, 8, VOLTA], [10, 9, TODAS], [11, 10, TODAS]];
+const RETAS = [[0, 1], [1, 0]], DIAG = [...RETAS, [1, 1], [-1, 1]], TODAS = [...DIAG, [0, -1], [-1, 0], [-1, -1], [1, -1]];
+// [lado do quadro, quantas palavras, direções, quantas na diagonal] de cada fase
+const FASES = [[7, 5, DIAG, 3], [8, 6, DIAG, 3], [8, 6, DIAG, 4], [8, 7, DIAG, 4], [9, 7, DIAG, 5], [9, 8, DIAG, 5], [10, 8, DIAG, 6], [10, 8, TODAS, 6], [10, 9, TODAS, 7], [11, 10, TODAS, 8]];
 const CORES = ['#8fa0ff', '#ff8aa0', '#4fd6c0', '#ffc33f', '#cf9bff', '#74d66a', '#ffa866', '#5fb8ff', '#f58fe0', '#b7d84a'];
 const ENCHE = 'AAAAEEEEIIOOOUURRSSTTLLMMNNCCDDPBGFVHJQXZ';
 const sorte = n => Math.floor(Math.random() * n);
@@ -49,23 +49,29 @@ function sortear(tema, n, qtd, antigas) {
   return r.sort((a, b) => b.length - a.length);
 }
 function quadro(tema, fase) {
-  const [n, qtd, dirs] = FASES[fase - 1], antigas = salvo.qr[tema] || [];
+  const [n, qtd, dirs, diag] = FASES[fase - 1], antigas = salvo.qr[tema] || [];
   for (let tent = 0; ; tent++) {
-    const lista = sortear(tema, n, qtd, antigas), g = Array(n * n).fill(''), p = [];
-    for (const w of lista) {
-      let posto = false;
-      for (let k = 0; k < 400 && !posto; k++) {
-        const [dl, dc] = dirs[sorte(dirs.length)], l = sorte(n), c = sorte(n), fl = l + dl * (w.length - 1), fc = c + dc * (w.length - 1);
-        if (fl < 0 || fl >= n || fc < 0 || fc >= n) continue;
-        let cabe = true;
-        for (let i = 0; i < w.length && cabe; i++) { const ch = g[(l + dl * i) * n + c + dc * i]; if (ch && ch !== w[i]) cabe = false; }
-        if (!cabe) continue;
-        for (let i = 0; i < w.length; i++) g[(l + dl * i) * n + c + dc * i] = w[i];
-        p.push({ w, ok: false, a: { l, c }, b: { l: fl, c: fc } }); posto = true;
+    const lista = sortear(tema, n, qtd, tent < 60 ? antigas : []), g = Array(n * n).fill(''), p = [];
+    // Se as palavras da vez não cabem juntas (60 tentativas), sorteia outras. Quem vai na diagonal é sorteado; todas as posições possíveis entram no sorteio.
+    const naDiag = new Set(lista.map((_, k) => k).sort(() => Math.random() - .5).slice(0, diag));
+    for (const [k, w] of lista.entries()) {
+      const lugares = [], querDiag = naDiag.has(k);
+      for (const [dl, dc] of dirs) {
+        if (!!(dl && dc) !== querDiag) continue;
+        for (let l = 0; l < n; l++) for (let c = 0; c < n; c++) {
+          const fl = l + dl * (w.length - 1), fc = c + dc * (w.length - 1);
+          if (fl < 0 || fl >= n || fc < 0 || fc >= n) continue;
+          let cabe = true;
+          for (let i = 0; i < w.length && cabe; i++) { const ch = g[(l + dl * i) * n + c + dc * i]; if (ch && ch !== w[i]) cabe = false; }
+          if (cabe) lugares.push([dl, dc, l, c, fl, fc]);
+        }
       }
-      if (!posto) break;
+      if (!lugares.length) break;
+      const [dl, dc, l, c, fl, fc] = lugares[sorte(lugares.length)];
+      for (let i = 0; i < w.length; i++) g[(l + dl * i) * n + c + dc * i] = w[i];
+      p.push({ w, ok: false, a: { l, c }, b: { l: fl, c: fc } });
     }
-    if (p.length < lista.length && tent < 80) continue;
+    if (p.length < lista.length && tent < 400) continue;
     for (let i = 0; i < n * n; i++) if (!g[i]) g[i] = ENCHE[sorte(ENCHE.length)];
     salvo.qr[tema] = [...lista, ...antigas.filter(x => !lista.includes(x))].slice(0, 60);
     p.sort((a, b) => a.w.localeCompare(b.w));
