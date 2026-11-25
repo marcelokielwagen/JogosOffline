@@ -58,6 +58,7 @@ const JO = (() => {
     const k = carregar('caca', null), fc = carregar('freecell', null);
     const ps = carregar('pinballShow', null), pz = carregar('ponteZero', null);
     let na = null, naFeitas = 0; try { na = JSON.parse(localStorage.getItem('nascente.v2')) || JSON.parse(localStorage.getItem('nascente.v1')); naFeitas = new Set(na ? (na.feitas || [na.concluidas || []]).flat() : []).size; } catch (e) {}
+    let cd = null; try { cd = JSON.parse(localStorage.getItem('candeia.v1')); } catch (e) {}
     const fcn = (n, nome) => { const s = fc && fc.stats && fc.stats[n]; return [nome, s && s.j ? `${s.v} de ${s.j} (${Math.round(100 * s.v / s.j)}%)` : '–']; };
     const pn = (n, nome) => { const s = p && p.stats && p.stats.n && p.stats.n[n]; return [nome, s && s.v ? `${s.v} · melhor ${relogio(s.melhor)}` : '–']; };
     // Caça-Palavras: fases vencidas, estrelas e temas completos.
@@ -75,6 +76,7 @@ const JO = (() => {
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
       ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 10` : '0 de 10']]],
       ['Nascente', [['Fases concluídas', `${naFeitas} de 100`]]],
+      ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
     ];
   }
   function preencherEstatisticas(cx) {

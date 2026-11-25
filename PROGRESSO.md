@@ -336,3 +336,8 @@ O roteiro completo das etapas está em `PROMPT.md`.
   (`nascente.v2`, migra da v1), andares (aqueduto alto, queda e parafuso d'água), eixo emperrado, peças irmãs, comportas e duas águas com mistura.
   Fases geradas e conferidas por `ferramentas/nascente` (solução única no Médio); detalhes e testes em `jogos/nascente/PLANO-100.md`. `sw.js` v51.
   Em commits locais, falta o dono autorizar a publicação.
+- **Candeia (25/11/2026)**, pedido do dono: quebra-cabeça calmo de girar fios de luz, em arquivo único (`jogos/candeia/index.html`), 100 fases em 10 mundos
+  (laços, formatos, colmeia, duas chamas, peças irmãs), sons todos por código (giro, sinos, acorde, ambiente) e progresso em `candeia.v1`. Fases geradas
+  por semente: mudar `gen` ou `spec` muda todas. No menu, nas Estatísticas e no modo offline. Cache `jogos-offline-v52`. Testado: solução conferida nas 100,
+  robô venceu as 100, toque, teclado, em pé e deitado, 61 quadros/s, sem internet. Não testado num celular de verdade; sons medidos, não ouvidos.
+  Publicado em 25/11/2026, com autorização do dono.
