@@ -996,7 +996,7 @@ for (const ev of ['touchmove', 'gesturestart']) document.addEventListener(ev, e 
 document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('dblclick', e => e.preventDefault());
 Tela.iniciar(); Jogo.opcoes();
 document.getElementById('fila').innerHTML = [0, 1, 2, 3, 4, 5].map(c => `<img alt="" src="${Arte.url('c' + c)}">`).join('');
-if (/\/jogos\/filao\//.test(location.pathname)) document.getElementById('lVolta').hidden = false;
+if (location.pathname.includes('/jogos/gem-shatter/')) document.getElementById('lVolta').hidden = false;
 Jogo.aberturaTela();
 if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__gemShatter = { Nucleo, Jogo, Tela, Som, Arte, Progresso, Eventos, Ganchos };
 </script>

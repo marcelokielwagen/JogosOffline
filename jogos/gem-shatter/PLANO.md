@@ -5,7 +5,7 @@ Série em fases, um jogo por vez e uma fase por conversa: 1 grupos de cubos (est
 
 | Fase | O que é | Estado |
 |---|---|---|
-| 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v55) em 25/11/2026 |
+| 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v56) em 25/11/2026 |
 | 2 | Progresso além da fase (coleção, restauração de áreas, marcos) e salvamento robusto | falta |
 | 3 | Moedas, boosters, dificuldade, recompensa diária, ganchos de anúncio e compra | falta |
 | 4 | Preparação para as lojas | falta |
