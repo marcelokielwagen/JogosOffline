@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Quebre grupos de minerais, crie especiais e provoque reações em cadeia. 50 fases.">
+<meta property="og:title" content="Gem Shatter">
+<meta property="og:description" content="Quebre grupos de minerais e provoque reações em cadeia. 50 fases.">
+<meta property="og:image" content="https://marcelokielwagen.github.io/JogosOffline/capas/gem-shatter.webp">
+<link rel="icon" href="../../icones/icone-192.png">
+<title>Gem Shatter</title>
+<style>
+/* ============================================================ APARÊNCIA */
+:root { --osso:#efe6d6; --osso2:#b9ad9b; --tinta:#14110f; --painel:rgba(22,18,16,.86); --ouro:#e3b457; --linha:rgba(239,230,214,.14);
+  --serifa:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; --corpo:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+[hidden] { display:none !important; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; background:var(--tinta); color:var(--osso); font-family:var(--corpo);
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; position:fixed; inset:0; width:100%; }
+#fundo,#tela { position:absolute; inset:0; width:100%; height:100%; }
+#tela { z-index:3; pointer-events:none; }
+#app { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; touch-action:none;
+  padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
+#painel { width:100%; max-width:600px; margin:0 auto; }
+.barra { display:flex; align-items:center; gap:8px; }
+.barra h1 { flex:1; margin:0; font:600 17px/1.15 var(--serifa); text-align:center; }
+.barra h1 small { display:block; font:400 12px/1.3 var(--corpo); color:var(--osso2); }
+.ic { width:44px; height:44px; border-radius:12px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); display:grid; place-items:center; padding:0; cursor:pointer; flex:none; }
+.ic:active { transform:scale(.93); }
+.ic svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.placar { display:flex; align-items:stretch; gap:8px; margin-top:8px; }
+.movs { width:78px; border-radius:14px; background:var(--painel); border:1px solid var(--linha); text-align:center; padding:6px 4px; flex:none; }
+.movs b { display:block; font:700 30px/1 var(--serifa); font-variant-numeric:tabular-nums; }
+.movs span { font-size:11.5px; color:var(--osso2); }
+.movs.poucos { border-color:#d9663f; } .movs.poucos b { color:#ff9a6b; }
+.metas { flex:1; display:flex; justify-content:center; align-items:center; gap:4px 14px; flex-wrap:wrap; border-radius:14px; background:var(--painel); border:1px solid var(--linha); padding:6px 8px; min-height:60px; }
+.meta { display:flex; align-items:center; gap:6px; font:700 20px/1 var(--serifa); font-variant-numeric:tabular-nums; }
+.meta img { width:36px; height:36px; display:block; }
+.meta.feita { color:var(--ouro); }
+.meta.pula img { animation:pula .22s; }
+@keyframes pula { 40% { transform:scale(1.22); } }
+.pontos { width:84px; border-radius:14px; background:var(--painel); border:1px solid var(--linha); text-align:center; padding:6px 4px; flex:none; }
+.pontos b { display:block; font:700 20px/30px var(--serifa); font-variant-numeric:tabular-nums; }
+.pontos span { font-size:11.5px; color:var(--osso2); }
+.prog { margin-top:8px; height:12px; border-radius:8px; background:rgba(10,8,7,.7); border:1px solid var(--linha); overflow:hidden; }
+.prog i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#a9772c,var(--ouro)); transition:width .25s; }
+#dica { min-height:22px; margin-top:6px; text-align:center; font-size:14.5px; line-height:1.35; color:var(--osso); text-shadow:0 1px 3px #000; }
+#area { flex:1; min-height:0; width:100%; max-width:760px; margin:4px auto 0; cursor:pointer; }
+/* celular deitado: painel ao lado do tabuleiro */
+@media (orientation:landscape) and (max-height:560px) {
+  #app { flex-direction:row; gap:10px; } #painel { width:250px; margin:0; } #area { margin:0 auto; }
+  .placar { flex-wrap:wrap; } .metas { order:3; flex-basis:100%; } .movs,.pontos { flex:1; }
+}
+/* telas por cima */
+.tela { position:absolute; inset:0; z-index:5; display:none; background:rgba(10,8,7,.62); padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom)); overflow:auto; touch-action:pan-y; overscroll-behavior:contain; }
+.tela.on { display:flex; animation:surge .18s; }
+@keyframes surge { from { opacity:0; } }
+.caixa { margin:auto; width:100%; max-width:380px; background:#1d1815; border:1px solid var(--linha); border-radius:20px; padding:22px 20px; text-align:center; box-shadow:0 18px 60px rgba(0,0,0,.6); }
+.caixa h2 { margin:0 0 6px; font:700 30px/1.1 var(--serifa); }
+.caixa p { margin:6px 0 0; color:var(--osso2); font-size:16px; line-height:1.45; }
+.bt { display:block; width:100%; min-height:54px; margin-top:12px; border-radius:15px; border:1px solid var(--linha); background:#2a231f; color:var(--osso); font:600 18px/1.2 var(--corpo); cursor:pointer; }
+.bt.pri { background:linear-gradient(#e9bf68,#c18f38); color:#241803; border-color:#f0cf88; font-size:20px; min-height:60px; }
+.bt:active { transform:scale(.97); }
+.estrelas { display:flex; justify-content:center; gap:10px; margin:10px 0 4px; }
+.estrelas svg { width:58px; height:58px; fill:#332b26; stroke:#50453c; stroke-width:1.4; }
+.estrelas svg.on { fill:var(--ouro); stroke:#fbe3ab; animation:estrela .38s cubic-bezier(.2,1.7,.4,1); }
+@keyframes estrela { from { transform:scale(0) rotate(-40deg); } }
+.linha2 { display:flex; gap:10px; } .linha2 .bt { margin-top:10px; }
+.op { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:50px; margin-top:8px; padding:0 16px; border-radius:13px; border:1px solid var(--linha); background:#26201c; color:var(--osso); font:500 17px var(--corpo); cursor:pointer; }
+.op b { width:46px; height:26px; border-radius:20px; background:#443a33; position:relative; transition:.15s; } .op b::after { content:""; position:absolute; width:20px; height:20px; border-radius:50%; background:var(--osso); left:3px; top:3px; transition:.15s; }
+.op[aria-pressed=true] b { background:#b98835; } .op[aria-pressed=true] b::after { left:23px; }
+.falta { display:flex; justify-content:center; gap:16px; margin:14px 0 4px; }
+/* abertura e mapa */
+#mapa { background:rgba(10,8,7,.5); }
+#abertura { background:linear-gradient(rgba(10,8,7,.25),rgba(10,8,7,.8)); }
+.capa { margin:auto; width:100%; max-width:420px; text-align:center; }
+.capa h2 { margin:0; font:700 clamp(58px,18vw,88px)/.95 var(--serifa); letter-spacing:-.01em; text-shadow:0 4px 30px #000; }
+.capa p { margin:8px 0 18px; font-size:18px; color:var(--osso); text-shadow:0 1px 6px #000; }
+.capa .fila { display:flex; justify-content:center; gap:4px; margin:20px 0; } .capa .fila img { width:15%; max-width:60px; }
+.capa a { display:inline-block; margin-top:18px; padding:10px; color:var(--osso2); font-size:15px; }
+.mapa { margin:0 auto; width:100%; max-width:460px; }
+.mapa h3 { margin:22px 0 10px; font:600 21px var(--serifa); display:flex; justify-content:space-between; align-items:baseline; } .mapa h3 small { font:400 14px var(--corpo); color:var(--osso2); }
+.grade { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.fs { aspect-ratio:1; border-radius:14px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); font:700 21px var(--serifa); cursor:pointer; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.fs small { font-size:12px; letter-spacing:1px; color:var(--ouro); height:14px; } .fs.atual { border-color:var(--ouro); box-shadow:0 0 0 2px var(--ouro) inset; } .fs:disabled { opacity:.38; cursor:default; }
+.vh { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+:focus-visible { outline:3px solid var(--ouro); outline-offset:2px; }
+@media (max-height:640px) and (orientation:portrait) { .movs b { font-size:25px; } .meta img { width:30px; height:30px; } .metas { min-height:50px; } #dica { font-size:13px; min-height:18px; } }
+</style>
+</head>
+<body>
+<canvas id="fundo"></canvas>
+<div id="app">
+  <div id="painel">
+    <div class="barra">
+      <button class="ic" id="bMapa" aria-label="Mapa de fases"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1><span id="tFase">Fase 1</span><small id="tGal"></small></h1>
+      <button class="ic" id="bSom" aria-label="Ligar ou desligar o som"></button>
+      <button class="ic" id="bPausa" aria-label="Pausa e ajustes"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+    </div>
+    <div class="placar">
+      <div class="movs" id="cMovs"><b id="tMovs">0</b><span>jogadas</span></div>
+      <div class="metas" id="metas"></div>
+      <div class="pontos"><b id="tPts">0</b><span id="tRit">pontos</span></div>
+    </div>
+    <div class="prog" role="progressbar" aria-label="Progresso da fase"><i id="prog"></i></div>
+    <div id="dica" aria-live="polite"></div>
+  </div>
+  <div id="area" role="application" aria-label="Tabuleiro: toque em duas ou mais pedras iguais que se encostam"></div>
+</div>
+<canvas id="tela"></canvas>
+
+<section class="tela" id="abertura"><div class="capa"><h2>Gem<br>Shatter</h2><p>Toque em pedras iguais que se encostam.</p><div class="fila" id="fila"></div>
+  <button class="bt pri" id="bJogar">Jogar</button><button class="bt" id="bVerMapa">Escolher fase</button><a id="lVolta" href="../../index.html" hidden>Todos os jogos</a></div></section>
+<section class="tela" id="mapa"><div class="mapa"><div class="barra"><button class="ic" id="bFechaMapa" aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Galerias<small id="tEstrelas"></small></h1><span style="width:44px"></span></div><div id="listaMapa"></div></div></section>
+<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2>
+  <button class="op" data-op="som"><span>Som</span><b></b></button><button class="op" data-op="ambiente"><span>Música de fundo</span><b></b></button><button class="op" data-op="tremor"><span>Tremor da tela</span><b></b></button><button class="op" data-op="vibra"><span>Vibração</span><b></b></button>
+  <button class="bt pri" id="bContinua">Continuar</button><div class="linha2"><button class="bt" id="bRecomeca">Recomeçar</button><button class="bt" id="bMapa2">Fases</button></div></div></section>
+<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Fase vencida</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p>
+  <button class="bt pri" id="bProx">Próxima fase</button><div class="linha2"><button class="bt" id="bDeNovo">Jogar de novo</button><button class="bt" id="bMapa3">Fases</button></div></div></section>
+<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">Quase</h2><p id="dTxt"></p><div class="falta" id="dFalta"></div><div class="prog"><i id="dProg"></i></div>
+  <button class="bt pri" id="bTenta">Tentar de novo</button><button class="bt" id="bMapa4">Escolher fase</button></div></section>
+
+<!-- ============================================================
+     1. NÚCLEO: regras e fases, sem tela nem som.
+     Pode rodar sozinho no Node (ferramentas/gem-shatter/calibrar.mjs).
+     ============================================================ -->
+<script id="nucleo">
+'use strict';
+const Nucleo = (() => {
+  const COR = 'cor', ESP = 'esp', PEDRA = 'pedra', GEODO = 'geodo';
+  const MIN_GRUPO = 2, MIN_RESSONA = 4;             // grupo mínimo para quebrar; grupo que ressoa sozinho ao cair
+  const especialDe = n => n >= 9 ? 'p' : n >= 7 ? 'b' : n >= 5 ? 'l' : null;   // prisma, carga, broca
+  const GALERIAS = ['Boca da mina', 'Lago fundo', 'Gruta violeta', 'Veio dourado', 'Coração da terra'];
+
+  // ---------- desenhos usados para espalhar obstáculos ----------
+  const meio = n => (n - 1) / 2;
+  const REG = {
+    base1: (x, y, W, H) => y >= H - 1, base2: (x, y, W, H) => y >= H - 2, base3: (x, y, W, H) => y >= H - 3,
+    cantos: (x, y, W, H) => (x < 2 || x >= W - 2) && y >= H - 2,
+    lados: (x, y, W, H) => (x < 1 || x >= W - 1) && y >= 3,
+    pilares: (x, y, W, H) => x % 3 === 1 && y >= H - 4,
+    degrau: (x, y, W, H) => y >= H - 1 - Math.min(x, W - 1 - x),
+    vale: (x, y, W, H) => y >= H - 4 + Math.min(x, W - 1 - x),
+    centro: (x, y, W, H) => Math.abs(x - meio(W)) <= 1.5 && Math.abs(y - meio(H)) <= 1.5,
+    anel: (x, y, W, H) => { const d = Math.max(Math.abs(x - meio(W)), Math.abs(y - meio(H))); return d > 1.4 && d <= 2.5; },
+    cruz: (x, y, W, H) => Math.abs(x - meio(W)) < 1 || Math.abs(y - meio(H)) < 1,
+    xis: (x, y, W, H) => { const a = Math.abs(x - meio(W)), b = Math.abs(y - meio(H)); return Math.abs(a - b) < .6; },
+    faixa: (x, y, W, H) => y === Math.floor(H * .6),
+    duas: (x, y, W, H) => y === Math.floor(H * .45) || y === H - 2,
+    coluna: (x, y, W) => Math.abs(x - meio(W)) < 1,
+    xadrez: (x, y, W, H) => (x + y) % 2 === 0 && y >= H - 4,
+    salpico: (x, y, W, H) => (x * 2 + y * 3) % 7 === 0 && y > 1,
+    baixo: (x, y, W, H) => y >= Math.floor(H / 2), tudo: () => true,
+  };
+  // recorte do tabuleiro: só cantos, para as colunas nunca terem buracos no meio
+  const FORMAS = {
+    cheio: () => true,
+    octo: (x, y, W, H) => Math.min(x, W - 1 - x) + Math.min(y, H - 1 - y) >= 1,
+    gema: (x, y, W, H) => Math.min(x, W - 1 - x) + Math.min(y, H - 1 - y) >= 2,
+    taca: (x, y, W, H) => Math.min(x, W - 1 - x) + (H - 1 - y) >= 2,
+    arco: (x, y, W, H) => Math.min(x, W - 1 - x) + y >= 2,
+  };
+
+  // ---------- as 50 fases: tamanho | cores | metas | obstáculos | forma ----------
+  // metas: c0..c5 (pedras por cor), pedra, ouro, geodo. Sem número = todas as que houver no tabuleiro.
+  const T = [
+    // Boca da mina
+    '6x7|3|c0:12', '7x7|4|c0:12 c1:12', '7x8|4|c2:24', '7x8|4|c0:16 c3:16||octo', '7x8|4|pedra|pedra:base1',
+    '7x8|4|c1:22 c2:22||arco', '7x8|4|c0:18 pedra|pedra:cantos', '7x8|4|c0:15 c1:15 c3:15||taca', '7x8|4|pedra|pedra:base2', '7x8|4|c2:20 pedra|pedra:degrau',
+    // Lago fundo
+    '7x8|4|ouro|ouro:centro', '7x8|4|ouro c0:18|ouro:base2', '7x8|4|ouro|ouro:cruz|octo', '7x8|5|c1:16 c4:16', '7x8|4|ouro pedra|ouro:base2 pedra:cantos',
+    '8x8|5|ouro|ouro:anel|gema', '8x8|5|c0:16 c2:16 c3:16', '7x8|4|ouro pedra|ouro:base3 pedra:pilares', '8x8|5|ouro c4:18|ouro:xis', '8x8|4|ouro pedra|ouro:baixo pedra:degrau',
+    // Gruta violeta
+    '7x8|4|geodo:2', '7x8|4|geodo:3 c0:16', '7x8|4|geodo:2 pedra|pedra:base1', '7x8|5|geodo:3|pedra:cantos|arco', '7x8|4|pedra|pedra2:base1 pedra:coluna',
+    '8x8|5|geodo:2 ouro|ouro:lados', '8x8|5|pedra c1:18|pedra2:cantos', '8x8|4|geodo:4|pedra:pilares', '8x8|5|ouro geodo:2|ouro:centro pedra:cantos|octo', '8x8|4|geodo:3 pedra|pedra:degrau',
+    // Veio dourado
+    '7x8|4|c0:16|grampo:faixa', '7x8|4|ouro|ouro:base2 grampo:coluna', '8x8|5|c2:18 c4:18|grampo:centro', '8x8|4|geodo:2 c1:16|grampo:faixa', '8x8|5|ouro pedra|ouro:xis pedra:base1|octo',
+    '8x9|5|ouro|ouro2:centro grampo:anel', '8x9|4|pedra c0:20|pedra2:base1 grampo:coluna', '8x9|4|geodo:3|grampo:xadrez', '8x9|4|ouro c3:20|ouro2:base1 pedra:pilares|arco', '8x9|4|ouro geodo:2|ouro:degrau grampo:cantos',
+    // Coração da terra
+    '8x9|5|c0:22 c1:22 c4:22||gema', '8x9|4|pedra|pedra2:base2 pedra:coluna', '8x9|5|ouro pedra|ouro2:centro pedra2:cantos', '8x9|6|c2:18 c5:18|grampo:salpico', '8x9|4|geodo:3 ouro|ouro:base1 grampo:lados',
+    '8x9|5|pedra ouro|pedra:vale ouro:centro', '8x9|5|geodo:3 c4:18|pedra:pilares', '8x9|5|ouro|ouro2:xis grampo:cantos|octo', '8x9|5|pedra geodo:2|pedra2:base1 grampo:faixa', '8x9|5|ouro pedra geodo:2|ouro:baixo pedra:degrau',
+  ];
+  // jogadas de cada fase, medidas por um jogador automático (ferramentas/gem-shatter/calibrar.mjs)
+  const MOVS = /*MOVS*/[8, 16, 24, 16, 12, 22, 20, 15, 16, 19, 12, 20, 18, 26, 26, 29, 24, 22, 35, 25, 29, 42, 31, 45, 34, 45, 45, 31, 45, 28, 14, 21, 30, 45, 19, 34, 29, 45, 45, 45, 27, 45, 45, 33, 45, 27, 45, 45, 45, 45]/*FIM*/;
+  const DICAS = {
+    1: 'Toque em 2 ou mais pedras iguais que se encostam', 2: 'Cada fase tem um número de jogadas', 3: '5 pedras juntas viram uma broca; 7, uma carga; 9, um prisma',
+    4: 'Pedras da mesma cor que caem juntas ressoam e quebram sozinhas', 5: 'Quebre ao lado da rocha para parti-la', 6: 'Dois especiais encostados se combinam',
+    11: 'Quebre em cima do ouro para soltá-lo da parede', 21: 'Leve os geodos até o chão', 25: 'Granito aguenta duas pancadas', 31: 'Quebre ao lado para soltar a pedra grampeada', 36: 'Este ouro tem duas camadas',
+  };
+
+  function fase(n) {                                  // n começa em 1
+    const [tam, k, metas, obst = '', forma = 'cheio'] = T[n - 1].split('|'), [W, H] = tam.split('x').map(Number);
+    return { n, W, H, cores: +k, metas: metas.split(' ').map(m => m.split(':')), obst: obst ? obst.split(' ').map(o => o.split(':')) : [], forma: forma || 'cheio', movs: MOVS[n - 1] || 30, galeria: Math.floor((n - 1) / 10), dica: DICAS[n] || '' };
+  }
+
+  let seq = 0;
+  const peca = (k, o) => Object.assign({ id: ++seq, k, c: -1, e: null, hp: 1, presa: false }, o);
+
+  class Partida {
+    constructor(def, rnd = Math.random) {
+      this.def = def; this.rnd = rnd; const { W, H } = def; this.W = W; this.H = H;
+      this.movs = this.movsTot = def.movs; this.pontos = 0; this.jogadas = 0;
+      this.mask = []; this.ouro = new Array(W * H).fill(0); this.g = new Array(W * H).fill(null);
+      const dentro = FORMAS[def.forma]; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) this.mask.push(!!dentro(x, y, W, H));
+      this.topo = []; this.base = [];
+      for (let x = 0; x < W; x++) { let t = -1, b = -1; for (let y = 0; y < H; y++) if (this.mask[y * W + x]) { if (t < 0) t = y; b = y; } this.topo.push(t); this.base.push(b); }
+      let tent = 0; do { this._encher(); } while (!this.temJogada() && ++tent < 30);
+      this.metas = {}; this.total = 0;
+      for (const [m, q] of def.metas) { this.metas[m] = q ? +q : this._contar(m); this.total += this.metas[m]; }
+      this.geodosFora = (this.metas.geodo || 0) - this.g.filter(p => p && p.k === GEODO).length;
+      this.metasIni = { ...this.metas };
+    }
+    _cor() { return Math.floor(this.rnd() * this.def.cores); }
+    _encher() {
+      const { W, H, def } = this; this.ouro.fill(0);
+      for (let i = 0; i < W * H; i++) this.g[i] = this.mask[i] ? peca(COR, { c: this._cor() }) : null;
+      for (const [tipo, reg] of def.obst) for (let i = 0; i < W * H; i++) {
+        const x = i % W, y = i / W | 0; if (!this.mask[i] || !REG[reg](x, y, W, H)) continue;
+        if (tipo === 'pedra' || tipo === 'pedra2') this.g[i] = peca(PEDRA, { hp: tipo === 'pedra2' ? 2 : 1 });
+        else if (tipo === 'grampo') { if (this.g[i].k === COR) this.g[i].presa = true; }
+        else this.ouro[i] = tipo === 'ouro2' ? 2 : 1;
+      }
+      const mg = def.metas.find(m => m[0] === 'geodo');
+      if (mg) { const cols = [...Array(W).keys()].filter(x => this.topo[x] <= 1).sort(() => this.rnd() - .5).slice(0, Math.min(2, +mg[1])); for (const x of cols) this.g[this.topo[x] * W + x] = peca(GEODO); }
+    }
+    _contar(m) { return m === 'pedra' ? this.g.filter(p => p && p.k === PEDRA).length : m === 'ouro' ? this.ouro.filter(Boolean).length : 0; }
+    get venceu() { return Object.values(this.metas).every(v => v <= 0); }
+    get perdeu() { return this.movs <= 0 && !this.venceu; }
+    get progresso() { let f = 0; for (const m in this.metas) f += Math.max(0, this.metas[m]); return 1 - f / this.total; }
+    get estrelas() { const f = this.movs / this.movsTot; return f >= .28 ? 3 : f >= .1 ? 2 : 1; }
+    viz(i) { const { W, H } = this, x = i % W, r = []; if (x > 0) r.push(i - 1); if (x < W - 1) r.push(i + 1); if (i >= W) r.push(i - W); if (i < W * (H - 1)) r.push(i + W); return r; }
+    livre(p) { return p && p.k === COR && !p.presa; }
+    fixo(p) { return p.k === PEDRA || p.presa; }
+    // grupo de cores iguais encostadas; cada item traz a distância até a origem (ondas da quebra)
+    grupo(i) {
+      const p = this.g[i]; if (!this.livre(p)) return [];
+      const d = new Map([[i, 0]]), fila = [i];
+      for (let q = 0; q < fila.length; q++) for (const v of this.viz(fila[q])) if (!d.has(v) && this.livre(this.g[v]) && this.g[v].c === p.c) { d.set(v, d.get(fila[q]) + 1); fila.push(v); }
+      return fila.map(j => ({ i: j, d: d.get(j) }));
+    }
+    grupos() { const v = new Set(), r = []; for (let i = 0; i < this.g.length; i++) if (!v.has(i) && this.livre(this.g[i])) { const gr = this.grupo(i); gr.forEach(o => v.add(o.i)); if (gr.length >= MIN_GRUPO) r.push(gr); } return r; }
+    temJogada() { return this.g.some(p => p && p.k === ESP) || this.grupos().length > 0; }
+
+    // ---------- uma jogada inteira. Devolve a lista de passos para a tela animar, ou null se o toque não vale ----------
+    tocar(i, mult = 1) {
+      const p = this.g[i]; if (!p || this.movs <= 0 || this.venceu) return null;
+      const passos = []; this.mult = mult;
+      if (p.k === ESP) { this.movs--; this.jogadas++; this._usarEspecial(i, passos); this._queda(passos); }
+      else {
+        const gr = this.grupo(i); if (gr.length < MIN_GRUPO) return null;
+        this.movs--; this.jogadas++;
+        this._quebrar(gr, i, 1, passos, true);
+        let mexidas = this._queda(passos), nivel = 1;
+        // ressonância: pedras da MESMA cor que caíram e formaram um grupo grande quebram sozinhas
+        while (nivel < 8) {
+          const vistos = new Set(), prontos = [];
+          for (let j = 0; j < this.g.length; j++) { const q = this.g[j]; if (vistos.has(j) || !this.livre(q) || q.c !== p.c) continue; const r = this.grupo(j); r.forEach(o => vistos.add(o.i)); if (r.length >= MIN_RESSONA && r.some(o => mexidas.has(this.g[o.i].id))) prontos.push(r); }
+          if (!prontos.length) break; nivel++;
+          for (const r of prontos) this._quebrar(r, r[0].i, nivel, passos, false);
+          mexidas = this._queda(passos);
+        }
+      }
+      if (!this.venceu && !this.temJogada()) this._embaralhar(passos);
+      return passos;
+    }
+    _coleta(passo, meta, i, q = 1) { if (this.metas[meta] > 0) { this.metas[meta] -= q; passo.coletas.push({ meta, i }); } }
+    _passo(t, o) { return Object.assign({ t, itens: [], danos: [], ouro: [], coletas: [], pontos: 0 }, o); }
+    _ferir(i, passo, d) {                             // rocha, granito e grampo
+      const p = this.g[i]; if (!p) return;
+      if (p.k === PEDRA) { p.hp--; passo.danos.push({ i, p, d, hp: p.hp, k: PEDRA }); if (p.hp <= 0) { this.g[i] = null; this._coleta(passo, 'pedra', i); passo.pontos += 40; } }
+      else if (p.presa) { p.presa = false; passo.danos.push({ i, p, d, hp: 0, k: 'grampo' }); passo.pontos += 20; }
+    }
+    _desgastarOuro(i, passo, d) { if (this.ouro[i] > 0) { this.ouro[i]--; passo.ouro.push({ i, d, n: this.ouro[i] }); if (!this.ouro[i]) this._coleta(passo, 'ouro', i); passo.pontos += 30; } }
+    _quebrar(gr, origem, nivel, passos, criar) {
+      const cor = this.g[origem].c, n = gr.length, passo = this._passo('quebra', { origem, cor, nivel, n, cria: null }), viz = new Map();
+      for (const { i, d } of gr) {
+        passo.itens.push({ p: this.g[i], i, d }); this.g[i] = null; this._coleta(passo, 'c' + cor, i); this._desgastarOuro(i, passo, d);
+        for (const v of this.viz(i)) if (!viz.has(v)) viz.set(v, d);
+      }
+      for (const [v, d] of viz) if (this.g[v] && this.fixo(this.g[v])) this._ferir(v, passo, d);
+      const e = criar && especialDe(n);
+      if (e) {
+        const xs = gr.map(o => o.i % this.W), ys = gr.map(o => o.i / this.W | 0), larg = Math.max(...xs) - Math.min(...xs), alt = Math.max(...ys) - Math.min(...ys);
+        const novo = peca(ESP, { e: e === 'l' ? (larg >= alt ? 'h' : 'v') : e, c: cor }); this.g[origem] = novo; passo.cria = { p: novo, i: origem };
+      }
+      passo.pontos = Math.round((passo.pontos + n * 10 + (n - 2) * (n - 2) * 4) * nivel * this.mult); this.pontos += passo.pontos; passos.push(passo);
+    }
+    // ---------- especiais ----------
+    _usarEspecial(i, passos) {
+      const p = this.g[i], F = { p: 3, b: 2, h: 1, v: 1 };
+      const par = this.viz(i).filter(v => this.g[v] && this.g[v].k === ESP).sort((a, b) => F[this.g[b].e] - F[this.g[a].e])[0];
+      let tipo = p.e, cor = p.c;
+      if (par !== undefined) {
+        const q = this.g[par], nomes = [p.e, q.e].map(e => e === 'h' || e === 'v' ? 'l' : e).sort().join('');   // bb bl bp ll lp pp
+        tipo = nomes; cor = p.e === 'p' ? p.c : q.c;
+      }
+      this._detonar([{ tipo, i, d: 0, cor, par }], passos, par !== undefined);
+    }
+    _area(tipo, i, cor) {                             // [casa, atraso]
+      const { W, H } = this, x0 = i % W, y0 = i / W | 0, r = [];
+      const faz = f => { for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const dx = Math.abs(x - x0), dy = Math.abs(y - y0), a = f(dx, dy); if (a !== false && this.mask[y * W + x]) r.push([y * W + x, a]); } };
+      if (tipo === 'h') faz((dx, dy) => dy === 0 && dx * .03); else if (tipo === 'v') faz((dx, dy) => dx === 0 && dy * .03);
+      else if (tipo === 'll') faz((dx, dy) => (dx === 0 || dy === 0) && Math.max(dx, dy) * .03);
+      else if (tipo === 'bl') faz((dx, dy) => (dx < 2 || dy < 2) && Math.max(dx, dy) * .03);
+      else if (tipo === 'b') faz((dx, dy) => dx + dy <= 2 && (dx + dy) * .03);
+      else if (tipo === 'bb') faz((dx, dy) => dx + dy <= 4 && (dx + dy) * .035);
+      else if (tipo === 'pp') faz((dx, dy) => Math.hypot(dx, dy) * .05);
+      else if (tipo === 'p') { let k = 0; this.g.forEach((q, j) => { if (q && q.k === COR && q.c === cor) r.push([j, .12 + (k++) * .022]); }); r.push([i, 0]); }
+      return r;
+    }
+    _detonar(inicio, passos, combinado = false) {
+      const passo = this._passo('especial', { acts: [], combinado }), tocadas = new Map(), usados = new Set(), fila = [...inicio];
+      for (const a of inicio) { usados.add(a.i); tocadas.set(a.i, a.d); if (a.par !== undefined) { usados.add(a.par); tocadas.set(a.par, a.d); } }
+      for (let q = 0; q < fila.length; q++) {
+        const a = fila[q];
+        if (a.tipo === 'lp' || a.tipo === 'bp') {     // prisma + outro: todas as pedras da cor viram aquele especial
+          passo.acts.push({ ...a, cells: [] }); let k = 0;
+          this.g.forEach((z, j) => { if (z && z.k === COR && !z.presa && z.c === a.cor) { fila.push({ tipo: a.tipo === 'bp' ? 'b' : k % 2 ? 'v' : 'h', i: j, d: a.d + .25 + k * .07, cor: z.c }); k++; } });
+          continue;
+        }
+        const cells = this._area(a.tipo, a.i, a.cor); passo.acts.push({ ...a, cells: cells.map(c => c[0]) });
+        for (const [j, dd] of cells) {
+          const t = a.d + dd; if (!tocadas.has(j) || tocadas.get(j) > t) tocadas.set(j, t);
+          const z = this.g[j]; if (z && z.k === ESP && !usados.has(j)) { usados.add(j); fila.push({ tipo: z.e, i: j, d: t + .08, cor: z.c }); }
+        }
+      }
+      for (const [j, d] of tocadas) {
+        const z = this.g[j];
+        if (z) {
+          if (z.k === PEDRA || z.presa) { this._ferir(j, passo, d); continue; }
+          if (z.k === GEODO) continue;
+          passo.itens.push({ p: z, i: j, d }); this.g[j] = null; passo.pontos += 15; if (z.k === COR) this._coleta(passo, 'c' + z.c, j);
+        }
+        this._desgastarOuro(j, passo, d);
+      }
+      passo.pontos = Math.round(passo.pontos * (1 + (passo.acts.length - 1) * .15) * this.mult); this.pontos += passo.pontos; passos.push(passo);
+    }
+    // ---------- gravidade, reposição e geodos que chegam ao chão ----------
+    _queda(passos) {
+      const { W } = this, mexidas = new Set();
+      for (;;) {
+        const movs = [], novas = [];
+        for (let x = 0; x < W; x++) {
+          const t = this.topo[x], b = this.base[x]; let w = b;
+          for (let y = b; y >= t; y--) {
+            const i = y * W + x, p = this.g[i]; if (!p) continue;
+            if (this.fixo(p)) { w = y - 1; continue; }
+            if (y !== w) { this.g[w * W + x] = p; this.g[i] = null; movs.push({ p, de: i, para: w * W + x }); mexidas.add(p.id); }
+            w--;
+          }
+          for (let y = w, k = 1; y >= t; y--, k++) {
+            let p; if (this.geodosFora > 0 && this.rnd() < .06) { p = peca(GEODO); this.geodosFora--; } else p = peca(COR, { c: this._cor() });
+            this.g[y * W + x] = p; novas.push({ p, para: y * W + x, deY: t - k }); mexidas.add(p.id);
+          }
+        }
+        if (movs.length || novas.length) passos.push({ t: 'queda', movs, novas });
+        const passo = this._passo('coleta', {});
+        for (let x = 0; x < W; x++) { const i = this.base[x] * W + x, p = this.g[i]; if (p && p.k === GEODO) { this.g[i] = null; passo.itens.push({ p, i, d: 0 }); this._coleta(passo, 'geodo', i); passo.pontos += 250; } }
+        if (!passo.itens.length) return mexidas;
+        this.pontos += passo.pontos; passos.push(passo);
+      }
+    }
+    _embaralhar(passos) {
+      const idx = []; this.g.forEach((p, i) => { if (this.livre(p)) idx.push(i); });
+      for (let t = 0; t < 60; t++) {
+        const ps = idx.map(i => this.g[i]); for (let k = ps.length - 1; k > 0; k--) { const r = Math.floor(this.rnd() * (k + 1)); [ps[k], ps[r]] = [ps[r], ps[k]]; }
+        idx.forEach((i, k) => this.g[i] = ps[k]); if (this.temJogada()) break;
+      }
+      const tinge = [];
+      if (!this.temJogada()) for (const i of idx) { const v = this.viz(i).find(j => this.livre(this.g[j])); if (v !== undefined) { this.g[v].c = this.g[i].c; tinge.push(this.g[v]); break; } }
+      passos.push({ t: 'embaralha', movs: idx.map(i => ({ p: this.g[i], para: i })), tinge });
+    }
+    // jogadas que sobraram viram especiais no fim da fase
+    bonus() {
+      const passos = [], idx = []; this.g.forEach((p, i) => { if (this.livre(p)) idx.push(i); }); idx.sort(() => this.rnd() - .5);
+      const n = Math.min(this.movs, 8, idx.length); if (!n) return passos; this.mult = 1;
+      const passo = { t: 'bonus', itens: [], restam: this.movs - n, pontos: this.movs * 100 }; this.pontos += passo.pontos; const ini = [];
+      for (let k = 0; k < n; k++) { const i = idx[k], velho = this.g[i], novo = peca(ESP, { e: ['h', 'v', 'b'][k % 3], c: velho.c }); this.g[i] = novo; passo.itens.push({ velho, p: novo, i }); ini.push({ tipo: novo.e, i, d: k * .16, cor: novo.c }); }
+      this.estrelasFim = this.estrelas; this.movs = 0; passos.push(passo); this._detonar(ini, passos); this._queda(passos); return passos;
+    }
+    clonar(rnd = Math.random) { const c = Object.create(Partida.prototype); Object.assign(c, this); c.rnd = rnd; c.g = this.g.map(p => p && { ...p }); c.ouro = [...this.ouro]; c.metas = { ...this.metas }; return c; }
+  }
+  return { Partida, fase, GALERIAS, TOTAL: T.length, especialDe, MIN_GRUPO, MIN_RESSONA, COR, ESP, PEDRA, GEODO };
+})();
+</script>
+
+<script>
+'use strict';
+// ============================================================
+// 2. EVENTOS E GANCHOS (preparados para as próximas fases)
+// ============================================================
+// Quem quiser (conquistas, moedas, anúncios, estatísticas) só precisa escutar: Eventos.on('fase:vitoria', d => ...)
+const Eventos = (() => { const m = {}; return {
+  on(n, f) { (m[n] = m[n] || []).push(f); return () => { m[n] = m[n].filter(x => x !== f); }; },
+  emit(n, d) { (m[n] || []).concat(m['*'] || []).forEach(f => { try { f(d, n); } catch (e) { console.error(e); } }); },
+}; })();
+// Pontos de encaixe da Fase 3. Hoje não fazem nada.
+const Ganchos = {
+  especiaisIniciais: () => [],                       // boosters antes da fase
+  oferecerContinuar: async () => 0,                  // devolve quantas jogadas extras (anúncio ou moedas)
+  entreFases: async () => {},                        // intersticial, recompensas
+};
+
+// ============================================================
+// 3. PROGRESSO SALVO
+// ============================================================
+const Progresso = (() => {
+  const CHAVE = 'gem-shatter.v1', calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const padrao = () => ({ v: 1, atual: 1, liberada: 1, estrelas: {}, recorde: {}, op: { som: true, ambiente: true, tremor: !calmo, vibra: true }, est: { jogadas: 0, vitorias: 0, derrotas: 0, pedras: 0, maiorCadeia: 0, especiais: 0 } });
+  let d = padrao();
+  const num = (v, a, b, p) => Number.isFinite(v) ? Math.min(b, Math.max(a, Math.floor(v))) : p;
+  try {
+    const s = JSON.parse(localStorage.getItem(CHAVE));
+    if (s && s.v === 1) {
+      const p = padrao(); d = { ...p, ...s, op: { ...p.op, ...s.op }, est: { ...p.est, ...s.est }, estrelas: { ...s.estrelas }, recorde: { ...s.recorde } };
+      d.liberada = num(d.liberada, 1, Nucleo.TOTAL, 1); d.atual = num(d.atual, 1, d.liberada, 1);
+    }
+  } catch (e) { /* salvo estragado: começa do zero */ }
+  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(d)); Eventos.emit('salvou', d); } catch (e) { /* sem espaço ou modo privado */ } };
+  return { get d() { return d; }, salvar,
+    venceu(n, est, pts) { d.estrelas[n] = Math.max(d.estrelas[n] || 0, est); const novo = pts > (d.recorde[n] || 0); if (novo) d.recorde[n] = pts; d.liberada = Math.min(Nucleo.TOTAL, Math.max(d.liberada, n + 1)); d.atual = Math.min(Nucleo.TOTAL, n + 1); d.est.vitorias++; salvar(); return novo; },
+  };
+})();
+
+// ============================================================
+// 4. MOTOR DE SOM (Web Audio, tudo sintetizado na hora)
+// ============================================================
+const Som = (() => {
+  // alto-falante de celular quase não toca graves: ali o som sai mais forte e mais agudo
+  const PEQUENO = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) < 600);
+  let ctx, mestre, efeitos, musica, eco, ruidoB, final, parado = null, refeitos = 0, proxNota = 0, passoM = 0, proxGota = 0, tensao = 0, animo = 0, gal = 0, tocando = false, vozes = 0;
+  const ALEA = (a, b) => a + Math.random() * (b - a), op = () => Progresso.d.op;
+  const ESC = [0, 2, 4, 7, 9], BASE = [261.63, 246.94, 233.08, 277.18, 220];          // pentatônica; nota base de cada galeria
+  const grau = (g, b = BASE[gal]) => b * Math.pow(2, (ESC[((g % 5) + 5) % 5] + 12 * Math.floor(g / 5)) / 12);
+  // cada mineral tem o seu timbre: [múltiplo da nota, força, duração]
+  const TIMBRE = [[[1, 1, .3], [2.76, .35, .12], [5.4, .12, .05]], [[1, 1, .36], [3, .3, .16], [6.3, .1, .06]], [[1, 1, .26], [2.4, .4, .14], [4.1, .2, .07]], [[1, 1, .42], [2.01, .3, .22], [4.2, .16, .09]], [[1, 1, .34], [2.7, .25, .2], [3.9, .22, .1]], [[1, 1, .5], [4, .3, .25], [8.1, .08, .08]]];
+  const pronto = () => ctx && ctx.state === 'running' && op().som;
+  function retomar() { const p = ctx.resume(); if (p) p.catch(() => {}); }
+  // o celular às vezes deixa o áudio travado: se o relógio dele não anda, refaz
+  function acordar() {
+    if (document.hidden) return false; const roda = ctx.state === 'running', ag = performance.now();
+    if (!roda && ctx.state !== 'closed') retomar();
+    if (!parado || parado.roda !== roda || parado.t !== ctx.currentTime) { parado = { roda, t: ctx.currentTime, em: ag }; return false; }
+    if (ag - parado.em < 2500 || refeitos >= 3) return false;
+    refeitos++; parado = null; const velho = ctx; ctx = null; if (velho.state !== 'closed') velho.close().catch(() => {}); return true;
+  }
+  function iniciar() {
+    if (ctx && !acordar()) return;
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC({ latencyHint: 'interactive' }); parado = null; canais = {}; vozes = 0;
+    mestre = ctx.createGain(); mestre.gain.value = 0; efeitos = ctx.createGain(); efeitos.gain.value = 1; musica = ctx.createGain(); musica.gain.value = 0;
+    efeitos.connect(mestre); musica.connect(mestre);
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .18; mestre.connect(comp);
+    const filtro = (t, f, g) => { const b = ctx.createBiquadFilter(); b.type = t; b.frequency.value = f; b.Q.value = .7; b.gain.value = g || 0; return b; };
+    final = ctx.createGain();
+    if (PEQUENO) { const g = ctx.createGain(), teto = ctx.createDynamicsCompressor(); g.gain.value = 2; teto.threshold.value = -9; teto.knee.value = 6; teto.ratio.value = 14; teto.attack.value = .002; teto.release.value = .2; final.gain.value = .66; comp.connect(filtro('highpass', 110)).connect(filtro('highshelf', 450, 5)).connect(g).connect(teto).connect(final); }
+    else { const teto = ctx.createDynamicsCompressor(); teto.threshold.value = -10; teto.knee.value = 4; teto.ratio.value = 20; teto.attack.value = .001; teto.release.value = .15; final.gain.value = .85; comp.connect(teto).connect(final); }
+    final.connect(ctx.destination);
+    // eco de gruta
+    const n = ctx.sampleRate * 2.2 | 0, imp = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); let s = 0; for (let i = 0; i < n; i++) { s += ((Math.random() * 2 - 1) - s) * .45; d[i] = s * Math.pow(1 - i / n, 3); } }
+    eco = ctx.createConvolver(); eco.buffer = imp; const ge = ctx.createGain(); ge.gain.value = .32; eco.connect(ge).connect(mestre);
+    ruidoB = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const d = ruidoB.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // ar da caverna: ruído grave que respira devagar
+    const s = ctx.createBufferSource(), f = filtro('lowpass', 380), g = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain(); s.buffer = ruidoB; s.loop = true; g.gain.value = .045; l.frequency.value = .07; lg.gain.value = .02; l.connect(lg).connect(g.gain); l.start(); s.connect(f).connect(g).connect(musica); s.start();
+    proxNota = ctx.currentTime + .4; proxGota = ctx.currentTime + 3; volume(); if (ctx.state !== 'running') retomar();
+  }
+  function volume() {
+    try { if (navigator.audioSession) navigator.audioSession.type = op().som ? 'playback' : 'ambient'; } catch (e) { /* sem esse ajuste */ }
+    if (!ctx) return; mestre.gain.setTargetAtTime(op().som ? .9 : 0, ctx.currentTime, .05); musica.gain.setTargetAtTime(op().ambiente && tocando ? 1 : 0, ctx.currentTime, .6);
+  }
+  // canais prontos (posição no estéreo x quantidade de eco): cada nota só cria 2 nós, o que alivia celular lento
+  let canais = {};
+  function canal(pan, molhado, saida) {
+    const i = Math.max(-2, Math.min(2, Math.round(pan * 3))), m = molhado < .04 ? 0 : molhado < .2 ? 1 : molhado < .45 ? 2 : 3, ch = i + '/' + m + (saida === musica ? 'm' : '');
+    if (canais[ch]) return canais[ch];
+    const no = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (no.pan) no.pan.value = i / 3; no.connect(saida);
+    if (m) { const w = ctx.createGain(); w.gain.value = [0, .1, .3, .6][m]; no.connect(w).connect(eco); } return canais[ch] = no;
+  }
+  const LIMITE = PEQUENO ? 56 : 90;
+  function tom(f, t0, dur, v, { tipo = 'sine', ate = 0, tGl = dur, ataque = .003, pan = 0, molhado = .25, saida = efeitos } = {}) {
+    if (f > 9000 || vozes > LIMITE) return; vozes++;
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0); if (ate) o.frequency.exponentialRampToValueAtTime(ate, t0 + tGl);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + ataque); g.gain.exponentialRampToValueAtTime(.0001, t0 + Math.max(dur, ataque + .02));
+    o.connect(g).connect(canal(pan, molhado, saida)); o.onended = () => { vozes--; g.disconnect(); }; o.start(t0); o.stop(t0 + dur + .06);
+  }
+  function chiado(t0, dur, v, f, { q = 1, ate = 0, ataque = .002, pan = 0, molhado = .12, tipo = 'bandpass' } = {}) {
+    if (vozes > LIMITE) return; vozes++;
+    const s = ctx.createBufferSource(), b = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = ruidoB; b.type = tipo; b.Q.value = q; b.frequency.setValueAtTime(f, t0); if (ate) b.frequency.exponentialRampToValueAtTime(ate, t0 + dur);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + ataque); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    s.connect(b).connect(g).connect(canal(pan, molhado, efeitos)); s.onended = () => { vozes--; g.disconnect(); }; s.start(t0, Math.random(), dur + .05);
+  }
+  const sino = (f, t, v, dur = 1.4, pan = 0) => { tom(f, t, dur, v, { molhado: .6, pan }); tom(f * 2.005, t, dur * .6, v * .35, { molhado: .5, pan }); tom(f * 5.4, t, .09, v * .12, { pan }); };
+  // música: kalimba grave em volta de um pulso, sem melodia fixa (não cansa)
+  const PADRAO = [0, -1, 5, -1, 3, -1, 7, -1, 1, -1, 5, -1, 4, -1, 2, -1];
+  setInterval(() => {
+    if (!ctx || ctx.state !== 'running' || document.hidden) return; const ag = ctx.currentTime; animo *= .96;
+    if (proxNota < ag - .5) proxNota = ag + .05;
+    const seg = 60 / (76 + animo * 10 + tensao * 10) / 2;
+    while (proxNota < ag + .35) {
+      const k = passoM % 16, b = BASE[gal] / 2;
+      if (op().som && op().ambiente && tocando) {
+        if (PADRAO[k] >= 0 && Math.random() < .82) { const f = grau(PADRAO[k] + (Math.random() < .15 ? 5 : 0), b); tom(f, proxNota, 1.1, .05, { saida: musica, molhado: .5, pan: ALEA(-.35, .35) }); tom(f * 3, proxNota, .3, .016, { saida: musica, molhado: .4 }); }
+        if (k % 4 === 0) tom(b / 2, proxNota, .34, .075 + tensao * .05, { ate: b / 2 * .82, saida: musica, molhado: .1 });               // pulso
+        if (tensao > .5 && k % 4 === 1) tom(b / 2, proxNota, .24, .06, { ate: b / 2 * .8, saida: musica, molhado: .05 });                // coração: últimas jogadas
+        if (k === 0) for (const q of [0, 2, 3]) tom(grau(q + (passoM % 64 < 32 ? 0 : 1), b), proxNota, seg * 16, .018, { ataque: seg * 4, saida: musica, molhado: .5 });   // cama
+      }
+      passoM++; proxNota += seg;
+    }
+    if (ag > proxGota && op().som && op().ambiente && tocando) { proxGota = ag + ALEA(4, 11); const f = ALEA(900, 1700); tom(f, ag + .02, .14, .03, { ate: f * 1.6, saida: musica, molhado: .9, pan: ALEA(-.7, .7) }); }
+  }, 120);
+
+  let ultQ = 0, ultP = 0;
+  return {
+    iniciar, volume, get estado() { return ctx ? ctx.state : 'parado'; }, get contexto() { return ctx; }, get final() { return final; }, pequeno: PEQUENO,
+    galeria(g) { gal = g; }, tensao(v) { tensao = v; }, ligar(v) { tocando = v; volume(); },
+    dormir(v) { if (!ctx || ctx.state === 'closed') return; parado = null; if (v) { const p = ctx.suspend(); if (p) p.catch(() => {}); } else retomar(); },
+    botao() { if (!pronto()) return; const t = ctx.currentTime; tom(520, t, .07, .13, { tipo: 'triangle', molhado: .1 }); tom(1040, t, .04, .05, { molhado: 0 }); },
+    toque(cor, g) { if (!pronto()) return; const t = ctx.currentTime; tom(grau(g) * 2, t, .05, .07, { tipo: 'triangle', molhado: .05 }); chiado(t, .03, .12, 3200, { molhado: 0 }); },
+    negado() { if (!pronto()) return; const t = ctx.currentTime; tom(172, t, .13, .22, { ate: 118, tipo: 'triangle', molhado: .05 }); chiado(t, .07, .13, 620, { molhado: .05 }); },
+    // pedra quebrando: nota do mineral + estalo + farelo. O grau sobe com o combo e com a onda
+    quebra(cor, g, forca = 1, pan = 0, atraso = 0) {
+      if (!pronto()) return; const t = ctx.currentTime + atraso; if (t - ultQ < .014) return; ultQ = t; const f = grau(Math.min(g, 17)) * (cor % 2 ? 1 : 1.0);
+      const tb = TIMBRE[cor] || TIMBRE[0]; for (const [m, v, d] of forca < .8 ? tb.slice(0, 2) : tb) tom(f * m, t, d, v * .17 * forca, { pan, molhado: .3 });
+      chiado(t, .05, .3 * forca, ALEA(2600, 3800), { q: .8, pan }); if (forca >= .8) chiado(t + .02, .16, .12 * forca, ALEA(900, 1500), { q: .7, pan });
+      animo = Math.min(1, animo + .05);
+    },
+    baque(n) { if (!pronto()) return; const t = ctx.currentTime, v = Math.min(.4, .1 + n * .03); tom(130, t, .16, v, { ate: 58, molhado: .1 }); },
+    pousa(forca, pan) { if (!pronto()) return; const t = ctx.currentTime; if (t - ultP < .028) return; ultP = t; const v = Math.min(1, forca); tom(ALEA(250, 330), t, .05, .06 * v, { ate: 190, tipo: 'triangle', pan, molhado: .08 }); chiado(t, .025, .07 * v, ALEA(1400, 2200), { pan, molhado: .05 }); },
+    nasce(e) { if (!pronto()) return; const t = ctx.currentTime, b = e === 'p' ? 7 : e === 'b' ? 5 : 3; for (let k = 0; k < (e === 'p' ? 5 : 3); k++) sino(grau(b + k * 2), t + k * .055, .11, .7); chiado(t, .3, .09, 1800, { ate: 6000, q: 2, ataque: .15 }); },
+    broca(pan = 0, at = 0) { if (!pronto()) return; const t = ctx.currentTime + at; tom(150, t, .36, .16, { tipo: 'sawtooth', ate: 620, pan, molhado: .15 }); chiado(t, .4, .42, 900, { ate: 4200, q: 1.4, pan, ataque: .02 }); tom(96, t, .22, .3, { ate: 50 }); },
+    carga(forca = 1, at = 0) { if (!pronto()) return; const t = ctx.currentTime + at; tom(125, t, .5, .55 * forca, { ate: 34, tGl: .3, molhado: .2 }); tom(320, t, .12, .22 * forca, { ate: 90, tipo: 'triangle' }); chiado(t, .5, .6 * forca, 1500, { ate: 220, tipo: 'lowpass', molhado: .35 }); chiado(t, .06, .4 * forca, 3600); for (let k = 0; k < 5; k++) chiado(t + .12 + Math.random() * .4, .05, .08, ALEA(1200, 3000), { pan: ALEA(-.6, .6) }); },
+    prisma(n = 8, at = 0) { if (!pronto()) return; const t = ctx.currentTime + at; for (let k = 0; k < Math.min(14, n + 5); k++) sino(grau(k + 2), t + k * .04, .075, .9, Math.sin(k) * .5); chiado(t, .7, .1, 2400, { ate: 8000, q: 3, ataque: .2, molhado: .4 }); tom(BASE[gal] / 2, t, .9, .16, { molhado: .4 }); },
+    combina() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .28, .3, 300, { ate: 5000, q: 1.5, ataque: .24 }); tom(90, t, .28, .25, { ate: 280 }); },
+    rocha(partiu) { if (!pronto()) return; const t = ctx.currentTime; tom(partiu ? 180 : 240, t, .14, .24, { ate: 80, tipo: 'triangle', molhado: .15 }); chiado(t, partiu ? .22 : .08, .36, partiu ? 700 : 1300, { q: .6, molhado: .2 }); if (partiu) for (let k = 0; k < 3; k++) chiado(t + .06 + k * .05, .05, .12, ALEA(900, 2000)); },
+    grampo() { if (!pronto()) return; const t = ctx.currentTime; for (const [f, v] of [[1180, .11], [1873, .08], [2960, .05]]) tom(f, t, .32, v, { molhado: .3 }); chiado(t, .04, .25, 4200); },
+    ouro() { if (!pronto()) return; const t = ctx.currentTime + ALEA(0, .03), f = grau(10 + (Math.random() * 4 | 0)); tom(f, t, .4, .07, { molhado: .4 }); tom(f * 2.76, t, .16, .04, { molhado: .3 }); },
+    geodo() { if (!pronto()) return; const t = ctx.currentTime; [5, 7, 9, 12].forEach((g, k) => sino(grau(g), t + k * .08, .14, 1.2)); tom(110, t, .3, .28, { ate: 60 }); },
+    meta(k) { if (!pronto()) return; tom(grau(8 + k % 5) * 1, ctx.currentTime, .12, .06, { tipo: 'triangle', molhado: .15 }); },
+    metaFeita() { if (!pronto()) return; const t = ctx.currentTime; sino(grau(7), t, .16, 1.1); sino(grau(10), t + .1, .16, 1.3); },
+    ressona(n) { if (!pronto()) return; const t = ctx.currentTime; [0, 2, 4].forEach((k, j) => sino(grau(k + 2 + n * 2), t + j * .03, .1, 1)); tom(BASE[gal] / 2, t, .5, .2, { molhado: .3 }); },
+    conta(k) { if (!pronto()) return; sino(grau(6 + k), ctx.currentTime, .12, .5); },
+    estrela(k) { if (!pronto()) return; const t = ctx.currentTime; [0, 2, 4].forEach((g, j) => sino(grau(5 + k * 2 + g), t + j * .05, .15, 1.3)); chiado(t, .25, .08, 5000, { q: 2, ataque: .05 }); },
+    vitoria() { if (!pronto()) return; const t = ctx.currentTime; [0, 2, 3, 5, 7, 10].forEach((g, k) => sino(grau(g + 2), t + k * .1, .15, 1.8, (k - 2.5) * .15)); [0, 3, 5].forEach(g => tom(grau(g, BASE[gal] / 2), t + .6, 2.4, .12, { ataque: .12, molhado: .6, tipo: 'triangle' })); tom(BASE[gal] / 4, t + .6, 1.2, .3, { molhado: .2 }); },
+    derrota() { if (!pronto()) return; const t = ctx.currentTime;[5, 4, 2, 0].forEach((g, k) => tom(grau(g, BASE[gal] / 2) * (k === 3 ? .94 : 1), t + k * .2, .9, .2, { tipo: 'triangle', molhado: .5 })); chiado(t + .6, 1, .1, 500, { ate: 160, tipo: 'lowpass' }); },
+  };
+})();
+const vibra = ms => { if (Progresso.d.op.vibra && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) { /* sem vibração */ } };
+
+// ============================================================
+// 5. DESENHO DAS PEÇAS (calculadas ponto a ponto, sem imagens)
+// ============================================================
+const Arte = (() => {
+  const S = 136, cl = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v, mix = (a, b, t) => a + (b - a) * t, ss = (a, b, v) => { const t = cl((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+  const hash = (x, y) => { let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const ruido = (x, y) => { const X = Math.floor(x), Y = Math.floor(y), u = x - X, v = y - Y, a = u * u * (3 - 2 * u), b = v * v * (3 - 2 * v); return mix(mix(hash(X, Y), hash(X + 1, Y), a), mix(hash(X, Y + 1), hash(X + 1, Y + 1), a), b); };
+  const fbm = (x, y, n = 4) => { let s = 0, a = .5; for (let i = 0; i < n; i++) { s += a * ruido(x, y); x = x * 2.03 + 17.1; y = y * 2.03 + 9.7; a *= .5; } return s; };
+  const rr = (x, y, h, r) => { const a = Math.abs(x) - h + r, b = Math.abs(y) - h + r; return Math.hypot(Math.max(a, 0), Math.max(b, 0)) + Math.min(Math.max(a, b), 0) - r; };
+  const L1 = [-.42, -.62, .66], L2 = [.6, .35, .72];
+  function pintar(fn, tam = S) { const c = document.createElement('canvas'); c.width = c.height = tam; const g = c.getContext('2d'), im = g.createImageData(tam, tam), d = im.data; for (let y = 0, k = 0; y < tam; y++) for (let x = 0; x < tam; x++, k += 4) { const p = fn((x + .5) / tam * 2 - 1, (y + .5) / tam * 2 - 1); if (!p) continue; d[k] = cl(p[0]) * 255; d[k + 1] = cl(p[1]) * 255; d[k + 2] = cl(p[2]) * 255; d[k + 3] = cl(p[3]) * 255; } g.putImageData(im, 0, 0); return c; }
+  const normal = (h, u, v, e = .014) => { const nx = (h(u - e, v) - h(u + e, v)) / (2 * e), ny = (h(u, v - e) - h(u, v + e)) / (2 * e), l = 1 / Math.hypot(nx, ny, 1); return [nx * l, ny * l, l]; };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const refl = n => [2 * n[2] * n[0], 2 * n[2] * n[1], 2 * n[2] * n[2] - 1];
+  const borda = sd => cl(.5 - sd * S / 2);            // serrilhado suave
+  // cores: fundo, meio, luz (granada, citrino, esmeralda, safira, ametista, quartzo)
+  const CORES = [[[.26, .01, .04], [.80, .10, .13], [1, .46, .36]], [[.36, .15, .0], [.95, .62, .08], [1, .88, .42]], [[.0, .17, .09], [.07, .62, .34], [.55, .98, .65]], [[.01, .07, .30], [.10, .36, .90], [.48, .78, 1]], [[.15, .03, .28], [.54, .24, .80], [.88, .66, 1]], [[.32, .35, .40], [.80, .84, .88], [1, 1, 1]]];
+  const HEX = ['#e2453f', '#f3b133', '#2fbf74', '#3f86f2', '#a563e0', '#dfe6ec'];
+  const planos = (n, rot, R, u, v) => { let m = 9; for (let k = 0; k < n; k++) { const a = rot + k * 2 * Math.PI / n; m = Math.min(m, R - Math.cos(a) * u - Math.sin(a) * v); } return m; };
+  // lapidação própria de cada cor: dá para distinguir sem depender da cor
+  const CORTE = [
+    (u, v) => Math.max(0, planos(4, 0, .64, u, v)) * .62,                                                               // granada: pirâmide quadrada
+    (u, v) => Math.min(.17, Math.max(0, planos(4, Math.PI / 4, .55, u, v)) * .8),                                       // citrino: losango
+    (u, v) => { const d = Math.max(0, Math.min(planos(4, 0, .64, u * 1.0, v), planos(4, Math.PI / 4, .78, u, v))); return Math.min(d, .13) * .75 + cl(d - .2, 0, .12) * .6; },   // esmeralda: degraus
+    (u, v) => Math.sqrt(Math.max(0, .42 - u * u - v * v)) * .62,                                                        // safira: cúpula redonda
+    (u, v) => Math.min(.25, Math.max(0, planos(6, Math.PI / 6, .6, u, v)) * .62),                                       // ametista: hexágono
+    (u, v) => Math.min(.24, Math.max(0, planos(3, Math.PI / 2, .36, u, v + .1)) * .62),                                 // quartzo: triângulo
+  ];
+  function gema(c) {
+    const [F, M, Z] = CORES[c], corte = CORTE[c];
+    const h = (u, v) => { const e = -rr(u, v, .94, .27), b = e >= .2 ? .3 : .3 * Math.sqrt(Math.max(0, 1 - Math.pow(1 - cl(e, 0, .2) / .2, 2))); return b + corte(u, v); };
+    return pintar((u, v) => {
+      const sd = rr(u, v, .94, .27), a = borda(sd); if (a <= 0) return;
+      const n = normal(h, u, v), r = refl(n), nl = Math.max(0, dot(n, L1)), tr = Math.max(0, n[0] * .5 + n[1] * .66 + .12), dentro = ss(0, .09, corte(u, v));
+      const inc = fbm(u * 3 + c * 9, v * 3 + c * 5) - .47, k = cl(.16 + nl * .95 + inc * .16 - v * .07 + dentro * .06 - (1 - dentro) * .12);
+      const b1 = ss(.80, .93, dot(r, L1)) * .62, b2 = ss(.88, .96, dot(r, L2)) * .2, fr = Math.pow(1 - n[2], 2.2) * .12, o = [];
+      let estrela = 0; if (c === 3) { const ang = Math.atan2(v + .06, u + .04), rd = Math.hypot(u, v); estrela = Math.pow(Math.abs(Math.cos(ang * 3)), 26) * ss(.55, .05, rd) * .45; }
+      for (let i = 0; i < 3; i++) o.push(mix(F[i], M[i], k) + Z[i] * (tr * tr * .34 + estrela) + (b1 + b2 + fr) * mix(Z[i], 1, .5));
+      const som = ss(.02, .13, -sd) * .35 + .65; return [o[0] * som, o[1] * som, o[2] * som, a];
+    });
+  }
+  const matiz = (t, s = .6, l = 1) => [0, 1, 2].map(k => l * (1 - s + s * (.5 + .5 * Math.cos(6.283 * (t + k / 3)))));
+  function broca() {                                  // deitada; em pé é só girar
+    const R = u => { const a = Math.abs(u); return a < .3 ? .46 : .46 * (1 - (a - .3) / .64); }, H = (u, v) => { const r = R(u); return r > Math.abs(v) ? Math.sqrt(r * r - v * v) * (1 + (Math.abs(u) > .3 ? .13 * Math.sin((Math.abs(u) * 26) + v * 9) : 0)) : 0; };
+    return pintar((u, v) => {
+      const sb = rr(u, v, .94, .27), a = borda(sb); if (a <= 0) return; const r = R(u), dentro = cl((r - Math.abs(v)) * S / 2 * .9), n = normal(H, u, v), q = refl(n), nl = Math.max(0, dot(n, L1)), b = ss(.72, .95, dot(q, L1));
+      const t = .5 + .5 * fbm(u * 4, v * 4), fundo = [.15, .135, .13].map(x => x * (.7 + t * .5) + ss(.12, .02, -sb) * .12 * (v < 0 ? 1 : .2));
+      const lat = Math.abs(u) < .3, anel = lat && (Math.abs(Math.abs(u) - .22) < .05), base = lat ? (anel ? [.22, .2, .19] : [.86, .58, .2]) : [.72, .75, .78];
+      const m = base.map(x => x * (.2 + nl * .95) + b * .7); return [0, 1, 2].map(i => mix(fundo[i], m[i], dentro)).concat(a);
+    });
+  }
+  function carga() {
+    return pintar((u, v) => {
+      const sb = rr(u, v, .94, .27), a = borda(sb); if (a <= 0) return; const d = Math.hypot(u, v), R = .76, t = .5 + .5 * fbm(u * 4, v * 4), f = [.15, .135, .13].map(x => x * (.7 + t * .5) + ss(.12, .02, -sb) * .12 * (v < 0 ? 1 : .2));
+      const k = cl((R - d) * S / 2), z = Math.sqrt(Math.max(0, R * R - d * d)) / R, rel = fbm(u * 5 + 3, v * 5), n = [u / R + (rel - .5) * .5, v / R + (fbm(u * 5, v * 5 + 8) - .5) * .5, z], nl = Math.max(0, dot(n, L1)), l = Math.abs(fbm(u * 2.6 + 7, v * 2.6 + 2) - .47), fenda = ss(.05, .0, l), halo = ss(.16, 0, l) * .5;
+      const m = [.2 + fenda * 1.2 + halo * .9, .17 + fenda * .75 + halo * .34, .16 + fenda * .3 + halo * .05], luz = .3 + nl * 1.05; const c = [mix(m[0] * luz, m[0], fenda), mix(m[1] * luz, m[1], fenda), mix(m[2] * luz, m[2], fenda)], s = ss(.9, .98, dot(refl([u / R, v / R, z]), L1)) * .35;
+      return [0, 1, 2].map(i => mix(f[i] + (i === 0 ? .25 : i === 1 ? .1 : .02) * ss(.95, .76, d), c[i] + s, k)).concat(a);
+    });
+  }
+  function prisma(c) {
+    const h = (u, v) => { const d = Math.max(0, planos(8, Math.PI / 8, .82, u, v)), w = Math.max(0, planos(8, 0, .5, u, v)); return Math.min(d, .3) * .9 + Math.min(w, .2) * .5; }, M = CORES[c][1];
+    return pintar((u, v) => {
+      const sb = rr(u, v, .94, .27), a = borda(sb); if (a <= 0) return; const t = .5 + .5 * fbm(u * 4, v * 4), f = [0, 1, 2].map(i => (.12 + M[i] * .34) * (.7 + t * .5) + ss(.12, .02, -sb) * .12);
+      const k = cl(planos(8, Math.PI / 8, .82, u, v) * S / 2), n = normal(h, u, v), q = refl(n), nl = Math.max(0, dot(n, L1)), hue = matiz(Math.atan2(n[1], n[0]) / 6.283 + (u + v) * .16, .55), b = ss(.8, .95, dot(q, L1)) * .6;
+      return [0, 1, 2].map(i => mix(f[i], mix(hue[i], M[i] * 1.1, .34) * (.45 + nl * .75) + b, k)).concat(a);
+    });
+  }
+  function rocha(hp) {
+    const s = hp * 13, h = (u, v) => { const e = -(rr(u, v, .92, .2) + (fbm(u * 4 + s, v * 4) - .5) * .12); return .34 * Math.sqrt(Math.max(0, 1 - Math.pow(1 - cl(e, 0, .3) / .3, 2))) + fbm(u * 3 + s, v * 3, 5) * .55; };
+    return pintar((u, v) => {
+      const sd = rr(u, v, .92, .2) + (fbm(u * 4 + s, v * 4) - .5) * .12, a = borda(sd); if (a <= 0) return; const n = normal(h, u, v, .02), nl = Math.max(0, dot(n, L1)), g = fbm(u * 9, v * 9 + s);
+      const B = hp > 1 ? [.40, .42, .45] : [.56, .47, .38]; let l = (.22 + nl * .95) * (.75 + g * .5); if (hp === 1) l *= 1 - ss(.035, 0, Math.abs(fbm(u * 2 + 4, v * 2 + 1) - .46)) * .75; else if (hash(Math.floor(u * 22), Math.floor(v * 22)) > .9) l *= 1.5;
+      return [B[0] * l, B[1] * l, B[2] * l, a];
+    });
+  }
+  function geodo() {
+    return pintar((u, v) => {
+      const d = Math.hypot(u * 1.06, v) + (fbm(u * 3, v * 3) - .5) * .08, a = cl((.88 - d) * S / 2); if (a <= 0) return; const ab = Math.hypot(u * 1.2 - .02, (v - .02) * 1.25) + (fbm(u * 5 + 5, v * 5) - .5) * .16, z = Math.sqrt(Math.max(0, 1 - d * d)), nl = Math.max(0, dot([u, v, z], L1)), g = fbm(u * 8, v * 8, 4);
+      const casca = [.5, .36, .24].map(x => x * (.25 + nl * .9) * (.6 + g * .8)); if (ab > .68) return casca.concat(a); if (ab > .58) return [.9, .86, .8].map(x => x * (.5 + nl * .6)).concat(a);
+      let m1 = 9, m2 = 9, id = 0; for (let j = -1; j < 2; j++) for (let i = -1; i < 2; i++) { const X = Math.floor(u * 6) + i, Y = Math.floor(v * 6) + j, q = Math.hypot(X + hash(X, Y) - u * 6, Y + hash(X + 31, Y) - v * 6); if (q < m1) { m2 = m1; m1 = q; id = hash(X, Y + 77); } else if (q < m2) m2 = q; }
+      const luz = (.35 + id * .75) * ss(0, .22, m2 - m1) * (.55 + ab * .9) + .12, br = id > .78 ? .35 : 0; return [.62 * luz + br, .34 * luz + br, .95 * luz + br, a];
+    });
+  }
+  function grampo() {
+    return pintar((u, v) => {
+      const f = (p, q) => { const d = Math.abs(p - q) / 1.414 - .125; return Math.max(d, Math.hypot(u, v) - 1.16, rr(u, v, .98, .3)); }, d1 = f(u, v), d2 = f(u, -v), d = Math.min(d1, d2), a = cl(.5 - d * S / 2); if (a <= 0) return;
+      const rb = Math.min(Math.hypot(Math.abs(u) - .62, Math.abs(v) - .62), Math.hypot(u, v)), reb = ss(.13, .1, rb), lado = d1 < d2 ? (u - v) : (u + v), g = fbm(u * 10, v * 10), l = .3 + g * .28 + ss(.06, .0, Math.abs(d + .03)) * .25 - lado * .25 * ss(-.2, 0, d) + reb * (.3 - (u + v) * .02);
+      return [l * .98, l * .93, l * .9, a];
+    });
+  }
+  function ouro(n) {
+    return pintar((u, v) => {
+      const a = borda(rr(u, v, .96, .16)); if (a <= 0) return; const w = fbm(u * 1.6 + 3, v * 1.6 + n * 7, 4), l = Math.abs(w - .46), veio = ss(n > 1 ? .13 : .07, .02, l), g = fbm(u * 9, v * 9, 4), p = hash(Math.floor(u * 30 + 50), Math.floor(v * 30)) > .93 ? .3 : 0, bd = ss(.1, .0, -rr(u, v, .96, .16)), m = cl(veio + bd);
+      return [mix(.26, 1.02, m) * (.55 + g * .75) + p, mix(.18, .76, m) * (.55 + g * .75) + p * .8, mix(.09, .26, m) * (.5 + g * .6) + p * .2, a];
+    });
+  }
+  const sp = {}; let feito = false;
+  function preparar() { if (feito) return; feito = true; for (let c = 0; c < 6; c++) { sp['c' + c] = gema(c); sp['p' + c] = prisma(c); } sp.l = broca(); sp.b = carga(); sp.pedra1 = rocha(1); sp.pedra2 = rocha(2); sp.geodo = geodo(); sp.grampo = grampo(); sp.ouro1 = ouro(1); sp.ouro2 = ouro(2); }
+  const icone = m => (m === 'pedra' ? sp.pedra1 : m === 'ouro' ? sp.ouro2 : sp[m]), urls = {};
+  // parede da gruta, uma por galeria
+  const PAL = [[[.10, .075, .055], [.50, .36, .24], [1, .74, .42]], [[.03, .07, .085], [.18, .38, .42], [.5, .95, .95]], [[.065, .04, .095], [.36, .24, .46], [.86, .62, 1]], [[.10, .07, .02], [.50, .37, .14], [1, .84, .4]], [[.09, .025, .02], [.42, .17, .12], [1, .45, .24]]];
+  function parede(g, larg, alt) {
+    const w = 300, h = Math.max(160, Math.round(w * alt / larg)), W = Math.min(w, 700), c = document.createElement('canvas'); c.width = W; c.height = Math.min(h, 660); const H = c.height, x = c.getContext('2d'), im = x.createImageData(W, H), d = im.data, [F, M, Z] = PAL[g], asp = alt / larg;
+    const alturas = new Float32Array((W + 1) * (H + 1)); for (let j = 0; j <= H; j++) for (let i = 0; i <= W; i++) { const u = i / W * 3.2, v = j / H * 3.2 * asp, q = fbm(u + g * 11 + fbm(u * 1.5, v * 1.5 + g, 3) * .9, v * 1.35 + g * 3, 5); alturas[j * (W + 1) + i] = 1 - Math.abs(q * 2 - .95); }
+    for (let j = 0, k = 0; j < H; j++) for (let i = 0; i < W; i++, k += 4) {
+      const o = j * (W + 1) + i, a = alturas[o], nx = (alturas[o + 1] - a) * 9, ny = (alturas[o + W + 1] - a) * 9, u = i / W * 2 - 1, v = j / H * 2 - 1, luz = cl(.5 - nx * .55 - ny * .85), foco = Math.exp(-(u * u * 1.1 + (v + 1.05) * (v + 1.05) * 1.3)), vin = cl(1.05 - Math.hypot(u, v * .9) * .55), l = luz * vin * (.4 + foco * .9);
+      for (let q = 0; q < 3; q++) d[k + q] = cl(mix(F[q], M[q], l * .85) + Z[q] * foco * .13 * (.4 + luz) + (hash(i, j) - .5) * .012) * 255; d[k + 3] = 255;
+    }
+    x.putImageData(im, 0, 0); return c;
+  }
+  return { preparar, sp, HEX, parede, PAL, url: m => urls[m] || (urls[m] = icone(m).toDataURL()), icone, S };
+})();
+
+// ============================================================
+// 6. TELA: animações, partículas e toque
+// ============================================================
+const Tela = (() => {
+  const cv = document.getElementById('tela'), g = cv.getContext('2d'), cf = document.getElementById('fundo'), area = document.getElementById('area');
+  let lento = false, fracos = 0, dpr = 1, LW = 0, LH = 0, C = 50, X0 = 0, Y0 = 0, laje = null, P = null, galAtual = -1, fundoChave = '';
+  let vis = new Map(), ouro = [], agora = 0, escala = 1, agenda = [], esperas = [], sessao = 0, tremor = 0, marcas = new Map(), destaque = null, dicaGrupo = null, ultimaAcao = 0, pausado = false;
+  const cacos = [], aneis = [], textos = [], voos = [], feixes = [], brilhos = [], poeira = [];
+  const ALEA = (a, b) => a + Math.random() * (b - a), sai = t => 1 - Math.pow(1 - t, 3);
+
+  // ---------- medidas ----------
+  function medir() {
+    LW = innerWidth; LH = innerHeight; dpr = Math.min(lento ? 1.35 : 2, devicePixelRatio || 1); cv.width = LW * dpr; cv.height = LH * dpr; fundo();
+    if (!P) return; const r = area.getBoundingClientRect(); C = Math.max(20, Math.floor(Math.min((r.width - 14) / P.W, (r.height - 14) / P.H, 84)));
+    X0 = Math.round(r.left + (r.width - C * P.W) / 2); Y0 = Math.round(r.top + (r.height - C * P.H) * .45); montarLaje();
+  }
+  function fundo() { const gal = Math.max(0, galAtual), ch = gal + ':' + (LW / LH).toFixed(2); if (ch === fundoChave) return; fundoChave = ch; const p = Arte.parede(gal, LW, LH); cf.width = p.width; cf.height = p.height; cf.getContext('2d').drawImage(p, 0, 0); }
+  function caminho(q, folga) { const { W, H, mask } = P; q.beginPath(); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (mask[y * W + x]) q.rect(x * C - folga, y * C - folga, C + folga * 2, C + folga * 2); }
+  let folha = null, fpos = {}, FT = 0;                // folha única com as peças já no tamanho da tela (bem mais leve)
+  function montarFolha() {
+    const nomes = Object.keys(Arte.sp), col = 6; FT = Math.ceil(C * dpr * 1.06) + 2; folha = document.createElement('canvas'); folha.width = FT * col; folha.height = FT * Math.ceil((nomes.length + 1) / col); const q = folha.getContext('2d'); q.imageSmoothingQuality = 'high';
+    nomes.forEach((nm, k) => { const x = k % col * FT, y = (k / col | 0) * FT; q.drawImage(Arte.sp[nm], x + 1, y + 1, FT - 2, FT - 2); fpos[nm] = [x + 1, y + 1]; });
+    const k = nomes.length, x = k % col * FT, y = (k / col | 0) * FT; q.save(); q.translate(x + FT / 2, y + FT / 2); q.rotate(Math.PI / 2); q.drawImage(Arte.sp.l, 1 - FT / 2, 1 - FT / 2, FT - 2, FT - 2); q.restore(); fpos.v = [x + 1, y + 1];
+  }
+  const peca = (nm, x, y, w, h = w) => { const f = fpos[nm]; g.drawImage(folha, f[0], f[1], FT - 2, FT - 2, x, y, w, h); };
+  function montarLaje() {
+    montarFolha(); selos = {};
+    const m = 12; laje = document.createElement('canvas'); laje.width = (P.W * C + m * 2) * dpr; laje.height = (P.H * C + m * 2) * dpr; const q = laje.getContext('2d'); q.scale(dpr, dpr); q.translate(m, m);
+    q.save(); q.shadowColor = 'rgba(0,0,0,.6)'; q.shadowBlur = 18 * dpr; q.fillStyle = 'rgba(58,48,41,.96)'; caminho(q, 6); q.fill(); q.restore();
+    q.fillStyle = '#16120f'; caminho(q, 2); q.fill();
+    for (let i = 0; i < P.W * P.H; i++) if (P.mask[i]) { const x = i % P.W, y = i / P.W | 0; q.fillStyle = (x + y) % 2 ? '#1e1916' : '#231d19'; q.fillRect(x * C + 1, y * C + 1, C - 2, C - 2); }
+  }
+  const px = x => X0 + (x + .5) * C, py = y => Y0 + (y + .5) * C, colDe = i => i % P.W, linDe = i => i / P.W | 0, panDe = i => (colDe(i) / (P.W - 1) - .5) * .9;
+
+  // ---------- tempo do jogo (para na pausa, acelera no bônus) ----------
+  const em = (seg, f) => agenda.push({ t: agora + seg, f, s: sessao });
+  const espera = seg => new Promise(r => esperas.push({ t: agora + seg, r, s: sessao }));
+  const assentar = async () => { for (let k = 0; k < 200; k++) { if (![...vis.values()].some(v => v.cai || v.tw)) return; await espera(.016); } };
+
+  // ---------- peças na tela ----------
+  const cria = (p, x, y) => { const v = { p, id: p.id, x, y, alvo: y, vy: 0, cai: false, espera: 0, s: 0, vs: 0, esc: 1, vesc: 0, hp: p.hp, presa: p.presa, c: p.c, sac: 0, tw: null, apaga: 0 }; vis.set(p.id, v); return v; };
+  function montar(part, entra) {
+    sessao++; P = part; agenda = []; esperas = []; vis.clear(); for (const l of [cacos, aneis, textos, voos, feixes, brilhos]) l.length = 0; ouro = [...P.ouro]; tremor = 0; escala = 1; destaque = dicaGrupo = null; ultimaAcao = agora;
+    if (P.def.galeria !== galAtual) galAtual = P.def.galeria; medir(); Som.galeria(galAtual);
+    P.g.forEach((p, i) => { if (!p) return; const v = cria(p, colDe(i), linDe(i)); if (entra && !P.fixo(p)) { v.y = linDe(i) - P.H - 1 - colDe(i) * .25; v.alvo = linDe(i); v.cai = true; v.espera = (P.H - linDe(i)) * .016; } });
+    marcar();
+  }
+  // selos discretos nos grupos que vão virar especial
+  function marcar() { marcas.clear(); for (const gr of P.grupos()) { const e = Nucleo.especialDe(gr.length); if (e) for (const o of gr) marcas.set(P.g[o.i].id, e); } }
+
+  // ---------- efeitos ----------
+  function estilhacar(i, cor, n, forca = 1) { const x = px(colDe(i)), y = py(linDe(i)); for (let k = 0; k < (lento ? n * .5 : n) && cacos.length < (lento ? 130 : 420); k++) { const a = ALEA(0, 6.28), f = ALEA(40, 230) * forca; cacos.push({ x: x + ALEA(-.3, .3) * C, y: y + ALEA(-.3, .3) * C, vx: Math.cos(a) * f, vy: Math.sin(a) * f - 110, r: ALEA(.05, .15) * C, a: ALEA(0, 6), va: ALEA(-9, 9), t: 0, d: ALEA(.45, .85), cor, k: Math.random() }); } }
+  const brilho = (i, cor, r = 1.2, d = .28) => brilhos.push({ x: px(colDe(i)), y: py(linDe(i)), r: r * C, cor, t: 0, d });
+  const anel = (i, cor, r, d = .42) => aneis.push({ x: px(colDe(i)), y: py(linDe(i)), r: r * C, cor, t: 0, d });
+  // cada letreiro é desenhado uma vez e depois só movido
+  function letreiro(s, tam, cor) { const c = document.createElement('canvas'), q = c.getContext('2d'), f = '700 ' + tam * dpr + 'px "Iowan Old Style","Palatino Linotype",Georgia,serif'; q.font = f; c.width = Math.ceil(q.measureText(s).width + 14 * dpr); c.height = Math.ceil(tam * 1.6 * dpr); q.font = f; q.textAlign = 'center'; q.textBaseline = 'middle'; q.lineJoin = 'round'; q.lineWidth = 5 * dpr; q.strokeStyle = 'rgba(15,11,8,.85)'; q.strokeText(s, c.width / 2, c.height / 2); q.fillStyle = cor; q.fillText(s, c.width / 2, c.height / 2); return c; }
+  const texto = (x, y, s, tam, cor = '#fff3d6', d = .95) => { tam = Math.round(tam); const meia = Math.min(LW / 2, s.length * tam * .28 + 8); textos.push({ x: Math.max(meia, Math.min(LW - meia, x)), y, im: letreiro(s, tam, cor), t: 0, d }); };
+  const treme = v => { if (Progresso.d.op.tremor) tremor = Math.max(tremor, v); };
+  function voar(meta, i) {                             // item coletado voa até a meta lá em cima
+    const el = document.querySelector(`[data-meta="${meta}"] img`); if (!el) return; const r = el.getBoundingClientRect();
+    if (voos.length > 26) { Jogo.chegou(meta); return; }
+    voos.push({ x0: px(colDe(i)), y0: py(linDe(i)), x1: r.left + r.width / 2, y1: r.top + r.height / 2, cx: ALEA(-90, 90), t: -ALEA(0, .12), d: ALEA(.42, .56), nm: meta === 'pedra' ? 'pedra1' : meta === 'ouro' ? 'ouro2' : meta, meta });
+  }
+  const nomeDe = v => { const p = v.p; return p.k === 'cor' ? 'c' + v.c : p.k === 'pedra' ? (v.hp > 1 ? 'pedra2' : 'pedra1') : p.k === 'geodo' ? 'geodo' : p.e === 'p' ? 'p' + p.c : p.e === 'b' ? 'b' : p.e === 'v' ? 'v' : 'l'; };
+
+  function some(item) { vis.delete(item.p.id); }
+  function efeitoDano(d) {
+    const v = vis.get(d.p.id);
+    if (d.k === 'grampo') { if (v) { v.presa = false; v.vesc = 5; } Som.grampo(); estilhacar(d.i, '#c9c2ba', 7); return; }
+    if (d.hp <= 0) { vis.delete(d.p.id); Som.rocha(true); estilhacar(d.i, '#a08a72', 12); } else { if (v) { v.hp = d.hp; v.sac = .3; } Som.rocha(false); estilhacar(d.i, '#8d8f94', 6); }
+  }
+  function aplicarExtras(ps, passo) {                  // danos, ouro e coletas no momento certo
+    for (const d of ps.danos) em(d.d * passo, () => efeitoDano(d));
+    for (const o of ps.ouro) em(o.d * passo, () => { ouro[o.i] = o.n; estilhacar(o.i, '#f0c255', 5, .8); Som.ouro(); });
+    const atraso = new Map(ps.itens.concat(ps.danos, ps.ouro).map(o => [o.i, o.d * passo])); for (const c of ps.coletas) em(atraso.get(c.i) || 0, () => voar(c.meta, c.i));
+  }
+
+  // ---------- toca a lista de passos do núcleo ----------
+  async function tocar(passos, ritmo) {
+    const minha = sessao;
+    for (let k = 0; k < passos.length; k++) {
+      const ps = passos[k], ultimo = k === passos.length - 1; if (minha !== sessao) return false;
+      if (ps.t === 'quebra') await passoQuebra(ps, ritmo);
+      else if (ps.t === 'especial') await passoEspecial(ps, ritmo);
+      else if (ps.t === 'bonus') await passoBonus(ps);
+      else if (ps.t === 'coleta') { for (const it of ps.itens) { some(it); estilhacar(it.i, '#c9a4ff', 14); anel(it.i, '#d9c2ff', 1.6); brilho(it.i, '#b98cff', 1.6); for (const c of ps.coletas) if (c.i === it.i) voar(c.meta, c.i); } Som.geodo(); vibra(20); await espera(.14); }
+      else if (ps.t === 'queda') {
+        for (const m of ps.movs) { const v = vis.get(m.p.id); if (!v) continue; v.alvo = linDe(m.para); if (!v.cai) { v.cai = true; v.espera = (P.H - linDe(m.para)) * .008; } }
+        for (const n of ps.novas) { const v = cria(n.p, colDe(n.para), n.deY); v.alvo = linDe(n.para); v.cai = true; v.espera = (P.H - linDe(n.para)) * .008; }
+        if (!ultimo) await assentar();
+      } else if (ps.t === 'embaralha') {
+        await assentar(); Jogo.avisar('Sem jogadas: embaralhando'); Som.combina();
+        for (const m of ps.movs) { const v = vis.get(m.p.id); if (!v) continue; if (ps.tinge.includes(m.p)) v.c = m.p.c; v.tw = { x0: v.x, y0: v.y, x1: colDe(m.para), y1: linDe(m.para), t: 0, d: .42 }; v.alvo = linDe(m.para); } await espera(.46);
+      }
+    }
+    return minha === sessao;
+  }
+  async function passoQuebra(ps, ritmo) {
+    const cor = Arte.HEX[ps.cor], PASSO = .034, maxD = Math.min(6, Math.max(...ps.itens.map(o => o.d))), grauBase = Math.min(ritmo, 6) + (ps.nivel - 1) * 2;
+    if (ps.nivel > 1) { Som.ressona(ps.nivel); const i = ps.origem; anel(i, cor, 3); texto(px(colDe(i)), py(linDe(i)) - C * .7, 'Ressonância ×' + ps.nivel, 24 + Math.min(12, ps.nivel * 3), '#ffe6a8', 1.1); treme(2 + ps.nivel); vibra(18); Eventos.emit('ressonancia', { nivel: ps.nivel, n: ps.n }); }
+    Som.baque(ps.n); vibra(ps.n > 6 ? 16 : 8);
+    for (const it of ps.itens) {
+      const d = Math.min(it.d, 6) * PASSO, v = vis.get(it.p.id);
+      if (ps.cria) { if (v) { v.tw = { x0: v.x, y0: v.y, x1: colDe(ps.origem), y1: linDe(ps.origem), t: 0, d: .15, fim: () => vis.delete(it.p.id) }; v.cai = false; } em(d, () => { Som.quebra(ps.cor, grauBase + it.d, .7, panDe(it.i)); estilhacar(it.i, cor, 3, .6); }); }
+      else { if (v) { v.vesc = 7; } em(d + .02, () => { some(it); estilhacar(it.i, cor, ps.n > 12 ? 6 : 9); brilho(it.i, cor, .95, .2); Som.quebra(ps.cor, grauBase + it.d, it.d ? .6 : 1, panDe(it.i)); }); }
+    }
+    aplicarExtras(ps, PASSO);
+    texto(px(colDe(ps.origem)), py(linDe(ps.origem)), '+' + ps.pontos, 17 + Math.min(16, ps.n * 1.3), '#fff'); Jogo.somar(ps.pontos);
+    if (ps.n >= 5) treme(Math.min(5, ps.n * .4));
+    if (ps.cria) { await espera(.16); const v = cria(ps.cria.p, colDe(ps.cria.i), linDe(ps.cria.i)); v.esc = .3; v.vesc = 9; anel(ps.cria.i, cor, 1.5); brilho(ps.cria.i, cor, 1.7, .35); Som.nasce(ps.cria.p.e); texto(px(colDe(ps.cria.i)), py(linDe(ps.cria.i)) - C * .8, { h: 'Broca', v: 'Broca', b: 'Carga', p: 'Prisma' }[ps.cria.p.e], 22, '#ffe6a8'); await espera(.05); Eventos.emit('especial:criado', { e: ps.cria.p.e }); }
+    else await espera(maxD * PASSO + .05);
+  }
+  async function passoEspecial(ps) {
+    let fim = 0; if (ps.combinado) { const a = ps.acts[0]; Som.combina(); const v = P && vis.get((ps.itens.find(o => o.i === a.par) || { p: {} }).p.id); if (v) v.tw = { x0: v.x, y0: v.y, x1: colDe(a.i), y1: linDe(a.i), t: 0, d: .16 }; await espera(.18); }
+    ps.acts.forEach((a, k) => em(a.d, () => {
+      const som = k < 14, i = a.i;
+      if (a.tipo === 'h' || a.tipo === 'v' || a.tipo === 'll' || a.tipo === 'bl') { if (a.tipo !== 'v') feixes.push({ i, h: true, l: a.tipo === 'bl' ? 3 : 1, t: 0 }); if (a.tipo !== 'h') feixes.push({ i, h: false, l: a.tipo === 'bl' ? 3 : 1, t: 0 }); if (som) Som.broca(panDe(i)); treme(a.tipo === 'bl' ? 8 : 4); if (a.tipo === 'bl' && som) Som.carga(1); }
+      else if (a.tipo === 'b' || a.tipo === 'bb') { const r = a.tipo === 'bb' ? 5 : 3; anel(i, '#ffc27a', r, .5); brilho(i, '#ff9d45', r, .34); estilhacar(i, '#ffb45c', 14, 1.6); if (som) Som.carga(a.tipo === 'bb' ? 1.15 : .85); treme(a.tipo === 'bb' ? 11 : 7); }
+      else { Som.prisma(a.cells.length); anel(i, '#ffffff', a.tipo === 'pp' ? 9 : 3, .6); brilho(i, Arte.HEX[a.cor] || '#fff', 2.4, .4); treme(a.tipo === 'pp' ? 11 : 4); for (const j of a.cells) if (a.tipo === 'p' && j !== i) feixes.push({ i, j, cor: Arte.HEX[a.cor], t: 0 }); }
+      vibra(22);
+    }));
+    let n = 0; const raro = ps.itens.length > 30 ? 4 : 7;
+    for (const it of ps.itens) { fim = Math.max(fim, it.d); const g0 = n++; em(it.d + .02, () => { some(it); const cor = it.p.k === 'cor' ? Arte.HEX[it.p.c] : '#f0d9a8'; estilhacar(it.i, cor, raro, 1.1); if (it.p.k === 'cor' && g0 % 2 === 0) Som.quebra(it.p.c, 2 + (g0 >> 1) % 10, .45, panDe(it.i)); }); }
+    for (const d of ps.danos) fim = Math.max(fim, d.d); for (const o of ps.ouro) fim = Math.max(fim, o.d);
+    aplicarExtras(ps, 1); const a = ps.acts[0]; texto(px(colDe(a.i)), py(linDe(a.i)), '+' + ps.pontos, 26 + Math.min(14, ps.acts.length * 2)); Jogo.somar(ps.pontos);
+    await espera(fim + .1); Eventos.emit('especial:usado', { tipo: a.tipo, cadeia: ps.acts.length });
+  }
+  async function passoBonus(ps) {
+    Jogo.avisar('Jogadas que sobraram viram especiais'); let m = P.movsVis || ps.itens.length;
+    for (let k = 0; k < ps.itens.length; k++) { const it = ps.itens[k]; vis.delete(it.velho.id); const v = cria(it.p, colDe(it.i), linDe(it.i)); v.esc = .4; v.vesc = 8; brilho(it.i, '#ffe6a8', 1.3); Som.conta(k); Jogo.mostrarMovs(Math.max(0, --m)); await espera(.11); }
+    Jogo.mostrarMovs(0); Jogo.somar(ps.pontos); await espera(.2);
+  }
+
+  // ---------- atualização ----------
+  function passo(dtReal) {
+    if (pausado) return; const dt = Math.min(.034, dtReal) * escala; agora += dt;
+    for (let k = agenda.length - 1; k >= 0; k--) if (agenda[k].t <= agora) { const a = agenda[k]; agenda.splice(k, 1); if (a.s === sessao) a.f(); }
+    for (let k = esperas.length - 1; k >= 0; k--) if (esperas[k].t <= agora) { const e = esperas[k]; esperas.splice(k, 1); if (e.s === sessao) e.r(); }
+    for (const v of vis.values()) {
+      if (v.tw) { const w = v.tw; w.t += dt; const t = Math.min(1, w.t / w.d), q = t * t * (3 - 2 * t); v.x = w.x0 + (w.x1 - w.x0) * q; v.y = w.y0 + (w.y1 - w.y0) * q; if (t >= 1) { v.tw = null; if (w.fim) w.fim(); } }
+      else if (v.cai) {
+        if (v.espera > 0) v.espera -= dt; else { v.vy = Math.min(30, v.vy + 78 * dt); v.y += v.vy * dt; v.s = Math.max(-.1, v.s - v.vy * dt * .03); if (v.y >= v.alvo) { const f = v.vy / 26; v.y = v.alvo; v.cai = false; v.vy = 0; v.vs = 2.2 + f * 5.5; Som.pousa(f, (v.x / (P.W - 1) - .5) * .8); } }
+      }
+      v.vs += (-420 * v.s - 24 * v.vs) * dt; v.s += v.vs * dt; v.vesc += (520 * (1 - v.esc) - 26 * v.vesc) * dt; v.esc += v.vesc * dt; if (v.sac > 0) v.sac -= dt;
+    }
+    for (const l of [aneis, textos, brilhos]) for (let k = l.length - 1; k >= 0; k--) { l[k].t += dt; if (l[k].t > l[k].d) l.splice(k, 1); }
+    for (let k = feixes.length - 1; k >= 0; k--) { feixes[k].t += dt; if (feixes[k].t > .42) feixes.splice(k, 1); }
+    for (let k = cacos.length - 1; k >= 0; k--) { const c = cacos[k]; c.t += dt; if (c.t > c.d) { cacos[k] = cacos[cacos.length - 1]; cacos.pop(); continue; } c.vy += 900 * dt; c.x += c.vx * dt; c.y += c.vy * dt; c.a += c.va * dt; }
+    for (let k = voos.length - 1; k >= 0; k--) { const f = voos[k]; f.t += dt; if (f.t >= f.d) { voos.splice(k, 1); Jogo.chegou(f.meta); } }
+    tremor *= Math.exp(-dt * 11); if (tremor < .15) tremor = 0;
+    if (Jogo.livre() && agora - ultimaAcao > 5 && !dicaGrupo) { const gs = P.grupos().sort((a, b) => b.length - a.length); dicaGrupo = gs[0] ? new Set(gs[0].map(o => P.g[o.i].id)) : null; }
+  }
+  // ---------- desenho ----------
+  function desenhar() {
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, LW, LH); if (!P || !laje || Jogo.aberto === 'abertura' || Jogo.aberto === 'mapa') return;
+    for (const p of poeira) { p.y -= p.v; p.x += Math.sin(agora * .4 + p.f) * .12; if (p.y < -5) { p.y = LH + 5; p.x = Math.random() * LW; } g.globalAlpha = p.a; g.fillStyle = '#ffe9c4'; g.fillRect(p.x, p.y, p.r, p.r); } g.globalAlpha = 1;
+    g.save(); if (tremor) g.translate(ALEA(-tremor, tremor), ALEA(-tremor, tremor));
+    g.drawImage(laje, X0 - 12, Y0 - 12, laje.width / dpr, laje.height / dpr);
+    for (let i = 0; i < ouro.length; i++) if (ouro[i] > 0) peca('ouro' + ouro[i], X0 + colDe(i) * C, Y0 + linDe(i) * C, C);
+    g.save(); g.translate(X0, Y0); g.beginPath(); g.rect(-8, -2, P.W * C + 16, P.H * C + 8); g.clip();
+    const lista = [...vis.values()].sort((a, b) => b.y - a.y), pulso = .5 + .5 * Math.sin(agora * 5);
+    for (const v of lista) {
+      const y0 = P.topo[Math.round(v.x)] || 0; if (v.y < y0 - 1) continue; const alfa = v.y < y0 ? Math.max(0, 1 - (y0 - v.y)) : 1; if (alfa <= 0) continue;
+      const i = Math.round(v.alvo) * P.W + Math.round(v.x), emOuro = ouro[i] > 0 && !v.cai, na = destaque && destaque.has(v.id), ndica = dicaGrupo && dicaGrupo.has(v.id), t = C * (emOuro ? .86 : .97) * v.esc * (na ? 1.04 : 1) * (ndica ? 1 + pulso * .045 : 1), sx = 1 + v.s * .7, sy = 1 - v.s, dx = v.sac > 0 ? Math.sin(v.sac * 60) * C * .07 * v.sac / .3 : 0;
+      const w = t * sx, h = t * sy, cx = (v.x + .5) * C + dx, cy = (v.y + .5) * C + C * .48 * (1 - sy), nm = nomeDe(v);
+      if (alfa < 1) g.globalAlpha = alfa; peca(nm, cx - w / 2, cy - h / 2, w, h); if (v.presa) peca('grampo', cx - w / 2, cy - h / 2, w, h);
+      if (na) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = .16; peca(nm, cx - w / 2, cy - h / 2, w, h); g.globalCompositeOperation = 'source-over'; }
+      g.globalAlpha = 1; const m = marcas.get(v.id); if (m && !v.cai && v.p.k === 'cor') g.drawImage(selos[m] || selo(m), cx - C * .22, cy - C * .22, C * .44, C * .44);
+    }
+    g.restore();
+    for (const f of feixes) feixe(f);
+    g.globalCompositeOperation = 'lighter';
+    for (const b of brilhos) { g.globalAlpha = (1 - b.t / b.d) * .42; g.drawImage(mancha(b.cor), b.x - b.r, b.y - b.r, b.r * 2, b.r * 2); }
+    g.globalCompositeOperation = 'source-over';
+    for (const a of aneis) { const t = a.t / a.d; g.globalAlpha = (1 - t) * .7; g.strokeStyle = a.cor; g.lineWidth = Math.max(1, C * .13 * (1 - t)); g.beginPath(); g.arc(a.x, a.y, a.r * sai(t), 0, 7); g.stroke(); }
+    const porCor = {}; for (const c of cacos) (porCor[c.cor] = porCor[c.cor] || []).push(c);
+    for (const cor in porCor) for (const luz of [false, true]) { g.globalAlpha = luz ? .4 : .95; g.fillStyle = luz ? '#fff' : cor; g.beginPath(); for (const c of porCor[cor]) { const e = Math.min(1, (1 - c.t / c.d) * 2) * c.r, co = Math.cos(c.a) * e, se = Math.sin(c.a) * e, k = .3 + c.k * .5; g.moveTo(c.x - co + se * .5, c.y - se - co * .5); g.lineTo(c.x + co + se * k, c.y + se - co * k); if (luz) g.lineTo(c.x, c.y); else g.lineTo(c.x + co * .1 - se, c.y + se * .1 + co); } g.fill(); }
+    g.globalAlpha = 1; g.restore();
+    for (const f of voos) { if (f.t < 0) continue; const t = f.t / f.d, q = t * t * (1.6 - .6 * t), x = f.x0 + (f.x1 - f.x0) * q + Math.sin(t * Math.PI) * f.cx, y = f.y0 + (f.y1 - f.y0) * q, s = C * (.78 - .3 * t); peca(f.nm, x - s / 2, y - s / 2, s); }
+    for (const t of textos) { const k = t.t / t.d, e = k < .16 ? .5 + 3.6 * k : Math.max(1, 1.12 - (k - .16)), w = t.im.width / dpr * e, h = t.im.height / dpr * e; g.globalAlpha = k > .65 ? (1 - k) / .35 : 1; g.drawImage(t.im, t.x - w / 2, t.y - k * 44 - h / 2, w, h); }
+    g.globalAlpha = 1;
+  }
+  const manchas = {}; function mancha(cor) { if (manchas[cor]) return manchas[cor]; const c = document.createElement('canvas'); c.width = c.height = 64; const q = c.getContext('2d'), gr = q.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, cor); gr.addColorStop(1, 'rgba(0,0,0,0)'); q.fillStyle = gr; q.fillRect(0, 0, 64, 64); return manchas[cor] = c; }
+  let selos = {};
+  function selo(m) {                                   // desenhado uma vez só por tamanho
+    const c = document.createElement('canvas'), L = Math.ceil(C * .44 * dpr), r = L * .34; c.width = c.height = L; const q = c.getContext('2d'); q.translate(L / 2, L / 2); q.globalAlpha = .92;
+    q.fillStyle = 'rgba(16,12,10,.66)'; q.beginPath(); q.arc(0, 0, L * .47, 0, 7); q.fill(); q.strokeStyle = q.fillStyle = '#fff4dc'; q.lineWidth = Math.max(1.5, L * .08); q.lineCap = 'round'; q.lineJoin = 'round'; q.beginPath();
+    if (m === 'l') { q.moveTo(-r * .8, 0); q.lineTo(r * .8, 0); q.moveTo(r * .35, -r * .42); q.lineTo(r * .8, 0); q.lineTo(r * .35, r * .42); q.moveTo(-r * .35, -r * .42); q.lineTo(-r * .8, 0); q.lineTo(-r * .35, r * .42); q.stroke(); }
+    else if (m === 'b') { q.arc(0, 0, r * .42, 0, 7); q.fill(); for (let k = 0; k < 8; k++) { const a = k * .785; q.moveTo(Math.cos(a) * r * .68, Math.sin(a) * r * .68); q.lineTo(Math.cos(a) * r * .95, Math.sin(a) * r * .95); } q.stroke(); }
+    else { q.moveTo(0, -r * .9); q.lineTo(r * .8, 0); q.lineTo(0, r * .9); q.lineTo(-r * .8, 0); q.closePath(); q.moveTo(-r * .8, 0); q.lineTo(r * .8, 0); q.stroke(); }
+    return selos[m] = c;
+  }
+  function feixe(f) {
+    const t = f.t / .42, a = 1 - t; const x = px(colDe(f.i)), y = py(linDe(f.i));
+    if (f.j !== undefined) { const u = Math.min(1, t * 3); g.globalAlpha = a * .8; g.strokeStyle = f.cor; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (px(colDe(f.j)) - x) * u, y + (py(linDe(f.j)) - y) * u); g.stroke(); g.globalAlpha = 1; return; }
+    const lim = f.h ? P.W * C : P.H * C, al = Math.min(lim, f.t * C / .03), e = C * .5 * f.l * a;
+    g.save(); g.beginPath(); g.rect(X0 - 6, Y0 - 6, P.W * C + 12, P.H * C + 12); g.clip(); g.translate(x, y); if (!f.h) g.rotate(Math.PI / 2);
+    g.globalCompositeOperation = 'lighter'; const gr = g.createLinearGradient(0, -e, 0, e); gr.addColorStop(0, 'rgba(255,190,90,0)'); gr.addColorStop(.5, 'rgba(255,226,170,.75)'); gr.addColorStop(1, 'rgba(255,190,90,0)'); g.globalAlpha = a; g.fillStyle = gr; g.fillRect(-al, -e, al * 2, e * 2);
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; const s = C * .9; for (const d of [-1, 1]) for (let k = 0; k < f.l; k++) peca('l', d * al - s / 2, (k - (f.l - 1) / 2) * C - s / 2, s); g.restore();
+  }
+
+  // ---------- laço principal ----------
+  let ult = 0; const qps = { n: 0, t: 0, v: 60 };
+  function laco(t) { const dt = Math.max(0, (t - ult) / 1000); ult = t; qps.n++; if (t - qps.t > 1000) { qps.v = Math.round(qps.n * 1000 / (t - qps.t)); qps.n = 0; qps.t = t; if (P && !lento && !document.hidden) { fracos = qps.v < 45 ? fracos + 1 : 0; if (fracos >= 2) { lento = true; medir(); } } } passo(dt); if (P && !document.hidden) desenhar(); requestAnimationFrame(laco); }
+  for (let k = 0; k < 22; k++) poeira.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, v: ALEA(.05, .22), r: ALEA(1, 2.2), a: ALEA(.08, .26), f: ALEA(0, 6) });
+
+  // ---------- toque ----------
+  function alvo(cx, cy) { const x = (cx - X0) / C - .5, y = (cy - Y0) / C - .5; let m = null, md = .56; for (const v of vis.values()) { const d = Math.max(Math.abs(v.x - x), Math.abs(v.y - y)); if (d < md && !(v.tw && v.tw.fim)) { md = d; m = v; } } return m; }
+  const casaDe = v => v ? P.g.findIndex(p => p && p.id === v.id) : -1;
+  area.addEventListener('pointerdown', e => { if (e.button > 0) return; e.preventDefault(); destaque = null; Jogo.toque(e.clientX, e.clientY); });
+  area.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse' || !Jogo.livre()) { destaque = null; return; } const i = casaDe(alvo(e.clientX, e.clientY)), gr = i >= 0 ? P.grupo(i) : []; destaque = gr.length >= 2 ? new Set(gr.map(o => P.g[o.i].id)) : null; });
+  area.addEventListener('pointerleave', () => { destaque = null; });
+  addEventListener('resize', medir); if (window.ResizeObserver) new ResizeObserver(() => { if (P) medir(); }).observe(area);
+
+  return { montar, tocar, marcar, medir, assentar, espera, alvo, casaDe, texto,
+    iniciar() { Arte.preparar(); medir(); requestAnimationFrame(t => { ult = t; laco(t); }); },
+    agiu() { ultimaAcao = agora; dicaGrupo = destaque = null; }, negar(v) { v.sac = .3; }, apertar(v) { v.vesc = -4; },
+    pausar(v) { pausado = v; }, acelerar(v) { escala = v; }, get agora() { return agora; }, get qps() { return qps.v; }, get sessao() { return sessao; }, limparMarcas() { marcas.clear(); },
+    get voando() { return voos.length; }, centro: i => [px(colDe(i)), py(linDe(i))], get cela() { return C; } };
+})();
+
+// ============================================================
+// 7. JOGO: fluxo das fases, painel e telas
+// ============================================================
+const Jogo = (() => {
+  const $ = id => document.getElementById(id), D = Progresso.d;
+  let P = null, n = 1, ocupado = true, fila = null, ritmo = 0, ultTap = -9, pts = 0, ptsVis = 0, metasVis = {}, aberto = null, emBonus = false, acabou = true;
+  const fmt = v => String(v).replace(/\B(?=(\d{3})+$)/g, '.');
+
+  // ---------- telas ----------
+  function abrir(id) { document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === id)); aberto = id || null; $('app').style.visibility = $('tela').style.visibility = id === 'abertura' || id === 'mapa' ? 'hidden' : ''; Tela.pausar(id === 'pausa'); Som.ligar(!!id && id !== 'abertura' ? true : !id); }
+  const opcoes = () => { document.querySelectorAll('.op').forEach(b => b.setAttribute('aria-pressed', !!D.op[b.dataset.op])); $('bSom').innerHTML = D.op.som ? '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9.5l5 5M22 9.5l-5 5"/></svg>'; $('bSom').setAttribute('aria-label', D.op.som ? 'Desligar o som' : 'Ligar o som'); };
+  function mudar(o) { D.op[o] = !D.op[o]; Progresso.salvar(); opcoes(); Som.iniciar(); Som.volume(); if (D.op[o]) { Som.botao(); if (o === 'vibra') vibra(25); } }
+
+  // ---------- começo da fase ----------
+  function comecar(num) {
+    n = Math.max(1, Math.min(Nucleo.TOTAL, num)); D.atual = n; Progresso.salvar(); abrir(null);
+    P = new Nucleo.Partida(Nucleo.fase(n)); Ganchos.especiaisIniciais(P);
+    ocupado = false; fila = null; ritmo = 0; pts = ptsVis = 0; ultTap = -9; emBonus = false; acabou = false; metasVis = { ...P.metas };
+    $('tFase').textContent = 'Fase ' + n; $('tGal').textContent = Nucleo.GALERIAS[P.def.galeria]; $('tPts').textContent = '0'; $('tRit').textContent = 'pontos'; $('prog').style.width = '0'; mostrarMovs(P.movs); avisar(P.def.dica);
+    $('metas').innerHTML = ''; for (const m in P.metas) { const e = document.createElement('div'); e.className = 'meta'; e.dataset.meta = m; e.innerHTML = `<img alt="${nomeMeta(m)}" src="${Arte.url(m)}"><span>${P.metas[m]}</span>`; $('metas').append(e); }
+    Tela.montar(P, true); Som.tensao(0); Eventos.emit('fase:inicio', { n, movs: P.movs });
+  }
+  const nomeMeta = m => ({ c0: 'granada', c1: 'citrino', c2: 'esmeralda', c3: 'safira', c4: 'ametista', c5: 'quartzo', pedra: 'rocha', ouro: 'ouro', geodo: 'geodo' })[m];
+  const avisar = s => { $('dica').textContent = s || ''; };
+  function mostrarMovs(v) { $('tMovs').textContent = v; $('cMovs').classList.toggle('poucos', v <= 3 && !emBonus); }
+  function somar(v) { pts += v; }
+  setInterval(() => { if (ptsVis !== pts) { ptsVis = Math.abs(pts - ptsVis) < 6 ? pts : ptsVis + Math.ceil((pts - ptsVis) * .3); $('tPts').textContent = fmt(ptsVis); } }, 40);
+  function atualizarMetas() { let falta = 0; for (const m in metasVis) { const e = document.querySelector(`[data-meta="${m}"]`); if (!e) continue; e.lastChild.textContent = metasVis[m] > 0 ? metasVis[m] : '✓'; e.classList.toggle('feita', metasVis[m] <= 0); falta += Math.max(0, metasVis[m]); } $('prog').style.width = (100 * (1 - falta / P.total)) + '%'; }
+  let tic = 0;
+  function chegou(m) {
+    if (!(metasVis[m] > 0)) return; metasVis[m]--; tic++; if (metasVis[m] === 0) Som.metaFeita(); else Som.meta(tic); atualizarMetas();
+    const e = document.querySelector(`[data-meta="${m}"]`); if (e) { e.classList.remove('pula'); void e.offsetWidth; e.classList.add('pula'); }
+  }
+
+  // ---------- jogada ----------
+  const livre = () => P && !ocupado && !aberto && !acabou;
+  function toque(x, y) {
+    if (aberto || !P) return; if (emBonus) { Tela.acelerar(4); return; } if (acabou) return;
+    if (ocupado) { fila = { x, y, t: Tela.agora }; return; }
+    const v = Tela.alvo(x, y); if (!v) return; const i = Tela.casaDe(v); if (i < 0) return; jogar(i, v);
+  }
+  async function jogar(i, v) {
+    const agora = Tela.agora, novo = agora - ultTap < 2.4 ? Math.min(10, ritmo + 1) : 0, passos = P.tocar(i, 1 + novo * .1);
+    Tela.agiu();
+    if (!passos) { if (v) Tela.negar(v); Som.negado(); return; }
+    ritmo = novo; ultTap = agora; ocupado = true; Som.toque(v ? v.c : 0, ritmo); if (v) Tela.apertar(v); if (n > 1 || P.jogadas > 1) avisar(''); Tela.limparMarcas();
+    const r0 = ritmo; setTimeout(() => { if (ritmo === r0 && Tela.agora - ultTap >= 2.3) { ritmo = 0; $('tRit').textContent = 'pontos'; } }, 2600);
+    $('tRit').textContent = ritmo > 0 ? 'ritmo ×' + (1 + ritmo * .1).toFixed(1).replace('.', ',') : 'pontos';
+    mostrarMovs(P.movs); Som.tensao(P.movs <= 3 && !P.venceu ? 1 : 0); D.est.jogadas++; const q = passos.filter(s => s.t === 'quebra'); D.est.maiorCadeia = Math.max(D.est.maiorCadeia, q.length); for (const s of passos) if (s.itens) D.est.pedras += s.itens.length; if (passos.some(s => s.cria)) D.est.especiais++;
+    Eventos.emit('jogada', { n, movs: P.movs, passos: passos.length, cadeia: q.length, progresso: P.progresso });
+    if (P.venceu) { acabou = true; guardar(); }
+    const ses = Tela.sessao, ok = await Tela.tocar(passos, ritmo); if (!ok || ses !== Tela.sessao) return;
+    if (P.venceu) return vencer(ses); if (P.perdeu) return perder(ses);
+    ocupado = false; Tela.marcar(); if (P.movs === 3) avisar('Só mais 3 jogadas');
+    if (fila && Tela.agora - fila.t < .35) { const f = fila; fila = null; toque(f.x, f.y); } else fila = null;
+  }
+  // ---------- fim da fase ----------
+  let ganho = null;
+  function guardar() { const est = P.estrelas, sobra = P.movs; P.movsVis = sobra; ganho = { est, sobra, novo: false }; const novo = Progresso.venceu(n, est, P.pontos + sobra * 100); ganho.novo = novo; Eventos.emit('fase:vitoria', { n, estrelas: est, pontos: P.pontos, sobra }); }
+  async function vencer(ses) {
+    emBonus = true; Som.tensao(0); await Tela.assentar(); await Tela.espera(.15); if (ses !== Tela.sessao) return;
+    const passos = P.bonus(); if (passos.length) { Tela.limparMarcas(); if (!await Tela.tocar(passos, 4)) return; }
+    await Tela.assentar(); for (let k = 0; k < 60 && Tela.voando; k++) await Tela.espera(.02); if (ses !== Tela.sessao) return;
+    for (const m in metasVis) metasVis[m] = 0; atualizarMetas(); Tela.acelerar(1); if (P.pontos > (D.recorde[n] || 0)) { D.recorde[n] = P.pontos; Progresso.salvar(); }
+    Som.vitoria(); const fim = n >= Nucleo.TOTAL; $('vTit').textContent = fim ? 'Você chegou ao coração da mina' : ['', 'Fase vencida', 'Muito bem', 'Perfeito'][ganho.est];
+    $('vTxt').textContent = `${fmt(P.pontos)} pontos` + (ganho.sobra ? ` · sobraram ${ganho.sobra} ${ganho.sobra > 1 ? 'jogadas' : 'jogada'}` : '') + (n % 10 === 0 && !fim ? `. Nova galeria: ${Nucleo.GALERIAS[P.def.galeria + 1]}` : '');
+    $('bProx').textContent = fim ? 'Ver as fases' : 'Próxima fase'; $('vEst').innerHTML = [1, 2, 3].map(() => '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.6 1.3 6.7L12 17.5l-6 3.3 1.3-6.7-5-4.6 6.8-.8z"/></svg>').join('');
+    abrir('vitoria'); emBonus = false; [...$('vEst').children].slice(0, ganho.est).forEach((s, k) => setTimeout(() => { if (aberto !== 'vitoria') return; s.classList.add('on'); Som.estrela(k); vibra(15); }, 260 + k * 260));
+  }
+  async function perder(ses) {
+    acabou = true; await Tela.assentar(); await Tela.espera(.25); if (ses !== Tela.sessao) return;
+    const extra = await Ganchos.oferecerContinuar({ n, progresso: P.progresso }); if (ses !== Tela.sessao) return;
+    if (extra > 0) { P.movs += extra; acabou = false; ocupado = false; mostrarMovs(P.movs); Tela.marcar(); return; }
+    D.est.derrotas++; Progresso.salvar(); Som.tensao(0); Som.derrota(); const pc = Math.floor(P.progresso * 100), faltam = Object.keys(P.metas).filter(m => P.metas[m] > 0); let tot = 0; faltam.forEach(m => tot += P.metas[m]);
+    $('dTit').textContent = pc >= 85 ? 'Por pouco' : pc >= 60 ? 'Quase' : 'Acabaram as jogadas'; $('dTxt').textContent = tot === 1 ? 'Faltou só 1' : `Faltaram ${tot}`;
+    $('dFalta').innerHTML = faltam.map(m => `<div class="meta"><img alt="${nomeMeta(m)}" src="${Arte.url(m)}"><span>${P.metas[m]}</span></div>`).join(''); $('dProg').style.width = pc + '%';
+    Eventos.emit('fase:derrota', { n, progresso: P.progresso, faltam: tot }); abrir('derrota');
+  }
+  async function proxima() { if (n >= Nucleo.TOTAL) return mapa(); await Ganchos.entreFases({ n }); comecar(n + 1); }
+
+  // ---------- mapa ----------
+  let voltaDoMapa = 'abertura';
+  function mapa() {
+    if (aberto !== 'mapa') voltaDoMapa = aberto; let h = '', tot = 0; for (const k in D.estrelas) tot += D.estrelas[k]; $('tEstrelas').textContent = `${tot} de ${Nucleo.TOTAL * 3} estrelas`;
+    Nucleo.GALERIAS.forEach((nome, gi) => { let s = 0; for (let k = 1; k <= 10; k++) s += D.estrelas[gi * 10 + k] || 0; h += `<h3>${nome}<small>${s} de 30</small></h3><div class="grade">`; for (let k = 1; k <= 10; k++) { const f = gi * 10 + k, e = D.estrelas[f] || 0; h += `<button class="fs${f === D.liberada ? ' atual' : ''}" data-f="${f}" ${f > D.liberada ? 'disabled' : ''} aria-label="Fase ${f}, ${e} estrelas">${f}<small>${'★'.repeat(e)}</small></button>`; } h += '</div>'; });
+    $('listaMapa').innerHTML = h; abrir('mapa'); const a = document.querySelector('.fs.atual'); if (a) a.scrollIntoView({ block: 'center' });
+  }
+  function aberturaTela() { $('bJogar').textContent = D.liberada > 1 ? 'Continuar na fase ' + D.atual : 'Jogar'; abrir('abertura'); }
+
+  // ---------- botões ----------
+  const clica = (id, f) => $(id).addEventListener('click', () => { Som.iniciar(); Som.botao(); f(); });
+  clica('bJogar', () => comecar(D.atual)); clica('bVerMapa', mapa); clica('bMapa', mapa); clica('bMapa2', mapa); clica('bMapa3', mapa); clica('bMapa4', mapa);
+  clica('bFechaMapa', () => { if (voltaDoMapa === 'abertura' || !P) aberturaTela(); else if (acabou && !emBonus && voltaDoMapa) abrir(voltaDoMapa); else abrir(voltaDoMapa === 'pausa' ? null : voltaDoMapa); });
+  clica('bPausa', () => { if (P && !acabou) abrir('pausa'); }); clica('bContinua', () => abrir(null)); clica('bRecomeca', () => comecar(n)); clica('bProx', proxima); clica('bDeNovo', () => comecar(n)); clica('bTenta', () => comecar(n));
+  $('bSom').addEventListener('click', () => mudar('som')); document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => mudar(b.dataset.op)));
+  $('listaMapa').addEventListener('click', e => { const b = e.target.closest('.fs'); if (b && !b.disabled) { Som.botao(); comecar(+b.dataset.f); } });
+  addEventListener('keydown', e => { if (e.repeat) return; if (e.key === 'Escape') { if (aberto === 'pausa') abrir(null); else if (aberto === 'mapa') $('bFechaMapa').click(); else if (!aberto && !acabou) abrir('pausa'); } else if (e.key === 'm' || e.key === 'M') mudar('som'); else if ((e.key === 'r' || e.key === 'R') && P && (!aberto || aberto === 'derrota')) comecar(n); });
+
+  return { comecar, toque, jogar, livre, chegou, somar, avisar, mostrarMovs, mapa, opcoes, aberturaTela, get P() { return P; }, get n() { return n; }, get aberto() { return aberto; }, get ocupado() { return ocupado; }, get metasVis() { return metasVis; }, get pts() { return pts; } };
+})();
+
+// ============================================================
+// 8. PARTIDA DO PROGRAMA
+// ============================================================
+// no celular o som só é liberado quando o dedo SOLTA a tela (touchend/click)
+for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) addEventListener(ev, () => Som.iniciar(), { passive: true, capture: true });
+document.addEventListener('visibilitychange', () => { Som.dormir(document.hidden); if (document.hidden) Progresso.salvar(); });
+for (const ev of ['touchmove', 'gesturestart']) document.addEventListener(ev, e => { if (!(e.target.closest && e.target.closest('.tela.on'))) e.preventDefault(); }, { passive: false });
+document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('dblclick', e => e.preventDefault());
+Tela.iniciar(); Jogo.opcoes();
+document.getElementById('fila').innerHTML = [0, 1, 2, 3, 4, 5].map(c => `<img alt="" src="${Arte.url('c' + c)}">`).join('');
+if (/\/jogos\/filao\//.test(location.pathname)) document.getElementById('lVolta').hidden = false;
+Jogo.aberturaTela();
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__gemShatter = { Nucleo, Jogo, Tela, Som, Arte, Progresso, Eventos, Ganchos };
+</script>
+</body>
+</html>

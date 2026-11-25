@@ -344,3 +344,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Caça-Palavras com diagonal em todas as fases (25/11/2026)**, pedido do dono (estava fácil): quantidade garantida de palavras na diagonal, de 3 em 5
   (fase 1) a 8 em 10 (fase 10); fase 8 ganhou diagonal de trás para frente. Se as palavras da vez não cabem juntas, sorteia outras (antes podia faltar
   palavra). Cache `jogos-offline-v53`. Testado: 17.400 quadros (29 temas x 10 fases) sem falha; fase 1 jogada arrastando. Não testado num celular de verdade.
+- **Gem Shatter (25/11/2026)**, pedido do dono: jogo 1 de uma série de 6 casuais (um por vez, 4 fases cada; ver `jogos/gem-shatter/PLANO.md`). Fase 1: quebrar grupos de
+  minerais, arquivo único, 50 fases em 5 galerias, especiais que se combinam, ressonância em cadeia, sons por código, progresso em `gem-shatter.v1`. No menu, nas
+  Estatísticas e no modo offline. Cache `jogos-offline-v55`. Testado: robô nas 50 fases (regras e jogadas), 50 fases com toque simulado, 9 tamanhos de tela,
+  sons medidos, processador 6x mais lento (44 a 59 quadros/s). Não testado num celular de verdade. Publicado com autorização do dono.
