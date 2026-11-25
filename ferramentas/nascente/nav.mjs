@@ -15,6 +15,7 @@ export async function abrir({w=1280,h=760,movel=false,url='/jogos/nascente/index
  await cmd('Runtime.enable');await cmd('Page.enable');await vp(w,h,movel,dpr);if(movel)await cmd('Emulation.setTouchEmulationEnabled',{enabled:true});
  await cmd('Page.navigate',{url:`http://127.0.0.1:${srv.address().port}${url}`});
  for(let i=0;i<(url.includes("manifest")?1:60);i++){if(await av('!!(window.__nascente&&__nascente.J.estado==="jogando")').catch(()=>0))break;await dorme(250);}
+ if(!(await av("!!window.__nascente").catch(()=>0)))console.log("NAO ABRIU",erros.slice(0,3).join(String.fromCharCode(10)));
  const foto=async f=>{const r=await cmd('Page.captureScreenshot',{format:'png'});writeFileSync(f,Buffer.from(r.data,'base64'));};
  const clique=async(x,y,b='left')=>{await cmd('Input.dispatchMouseEvent',{type:'mouseMoved',x,y});for(const t of['mousePressed','mouseReleased'])await cmd('Input.dispatchMouseEvent',{type:t,x,y,button:b,clickCount:1});};
  const toque=async(x,y)=>{await cmd('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await dorme(40);await cmd('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});};

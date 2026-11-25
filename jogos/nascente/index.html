@@ -36,7 +36,7 @@
   .topo { position: fixed; left: 0; right: 0; top: 0; padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
     display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; pointer-events: none; }
   .topo > * { pointer-events: auto; }
-  .fase-atual { pointer-events: none; min-width: 0; margin-right: auto; }
+  .fase-atual { text-shadow: 0 0 6px var(--nevoa), 0 0 14px var(--nevoa), 0 0 2px var(--nevoa); pointer-events: none; min-width: 0; margin-right: auto; }
   .topo > .redondo { flex: none; color: inherit; }
   .fase-atual h1 { margin: 0; font-size: clamp(19px, 2.6vw, 26px); font-weight: 400; line-height: 1.15; text-wrap: balance; }
   .fase-atual p { margin: 5px 0 0; font-size: 14px; display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
@@ -44,6 +44,7 @@
   .gotas i { width: 10px; height: 10px; border-radius: 50% 50% 50% 0; transform: rotate(135deg); border: 1.4px solid currentColor; opacity: .55; transition: background .8s, border-color .8s, opacity .8s; }
   .gotas i.cheia { background: var(--acento); border-color: var(--acento); opacity: 1; }
   .gotas i.a2.cheia { background: var(--agua2); border-color: var(--agua2); } .gotas i.a2 { border-color: var(--agua2); opacity: .9; } .gotas i.a3 { border-style: double; border-width: 3px; } .gotas i.a3.cheia { background: linear-gradient(45deg, var(--acento) 50%, var(--agua2) 50%); }
+  .fase-atual p { white-space: nowrap; flex-wrap: wrap; row-gap: 0; }
   .fase-atual p.onde { margin-top: 3px; font-size: 13px; opacity: .8; }
   .som { display: flex; align-items: center; gap: 6px; }
   .som input { width: 84px; accent-color: var(--acento); opacity: .75; height: 24px; margin: 0; cursor: pointer; }
@@ -106,7 +107,7 @@
 
   #veu { position: fixed; inset: 0; background: var(--nevoa); transition: opacity 1s ease; pointer-events: none; display: grid; place-items: center; }
   #veu p { font-size: 18px; max-width: 80vw; text-align: center; transition: opacity .5s; }
-  @media (max-width: 560px) { .mundos { grid-template-columns: 1fr 1fr; } .mundos button { font-size: 14px; padding: 4px 6px; } dialog { max-height: 92vh; } .barra { gap: 7px; } .som input { width: 66px; } .redondo { width: 44px; height: 44px; } .fim { padding: 14px 16px 16px; } .fim .acoes { gap: 4px; } .leve, .cheio { padding: 8px 14px; } }
+  @media (max-width: 560px) { .som input { display: none; } .topo { gap: 12px; } .fase-atual h1 { font-size: 20px; } .mundos { grid-template-columns: 1fr 1fr; } .mundos button { font-size: 14px; padding: 4px 6px; } dialog { max-height: 92vh; } .barra { gap: 7px; } .som input { width: 66px; } .redondo { width: 44px; height: 44px; } .fim { padding: 14px 16px 16px; } .fim .acoes { gap: 4px; } .leve, .cheio { padding: 8px 14px; } }
   @media (max-height: 430px) {
     .barra { flex-direction: column; left: auto; right: max(14px, env(safe-area-inset-right)); bottom: 10px; gap: 6px; }
     .redondo { width: 40px; height: 40px; } .som { margin-right: 56px; } .aviso { bottom: 12px; } .redondo[data-nome]::after { display: none; }
@@ -309,19 +310,87 @@ const FASES = [
 ];
 // </fases>
 
-// Climas: cores da névoa, da luz e do verde que nasce. Cada fase aponta para um deles.
-const TEMAS = {
-  manha:      { nevoa: '#dbe3db', longe: '#aebfba', sol: '#fff0d4', forca: 2.7, ceu: '#dceaf0', solo: '#94815f', verde: '#75934b', seco: '#c2aa78', flores: ['#f4ead6', '#dfa39b', '#c4b3dc', '#f0d58c'], angulo: .7, tinta: '#2d3a37' },
-  primavera:  { nevoa: '#dde6d0', longe: '#aec0a2', sol: '#fff3d0', forca: 2.6, ceu: '#e3f0e6', solo: '#8d8458', verde: '#6f9a4e', seco: '#c4b07a', flores: ['#f3c6cf', '#fbf2e2', '#e9aab8', '#d9c0ea'], angulo: .35, tinta: '#2f3b30' },
-  nevoa:      { nevoa: '#cdd9da', longe: '#9db1b5', sol: '#eef4f2', forca: 2.1, ceu: '#d8e6ee', solo: '#7f8272', verde: '#5f8a5c', seco: '#b5a988', flores: ['#e9eef2', '#a9b9e0', '#cfd8ee', '#f1e6c4'], angulo: .2, tinta: '#28383c' },
-  tarde:      { nevoa: '#ecdabb', longe: '#cfae86', sol: '#ffd599', forca: 2.9, ceu: '#f3e3cc', solo: '#9c7a50', verde: '#85934a', seco: '#cda873', flores: ['#f7e3a6', '#e8a36c', '#fbf0da', '#c98b86'], angulo: 1.2, tinta: '#423421' },
-  entardecer: { nevoa: '#dcc3c0', longe: '#b294a0', sol: '#ffc49a', forca: 2.6, ceu: '#d9c6dc', solo: '#98795f', verde: '#728c5a', seco: '#bf9f7c', flores: ['#f6dcd2', '#d59ab4', '#b9a5d6', '#f2c79c'], angulo: 2, tinta: '#3d2d36' },
-  lua:        { nevoa: '#46566d', longe: '#35435a', sol: '#c4d6fb', forca: 1.9, ceu: '#8fa5cc', solo: '#5a5c5c', verde: '#5d8a6e', seco: '#9c937f', flores: ['#e6ecfb', '#b5bff0', '#cfe3f0', '#e8dcc0'], angulo: .5, tinta: '#e9eef6', noite: true },
-};
+/*
+  MUNDOS: dez cenários, dez fases cada. Em cada mundo:
+    luz     três luzes (fases 1-4, 5-7 e 8-10); a 2ª e a 3ª só dizem o que muda em relação à 1ª. clima: ver CLIMAS (seção 8)
+    cor     materiais das construções        teto / tanque / horta   jeito das casas, reservatórios e hortas
+    arv     árvores da orla [tipo, peso, tamanho]   dentro: árvore pequena das casas livres   (tipos em ARV, seção 8)
+    chao    desenho do chão no shader: 0 terra, 1 rocha listrada, 2 areia penteada, 3 neve, 4 dunas
+    relevo  onda, degrau, duna, sobe (altura da orla), larg (quanto o paredão deita)    mar: o que existe em volta da ilha
+    som     ver seção 5
+*/
+const MUNDOS = [
+  { nome: 'Vale das Oliveiras', texto: 'Colinas claras, telhados de barro e oliveiras à espera de chuva.', teto: 'duas', arv: [['oliveira', 3, 1], ['cipreste', 2, 1]], dentro: ['oliveira', .55], seca: '#a89672', longe: 'montes',
+    horta: { cores: ['#7fa84f', '#5f8f58', '#93a84a'], frutos: ['#c9563f', '#e0a046', '#a5486b'] }, som: {},
+    luz: [{ nevoa: '#dbe3db', longe: '#aebfba', sol: '#fff0d4', forca: 2.7, ceu: '#dceaf0', solo: '#94815f', verde: '#75934b', seco: '#c2aa78', flores: ['#f4ead6', '#dfa39b', '#c4b3dc', '#f0d58c'], angulo: .7, tinta: '#2d3a37', clima: 'polen' },
+      { nevoa: '#ecdabb', longe: '#cfae86', sol: '#ffd599', forca: 2.9, ceu: '#f3e3cc', solo: '#9c7a50', verde: '#85934a', seco: '#cda873', angulo: 1.2, tinta: '#423421' },
+      { nevoa: '#dcc3c0', longe: '#b294a0', sol: '#ffc49a', forca: 2.6, ceu: '#d9c6dc', solo: '#98795f', verde: '#728c5a', seco: '#bf9f7c', angulo: 2, tinta: '#3d2d36', clima: 'nada' }] },
 
-const NOMES_MUNDO = ['Vale das Oliveiras', 'Serra da Névoa', 'Terraços de Arroz', 'Cânion Vermelho', 'Oásis', 'Jardim dos Bordos', 'Costa do Farol', 'Floresta das Ruínas', 'Montanha do Degelo', 'Jardins do Luar'];
-const MUNDOS = NOMES_MUNDO.map((nome, i) => ({ nome, texto: '', luz: [Object.values(TEMAS)[i % 6]] }));
-const temaDa = i => MUNDOS[i / 10 | 0].luz[0];
+  { nome: 'Serra da Névoa', texto: 'Campos altos, araucárias e uma névoa que nunca vai embora de todo.', teto: 'agudo', arv: [['araucaria', 4, 1.05], ['oliveira', 1, .7]], dentro: ['araucaria', .5], seca: '#8d9484', longe: 'montes', nevoaAlta: 1, relevo: { onda: 1.8 }, orla: .25,
+    cor: { pedra: '#c9c8bd', cornija: '#aeb0a6', base: '#b7b7ab', baseClara: '#cbcabf', cal: '#8a6a4c', telha: '#5d6a66', telha2: '#505c5c', madeira: '#6b5040', rocha: '#93988f', rocha2: '#828981', terra: '#4e4436' },
+    horta: { cores: ['#4f7d55', '#5f8a52', '#467055'], frutos: ['#6f9a5a', '#86a860', '#5d8a5a'] }, som: { vento: 1.7, ventoF: 300, escala: 'menor', ave: 'sabia', sino: .8 },
+    luz: [{ nevoa: '#cdd9da', longe: '#9db1b5', sol: '#eef4f2', forca: 2.1, ceu: '#d8e6ee', solo: '#7f8272', verde: '#5f8a5c', seco: '#a9a88c', flores: ['#e9eef2', '#a9b9e0', '#cfd8ee', '#f1e6c4'], angulo: .2, tinta: '#28383c', clima: 'bruma' },
+      { nevoa: '#bcc7c6', longe: '#8b9b9c', sol: '#dfe8ea', forca: 1.7, seco: '#989a84', angulo: 1, clima: 'garoa' },
+      { nevoa: '#e2d3cc', longe: '#b7a3a4', sol: '#ffdcb8', forca: 2.5, ceu: '#e0dbe8', seco: '#b5a98c', angulo: 2.2, tinta: '#3a3035', clima: 'bruma' }] },
+
+  { nome: 'Terraços de Arroz', texto: 'Patamares estreitos, bambu e espelhos d’água subindo a montanha.', teto: 'palha', arv: [['bambu', 3, 1], ['bananeira', 2, .9]], dentro: ['bambu', .52], seca: '#b3a873', longe: 'torres', relevo: { degrau: .2, onda: 1.4, sobe: .5 }, pocas: 9, orla: .35, flores: .5, capim: 1.25,
+    cor: { pedra: '#cdbf9f', cornija: '#b3a17c', base: '#b8a782', baseClara: '#cbbc98', cal: '#b08a5c', telha: '#a98d55', telha2: '#97794a', madeira: '#6a4f35', rocha: '#8f8d78', rocha2: '#7f7f6c', terra: '#5d4a38' },
+    horta: { cores: ['#8fb04a', '#a5bb55', '#7da24d'], frutos: ['#d8c266', '#c9b45a', '#e0cf80'] }, som: { vento: .6, escala: 'penta2', ave: 'sapo', chuva: 0 },
+    luz: [{ nevoa: '#d5e2d2', longe: '#9fb8a6', sol: '#fff2cf', forca: 2.6, ceu: '#dcecec', solo: '#7a6a4b', verde: '#7da24a', seco: '#b4a46e', flores: ['#f2ecd8', '#e7c9d0', '#f3dd9a', '#d7e2b8'], angulo: .5, tinta: '#2b3a30', clima: 'polen' },
+      { nevoa: '#b9c9c4', longe: '#869e99', sol: '#e6efe9', forca: 1.8, ceu: '#cfdfe0', seco: '#9d9870', angulo: 1.1, clima: 'chuva' },
+      { nevoa: '#eed9ae', longe: '#c9ac7c', sol: '#ffcf8c', forca: 2.9, ceu: '#f2e4cb', seco: '#bda468', angulo: 2, tinta: '#40341d', clima: 'polen' }] },
+
+  { nome: 'Cânion Vermelho', texto: 'Paredões cor de ferro e pontes de água por cima da sombra.', teto: 'plano', arv: [['cacto', 3, 1], ['zimbro', 2, .75]], dentro: ['cacto', .55], seca: '#a08358', longe: 'mesas', chao: 1, relevo: { degrau: .3, onda: 2, sobe: .55, larg: .7 }, arvMax: 14, capim: .5, flores: .5, pedras: 2, tanque: 'quadrado',
+    cor: { pedra: '#e0b48c', cornija: '#c8946a', base: '#cf9d72', baseClara: '#deb28a', cal: '#c98a5e', telha: '#a5633f', telha2: '#94563a', madeira: '#6b4630', rocha: '#b56a48', rocha2: '#a35c3f', terra: '#7a4a30', fixa: '#7c6a66', fixaBase: '#665854' },
+    horta: { cores: ['#9aa34a', '#86964a', '#a8a850'], frutos: ['#e0b648', '#d6a03e', '#c9653a'] }, som: { vento: 1.5, ventoF: 560, escala: 'frigio', ave: 'falcao', eco: 1.5 },
+    luz: [{ nevoa: '#efd9bd', longe: '#d39f78', sol: '#fff0d0', forca: 3, ceu: '#f0e4d6', solo: '#a5583a', verde: '#8d9350', seco: '#d0905f', flores: ['#f3d9a0', '#e28c5c', '#f7eedd', '#d06a70'], angulo: .6, tinta: '#4a2c1c', clima: 'poeira' },
+      { nevoa: '#eebf94', longe: '#c27d58', sol: '#ffc685', forca: 3, ceu: '#f3d6b8', seco: '#c97f50', angulo: 1.4, clima: 'poeira' },
+      { nevoa: '#c9a3ac', longe: '#9c6f82', sol: '#ffb68e', forca: 2.4, ceu: '#c5b0cf', seco: '#b5765a', angulo: 2.2, tinta: '#43242e', clima: 'nada' }] },
+
+  { nome: 'Oásis', texto: 'Dunas quietas, tamareiras e água guardada a fundo.', teto: 'cupula', arv: [['palmeira', 5, 1]], dentro: ['palmeira', .5], seca: '#b59a63', longe: 'dunas', chao: 4, mar: 'areia', relevo: { duna: 1, onda: .8, larg: 2.1 }, arvMax: 16, capim: .55, flores: .4, pocas: 2,
+    cor: { pedra: '#ecdcb8', cornija: '#d8c195', base: '#dcc79c', baseClara: '#e9d9b3', cal: '#efe2c6', telha: '#3f8c8c', telha2: '#357878', madeira: '#7d5a38', rocha: '#cbb088', rocha2: '#bda078', terra: '#8a6a44' },
+    horta: { cores: ['#6f9a4e', '#86a552', '#5c8a52'], frutos: ['#a2553a', '#c98a3e', '#8d3f4a'] }, som: { vento: 1.2, ventoF: 480, escala: 'hijaz', ave: 'grilo' },
+    luz: [{ nevoa: '#f2e5c8', longe: '#dcc394', sol: '#fff3d6', forca: 3, ceu: '#eaf0ee', solo: '#c09a62', verde: '#6f9650', seco: '#e0c38d', flores: ['#f7ecd0', '#e8927c', '#f2cf86', '#c9b2d8'], angulo: .5, tinta: '#463820', clima: 'poeira' },
+      { nevoa: '#f0c9a0', longe: '#d69e74', sol: '#ffc07c', forca: 2.9, ceu: '#f0d9c8', seco: '#d8aa74', angulo: 1.5, tinta: '#4a2f1d', clima: 'poeira' },
+      { nevoa: '#3f4c6b', longe: '#2f3a57', sol: '#cdd8fa', forca: 1.9, ceu: '#8c9cc6', solo: '#6b6258', verde: '#5f8a68', seco: '#a89a80', angulo: .8, tinta: '#ecf0f8', noite: true, clima: 'nada' }] },
+
+  { nome: 'Jardim dos Bordos', texto: 'Areia penteada, musgo e folhas que caem sem pressa.', teto: 'curvo', arv: [['bordo', 4, 1], ['pinheiro', 1, .9]], dentro: ['bordo', .52], seca: '#9c7c62', longe: 'montes', chao: 2, relevo: { onda: .35, larg: .8 }, arvMax: 18, capim: .45, flores: .25, pedras: 1.8, pocas: 2,
+    cor: { pedra: '#c8c5bb', cornija: '#a9a79d', base: '#b1aea4', baseClara: '#c6c3b9', cal: '#e9e1d2', telha: '#4d5356', telha2: '#43494c', madeira: '#5f4433', rocha: '#85857f', rocha2: '#747570', terra: '#5b4c3d', fixa: '#6e6c6a', fixaBase: '#5b5a58' },
+    copa: ['#b5483a', '#c9663c', '#a33b40', '#d18a48'], horta: { cores: ['#6f8f4a', '#86a054', '#5d7f4c'], frutos: ['#c14d45', '#e3b8bd', '#d18a48'] }, som: { vento: .5, escala: 'japa', ave: 'bambu', sino: 1.2 },
+    luz: [{ nevoa: '#e4ddd0', longe: '#b9ad9f', sol: '#fff0d8', forca: 2.6, ceu: '#e6ebea', solo: '#77716a', verde: '#76894c', seco: '#cfc8b8', flores: ['#c9533f', '#d9873f', '#f0e2c8', '#a8434a'], angulo: .6, tinta: '#3a322c', clima: 'folhas' },
+      { nevoa: '#ebcfae', longe: '#c59c7c', sol: '#ffcb8c', forca: 2.9, ceu: '#f0dcc6', seco: '#d2bfa0', angulo: 1.4, tinta: '#452e1f', clima: 'folhas' },
+      { nevoa: '#c2c6c4', longe: '#949b9c', sol: '#e4e9ea', forca: 1.8, ceu: '#d5dde2', seco: '#b5b3aa', angulo: .3, tinta: '#2e3436', clima: 'garoa' }] },
+
+  { nome: 'Costa do Farol', texto: 'Casas caiadas, vento de sal e duas águas que não se entendem.', teto: 'plano', agua2: '#2f3f96', nomeAgua2: 'água do mar', arv: [['pinheiroMar', 3, 1], ['agave', 3, 1]], dentro: ['agave', .8], seca: '#b3a781', longe: 'ilhotas', mar: 'agua', relevo: { larg: .42, onda: .9 }, arvMax: 16, capim: 1.1, orla: -.1,
+    cor: { pedra: '#e6e1d3', cornija: '#cfc7b3', base: '#d5cdb9', baseClara: '#e6dfce', cal: '#f5f1e6', telha: '#4a7fa5', telha2: '#3f6f93', madeira: '#5f7f93', rocha: '#c9c0ac', rocha2: '#b8ae98', terra: '#94805f' },
+    horta: { cores: ['#8a9a6a', '#7d9460', '#9aa872'], frutos: ['#a08ac9', '#8f7abf', '#b8a5d6'] }, som: { vento: 1.3, ondas: 1, escala: 'lidio', ave: 'gaivota' },
+    luz: [{ nevoa: '#d3e4ea', longe: '#9fbccb', sol: '#fff6e0', forca: 2.9, ceu: '#dcecf5', solo: '#c0b294', verde: '#7f9a58', seco: '#cfc096', flores: ['#f6f0e2', '#a58fd0', '#e6a3b0', '#f2d78a'], angulo: .5, tinta: '#24404d', clima: 'nada', mar1: '#6ba6b6', mar2: '#a9d2d8' },
+      { nevoa: '#f1cfae', longe: '#cf9f86', sol: '#ffc283', forca: 2.9, ceu: '#f3dcc9', seco: '#cdb085', angulo: 1.6, tinta: '#4a2f22', mar1: '#8d95a0', mar2: '#e6c0a0' },
+      { nevoa: '#4d6280', longe: '#3a4d6a', sol: '#c9d8fb', forca: 1.9, ceu: '#93a9d2', solo: '#7a7a78', verde: '#5f8878', seco: '#a3a294', angulo: .9, tinta: '#eaf1f8', noite: true, mar1: '#2c4265', mar2: '#496890' }] },
+
+  { nome: 'Floresta das Ruínas', texto: 'Raízes sobre pedra antiga; a mata guarda o que sobrou da cidade.', teto: 'palha', arv: [['gigante', 4, 1], ['bananeira', 2, .8], ['samambaia', 4, 1]], dentro: ['samambaia', .9], seca: '#8b8a62', longe: 'mata', relevo: { onda: 1.3, sobe: .25 }, orla: .4, arvMax: 34, capim: 1.4, arbustos: 2, flores: .8, tanque: 'quadrado', musgo: 1,
+    cor: { pedra: '#a9ab94', cornija: '#8d907a', base: '#95977f', baseClara: '#a7a992', cal: '#9c8f6c', telha: '#7f7546', telha2: '#6f683f', madeira: '#54412f', rocha: '#7a7f6c', rocha2: '#6b715f', terra: '#4b3f2f', fixa: '#62665e', fixaBase: '#51554e' },
+    horta: { cores: ['#5f9a4a', '#4f8a50', '#75a850'], frutos: ['#d97b3f', '#c9484f', '#e0b648'] }, som: { vento: .7, escala: 'menor', ave: 'mata', insetos: 1 },
+    luz: [{ nevoa: '#c3d3bd', longe: '#89a287', sol: '#fdf6cf', forca: 2.4, ceu: '#d7e8d6', solo: '#5f6049', verde: '#5b8550', seco: '#8f8c62', flores: ['#e8744f', '#f0d35e', '#d05f86', '#f2ece0'], angulo: .4, tinta: '#24352a', clima: 'polen' },
+      { nevoa: '#a3b6a8', longe: '#71897c', sol: '#dcebe0', forca: 1.8, ceu: '#bfd3cb', seco: '#7c7f5c', angulo: 1, clima: 'chuva' },
+      { nevoa: '#dcd3a0', longe: '#a59e68', sol: '#ffdf94', forca: 2.9, ceu: '#e6e6c6', seco: '#978a58', angulo: 1.9, tinta: '#3a3518', clima: 'polen' }] },
+
+  { nome: 'Montanha do Degelo', texto: 'A neve cede onde a água passa; debaixo dela, o chão ainda é quente.', teto: 'neve', agua2: '#c8743a', nomeAgua2: 'água termal', arv: [['abeto', 5, 1]], dentro: ['abeto', .5], seca: '#e8eef2', longe: 'picos', chao: 3, relevo: { onda: 1.5, sobe: .3 }, capim: .8, capimSeco: '#dfe6ea', pedras: 1.4,
+    cor: { pedra: '#cfd3d4', cornija: '#b1b7bb', base: '#bcc2c5', baseClara: '#d0d5d7', cal: '#7a5a42', telha: '#eef3f6', telha2: '#e4ebf0', madeira: '#5a4233', rocha: '#8b95a0', rocha2: '#7a8591', terra: '#5b4f48', fixa: '#707881', fixaBase: '#5e666e' },
+    horta: { cores: ['#6f9a5a', '#5f8f62', '#86a864'], frutos: ['#8f7fd0', '#e6e0f2', '#d9a0c0'] }, som: { vento: 2, ventoF: 620, escala: 'lidio', ave: 'nada', sino: 1.4, eco: 1.3 },
+    luz: [{ nevoa: '#dfe9f1', longe: '#b2c5d8', sol: '#fffaf0', forca: 2.6, ceu: '#dceafa', solo: '#7b8694', verde: '#7ba05c', seco: '#eef3f7', flores: ['#b7a5e0', '#f4efe4', '#8fa5e0', '#f2d98c'], angulo: .5, tinta: '#25364a', clima: 'neve' },
+      { nevoa: '#ecd3d6', longe: '#c29fb0', sol: '#ffcbb0', forca: 2.6, ceu: '#e0d6ec', solo: '#857f8e', seco: '#f3e9ea', angulo: 1.7, tinta: '#452f3c', clima: 'nada' },
+      { nevoa: '#8fa5c2', longe: '#6d84a6', sol: '#d8e4fb', forca: 2, ceu: '#b3c6e6', solo: '#6d7a8e', seco: '#d5dfec', angulo: .9, tinta: '#16263c', clima: 'neve' }] },
+
+  { nome: 'Jardins do Luar', texto: 'Terraços suspensos, glicínias e água que cai no escuro.', teto: 'cupula', agua2: '#a06fd6', nomeAgua2: 'água da lua', arv: [['glicinia', 3, 1], ['salgueiro', 2, 1], ['cipreste', 1, .8]], dentro: ['glicinia', .5], seca: '#7f8a9a', longe: 'suspensas', mar: 'nuvens', relevo: { larg: .5, onda: .7 }, flores: 1.4, cascatas: 5, pocas: 2,
+    cor: { pedra: '#d9d6df', cornija: '#b9b5c6', base: '#c0bccb', baseClara: '#d6d2de', cal: '#e6e2ec', telha: '#6f7fae', telha2: '#62719e', madeira: '#5f5a70', rocha: '#8c8fa3', rocha2: '#7b7f95', terra: '#555064', fixa: '#62647a', fixaBase: '#515368' },
+    horta: { cores: ['#5f9a82', '#6fa890', '#4f8a7a'], frutos: ['#e6ecfb', '#c9b5f0', '#f0e2c8'] }, som: { vento: .8, escala: 'sonho', ave: 'grilo', sino: 1.3, eco: 1.6 },
+    luz: [{ nevoa: '#44546f', longe: '#33425e', sol: '#c8d8fb', forca: 2, ceu: '#90a5d2', solo: '#5d5f6e', verde: '#5a8a76', seco: '#8f919c', flores: ['#e6ecfb', '#b5bff0', '#cfe3f0', '#e8dcc0'], angulo: .5, tinta: '#e9eef6', noite: true, clima: 'petalas' },
+      { nevoa: '#2f5560', longe: '#224450', sol: '#bfe6ee', forca: 1.9, ceu: '#7fb5bf', verde: '#4f8f7c', seco: '#85959a', angulo: 1.1 },
+      { nevoa: '#6b5c86', longe: '#544770', sol: '#f0cfe6', forca: 2.1, ceu: '#a998cc', solo: '#645c70', verde: '#688a80', seco: '#a297a8', angulo: 1.8 }] },
+];
+for (const m of MUNDOS) m.luz = m.luz.map(l => ({ mar1: l.nevoa, mar2: l.nevoa, ...m.luz[0], ...l }));
+const temaDa = i => { const f = i % 10; return MUNDOS[i / 10 | 0].luz[f < 4 ? 0 : f < 7 ? 1 : 2]; };
 
 // <regras>  (trecho sem 3D: o gerador de fases em ferramentas/nascente lê e executa exatamente este texto)
 // ============================================================ 2. PEÇAS
@@ -496,8 +565,12 @@ function salvarAndamento() {
 // ============================================================ 5. SOM (Web Audio, sem arquivos)
 const Som = (() => {
   let ctx, mestre, eco, rio, curto, ultimaGota = 0, proxNota = 0, proxAve = 0;
+  let ares = null, mundoSom = {}, climaSom = '', notas = null;   // ambiente do mundo atual
   const ALEA = (a, b) => a + Math.random() * (b - a);
-  const ESCALA = [146.83, 164.81, 185, 220, 246.94, 293.66, 329.63, 369.99, 440, 493.88];   // ré maior pentatônica
+  // escalas por mundo (semitons a partir da nota base)
+  const ESCALAS = { maior: [0, 2, 4, 7, 9], penta2: [0, 2, 5, 7, 9], menor: [0, 3, 5, 7, 10], frigio: [0, 1, 5, 7, 8], hijaz: [0, 1, 4, 5, 7], japa: [0, 1, 5, 7, 10], lidio: [0, 2, 4, 6, 9], sonho: [0, 4, 7, 11, 14] };
+  const BASES = [146.83, 130.81, 146.83, 123.47, 130.81, 138.59, 155.56, 123.47, 164.81, 138.59];
+  function afinar(k) { const e = ESCALAS[MUNDOS[k].som.escala || 'maior']; notas = Array.from({ length: 10 }, (_, i) => BASES[k] * Math.pow(2, (e[i % 5] + 12 * Math.floor(i / 5)) / 12)); }
   const pronto = () => ctx && ctx.state === 'running';
 
   // ruído que emenda sem estalo (o fim se mistura com o começo)
@@ -520,17 +593,26 @@ const Som = (() => {
     for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); let s = 0; for (let i = 0; i < d.length; i++) { s += ((Math.random() * 2 - 1) - s) * .35; d[i] = s * Math.pow(1 - i / d.length, 2.6); } }
     eco = ctx.createConvolver(); eco.buffer = imp; const ge = ctx.createGain(); ge.gain.value = .3; eco.connect(ge).connect(mestre);
     curto = ruido(1.5);
-    laco(ruido(7, true), [['lowpass', 420, .4]], .13, .06);                           // vento bem baixo
+    ares = {
+      vento: laco(ruido(7, true), [['lowpass', 420, .4]], .13, .06),                  // vento bem baixo
+      ondas: laco(ruido(6, true), [['lowpass', 900, .2]], 0, .085, .5),              // mar: sobe e desce devagar
+      chuva: laco(curto, [['bandpass', 3200, .35], ['lowpass', 6500, .2]], 0, .05),
+      insetos: laco(curto, [['bandpass', 5200, 9]], 0, 7, .5),
+    };
     rio = laco(ruido(5), [['bandpass', 760, .7], ['lowpass', 1800, .3]], 0, .11);     // água: cresce com os canais cheios
-    volume();
+    volume(); ambiente();
     proxNota = ctx.currentTime + 4; proxAve = ctx.currentTime + 9;
   }
-  function laco(buf, filtros, ganho, lfoHz) {
+  function laco(buf, filtros, ganho, lfoHz, fundo = .25) {
     const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.playbackRate.value = ALEA(.9, 1.1);
     let no = s; const fs = filtros.map(([t, f, q]) => { const b = ctx.createBiquadFilter(); b.type = t; b.frequency.value = f; b.Q.value = q; no.connect(b); no = b; return b; });
     const g = ctx.createGain(); g.gain.value = ganho; no.connect(g);
-    const l = ctx.createOscillator(), lg = ctx.createGain(), m = ctx.createGain(); m.gain.value = .75; l.frequency.value = lfoHz; lg.gain.value = .25; l.connect(lg).connect(m.gain); l.start();
+    const l = ctx.createOscillator(), lg = ctx.createGain(), m = ctx.createGain(); m.gain.value = 1 - fundo; l.frequency.value = lfoHz; lg.gain.value = fundo; l.connect(lg).connect(m.gain); l.start();
     g.connect(m).connect(mestre); s.start(); return { g, filtro: fs[0] };
+  }
+  function ambiente() {
+    if (!ares) return; const t = ctx.currentTime, m = mundoSom, vai = (a, v, f) => { a.g.gain.setTargetAtTime(v, t, 1.5); if (f) a.filtro.frequency.setTargetAtTime(f, t, 1); };
+    vai(ares.vento, .11 * (m.vento ?? 1), m.ventoF || 420); vai(ares.ondas, (m.ondas || 0) * .2); vai(ares.chuva, climaSom === 'chuva' ? .032 : climaSom === 'garoa' ? .013 : 0); vai(ares.insetos, (m.insetos || 0) * .012);
   }
   function tom(f, t0, dur, v, { tipo = 'sine', ate = f, ataque = .006, pan = 0, molhado = .3 } = {}) {
     const o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner(); o.type = tipo; o.frequency.setValueAtTime(f, t0);
@@ -545,11 +627,13 @@ const Som = (() => {
     b.type = 'bandpass'; b.frequency.value = f; b.Q.value = q; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + dur * .35); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
     s.connect(b).connect(g).connect(mestre); s.start(t0, Math.random() * (1.4 - Math.min(1.3, dur)), dur + .05);
   }
-  const sino = (f, t0, v, dur = 2.6, pan = 0) => { tom(f, t0, dur, v, { molhado: .8, pan }); tom(f * 2.01, t0, dur * .5, v * .28, { molhado: .6, pan }); tom(f * 5.4, t0, .12, v * .12, { pan }); };
+  const sino = (f, t0, v, dur = 2.6, pan = 0) => { const k = mundoSom.sino || 1; dur *= Math.sqrt(k); tom(f, t0, dur, v, { molhado: .8, pan }); tom(f * 2.01, t0, dur * .5, v * .28, { molhado: .6, pan }); tom(f * 5.4, t0, .12, v * .12, { pan }); };
   function volume() { if (mestre) mestre.gain.setTargetAtTime(salvo.mudo ? 0 : Math.pow(salvo.volume / 100, 1.6) * 1.9, ctx.currentTime, .12); }
 
   return {
     iniciar, volume,
+    // troca de mundo: escala, vento, mar, chuva, bichos
+    mundo(k, clima) { mundoSom = MUNDOS[k].som; climaSom = clima; afinar(k); ambiente(); },
     get estado() { return ctx ? ctx.state : 'parado'; },
     get saida() { return mestre; }, get contexto() { return ctx; },
     dormir(v) { if (ctx) v ? ctx.suspend() : ctx.resume(); },
@@ -573,13 +657,13 @@ const Som = (() => {
     // a água chegou a um destino
     chegou(k = 0) {
       if (!pronto()) return; const t = ctx.currentTime, b = 3 + k % 4;
-      chiado(t, 1.2, .05, 620, .8); sino(ESCALA[b], t + .05, .09, 2.8, -.2); sino(ESCALA[b + 2], t + .28, .075, 3, .2);
+      chiado(t, 1.2, .05, 620, .8); sino(notas[b], t + .05, .09, 2.8, -.2); sino(notas[b + 2], t + .28, .075, 3, .2);
       for (let i = 0; i < 5; i++) setTimeout(() => Som.gota(.8), 120 + i * 130 + Math.random() * 60);
     },
     // fase concluída: acorde que abre devagar (um de três, ao acaso)
     acorde() {
       if (!pronto()) return; const t = ctx.currentTime + .1;
-      const base = [[146.83, 220, 277.18, 329.63, 440], [123.47, 185, 293.66, 369.99, 440], [98, 246.94, 293.66, 369.99, 554.37]][Math.random() * 3 | 0];
+      const base = [[0, 2, 4, 5, 7], [0, 3, 4, 6, 7], [0, 2, 3, 5, 8]][Math.random() * 3 | 0].map(i => notas[i]);
       base.forEach((f, i) => {
         for (const d of [-5, 5]) {
           const o = ctx.createOscillator(), g = ctx.createGain(), l = ctx.createBiquadFilter(), w = ctx.createGain(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = d;
@@ -598,12 +682,19 @@ const Som = (() => {
       if (cheios > 1 && Math.random() < .006) Som.gota(.45);
       if (t > proxNota) {
         proxNota = t + ALEA(5, 13); const k = Math.random() * 6 | 0, p = ALEA(-.5, .5);
-        sino(ESCALA[k], t, .032, 4.2, p); if (Math.random() < .45) sino(ESCALA[k + 2 + (Math.random() * 2 | 0)], t + ALEA(.5, 1.1), .024, 4, -p);
+        sino(notas[k], t, .032, 4.2, p); if (Math.random() < .45) sino(notas[k + 2 + (Math.random() * 2 | 0)], t + ALEA(.5, 1.1), .024, 4, -p);
       }
       if (t > proxAve) {
         proxAve = t + ALEA(9, 24); const p = ALEA(-.8, .8);
-        if (noite) for (let i = 0; i < 9; i++) tom(ALEA(3900, 4050), t + i * .06, .04, .004, { pan: p, molhado: .5 });
-        else { const f = ALEA(1900, 2900), n = 2 + (Math.random() * 3 | 0); for (let i = 0; i < n; i++) tom(f * ALEA(.95, 1.1), t + i * ALEA(.13, .22), .11, .007, { ate: f * ALEA(.75, 1.35), pan: p, molhado: 1 }); }
+        const q = noite ? 'grilo' : mundoSom.ave || 'passaro', seq = (n, f) => { for (let i = 0; i < n; i++) f(i); };
+        if (q === 'grilo') seq(9, i => tom(ALEA(3900, 4050), t + i * .06, .04, .004, { pan: p, molhado: .5 }));
+        else if (q === 'gaivota') seq(3, i => tom(ALEA(1150, 1250), t + i * .34, .3, .006, { ate: ALEA(800, 880), tipo: 'triangle', ataque: .05, pan: p, molhado: 1 }));
+        else if (q === 'sapo') seq(3 + (Math.random() * 3 | 0), i => tom(ALEA(250, 290), t + i * ALEA(.24, .34), .12, .011, { ate: 330, tipo: 'triangle', ataque: .02, pan: p, molhado: .6 }));
+        else if (q === 'falcao') tom(ALEA(2300, 2500), t, 1.1, .005, { ate: 1500, ataque: .08, pan: p, molhado: 1.6 });
+        else if (q === 'bambu') { tom(ALEA(310, 340), t, .22, .03, { ate: 250, tipo: 'triangle', ataque: .002, pan: p, molhado: .8 }); tom(820, t, .08, .008, { pan: p, molhado: .6 }); }
+        else if (q === 'mata') { const f = ALEA(900, 1300); seq(4, i => tom(f * (1 + i * .12), t + i * .16, .16, .007, { ate: f * (1.15 + i * .12), pan: p, molhado: 1.3 })); }
+        else if (q === 'sabia') { const f = ALEA(1500, 2100); seq(5, i => tom(f * [1, 1.26, 1.12, 1.5, 1.2][i], t + i * .26, .2, .006, { ate: f * [1.1, 1.2, 1.3, 1.4, 1][i], ataque: .02, pan: p, molhado: 1.4 })); }
+        else if (q === 'passaro') { const f = ALEA(1900, 2900); seq(2 + (Math.random() * 3 | 0), i => tom(f * ALEA(.95, 1.1), t + i * ALEA(.13, .22), .11, .007, { ate: f * ALEA(.75, 1.35), pan: p, molhado: 1 })); }
       }
     },
   };
@@ -629,7 +720,7 @@ const U = {
   uT: { value: 0 }, uVida: { value: null }, uVidaMin: { value: new THREE.Vector2() }, uVidaTam: { value: new THREE.Vector2(1, 1) },
   uVerde: { value: new THREE.Color() }, uSeco: { value: new THREE.Color() }, uSolo: { value: new THREE.Color() },
   uNevoa: { value: new THREE.Color() }, uSolDir: { value: new THREE.Vector3(0, 1, 0) }, uSolCor: { value: new THREE.Color() }, uNoite: { value: 0 },
-  uAgua2: { value: new THREE.Color('#2f3f96') },
+  uAgua2: { value: new THREE.Color('#2f3f96') }, uChao: { value: 0 }, uPe: { value: new THREE.Color() }, uMar: { value: 0 }, uMar1: { value: new THREE.Color() }, uMar2: { value: new THREE.Color() },
 };
 const GLSL_RUIDO = `
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
@@ -663,21 +754,26 @@ const matVeu = new THREE.MeshLambertMaterial({ vertexColors: true, transparent: 
 // CHÃO: mistura terra seca e grama conforme o mapa de vida; paredões em camadas de rocha
 const matChao = new THREE.MeshLambertMaterial();
 matChao.onBeforeCompile = sh => {
-  ligarUniformes(sh, ['uVida', 'uVidaMin', 'uVidaTam', 'uVerde', 'uSeco', 'uSolo']);
+  ligarUniformes(sh, ['uVida', 'uVidaMin', 'uVidaTam', 'uVerde', 'uSeco', 'uSolo', 'uChao', 'uPe', 'uMar']);
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vPO,vNO;')
     .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPO=position;vNO=normal;');
-  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>\nvarying vec3 vPO,vNO;uniform vec3 uVerde,uSeco,uSolo;${GLSL_RUIDO}${GLSL_VIDA}`)
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>\nvarying vec3 vPO,vNO;uniform vec3 uVerde,uSeco,uSolo,uPe;uniform float uChao,uMar;${GLSL_RUIDO}${GLSL_VIDA}`)
     .replace('#include <color_fragment>', `#include <color_fragment>
     { float v=vidaEm(vPO.xz), n=fbm(vPO.xz*2.6), n2=ruido(vPO.xz*19.), n3=ruido(vPO.xz*7.+3.);
       float m=smoothstep(n*.72-.06,n*.72+.26,v)*smoothstep(.02,.16,v);
       vec3 seco=uSeco*(.84+.2*n+.1*n2); seco=mix(seco,uSolo*1.05,smoothstep(.55,.8,n3)*.3);
+      if(uChao>1.5&&uChao<2.5){ float r=sin((vPO.x+.22*sin(vPO.z*1.4)+.1*sin(vPO.z*3.1))*30.); seco=uSeco*(.95+.05*n2)*(1.-.13*smoothstep(.1,.9,r)); }
+      if(uChao>2.5&&uChao<3.5) seco=uSeco*(.93+.07*n)*mix(vec3(1.),vec3(.86,.92,1.),smoothstep(.35,.75,n));
+      if(uChao>3.5) seco=uSeco*(.93+.08*n)*(1.-.07*smoothstep(-.2,.9,sin(vPO.x*20.+vPO.z*9.+n*11.)));
       vec3 verde=uVerde*(.74+.36*n+.16*n2); verde=mix(verde,uVerde*vec3(1.22,1.12,.8),smoothstep(.5,.85,n3)*.5);
       vec3 c=mix(seco,verde,m);
       float pd=smoothstep(.86,.6,vNO.y), y=vPO.y*9.+fbm(vPO.xz*2.2)*2.4;
       float cam=.5+.5*sin(y*2.1), fina=ruido(vec2(y*3.,vPO.x*2.+vPO.z*2.));
-      vec3 rocha=mix(uSolo*.82,uSolo*1.28,cam*.6+fina*.4)*(.88+.2*n2); rocha=mix(rocha,uVerde*.7,smoothstep(.55,.85,n3+v*.25)*v*.5);
+      vec3 rocha=mix(uSolo*.82,uSolo*1.28,cam*.6+fina*.4)*(.88+.2*n2); if(uChao>.5&&uChao<1.5){ float b=fract(vPO.y*1.9+n*.35); rocha=mix(rocha,uSolo*vec3(1.75,1.7,1.6),smoothstep(.62,.7,b)*smoothstep(.95,.85,b)*.55); rocha=mix(rocha,uSolo*.62,smoothstep(.12,.05,b)*.5); }
+      if(uChao>2.5&&uChao<3.5) rocha=mix(rocha,uSeco*.95,smoothstep(.6,.8,vNO.y+n3*.12)*(1.-v));
+      rocha=mix(rocha,uVerde*.7,smoothstep(.55,.85,n3+v*.25)*v*.5);
       diffuseColor.rgb=mix(c,rocha,pd); }`)
-    .replace('#include <fog_fragment>', '#include <fog_fragment>\n{ float q=smoothstep(-.35,-1.75,vPO.y); gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,q); }');
+    .replace('#include <fog_fragment>', '#include <fog_fragment>\n{ float q=uMar>.5&&uMar<1.5?smoothstep(-1.35,-1.95,vPO.y)*.8:smoothstep(-.35,-1.75,vPO.y); gl_FragColor.rgb=mix(gl_FragColor.rgb,uMar>.5&&uMar<2.5?uPe:fogColor,q); if(uMar>.5&&uMar<1.5) gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(.9,.95,.95),smoothstep(.09,.0,abs(vPO.y+1.82+.05*fbm(vPO.xz*3.)))*.6); }');
 };
 
 // PLANTAS: cada uma olha o mapa de vida no lugar onde está e cresce, ganha cor e balança
@@ -698,13 +794,14 @@ function materialPlanta({ faixa = [.15, .7], menor = .4, seca = '#a8966f', vento
   const m = new THREE.MeshLambertMaterial({ vertexColors: true, side: face });
   m.onBeforeCompile = mexer(true); m.customProgramCacheKey = () => 'planta' + face;
   const d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }); d.onBeforeCompile = mexer(false);
-  m.userData.sombra = d; return m;
+  m.userData.sombra = d; m.userData.un = un; return m;
 }
 const MP = {
   capim: materialPlanta({ faixa: [.1, .6], menor: .45, seca: '#c7b184', vento: .22, face: THREE.DoubleSide }),
   flor: materialPlanta({ faixa: [.42, .85], menor: 0, vento: .18, face: THREE.DoubleSide }),
   copa: materialPlanta({ faixa: [.12, .75], menor: .66, seca: '#a89672', vento: .035 }),
   horta: materialPlanta({ faixa: [.35, .9], menor: .08, vento: .05 }),
+  fixa: materialPlanta({ faixa: [.2, .8], menor: .8, seca: '#a08358', vento: .008 }),
 };
 
 // ÁGUA: uma cor translúcida que corre da entrada para as saídas. uForma: 0 braços retos, 1 arco, 2 poça redonda
@@ -937,6 +1034,20 @@ function amaciar(g, cx, cy, cz, k = .8) {
 const telhado = (w, d, h) => { const x = w / 2, z = d / 2, V = [-x, 0, z, x, 0, z, 0, h, z, x, 0, -z, -x, 0, -z, 0, h, -z, x, 0, z, x, 0, -z, 0, h, -z, x, 0, z, 0, h, -z, 0, h, z, -x, 0, -z, -x, 0, z, 0, h, z, -x, 0, -z, 0, h, z, 0, h, -z, -x, 0, z, -x, 0, -z, x, 0, -z, -x, 0, z, x, 0, -z, x, 0, z];
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); g.computeVertexNormals(); return g; };
 
+// Telhados dos mundos. Devolvem peças [forma, cor] para uma casa de largura w e fundo d, com a base em y = 0.
+const meiaBola = (r, ach = 1) => new THREE.SphereGeometry(r, 18, 9, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, ach, 1);
+const piramide = (w, d, h, topo = 0) => new THREE.CylinderGeometry(topo, 1, h, 4, 1).rotateY(Math.PI / 4).scale(w / 1.414, 1, d / 1.414).translate(0, h / 2, 0);
+const TETOS = {
+  duas: (w, d, t) => [[telhado(w + .07, d + .07, w * .5), t]],
+  agudo: (w, d, t) => [[telhado(w + .09, d + .09, w * .85), t]],
+  neve: (w, d, t) => [[telhado(w + .08, d + .08, w * .72), '#6a5040'], [telhado(w + .11, d + .06, w * .72).translate(0, .022, 0), t]],
+  plano: (w, d, t) => [[caixa(-w / 2 - .012, w / 2 + .012, 0, .03, -d / 2 - .012, d / 2 + .012), COR.cal], [caixa(-w / 2 + .02, w / 2 - .02, .012, .034, -d / 2 + .02, d / 2 - .02), t], ...[-.3, 0, .3].map(k => [caixa(k * w - .008, k * w + .008, -.03, -.012, -d / 2 - .03, d / 2 + .03), COR.madeira])],
+  cupula: (w, d, t) => [[caixa(-w / 2 - .01, w / 2 + .01, 0, .025, -d / 2 - .01, d / 2 + .01), COR.cornija], [meiaBola(Math.min(w, d) * .44, 1.1).translate(0, .025, 0), t], [new THREE.ConeGeometry(.008, .07, 6).translate(0, Math.min(w, d) * .48 + .05, 0), COR.bronze]],
+  palha: (w, d, t) => [[piramide(w + .13, d + .13, .07, .74), t], [piramide(w * .74 + .05, d * .74 + .05, w * .5, .12).translate(0, .07, 0), t]],
+  curvo: (w, d, t) => [[piramide(w + .17, d + .17, .05, .72), t], [piramide(w * .74 + .05, d * .74 + .05, w * .34, .1).translate(0, .05, 0), t], [caixa(-.03, .03, w * .34 + .03, w * .34 + .075, -.012, .012), COR.madeira]],
+};
+const janelas = () => { const jan = []; return { jan, por: (x, y, z, r = 0, w = .045, h = .06) => jan.push([new THREE.PlaneGeometry(w, h).rotateY(r).translate(x, y, z), '#fff']), malhas(g) { const e = new THREE.Mesh(juntar(jan), new THREE.MeshBasicMaterial({ color: '#4f463f' })), mj = luzJanela(), a = new THREE.Mesh(juntar(jan), mj); a.scale.setScalar(1.002); g.add(e, a); return k => { mj.opacity = k * (U.uNoite.value ? 1 : .75); }; } }; };
+
 // Boca do canal que chega (ou sai) de um lugar: um braço curto voltado para o norte local
 const bocaLugar = (de = LO) => { const b = bracoEm(0), c = { pedra: COR.pedra, cornija: COR.cornija };
   return [[varrer(b, ARCO_BRACO.map(([s, a, y]) => [Math.max(s, .0), a, y]).filter(([s]) => s >= .13).map(([s, a, y]) => [Math.max(s, de), a, y]), -LO, LO), c.pedra], [caixa(-.15, .15, 0, YB, -de - .1, -de), c.pedra],
@@ -960,7 +1071,7 @@ const LUGAR = {
   vila() {
     const g = new THREE.Group(), l = bocaLugar(.18), jan = [];
     const casa = (x, z, w, d, h, r, t) => {
-      l.push([caixa(-w / 2, w / 2, -.05, h, -d / 2, d / 2), COR.cal, M4(x, 0, z, r)], [telhado(w + .07, d + .07, w * .5), t, M4(x, h - .01, z, r)], [caixa(-.03, .03, 0, .12, d / 2, d / 2 + .006), COR.madeira, M4(x, 0, z, r)], [caixa(w * .2, w * .2 + .05, h + .02, h + w * .5 + .03, -.03, .03), COR.cal, M4(x, 0, z, r)]);
+      l.push([caixa(-w / 2, w / 2, -.05, h, -d / 2, d / 2), COR.cal, M4(x, 0, z, r)], ...TETOS[MUNDO.teto](w, d, t).map(([g, c]) => [g, c, M4(x, h - .01, z, r)]), [caixa(-.03, .03, 0, .12, d / 2, d / 2 + .006), COR.madeira, M4(x, 0, z, r)], ...(MUNDO.teto === 'duas' || MUNDO.teto === 'neve' ? [[caixa(w * .2, w * .2 + .05, h + .02, h + w * .5 + .06, -.03, .03), MUNDO.teto === 'neve' ? COR.rocha : COR.cal, M4(x, 0, z, r)]] : []));
       for (const [a, b, c] of [[-w * .28, d / 2 + .004, 0], [w * .28, d / 2 + .004, 0], [0, -d / 2 - .004, Math.PI]]) jan.push([new THREE.PlaneGeometry(.045, .06).rotateY(c).translate(a, h * .62, b), '#fff', M4(x, 0, z, r)]);
       for (const s of [-1, 1]) jan.push([new THREE.PlaneGeometry(.045, .06).rotateY(s * Math.PI / 2).translate(s * (w / 2 + .004), h * .62, 0), '#fff', M4(x, 0, z, r)]);
     };
@@ -986,7 +1097,7 @@ const LUGAR = {
     // pés de verdura: três tipos, um por canteiro
     const folha = guardar('verdura', () => tingir(juntar([[bolota(.055, 1, 4, .4, .7).translate(0, .035, 0)], [bolota(.03, 1, 8, .2, .9).translate(0, .075, 0)]]), 0, .1, '#8a8a8a', '#ffffff'));
     const im = new THREE.InstancedMesh(folha, matLiso, pes.length), fr = new THREE.InstancedMesh(guardar('fruto', () => juntar([[new THREE.IcosahedronGeometry(.02, 1), '#fff']])), matLiso, pes.length);
-    const cores = ['#7fa84f', '#5f8f58', '#93a84a'], frutos = ['#c9563f', '#e0a046', '#a5486b'];
+    const { cores, frutos } = MUNDO.horta;
     pes.forEach(([, , c], i) => { im.setColorAt(i, new THREE.Color(cores[c]).offsetHSL(0, 0, (i % 3 - 1) * .03)); fr.setColorAt(i, new THREE.Color(frutos[c])); });
     im.castShadow = true; g.add(im, fr);
     const p = poca(.1, .165, 0, -.13), q = malhaQueda({ uAlto: .36, uLonge: .09, uLargo: .18, uSome: 0 }), agua = aguaBoca(.25); q.position.set(0, YA, -.25); q.rotation.y = Math.PI; g.add(p, q, agua);
@@ -999,9 +1110,9 @@ const LUGAR = {
     } };
   },
   reservatorio() {
-    const g = new THREE.Group(), l = bocaLugar(.3), anel = (r0, r1, y0, y1) => { const s = new THREE.Shape().absarc(0, 0, r1, 0, Math.PI * 2); s.holes.push(new THREE.Path().absarc(0, 0, r0, 0, Math.PI * 2, true)); return new THREE.ExtrudeGeometry(s, { depth: y1 - y0, bevelEnabled: false, curveSegments: 24 }).rotateX(-Math.PI / 2).translate(0, y0, 0); };
-    l.push([anel(.33, .41, -.05, .33), COR.pedra], [anel(.32, .425, .33, .37), COR.cornija], [new THREE.CylinderGeometry(.34, .34, .04, 28).translate(0, .02, 0), '#8d8168']);
-    for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + .52; l.push([caixa(-.045, .045, 0, .33, -.03, .03), COR.cornija, M4(Math.sin(a) * .42, 0, Math.cos(a) * .42, a)]); }
+    const g = new THREE.Group(), l = bocaLugar(.3), anel = (r0, r1, y0, y1) => { const q = MUNDO.tanque === 'quadrado', k = .93, s = new THREE.Shape(), b = new THREE.Path(); if (q) { const R1 = r1 * k, R0 = r0 * k; s.moveTo(-R1, -R1); s.lineTo(R1, -R1); s.lineTo(R1, R1); s.lineTo(-R1, R1); b.moveTo(-R0, -R0); b.lineTo(-R0, R0); b.lineTo(R0, R0); b.lineTo(R0, -R0); } else { s.absarc(0, 0, r1, 0, Math.PI * 2); b.absarc(0, 0, r0, 0, Math.PI * 2, true); } s.holes.push(b); return new THREE.ExtrudeGeometry(s, { depth: y1 - y0, bevelEnabled: false, curveSegments: 24 }).rotateX(-Math.PI / 2).translate(0, y0, 0); };
+    l.push([anel(.33, .41, -.05, .33), COR.pedra], [anel(.32, .425, .33, .37), COR.cornija], [MUNDO.tanque === 'quadrado' ? caixa(-.32, .32, 0, .04, -.32, .32) : new THREE.CylinderGeometry(.34, .34, .04, 28).translate(0, .02, 0), '#8d8168']);
+    if (MUNDO.tanque !== 'quadrado') for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + .52; l.push([caixa(-.045, .045, 0, .33, -.03, .03), COR.cornija, M4(Math.sin(a) * .42, 0, Math.cos(a) * .42, a)]); }
     const m = new THREE.Mesh(juntar(l), matPedra); m.castShadow = m.receiveShadow = true; g.add(m);
     const p = poca(.33, .05), q = malhaQueda({ uAlto: .42, uLonge: .14, uLargo: .18, uSome: 0 }), agua = aguaBoca(.29); q.position.set(0, YA, -.29); q.rotation.y = Math.PI; g.add(p, q, agua);
     const nenufar = new THREE.Mesh(juntar([0, 1, 2, 3].map(i => [new THREE.CircleGeometry(.05 + i % 2 * .015, 12, .3, 5.6).rotateX(-Math.PI / 2), '#6f9a5a', M4(Math.sin(i * 2.1 + .6) * .2, 0, Math.cos(i * 2.1 + .6) * .2 + .03, i)]).concat([0, 2].map(i => [bolota(.026, 1, i + 2, .3), '#f0c9d2', M4(Math.sin(i * 2.1 + .6) * .2, .015, Math.cos(i * 2.1 + .6) * .2 + .03)]))), matLiso); g.add(nenufar);
@@ -1013,7 +1124,7 @@ const LUGAR = {
     const s = new THREE.Shape().absarc(0, 0, .22, 0, Math.PI * 2); s.holes.push(new THREE.Path().absarc(0, 0, .16, 0, Math.PI * 2, true));
     l.push([new THREE.ExtrudeGeometry(s, { depth: .27, bevelEnabled: false, curveSegments: 20 }).rotateX(-Math.PI / 2).translate(0, 0, .06), COR.pedra]);
     for (const x of [-.2, .2]) l.push([caixa(x - .02, x + .02, 0, .72, .04, .08), COR.madeira]);
-    l.push([caixa(-.22, .22, .58, .605, .045, .075), COR.madeira], [telhado(.36, .56, .17).rotateY(Math.PI / 2), COR.telha, M4(0, .7, .06)], [new THREE.CylinderGeometry(.045, .035, .08, 10).translate(0, .4, .06), COR.madeira], [caixa(-.004, .004, .42, .59, .056, .064), '#d8cba8']);
+    l.push([caixa(-.22, .22, .58, .605, .045, .075), COR.madeira], ...TETOS[MUNDO.teto](.3, .44, COR.telha).map(([g, c]) => [g, c, M4(0, .7, .06, Math.PI / 2)]), [new THREE.CylinderGeometry(.045, .035, .08, 10).translate(0, .4, .06), COR.madeira], [caixa(-.004, .004, .42, .59, .056, .064), '#d8cba8']);
     const m = new THREE.Mesh(juntar(l), matPedra); m.castShadow = m.receiveShadow = true; g.add(m);
     const vasos = new THREE.Group(); g.add(vasos);
     for (let i = 0; i < 7; i++) { const a = .9 + i * .75, v = new THREE.Mesh(juntar([[bolota(.06, 1, i + 3, .3, .8).translate(0, .04, 0), '#7c9d5a'], [bolota(.026, 1, 2, .2).translate(.03, .09, .01), ['#e6b7c1', '#f3e6c8', '#c5b2de'][i % 3]], [bolota(.022, 1, 3, .2).translate(-.03, .085, .03), ['#f3e6c8', '#c5b2de', '#e6b7c1'][i % 3]]]), matLiso); v.position.set(Math.sin(a) * .37, .02, Math.cos(a) * .37 + .02); v.castShadow = true; vasos.add(v); }
@@ -1022,27 +1133,117 @@ const LUGAR = {
   },
 };
 
-LUGAR.marco = LUGAR.vila;
+// MARCO: a construção própria de cada mundo (símbolo M). Todas recebem a água numa bacia e ganham vida de um jeito.
+const MARCOS = [
+  // campanário
+  (g, l) => { const j = janelas(); l.push([caixa(-.13, .13, 0, .62, .1, .36), COR.cal], [caixa(-.15, .15, .4, .43, .08, .38), COR.cornija], [caixa(-.15, .15, .62, .65, .08, .38), COR.cornija], [meiaBola(.12, 1.2).translate(0, .65, .23), COR.telha], [caixa(-.36, -.13, -.02, .24, .12, .4), COR.cal], [telhado(.28, .32, .12).rotateY(Math.PI / 2).translate(-.25, .24, .26), COR.telha2], [new THREE.SphereGeometry(.035, 10, 8).translate(0, .52, .23), COR.bronze]);
+    for (const y of [.14, .3]) j.por(0, y, .364); j.por(0, .53, .364, 0, .1, .12); j.por(0, .53, .096, Math.PI, .1, .12); j.por(-.25, .13, .404); return j.malhas(g); },
+  // moinho d'água
+  (g, l) => { const j = janelas(); l.push([caixa(-.3, .16, -.02, .34, .08, .42), COR.cal], ...TETOS.agudo(.46, .34, COR.telha).map(([q, c]) => [q, c, M4(-.07, .34, .25)]), [caixa(-.1, -.04, .4, .78, .3, .36), COR.rocha]);
+    const r = []; r.push([new THREE.TorusGeometry(.2, .018, 6, 28), COR.madeira]); for (let i = 0; i < 12; i++) r.push([caixa(-.012, .012, .03, .24, -.05, .05), COR.madeira, new THREE.Matrix4().makeRotationZ(i * Math.PI / 6)]);
+    const roda = new THREE.Mesh(juntar(r), matLiso); roda.position.set(.28, .24, .2); roda.rotation.y = Math.PI / 2; roda.castShadow = true; g.add(roda); j.por(-.18, .18, .424); j.por(.02, .18, .424); const luz = j.malhas(g); let a = 0;
+    return (k, dt) => { luz(k); a += k * .03; roda.rotation.z = a; }; },
+  // arrozal em degraus
+  (g, l) => { const ps = [], pes = []; [[0, .02, .06, .4], [.0, .1, .2, .33], [0, .18, .33, .22]].forEach(([x, y, z, w], i) => { l.push([caixa(-w, w, -.02, y + .05, z, .46), COR.terra], [caixa(-w - .02, w + .02, y + .05, y + .075, z - .02, z + .012), COR.pedra]); const p = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.9, .11).rotateX(-Math.PI / 2), novaAgua(matAgua, { uForma: 2, uRaio: .5, uCheio: 1 })); p.position.set(0, y + .06, z + .075); p.renderOrder = 2; g.add(p); ps.push(p); for (let k = -3; k <= 3; k++) if (Math.abs(k) * .1 < w - .03) for (const dz of [.045, .105]) pes.push([k * .1, y + .05, z + dz]); });
+    const im = new THREE.InstancedMesh(guardar('arroz', () => juntar([0, 1, 2, 3, 4].map(i => [new THREE.ConeGeometry(.008, .13, 4).translate(0, .065, 0), i % 2 ? '#b9c15a' : '#8fae4a', new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.sin(i * 1.3) * .35, 0, Math.cos(i * 1.3) * .35))]))), matLiso, pes.length); im.frustumCulled = false; g.add(im);
+    return k => { ps.forEach((p, i) => p.material.uniforms.uNivel.value = suave(i * .12, .35 + i * .12, k)); pes.forEach(([x, y, z], i) => im.setMatrixAt(i, M4(x, y, z, i, Math.max(.06, suave((i * .37) % .4, .6 + (i * .37) % .4, k))))); im.instanceMatrix.needsUpdate = true; }; },
+  // casas de adobe empilhadas
+  (g, l) => { const j = janelas(); for (const [x, z, w, d, y0, y1, c] of [[-.17, .2, .42, .4, -.02, .22, 0], [.23, .24, .32, .34, -.02, .3, 1], [-.14, .26, .3, .28, .22, .42, 1], [.2, .28, .2, .2, .3, .46, 0], [-.16, .3, .17, .18, .42, .58, 0]]) { l.push([caixa(x - w / 2, x + w / 2, y0, y1, z - d / 2, z + d / 2), c ? COR.cal : COR.pedra], [caixa(x - w / 2 - .01, x + w / 2 + .01, y1 - .012, y1 + .02, z - d / 2 - .01, z + d / 2 + .01), COR.cornija]); for (const k of [-.25, .25]) { j.por(x + k * w, (y0 + y1) / 2 + .02, z + d / 2 + .004, 0, .04, .05); j.por(x + k * w, (y0 + y1) / 2 + .02, z - d / 2 - .004, Math.PI, .035, .045); } for (const k of [-.3, 0, .3]) l.push([new THREE.CylinderGeometry(.009, .009, d + .06, 5).rotateX(Math.PI / 2).translate(x + k * w, y1 - .035, z), COR.madeira]); }
+    for (const x of [.0, .05]) l.push([caixa(x - .006, x + .006, 0, .36, .42, .432), COR.madeira]); for (let y = .05; y < .34; y += .055) l.push([caixa(0, .05, y, y + .01, .42, .432), COR.madeira]); return j.malhas(g); },
+  // casa de banhos
+  (g, l) => { const j = janelas(); l.push([caixa(-.32, .32, -.02, .26, .06, .42), COR.cal], [caixa(-.34, .34, .26, .295, .04, .44), COR.cornija], [meiaBola(.17, 1.05).translate(0, .29, .24), COR.telha], [new THREE.CylinderGeometry(.018, .018, .09, 8).translate(0, .5, .24), COR.bronze], [meiaBola(.075).translate(-.22, .29, .13), COR.telha2], [meiaBola(.075).translate(.22, .29, .13), COR.telha2], [meiaBola(.075).translate(-.22, .29, .36), COR.telha2], [meiaBola(.075).translate(.22, .29, .36), COR.telha2]); for (let x = -.3; x < .3; x += .1) l.push([caixa(x + .01, x + .09, .19, .23, .42, .426), COR.telha]); for (const x of [-.2, 0, .2]) { j.por(x, .11, .426, 0, .06, .1); j.por(x, .12, .055, Math.PI, .05, .08); } for (const s of [-1, 1]) j.por(s * .324, .12, .24, s * Math.PI / 2, .06, .1); return j.malhas(g); },
+  // casa de chá
+  (g, l) => { const j = janelas(); l.push([caixa(-.33, .33, .04, .08, .04, .44), COR.madeira]); for (const x of [-.28, .28]) for (const z of [.08, .4]) l.push([caixa(x - .016, x + .016, -.02, .32, z - .016, z + .016), COR.madeira]); l.push([caixa(-.2, .2, .08, .31, .12, .36), COR.cal], ...TETOS.curvo(.5, .36, COR.telha).map(([q, c]) => [q, c, M4(0, .3, .24)]), [caixa(-.1, .1, .38, .5, .16, .32), COR.cal], ...TETOS.curvo(.2, .16, COR.telha2).map(([q, c]) => [q, c, M4(0, .48, .24, 0, 1.2)])); for (const x of [-.1, .1]) { j.por(x, .2, .364, 0, .1, .14); j.por(x, .2, .116, Math.PI, .1, .14); } for (const s of [-1, 1]) j.por(s * .204, .2, .24, s * Math.PI / 2, .14, .14); j.por(0, .44, .324, 0, .1, .06); for (const x of [-.31, .31]) l.push([new THREE.SphereGeometry(.03, 10, 8).translate(x, .23, .44), '#d9b48a']); return j.malhas(g); },
+  // farol
+  (g, l) => { const j = janelas(); for (let i = 0; i < 4; i++) l.push([new THREE.CylinderGeometry(.135 - i * .012, .147 - i * .012, .19, 20).translate(.06, .095 + i * .19, .22), i % 2 ? '#b5574c' : COR.cal]); l.push([new THREE.CylinderGeometry(.14, .14, .025, 20).translate(.06, .77, .22), COR.cornija], [new THREE.CylinderGeometry(.06, .06, .12, 12).translate(.06, .84, .22), '#dfe9ea'], [new THREE.ConeGeometry(.1, .09, 14).translate(.06, .945, .22), '#b5574c'], [caixa(-.36, -.1, -.02, .2, .12, .4), COR.cal], ...TETOS.duas(.26, .28, COR.telha).map(([q, c]) => [q, c, M4(-.23, .2, .26)])); j.por(-.23, .1, .404); j.por(.06, .25, .362); j.por(.06, .5, .352); const luz = j.malhas(g);
+    const m = new THREE.MeshBasicMaterial({ color: '#ffe9b0', transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, toneMapped: false }), facho = new THREE.Group(); for (const s of [0, Math.PI]) { const c = new THREE.Mesh(guardar('facho', () => { const q = new THREE.ConeGeometry(.28, 2.2, 14, 1, true).translate(0, -1.1, 0).rotateZ(Math.PI / 2); return q; }), m); c.rotation.y = s; facho.add(c); } facho.position.set(.06, .84, .22); g.add(facho); const lamp = new THREE.Mesh(new THREE.SphereGeometry(.045, 12, 10), new THREE.MeshBasicMaterial({ color: '#fff0c0', transparent: true, opacity: 0, toneMapped: false })); lamp.position.copy(facho.position); g.add(lamp);
+    return k => { luz(k); m.opacity = k * (U.uNoite.value ? .22 : .1); lamp.material.opacity = k; facho.rotation.y = U.uT.value * .5; facho.visible = k > 0; }; },
+  // templo em degraus, que a mata cobre de flores
+  (g, l) => { for (let i = 0; i < 4; i++) { const w = .4 - i * .085; l.push([caixa(-w, w, i * .12 - .02, i * .12 + .12, .25 - w * .55, .25 + w * .55), i % 2 ? COR.cornija : COR.pedra]); } l.push([caixa(-.1, .1, .46, .6, .18, .32), COR.pedra], [caixa(-.13, .13, .6, .63, .15, .35), COR.cornija], [caixa(-.04, .04, .46, .56, .322, .326), '#2f2d26']); for (let i = 0; i < 8; i++) l.push([caixa(-.07, .07, 0, .06 + i * .057, .49 - i * .032, .5 - i * .032 + .03), COR.baseClara]);
+    const v = []; for (let i = 0; i < 16; i++) { const a = i * 2.4, n = i % 4, w = .4 - n * .085, x = Math.sin(a) * w, z = .25 + Math.cos(a) * w * .5; v.push([bolota(.06, 1, i + 3, .3, .7), ['#5f9a4a', '#6fa850', '#4f8a46', '#7aa552'][i % 4], M4(x, n * .12 + .11, z)], [bolota(.02, 1, i, .2), i % 2 ? '#e8744f' : '#f0d35e', M4(x + .02, n * .12 + .16, z)]); } const m = new THREE.Mesh(juntar(v), matLiso); m.castShadow = true; g.add(m); return k => { m.scale.set(1, Math.max(.001, k), 1); m.visible = k > .02; }; },
+  // terma: piscina de pedra com vapor
+  (g, l, o) => { for (let i = 0; i < 11; i++) { const a = i * .571 + .6, r = .34 + (i % 3) * .02; if (Math.cos(a) < -.75) continue; l.push([bolota(.1 + (i % 4) * .016, 1, i + 5, .3, .9), i % 2 ? COR.rocha : COR.rocha2, M4(Math.sin(a) * r, .06, .12 + Math.cos(a) * r * .85, i)]); } l.push([new THREE.CylinderGeometry(.3, .3, .05, 20).translate(0, .02, .12), '#6d6a62']); const p = poca(.28, .1, 0, .12); g.add(p); o.pocas.push(p); l.push([caixa(.2, .42, -.02, .2, .28, .46), COR.cal], ...TETOS.neve(.22, .18, COR.telha).map(([q, c]) => [q, c, M4(.31, .2, .37)])); const j = janelas(); j.por(.31, .1, .464); const luz = j.malhas(g); let t = 0; const w = new THREE.Vector3();
+    return (k, c) => { luz(k); p.material.uniforms.uNivel.value = suave(0, .3, k); if (k > .3 && c && Math.random() < .05 * k) { c.getWorldPosition(w); Part.nova(w.x + (Math.random() - .5) * .3, w.y + .15, w.z + (Math.random() - .5) * .3, { dur: 3, vy: .16, bal: .08, tam: .17, alfa: .16, cor: '#f2f6f8' }); } }; },
+  // pavilhão da lua
+  (g, l) => { l.push([new THREE.CylinderGeometry(.37, .39, .06, 8).translate(0, .02, .16), COR.baseClara]); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + .52; l.push([new THREE.CylinderGeometry(.024, .03, .42, 10).translate(Math.sin(a) * .27, .25, .16 + Math.cos(a) * .27), COR.pedra]); } l.push([new THREE.CylinderGeometry(.33, .33, .05, 24).translate(0, .48, .16), COR.cornija], [meiaBola(.27, .9).translate(0, .5, .16), COR.telha], [new THREE.ConeGeometry(.014, .12, 8).translate(0, .8, .16), COR.bronze]);
+    const orbe = new THREE.Mesh(new THREE.SphereGeometry(.085, 18, 14), new THREE.MeshBasicMaterial({ color: '#f2f4ff', transparent: true, opacity: 0, toneMapped: false })); orbe.position.set(0, .26, .16); g.add(orbe); const halo = new THREE.Mesh(new THREE.SphereGeometry(.17, 18, 14), new THREE.MeshBasicMaterial({ color: '#b8c8ff', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })); halo.position.copy(orbe.position); g.add(halo);
+    return k => { orbe.material.opacity = k; halo.material.opacity = k * (.16 + .05 * Math.sin(U.uT.value * 1.3)); orbe.position.y = halo.position.y = .26 + Math.sin(U.uT.value * .9) * .02 * k; }; },
+];
+LUGAR.marco = () => {
+  const g = new THREE.Group(), l = bocaLugar(.2), o = { pocas: [] };
+  l.push([new THREE.CylinderGeometry(.14, .16, .16, 16).translate(0, .08, -.08), COR.baseClara]);
+  const vida = MARCOS[MUNDOS.indexOf(MUNDO)](g, l, o), m = new THREE.Mesh(juntar(l), matLiso); m.castShadow = m.receiveShadow = true; g.add(m);
+  const p = poca(.11, .165, 0, -.08), q = malhaQueda({ uAlto: .36, uLonge: .09, uLargo: .18, uSome: 0 }), agua = aguaBoca(.19); q.position.set(0, YA, -.19); q.rotation.y = Math.PI; g.add(p, q, agua); o.pocas.push(p);
+  return { grupo: g, agua, queda: q, pocas: o.pocas, anima: true, vida(k) { p.material.uniforms.uNivel.value = suave(0, .3, k); vida(k, g); } };
+};
 
 // ============================================================ 8. ILHA
 const hash2 = (x, z) => { const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453; return s - Math.floor(s); };
 const ruido2 = (x, z) => { const i = Math.floor(x), j = Math.floor(z); let f = x - i, g = z - j; f = f * f * (3 - 2 * f); g = g * g * (3 - 2 * g); return misturar(misturar(hash2(i, j), hash2(i + 1, j), f), misturar(hash2(i, j + 1), hash2(i + 1, j + 1), f), g); };
 const MARGEM = 3.4;
 
+// Fita dos dois lados (folhas de palmeira, cipós, samambaias). pts: pontos; w(t): meia largura; (lx, lz): direção da largura
+function fita(pts, w, lx, lz) { const V = [], n = pts.length - 1; for (let i = 0; i < n; i++) { const [a, b] = [pts[i], pts[i + 1]], p = w(i / n), q = w((i + 1) / n), A = [a[0] - lx * p, a[1], a[2] - lz * p], B = [a[0] + lx * p, a[1], a[2] + lz * p], C = [b[0] + lx * q, b[1], b[2] + lz * q], D = [b[0] - lx * q, b[1], b[2] - lz * q]; V.push(...A, ...B, ...C, ...A, ...C, ...D, ...C, ...B, ...A, ...D, ...C, ...A); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); g.computeVertexNormals(); return g; }
+const folhas = (n, comp, sobe, cai, larg, cor) => Array.from({ length: n }, (_, i) => { const a = i * 6.283 / n + (i % 2) * .2, s = Math.sin(a), c = Math.cos(a), k = 1 - (i % 3) * .1; return [fita([0, .25, .5, .75, 1].map(t => [s * comp * k * t, sobe * Math.sin(t * Math.PI * .6) - cai * t * t, c * comp * k * t]), t => larg * Math.sin(Math.PI * (.12 + t * .86)), c, -s), cor || (i % 2 ? '#ffffff' : '#d8d8d8')]; });
+const tronco = (h, r0, r1, curva = .025, cor = '#7c6a55', seg = 5) => { const t = new THREE.CylinderGeometry(r1, r0, h, 7, seg).translate(0, h / 2, 0), p = t.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i) / h; p.setX(i, p.getX(i) + Math.sin(y * 2.6) * curva); } t.computeVertexNormals(); return [t, cor]; };
+const galho = (h, y, rz, ry = 0, cor = '#7c6a55') => [new THREE.CylinderGeometry(.01, .022, h, 5).translate(0, h / 2, 0), cor, new THREE.Matrix4().makeRotationY(ry).multiply(new THREE.Matrix4().makeRotationZ(rz)).setPosition(0, y, 0)];
+const nuvens = (l, y0 = -.1, y1 = .34, k = .85) => tingir(amaciar(juntar(l.map(([r, x, y, z, ach = .85, s = 3]) => [bolota(r, r > .2 ? 3 : 2, s, .3, ach).translate(x, y, z)])), 0, (y0 + y1) / 4, 0, k), y0, y1, '#868686', '#ffffff');
+// ÁRVORES: { tronco, copa, alto (altura da copa), cores, rija (não balança) }
+const ARV = {
+  oliveira: () => ({ florida: true, alto: .42, tronco: juntar([tronco(.5, .045, .022), galho(.26, .34, .8), galho(.26, .4, -.75)]), copa: nuvens([[.24, 0, .16, 0, .82, 3], [.18, .17, .08, .06, .85, 7], [.17, -.16, .1, -.07, .85, 9], [.15, .02, .06, -.18, .85, 15], [.14, -.05, .07, .18, .85, 19]]) }),
+  zimbro: () => ({ alto: .26, tronco: juntar([tronco(.34, .05, .025, .08, '#6b5644'), galho(.2, .2, 1, 0, '#6b5644')]), copa: nuvens([[.17, .06, .1, 0, .7, 4], [.13, -.1, .05, .05, .7, 8], [.1, .16, .02, -.06, .7, 12]]) }),
+  cipreste: () => { const pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12; pts.push(new THREE.Vector2(Math.max(.002, .13 * Math.pow(Math.sin(Math.PI * Math.pow(t, .62)), .8) * (1 - t * .25)), t * .95 + .02)); } const c = new THREE.LatheGeometry(pts, 12), p = c.attributes.position; for (let i = 0; i < p.count; i++) { const k = 1 + .22 * (ruido2(p.getX(i) * 22 + 5, p.getY(i) * 9 + p.getZ(i) * 22) - .5); p.setX(i, p.getX(i) * k); p.setZ(i, p.getZ(i) * k); } c.computeVertexNormals(); return { alto: 0, copa: tingir(juntar([[c]]), 0, .95, '#6f6f6f', '#ffffff') }; },
+  araucaria: () => { const l = [tronco(1.02, .045, .028, .012, '#6f5f52')]; for (let i = 0; i < 6; i++) l.push(galho(.3, .82 + (i % 2) * .1, 1.15, i * 1.05, '#6f5f52')); const c = []; for (let i = 0; i < 7; i++) { const a = i * .9, r = i ? .25 : 0; c.push([i ? .13 : .17, Math.sin(a) * r, i ? (i % 2) * .07 : .12, Math.cos(a) * r, .42, i + 3]); } return { alto: .96, tronco: juntar(l), copa: nuvens(c, -.06, .2, .7) }; },
+  bambu: () => { const l = [], c = []; for (let i = 0; i < 7; i++) { const a = i * 2.4, r = .03 + i * .016, h = .7 + (i % 3) * .16, q = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(a) * .1, 0, -Math.sin(a) * .1)).setPosition(Math.sin(a) * r, 0, Math.cos(a) * r); l.push([new THREE.CylinderGeometry(.011, .014, h, 6).translate(0, h / 2, 0), i % 2 ? '#8fa05a' : '#9cae66', q]); for (const y of [.25, .5, .75]) l.push([new THREE.CylinderGeometry(.017, .017, .012, 6).translate(0, h * y, 0), '#b8b878', q]); } for (let i = 0; i < 4; i++) c.push(...folhas(5, .26, .05 + i * .02, .12, .025).map(([g, k]) => [g.translate(Math.sin(i * 2) * .1, i * .11 - .12, Math.cos(i * 2) * .1), k])); return { alto: .72, tronco: juntar(l), copa: juntar(c) }; },
+  bananeira: () => ({ alto: .34, tronco: juntar([tronco(.4, .055, .035, .015, '#8c8a58')]), copa: juntar(folhas(8, .44, .24, .24, .075)) }),
+  palmeira: () => { const g = juntar(folhas(11, .42, .17, .3, .05)), t = tronco(.86, .05, .032, .09, '#8d7250', 9); return { alto: .86, tronco: juntar([t, ...Array.from({ length: 8 }, (_, i) => [new THREE.TorusGeometry(.043 - i * .0015, .007, 4, 10).rotateX(Math.PI / 2).translate(Math.sin(i / 8 * 2.6) * .09, i * .1 + .06, 0), '#7a6142'])]), copa: juntar([[g.translate(.045, 0, 0)], [bolota(.05, 1, 3, .3).translate(.045, -.04, 0), '#b5803f']]) }; },
+  cacto: () => { const c = [], col = (x, z, y0, h, r) => { c.push([new THREE.CylinderGeometry(r, r * 1.02, h, 10).translate(x, y0 + h / 2, z)], [meiaBola(r).translate(x, y0 + h, z)]); }; col(0, 0, 0, .52, .075); col(.16, 0, .24, .2, .05); col(-.15, .02, .16, .18, .048); c.push([new THREE.CylinderGeometry(.045, .045, .16, 8).rotateZ(Math.PI / 2).translate(.09, .24, 0)], [new THREE.CylinderGeometry(.043, .043, .16, 8).rotateZ(Math.PI / 2).translate(-.08, .17, .02)], [new THREE.SphereGeometry(.05, 10, 8).translate(.16, .24, 0)], [new THREE.SphereGeometry(.048, 10, 8).translate(-.15, .17, .02)]); for (const [x, y, z] of [[0, .6, 0], [.16, .49, 0], [.03, .59, .04]]) c.push([bolota(.026, 1, 3, .2).translate(x, y, z), '#ff9c8a']); return { alto: 0, rija: true, cores: ['#6f8a55', '#7a9058', '#66804f'], copa: tingir2(juntar(c), 0, .6) }; },
+  bordo: () => ({ alto: .46, tronco: juntar([tronco(.52, .045, .02, .07, '#5f4a3d'), galho(.34, .3, .95, 0, '#5f4a3d'), galho(.3, .36, -.9, .6, '#5f4a3d'), galho(.26, .4, .7, 2.2, '#5f4a3d')]), copa: nuvens([[.22, .02, .2, 0, .42, 3], [.2, .2, .06, .06, .4, 7], [.19, -.2, .1, -.05, .4, 9], [.16, .03, .04, -.2, .4, 15], [.15, -.06, .0, .2, .4, 19]], -.08, .3) }),
+  pinheiro: () => ({ alto: .5, cores: ['#4f6b4a', '#5a7550'], tronco: juntar([tronco(.66, .045, .02, .1, '#5a463a'), galho(.3, .36, 1.1, 0, '#5a463a'), galho(.26, .5, -1, .4, '#5a463a')]), copa: nuvens([[.19, .08, .2, 0, .3, 3], [.16, .26, -.02, .02, .3, 7], [.15, -.14, .06, -.04, .3, 9]], -.06, .24) }),
+  pinheiroMar: () => ({ alto: .74, cores: ['#5f7f52', '#6b8a58'], tronco: juntar([tronco(.8, .04, .022, .12, '#7d6450'), galho(.2, .64, .8, 0, '#7d6450'), galho(.2, .66, -.8, .3, '#7d6450')]), copa: nuvens([[.26, .06, .06, 0, .36, 3], [.18, .24, .02, .08, .36, 7], [.17, -.12, .03, -.1, .36, 9], [.14, .06, .0, -.22, .36, 15]], -.06, .16) }),
+  agave: () => ({ alto: .02, rija: true, cores: ['#8aa08a', '#7d967f'], copa: juntar(folhas(11, .22, .3, .12, .035)) }),
+  gigante: () => { const l = [tronco(1.1, .085, .05, .03, '#6a5844')]; for (let i = 0; i < 5; i++) { const a = i * 1.257; l.push([new THREE.ConeGeometry(.05, .4, 4).translate(0, .18, 0), '#62513f', new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(a) * -.32, 0, Math.sin(a) * .32)).setPosition(Math.sin(a) * .09, 0, Math.cos(a) * .09)]); } for (let i = 0; i < 4; i++) l.push(galho(.32, .86 + (i % 2) * .08, 1, i * 1.6, '#6a5844')); const c = [[nuvens([[.28, 0, .18, 0, .55, 3], [.23, .27, .06, .1, .5, 7], [.22, -.25, .08, -.1, .5, 9], [.2, .06, .04, -.27, .5, 15], [.2, -.1, .05, .27, .5, 19]], -.1, .34)]]; for (let i = 0; i < 9; i++) { const a = i * 1.3, r = .16 + (i % 3) * .08, h = .3 + (i % 4) * .12; c.push([fita([0, .5, 1].map(t => [Math.sin(a) * r, -h * t, Math.cos(a) * r]), t => .012 + .012 * Math.sin(t * 9), Math.cos(a), -Math.sin(a)), '#9ab07a']); } return { alto: 1.04, tronco: juntar(l), copa: juntar(c) }; },
+  samambaia: () => ({ alto: .02, copa: juntar(folhas(10, .3, .24, .22, .05)) }),
+  abeto: () => ({ alto: .1, tronco: juntar([tronco(.2, .04, .035, 0, '#5a4638')]), copa: tingir2(juntar([[.24, .34, 0], [.2, .32, .2], [.15, .28, .38], [.1, .24, .55]].map(([r, h, y], i) => { const g = new THREE.ConeGeometry(r, h, 9, 1), p = g.attributes.position; for (let k = 0; k < p.count; k++) if (p.getY(k) < 0) { const a = Math.atan2(p.getZ(k), p.getX(k)), q = 1 + .12 * Math.sin(a * 4 + i * 2); p.setX(k, p.getX(k) * q); p.setZ(k, p.getZ(k) * q); } g.computeVertexNormals(); return [g.translate(0, y + h / 2, 0)]; })), 0, .75) }),
+  glicinia: () => { const c = [[nuvens([[.22, 0, .12, 0, .5, 3], [.16, .2, .04, .08, .5, 7], [.16, -.18, .05, -.08, .5, 9]], -.1, .24)]]; for (let i = 0; i < 20; i++) { const a = i * 2.4, r = .08 + (i % 5) * .055, h = .16 + (i % 3) * .07; c.push([new THREE.ConeGeometry(.032, h, 6).rotateX(Math.PI).translate(Math.sin(a) * r, -h / 2 + .02, Math.cos(a) * r), '#ffffff']); } return { alto: .56, cores: ['#a58fd0', '#b8a5e0', '#c7b8ec', '#8f86c9'], tronco: juntar([tronco(.6, .05, .025, .09, '#6a6070'), galho(.3, .42, .9, 0, '#6a6070'), galho(.28, .46, -.9, .5, '#6a6070')]), copa: juntar(c) }; },
+  salgueiro: () => { const c = [[nuvens([[.2, 0, .14, 0, .6, 3], [.14, .14, .08, .06, .6, 7], [.14, -.13, .08, -.06, .6, 9]], -.06, .26)]]; for (let i = 0; i < 22; i++) { const a = i * 2.4, r = .16 + (i % 4) * .045, h = .34 + (i % 3) * .1; c.push([fita([0, .35, .7, 1].map(t => [Math.sin(a) * (r + .08 * Math.sin(t * 2)), .1 - h * t, Math.cos(a) * (r + .08 * Math.sin(t * 2))]), t => .016 * (1 - t * .6), Math.cos(a), -Math.sin(a)), i % 2 ? '#ffffff' : '#cfcfcf']); } return { alto: .6, cores: ['#7fa898', '#8fb5a8'], tronco: juntar([tronco(.66, .055, .03, .05, '#6a6560'), galho(.24, .5, .8, 0, '#6a6560')]), copa: juntar(c) }; },
+};
+function tingir2(g, y0, y1) { const p = g.attributes.position, c = g.attributes.color; for (let i = 0; i < p.count; i++) { const k = misturar(.62, 1, limitar((p.getY(i) - y0) / (y1 - y0))); c.setXYZ(i, c.getX(i) * k, c.getY(i) * k, c.getZ(i) * k); } return g; }
+const formasArv = new Map();
+function guardarArv(t) { if (!formasArv.has(t)) { const a = ARV[t](); a.copa.userData.fixo = true; if (a.tronco) a.tronco.userData.fixo = true; formasArv.set(t, a); } return formasArv.get(t); }
+
+// ADEREÇOS da orla, um jeito por mundo. por(forma, cor, dx, dy, dz, giro, tamanho)
+const ADERECOS = [
+  (l, por, i) => { if (i % 2) for (let k = 0; k < 5; k++) por(bolota(.07, 1, k + i, .3, .75), k % 2 ? COR.rocha : COR.rocha2, (k - 2) * .11, .05, Math.sin(k) * .02, k); else { por(new THREE.CylinderGeometry(.035, .06, .13, 10), '#b5764f', 0, .07, 0); por(new THREE.CylinderGeometry(.045, .03, .04, 10), '#b5764f', 0, .15, 0); por(new THREE.CylinderGeometry(.03, .045, .1, 10), '#a5684a', .12, .05, .05); } },
+  (l, por, i) => { for (let k = 0; k < 4; k++) por(caixa(-.015, .015, 0, .2, -.015, .015), COR.madeira, (k - 1.5) * .16, 0, 0); for (const y of [.08, .15]) por(caixa(-.27, .27, y, y + .018, -.006, .006), COR.madeira); if (i % 3 === 0) { for (let k = 0; k < 5; k++) por(new THREE.CylinderGeometry(.03, .03, .3, 8).rotateZ(Math.PI / 2), '#8a6a4c', 0, .03 + (k > 2 ? .052 : 0), .14 + (k % 3) * .06 + (k > 2 ? .03 : 0)); } },
+  (l, por, i) => { if (i % 2) { for (const x of [-.08, .08]) for (const z of [-.08, .08]) por(caixa(-.01, .01, 0, .16, -.01, .01), COR.madeira, x, 0, z); por(caixa(-.12, .12, .15, .28, -.1, .1), COR.cal); for (const [g, c] of TETOS.palha(.24, .2, COR.telha)) por(g, c, 0, .28, 0); } else for (let k = 0; k < 3; k++) { por(new THREE.CylinderGeometry(.09 - k * .012, .1 - k * .012, .03, 14), '#c9b183', (k - 1) * .2, .015, .03 * k); por(new THREE.ConeGeometry(.07, .08, 12), '#b59a63', (k - 1) * .2, .07, .03 * k); } },
+  (l, por, i) => { if (i % 3 === 0) por(new THREE.TorusGeometry(.22, .075, 7, 14, Math.PI).scale(1, 1.15, 1), '#b56a48', 0, 0, 0); else { const h = .22 + (i % 2) * .16; por(new THREE.CylinderGeometry(.07, .11, h, 7), '#a8603f', 0, h / 2, 0); por(new THREE.CylinderGeometry(.11, .09, .07, 7), '#c27a52', 0, h + .03, 0); por(new THREE.CylinderGeometry(.08, .1, .05, 7), '#a8603f', .01, h + .09, 0); } },
+  (l, por, i) => { if (i % 2 === 0) { por(new THREE.ConeGeometry(.2, .26, 4).rotateY(.78), '#e6d3ae', 0, .13, 0); por(new THREE.ConeGeometry(.205, .1, 4, 1, true).rotateY(.78), '#a5563f', 0, .215, 0, 0, .42); por(caixa(-.04, .04, 0, .12, .13, .15), '#5a4632'); } else for (let k = 0; k < 4; k++) { por(new THREE.SphereGeometry(.05, 10, 8).scale(1, 1.2, 1), k % 2 ? '#b5764f' : '#c98f62', Math.sin(k * 2) * .11, .05, Math.cos(k * 2) * .11); por(new THREE.CylinderGeometry(.03, .025, .03, 8), '#a5684a', Math.sin(k * 2) * .11, .115, Math.cos(k * 2) * .11); } },
+  (l, por, i) => { if (i % 2) { por(new THREE.CylinderGeometry(.07, .09, .04, 6), COR.rocha, 0, .02, 0); por(new THREE.CylinderGeometry(.035, .045, .16, 8), COR.rocha, 0, .12, 0); por(new THREE.CylinderGeometry(.07, .05, .03, 6), COR.rocha, 0, .21, 0); por(caixa(-.045, .045, .225, .3, -.045, .045), '#f0d9a8'); for (const [x, z] of [[-.045, -.045], [.045, -.045], [-.045, .045], [.045, .045]]) por(caixa(-.012, .012, .22, .3, -.012, .012), COR.rocha2, x, 0, z); por(new THREE.ConeGeometry(.12, .07, 6), COR.rocha2, 0, .335, 0); } else { por(bolota(.16, 2, i + 4, .4, 1.1), COR.rocha, 0, .08, 0); por(bolota(.1, 2, i + 9, .4, .7), COR.rocha2, .17, .04, .05); por(bolota(.12, 1, i + 2, .2, .25), '#6f8548', -.08, .0, .1); } },
+  (l, por, i) => { if (i % 2) { for (let k = 0; k < 5; k++) por(caixa(-.018, .018, 0, .17, -.01, .01), '#f2eee2', (k - 2) * .1, 0, 0); por(caixa(-.25, .25, .09, .115, -.006, .006), '#f2eee2'); } else { const h = new THREE.SphereGeometry(.16, 12, 6, 0, 6.3, Math.PI / 2, Math.PI / 2).scale(1.5, .6, .62); por(h, '#4a7fa5', 0, .1, 0); por(caixa(-.22, .22, .09, .105, -.09, .09), '#e6dcc2'); por(caixa(-.008, .008, .1, .36, -.008, .008), COR.madeira); } },
+  (l, por, i) => { const h = .18 + (i % 3) * .14; por(caixa(-.1, .1, 0, .05, -.1, .1), COR.cornija); por(new THREE.CylinderGeometry(.06, .068, h, 10), COR.pedra, 0, .05 + h / 2, 0); if (i % 3 === 2) por(caixa(-.1, .1, 0, .05, -.1, .1), COR.cornija, 0, .05 + h, 0); por(new THREE.CylinderGeometry(.06, .06, .2, 10).rotateZ(Math.PI / 2), COR.pedra, .24, .05, .08, .6); por(bolota(.07, 1, i, .3, .5), '#5f8a4a', .02, h + .06, 0); por(bolota(.08, 1, i + 4, .3, .4), '#4f7d45', -.1, .04, .1); },
+  (l, por, i) => { if (i % 2) for (let k = 0; k < 6; k++) { por(new THREE.CylinderGeometry(.032, .032, .28, 8).rotateZ(Math.PI / 2), '#7a5a42', 0, .03 + (k > 2 ? .054 : 0), (k % 3) * .065 + (k > 2 ? .03 : 0)); if (k > 2) por(caixa(-.14, .14, 0, .02, -.025, .025), '#f3f7f9', 0, .108, (k % 3) * .065 + .03); } else { por(bolota(.17, 2, i + 3, .4, .9), COR.rocha, 0, .06, 0); por(bolota(.15, 2, i + 3, .35, .4), '#f3f7f9', 0, .17, 0); } },
+  (l, por, i) => { if (i % 2) { for (const x of [-.14, .14]) por(new THREE.CylinderGeometry(.022, .028, .4, 10), COR.pedra, x, .2, 0); por(new THREE.TorusGeometry(.14, .022, 6, 14, Math.PI), COR.pedra, 0, .4, 0); for (let k = 0; k < 5; k++) por(bolota(.05, 1, k, .3), ['#a58fd0', '#c7b8ec', '#7fa898'][k % 3], Math.cos(k * .7 + .2) * .14, .42 + Math.sin(k * .7 + .2) * .14, .02); } else { por(new THREE.CylinderGeometry(.05, .07, .18, 8), COR.cornija, 0, .09, 0); por(new THREE.SphereGeometry(.06, 14, 10), '#f6f1d8', 0, .24, 0); } },
+];
+
 function criarIlha(F, tema) {
   const grupo = new THREE.Group(), L = F.larg, P = F.prof, ox = F.indice * 13.7;
   const foraDe = (x, z) => Math.hypot(Math.max(0, Math.abs(x) - L / 2), Math.max(0, Math.abs(z) - P / 2));
-  const limite = (x, z) => .85 + .7 * ruido2(x * .55 + ox, z * .55) + .2 * ruido2(x * 1.9, z * 1.9 + ox);
+  const V8 = MUNDO, RV = V8.relevo || {}, pf = V8;
+  const limite = (x, z) => .85 + (V8.orla || 0) + .7 * ruido2(x * .55 + ox, z * .55) + .2 * ruido2(x * 1.9, z * 1.9 + ox);
   function altura(x, z) {
     const w = .05, a = x + (ruido2(x * 2.3 + ox, z * 2.3) - .5) * 2 * w, b = z + (ruido2(x * 2.3, z * 2.3 + 40 + ox) - .5) * 2 * w;
     const nivel = F.alt(limitar(Math.floor(a + L / 2), 0, L - 1), limitar(Math.floor(b + P / 2), 0, P - 1)) * DEGRAU;
     const d = foraDe(x, z); if (d === 0) return nivel;
     const lim = limite(x, z), solta = suave(.15, 1.1, d);
-    let y = nivel + solta * (ruido2(x * .9 + ox, z * .9) - .4) * .42 - .12 * suave(lim - .5, lim, d);
-    const q = limitar((d - lim) / 1.1); return misturar(y, -3.2, Math.pow(q, 1.15) * (.94 + .06 * ruido2(x * 2, z * 2)));
+    let y = nivel + solta * (ruido2(x * .9 + ox, z * .9) - .4) * .42 * (RV.onda ?? 1) - .12 * suave(lim - .5, lim, d);
+    if (RV.duna) y += solta * (.2 * Math.sin(x * 1.25 + z * .7 + ox) + .08 * Math.sin(z * 2.1 - x * .8));
+    if (RV.sobe) y += solta * suave(.2, 1.1, d) * RV.sobe * ruido2(x * .75 + ox + 5, z * .75);
+    if (RV.degrau) { const f = y / RV.degrau, i = Math.floor(f); y = misturar(y, (i + suave(.62, 1, f - i)) * RV.degrau, suave(0, .3, d)); }
+    const q = limitar((d - lim) / (RV.larg || 1.1)); return misturar(y, -3.2, Math.pow(q, 1.15) * (.94 + .06 * ruido2(x * 2, z * 2)));
   }
   // relevo
-  const passo = 1 / 12, nx = Math.round((L + MARGEM * 2) / passo), nz = Math.round((P + MARGEM * 2) / passo), V = new Float32Array((nx + 1) * (nz + 1) * 3), I = [];
+  const passo = L * P > 56 ? 1 / 10 : 1 / 12, nx = Math.round((L + MARGEM * 2) / passo), nz = Math.round((P + MARGEM * 2) / passo), V = new Float32Array((nx + 1) * (nz + 1) * 3), I = [];
   for (let j = 0, k = 0; j <= nz; j++) for (let i = 0; i <= nx; i++) { const x = -L / 2 - MARGEM + i * passo, z = -P / 2 - MARGEM + j * passo; V[k++] = x; V[k++] = altura(x, z); V[k++] = z; }
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) { const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1; if (Math.max(V[a * 3 + 1], V[d * 3 + 1]) < -2.6) continue; I.push(a, c, b, b, c, d); }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(V, 3)); g.setIndex(I); g.computeVertexNormals();
@@ -1063,28 +1264,36 @@ function criarIlha(F, tema) {
   const area = (L + 4) * (P + 4);
   // capim
   const gCapim = guardar('capim', () => { const l = []; for (let i = 0; i < 6; i++) { const a = i * 1.05, h = .1 + (i % 3) * .035, t = new THREE.BufferGeometry(), dx = Math.cos(a) * .035, dz = Math.sin(a) * .035; t.setAttribute('position', new THREE.Float32BufferAttribute([dx * .4 - dz * .28, 0, dz * .4 + dx * .28, dx * .4 + dz * .28, 0, dz * .4 - dx * .28, dx * 2, h, dz * 2], 3)); t.setAttribute('normal', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 0, 0, 1, 0], 3)); l.push([t]); } return tingir(juntar(l), 0, .16, '#9a9a9a', '#ffffff'); });
-  plantar(gCapim, MP.capim, lugar(area * 62 | 0, (x, z) => ruido2(x * 1.6 + ox, z * 1.6) > .26 && !ocupado(x, z, .45) && plano(x, z)), () => tema.verde, () => .55 + sorte() * .65);
+  plantar(gCapim, MP.capim, lugar(area * (area > 130 ? 46 : 58) * (V8.capim ?? 1) | 0, (x, z) => ruido2(x * 1.6 + ox, z * 1.6) > .26 && !ocupado(x, z, .45) && plano(x, z)), () => tema.verde, () => .55 + sorte() * .65);
   // flores
   const gFlor = guardar('flor', () => { const l = [[caixa(-.005, .005, 0, .12, -.005, .005), '#6d8a4e']]; for (let i = 0; i < 5; i++) { const a = i * 1.257; l.push([new THREE.CircleGeometry(.022, 6).rotateX(-Math.PI / 2 + .25).translate(0, .122, .024).rotateY(a), '#ffffff']); } l.push([new THREE.IcosahedronGeometry(.013, 0).translate(0, .128, 0), '#e8b64c']); return juntar(l); });
-  plantar(gFlor, MP.flor, lugar(area * 22 | 0, (x, z) => ruido2(x * 1.1 + ox + 9, z * 1.1) > .5 && !ocupado(x, z, .46) && plano(x, z)), i => tema.flores[(i * 7 + (ruido2(i * .3, 2) * 4 | 0)) % tema.flores.length], () => .75 + sorte() * .7);
+  plantar(gFlor, MP.flor, lugar(area * 20 * (V8.flores ?? 1) | 0, (x, z) => ruido2(x * 1.1 + ox + 9, z * 1.1) > .5 && !ocupado(x, z, .46) && plano(x, z)), i => tema.flores[(i * 7 + (ruido2(i * .3, 2) * 4 | 0)) % tema.flores.length], () => .75 + sorte() * .7);
   // arbustos
   const gArb = guardar('arbusto', () => tingir(amaciar(juntar([[bolota(.14, 2, 5, .3, .8).translate(0, .09, 0)], [bolota(.1, 2, 8, .3, .85).translate(.11, .07, .04)], [bolota(.09, 2, 12, .3, .85).translate(-.1, .06, -.03)]]), 0, 0, 0, .85), 0, .22, '#8a8a8a', '#ffffff'));
   const verdeEscuro = '#' + new THREE.Color(tema.verde).offsetHSL(.02, .02, -.06).getHexString();
-  plantar(gArb, MP.copa, lugar(area * 1.7 | 0, (x, z, d) => !ocupado(x, z, .6) && plano(x, z, .14) && (d > .3 || !centro(x, z))), i => i % 3 ? verdeEscuro : tema.verde, () => .55 + sorte() * .6, true);
-  // árvores: na orla e, pequenas, em algumas casas livres
-  const arv = [];
-  for (const p of lugar(area * 1.5 | 0, (x, z, d) => d > .62 && d < limite(x, z) - .28 && plano(x, z, .16))) if (arv.length < 26 && arv.every(q => Math.hypot(q[0] - p[0], q[2] - p[2]) > .62)) arv.push([...p, .75 + sorte() * .45]);
-  for (let i = 0; i < L * P; i++) if (!F.grade[i] && sorte() < .42) { const x = i % L - (L - 1) / 2 + (sorte() - .5) * .25, z = (i / L | 0) - (P - 1) / 2 + (sorte() - .5) * .25; if (plano(x, z, .15)) arv.push([x, altura(x, z), z, .5 + sorte() * .14]); }
-  const gTronco = guardar('tronco', () => { const t = new THREE.CylinderGeometry(.022, .045, .5, 7, 4).translate(0, .25, 0), p = t.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setX(i, p.getX(i) + Math.sin(y * 6) * .025); } t.computeVertexNormals(); const r = new THREE.CylinderGeometry(.012, .024, .26, 5).translate(0, .13, 0); return juntar([[t, '#7c6a55'], [r, '#7c6a55', new THREE.Matrix4().makeRotationZ(.8).setPosition(0, .34, 0)], [r, '#7c6a55', new THREE.Matrix4().makeRotationZ(-.75).setPosition(0, .4, 0)]]); });
-  const gCopa = guardar('copa', () => tingir(amaciar(juntar([[bolota(.24, 3, 3, .3, .82).translate(0, .16, 0)], [bolota(.18, 2, 7, .3, .85).translate(.17, .08, .06)], [bolota(.17, 2, 9, .3, .85).translate(-.16, .1, -.07)], [bolota(.15, 2, 15, .3, .85).translate(.02, .06, -.18)], [bolota(.14, 2, 19, .3, .85).translate(-.05, .07, .18)]]), 0, .1, 0, .85), -.08, .34, '#8a8a8a', '#ffffff'));
-  const gCip = guardar('cipreste', () => { const pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12; pts.push(new THREE.Vector2(Math.max(.002, .13 * Math.pow(Math.sin(Math.PI * Math.pow(t, .62)), .8) * (1 - t * .25)), t * .95 + .02)); } const c = new THREE.LatheGeometry(pts, 12), p = c.attributes.position; for (let i = 0; i < p.count; i++) { const k = 1 + .22 * (ruido2(p.getX(i) * 22 + 5, p.getY(i) * 9 + p.getZ(i) * 22) - .5); p.setX(i, p.getX(i) * k); p.setZ(i, p.getZ(i) * k); } c.computeVertexNormals(); return tingir(juntar([[c]]), 0, .95, '#6f6f6f', '#ffffff'); });
-  const cip = arv.filter((a, i) => a[3] > .7 && i % 3 === 1), redondas = arv.filter(a => !cip.includes(a));
-  const troncos = new THREE.InstancedMesh(gTronco, matLiso, Math.max(1, redondas.length)); redondas.forEach(([x, y, z, e], i) => troncos.setMatrixAt(i, M4(x, y - .03, z, i * 2.4, e))); troncos.castShadow = troncos.receiveShadow = true; troncos.count = redondas.length; troncos.frustumCulled = false; grupo.add(troncos);
-  plantar(gCopa, MP.copa, redondas.map(([x, y, z, e]) => [x, y + .42 * e, z]), i => i % 4 === 2 ? tema.flores[1] : i % 2 ? tema.verde : verdeEscuro, i => redondas[i][3], true);
-  plantar(gCip, MP.copa, cip, () => '#' + new THREE.Color(tema.verde).offsetHSL(.04, -.03, -.06).getHexString(), i => cip[i][3], true);
+  plantar(gArb, MP.copa, lugar(area * 1.5 * (V8.arbustos ?? 1) | 0, (x, z, d) => !ocupado(x, z, .6) && plano(x, z, .14) && (d > .3 || !centro(x, z))), i => i % 3 ? verdeEscuro : tema.verde, () => .55 + sorte() * .6, true);
+  // árvores: na orla e, pequenas, em algumas casas livres. Os tipos vêm do mundo (MUNDOS[].arv) e as formas de ARV.
+  const arv = [], bolsa = V8.arv.flatMap(([t, p, e]) => Array(p).fill([t, e]));
+  for (const p of lugar(area * 1.6 | 0, (x, z, d) => d > .62 && d < limite(x, z) - .22 && plano(x, z, .13))) if (arv.length < (V8.arvMax || 24) && arv.every(q => Math.hypot(q[0] - p[0], q[2] - p[2]) > .55)) { const [t, e] = bolsa[sorte() * bolsa.length | 0]; arv.push([...p, (.75 + sorte() * .4) * e, t]); }
+  for (let i = 0; i < L * P; i++) if (!F.grade[i] && !F.grade[i + L * P] && sorte() < .36) { const x = i % L - (L - 1) / 2 + (sorte() - .5) * .25, z = (i / L | 0) - (P - 1) / 2 + (sorte() - .5) * .25; if (plano(x, z, .15)) arv.push([x, altura(x, z), z, V8.dentro[1] * (.95 + sorte() * .2), V8.dentro[0]]); }
+  const troncoDe = (geo, l) => { const t = new THREE.InstancedMesh(geo, matLiso, l.length); l.forEach(([x, y, z, e], i) => t.setMatrixAt(i, M4(x, y - .03, z, i * 2.4, e))); t.castShadow = t.receiveShadow = true; t.frustumCulled = false; grupo.add(t); };
+  for (const tipo of new Set(arv.map(a => a[4]))) {
+    const l = arv.filter(a => a[4] === tipo), A = guardarArv(tipo), cores = A.cores || V8.copa || [tema.verde, verdeEscuro, verdeEscuro, A.florida ? tema.flores[1] : verdeEscuro];
+    if (A.tronco) troncoDe(A.tronco, l);
+    plantar(A.copa, A.rija ? MP.fixa : MP.copa, l.map(([x, y, z, e]) => [x, y + A.alto * e, z]), i => cores[i % cores.length], i => l[i][3], true);
+  }
   // pedras soltas
-  const pedras = lugar(area * 2.2 | 0, (x, z) => !ocupado(x, z, .56)), gPed = guardar('pedra', () => juntar([[bolota(.1, 1, 6, .35, .62)]]));
+  const pedras = lugar(area * 2 * (V8.pedras || 1) | 0, (x, z) => !ocupado(x, z, .56)), gPed = guardar('pedra', () => juntar([[bolota(.1, 1, 6, .35, .62)]]));
   const ip = new THREE.InstancedMesh(gPed, matLiso, Math.max(1, pedras.length)); pedras.forEach(([x, y, z], i) => { const e = .3 + Math.pow(sorte(), 2.2) * 1.1; ip.setMatrixAt(i, M4(x, y, z, sorte() * 6, e)); ip.setColorAt(i, new THREE.Color(i % 2 ? COR.rocha : COR.rocha2)); }); ip.count = pedras.length; ip.castShadow = ip.receiveShadow = true; ip.frustumCulled = false; grupo.add(ip);
+  // adereços do mundo, na orla
+  const onde = [], longeDe = (p, r) => onde.every(q => Math.hypot(q[0] - p[0], q[2] - p[2]) > r) && arv.every(q => Math.hypot(q[0] - p[0], q[2] - p[2]) > .42);
+  for (const p of lugar(area * 1.2 | 0, (x, z, d) => d > .5 && d < limite(x, z) - .3 && plano(x, z, .16))) if (onde.length < 7 && longeDe(p, 1.3)) onde.push(p);
+  const la = []; onde.forEach(([x, y, z], i) => ADERECOS[F.mundo](la, (g, c, dx = 0, dy = 0, dz = 0, r = 0, e = 1) => { const a = i * 1.9, q = M4(x, y - .02, z, a).multiply(M4(dx, dy, dz, r, e)); la.push([g, c, q]); }, i));
+  if (la.length) { const m = new THREE.Mesh(juntar(la), matLiso); m.castShadow = m.receiveShadow = true; grupo.add(m); }
+  // espelhos d'água na orla
+  if (V8.pocas) { let n = 0; for (const [x, y, z] of lugar(area * 1.4 | 0, (x, z, d) => d > .45 && d < limite(x, z) - .25 && plano(x, z, .22))) { if (n >= V8.pocas) break; if (!longeDe([x, y, z], .8)) continue; onde.push([x, y, z]); const p = poca(.3, y + .03, x, z); p.material.uniforms.uNivel.value = 1; p.scale.set(1 + sorte() * .5, 1, .6 + sorte() * .4); p.rotation.y = sorte() * 3; grupo.add(p); n++; } }
+  // cascatas que escorrem da borda (jardins suspensos)
+  for (let i = 0; i < (V8.cascatas || 0); i++) { const a = i / V8.cascatas * 6.28 + .6, sx = Math.sin(a), cz = Math.cos(a); let r = Math.max(L, P) * .4; while (r < 12 && foraDe(sx * r, cz * r) < limite(sx * r, cz * r) - .02) r += .05; const m = malhaQueda({ uAlto: 3.2, uLonge: .35, uLargo: .3, uForca: 1, uSome: 1 }); m.position.set(sx * r, altura(sx * r, cz * r) + .02, cz * r); m.rotation.y = a + Math.PI; m.visible = true; grupo.add(m); }
 
   // ---- MAPA DE VIDA: imagem pequena vista de cima; branco = verde e florido, preto = seco
   const PX = 7, vx = Math.ceil((L + MARGEM * 2) * PX), vz = Math.ceil((P + MARGEM * 2) * PX), atual = new Float32Array(vx * vz), dados = new Uint8Array(vx * vz);
@@ -1115,16 +1324,22 @@ function criarIlha(F, tema) {
 // ---- Mundo em volta: mar de névoa, montanhas ao longe, pássaros
 const mundo = new THREE.Group(); cena.add(mundo);
 const matNevoa = new THREE.ShaderMaterial({
-  transparent: true, depthWrite: false, uniforms: { uT: U.uT, uNevoa: U.uNevoa, uAlfa: { value: 1 }, uEsc: { value: .2 }, uLim: { value: 60 } },
+  transparent: true, depthWrite: false, uniforms: { uT: U.uT, uNevoa: U.uNevoa, uAlfa: { value: 1 }, uEsc: { value: .2 }, uMar: U.uMar, uMar1: U.uMar1, uMar2: U.uMar2, uCam: { value: new THREE.Vector3() } },
   vertexShader: 'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-  fragmentShader: `uniform vec3 uNevoa;uniform float uT,uAlfa,uEsc,uLim;varying vec3 vW;${GLSL_RUIDO}
-  void main(){ float r=length(vW.xz), n=fbm(vW.xz*uEsc+vec2(uT*.018,uT*.011)+vW.y*3.); float a=uAlfa*smoothstep(.28,.72,n); a*=1.-smoothstep(7.,13.,r); if(uAlfa>.99) a=1.; vec3 c=uNevoa*(.94+.1*n); c=mix(c,uNevoa,smoothstep(14.,34.,r));
+  fragmentShader: `uniform vec3 uNevoa,uMar1,uMar2;uniform float uT,uAlfa,uEsc,uMar;varying vec3 vW;${GLSL_RUIDO}
+  void main(){ float r=length(vW.xz), n=fbm(vW.xz*uEsc+vec2(uT*.018,uT*.011)+vW.y*3.); float a=uAlfa*smoothstep(.28,.72,n); a*=1.-smoothstep(7.,13.,r); if(uAlfa>.99) a=1.; vec3 c=uNevoa*(.94+.1*n);
+    if(uMar>.5&&uMar<2.5){ if(uAlfa>.99){
+      if(uMar<1.5){ vec2 q=vW.xz; float o=fbm(vec2(q.x*.8+q.y*.25,q.y*2.1-q.x*.5)+vec2(uT*.1,uT*.16))+.5*fbm(vec2(q.x*2.2,q.y*4.6)-vec2(uT*.2,-uT*.14)); c=mix(uMar1,uMar2,smoothstep(.4,1.15,o)*.8); c+=vec3(.5)*smoothstep(.98,1.12,o)*.16*(1.-smoothstep(6.,16.,r)); }
+      else { float d=sin(vW.x*.42+vW.z*.2+fbm(vW.xz*.12)*5.); c=mix(uMar1*.9,uMar2,.5+.5*d)*(.97+.05*sin(vW.x*9.+vW.z*4.+fbm(vW.xz*.6)*9.)*(1.-smoothstep(6.,16.,r))); }
+    } else a*=uMar<1.5?.22:.12; }
+    if(uMar>2.5){ c=mix(uMar1,uMar2,n)*(.8+.5*n); a=min(1.,a*1.5); if(uAlfa>.99) a=1.; }
+    c=mix(c,uNevoa,smoothstep(14.,34.,r));
     gl_FragColor=vec4(c,a);
     #include <colorspace_fragment>
   }`,
 });
 [[-1.9, 1, .16], [-1.55, .4, .23], [-1.2, .24, .3]].forEach(([y, a, e], i) => {
-  const m = new THREE.Mesh(new THREE.CircleGeometry(i ? 34 : 150, 40).rotateX(-Math.PI / 2), matNevoa.clone()); for (const n of ['uT', 'uNevoa']) m.material.uniforms[n] = U[n];
+  const m = new THREE.Mesh(new THREE.CircleGeometry(i ? 34 : 150, 40).rotateX(-Math.PI / 2), matNevoa.clone()); for (const n of ['uT', 'uNevoa', 'uMar', 'uMar1', 'uMar2']) m.material.uniforms[n] = U[n];
   m.material.uniforms.uAlfa.value = a; m.material.uniforms.uEsc.value = e; if (!i) { m.material.transparent = false; m.material.depthWrite = true; }
   m.position.y = y; m.renderOrder = i ? 5 + i : 0; mundo.add(m);
 });
@@ -1134,8 +1349,48 @@ matLonge.onBeforeCompile = sh => {   // o pé das montanhas se dissolve na névo
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying float vAlt;').replace('#include <fog_fragment>', '#include <fog_fragment>\ngl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,1.-.75*smoothstep(-1.9,1.2,vAlt));');
 };
 const longe = new THREE.Group(); mundo.add(longe);
-{ const s = sorteador(8), l = []; for (let i = 0; i < 30; i++) { const a = i * 2.4 + s() * .5, r = 8.2 + i * .75 + s() * 1.5, w = .5 + s() * r * .12, h = .4 + s() * r * .11, g = bolota(1, 3, i + 40, .42); l.push([g, '#fff', M4(Math.sin(a) * r, -2.1, Math.cos(a) * r, i, w, h + 1, w * (.7 + s() * .5))]); }
-  longe.add(new THREE.Mesh(juntar(l), matLonge)); }
+// silhuetas ao longe: cada mundo tem as suas
+const SILHUETAS = {
+  montes: (s, i, r) => [bolota(1, 3, i + 40, .42), .5 + s() * r * .12, .4 + s() * r * .11 + 1, 1],
+  torres: (s, i, r) => [bolota(1, 3, i + 40, .35), .35 + s() * r * .045, 1.2 + s() * r * .2, 1],
+  mesas: (s, i, r) => [new THREE.CylinderGeometry(.8, 1.1, 1.6, 9, 3), .5 + s() * r * .11, .6 + s() * r * .09, 1],
+  dunas: (s, i, r) => [bolota(1, 3, i + 40, .25), 1.4 + s() * r * .25, .35 + s() * r * .035 + .6, .6],
+  ilhotas: (s, i, r) => [bolota(1, 3, i + 40, .5), i % 3 ? .001 : .4 + s() * r * .09, .5 + s() * r * .05, 1],
+  mata: (s, i, r) => [bolota(1, 3, i + 40, .55), .7 + s() * r * .1, .8 + s() * r * .08, 1],
+  picos: (s, i, r) => [new THREE.ConeGeometry(1, 2, 6, 3), .7 + s() * r * .14, .8 + s() * r * .16, 1],
+  suspensas: (s, i, r) => [new THREE.ConeGeometry(1, 1.3, 9, 2).rotateX(Math.PI), .4 + s() * r * .07, .5 + s() * r * .05, 1],
+};
+function montarLonge(nome) {
+  if (longe.userData.nome === nome) return; longe.userData.nome = nome; for (const m of longe.children.slice()) { m.geometry.dispose(); longe.remove(m); }
+  const s = sorteador(8), l = []; for (let i = 0; i < 30; i++) { const a = i * 2.4 + s() * .5, r = 8.6 + i * .75 + s() * 1.5, [g, w, h, f] = SILHUETAS[nome](s, i, r); l.push([g, '#fff', M4(Math.sin(a) * r, nome === 'suspensas' ? -1.2 + s() * 2.2 : -2.1, Math.cos(a) * r, i, w, h, w * f * (.7 + s() * .5))]); }
+  longe.add(new THREE.Mesh(juntar(l), matLonge));
+}
+// céu da noite: estrelas e lua
+const noite = new THREE.Group(); noite.visible = false; mundo.add(noite);
+{ const s = sorteador(31), V = []; for (let i = 0; i < 420; i++) { const a = s() * 6.283, e = -.25 + s() * 1.2, r = 60; V.push(Math.sin(a) * Math.cos(e) * r, Math.sin(e) * r, Math.cos(a) * Math.cos(e) * r); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); noite.add(new THREE.Points(g, new THREE.PointsMaterial({ color: '#eef2ff', size: 1.6, sizeAttenuation: false, transparent: true, opacity: .75, fog: false, depthWrite: false, toneMapped: false })));
+  const lua = new THREE.Group(); lua.add(new THREE.Mesh(new THREE.CircleGeometry(2.1, 40), new THREE.MeshBasicMaterial({ color: '#f4f2e4', fog: false, toneMapped: false })), ...[3, 4.2].map((r, i) => new THREE.Mesh(new THREE.CircleGeometry(r, 40), new THREE.MeshBasicMaterial({ color: '#cfdcff', transparent: true, opacity: .09 - i * .035, fog: false, depthWrite: false, toneMapped: false })))); noite.add(lua); noite.userData.lua = lua; }
+
+// ---- CLIMA: partículas leves calculadas na placa de vídeo. vel [x, y, z], bal balanço, tam, cor, n quantidade, risco = gota comprida
+const CLIMAS = {
+  nada: null,
+  polen: { vel: [.05, .03, .04], bal: .35, tam: .035, cor: '#fff6d8', alfa: .5, n: 60 },
+  bruma: { vel: [.22, .0, .1], bal: .4, tam: 1.9, cor: '#ffffff', alfa: .085, n: 26, mole: 1 },
+  garoa: { vel: [.1, -2.6, .05], bal: .05, tam: .09, cor: '#e8f0f2', alfa: .3, n: 260, risco: 1 },
+  chuva: { vel: [.25, -4.6, .1], bal: .03, tam: .13, cor: '#e6f0f4', alfa: .36, n: 340, risco: 1 },
+  poeira: { vel: [.5, .02, .2], bal: .3, tam: .03, cor: '#f7e2bd', alfa: .4, n: 90 },
+  folhas: { vel: [.2, -.36, .12], bal: .6, tam: .075, cor: '#c9583c', alfa: .85, n: 46, folha: 1 },
+  petalas: { vel: [.12, -.2, .1], bal: .55, tam: .05, cor: '#dccdf5', alfa: .7, n: 60, folha: 1 },
+  neve: { vel: [.12, -.55, .08], bal: .4, tam: .05, cor: '#ffffff', alfa: .85, n: 220 },
+};
+const Clima = (() => {
+  const N = 340, s = sorteador(77), V = []; for (let i = 0; i < N; i++) V.push(s(), s(), s()); const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3));
+  const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uT: U.uT, uEsc: { value: 400 }, uVel: { value: new THREE.Vector3() }, uBal: { value: 0 }, uTam: { value: .05 }, uCor: { value: new THREE.Color() }, uAlfa: { value: 0 }, uRisco: { value: 0 }, uFolha: { value: 0 }, uMole: { value: 0 }, uLado: { value: 14 } },
+    vertexShader: 'uniform float uT,uEsc,uBal,uTam,uLado,uFolha;uniform vec3 uVel;varying float vA,vG;void main(){vec3 b=vec3(uLado,6.,uLado);vec3 p=position*b+uVel*uT*(.8+.4*position.x);p.x+=sin(uT*.9+position.y*40.)*uBal;p.z+=cos(uT*.7+position.x*40.)*uBal;p=mod(p,b);vA=smoothstep(0.,.8,p.y)*smoothstep(6.,4.5,p.y)*smoothstep(0.,1.5,p.x)*smoothstep(uLado,uLado-1.5,p.x)*smoothstep(0.,1.5,p.z)*smoothstep(uLado,uLado-1.5,p.z);p-=vec3(uLado*.5,1.3,uLado*.5);vG=uT*(1.+position.z*2.)+position.y*30.;vec4 q=viewMatrix*vec4(p,1.);gl_Position=projectionMatrix*q;gl_PointSize=uTam*(.6+.8*position.z)*uEsc/-q.z;}',
+    fragmentShader: 'uniform vec3 uCor;uniform float uAlfa,uRisco,uFolha,uMole;varying float vA,vG;void main(){vec2 p=gl_PointCoord-.5;float a;if(uRisco>.5)a=smoothstep(.07,.0,abs(p.x))*smoothstep(.5,.1,abs(p.y));else if(uFolha>.5){float s=sin(vG),c=cos(vG);p=mat2(c,-s,s,c)*p;p.y*=1.8+1.2*sin(vG*1.7);a=smoothstep(.5,.4,length(p));}else a=smoothstep(.5,uMole>.5?.0:.2,length(p));gl_FragColor=vec4(uCor,a*uAlfa*vA);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}' });
+  const p = new THREE.Points(g, m); p.frustumCulled = false; p.renderOrder = 11; p.visible = false; cena.add(p);
+  return { m, trocar(nome, lado) { const c = CLIMAS[nome || 'nada']; p.visible = !!c && !CALMO; if (!c) return; const u = m.uniforms; u.uVel.value.set(...c.vel); u.uBal.value = c.bal; u.uTam.value = c.tam; u.uCor.value.set(c.cor); u.uAlfa.value = c.alfa; u.uRisco.value = c.risco || 0; u.uFolha.value = c.folha || 0; u.uMole.value = c.mole || 0; u.uLado.value = lado; g.setDrawRange(0, c.n); } };
+})();
 const passaros = new THREE.Group(); mundo.add(passaros);
 { const asa = new THREE.BufferGeometry(); asa.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -.05, 0, 0, .06, .24, .015, .05], 3)); asa.computeVertexNormals();
   const m = new THREE.MeshBasicMaterial({ color: '#4d5a58', side: THREE.DoubleSide, transparent: true }); for (let i = 0; i < 6; i++) { const p = new THREE.Group(), a = new THREE.Mesh(asa, m), b = new THREE.Mesh(asa, m); b.scale.x = -1; p.add(a, b); p.scale.setScalar(.55); p.userData = { f: i * 1.9, r: 3 + i * .45, y: 1.7 + (i % 3) * .3 }; passaros.add(p); } passaros.userData.m = m; }
@@ -1200,11 +1455,20 @@ const geoToque = new THREE.CylinderGeometry(.47, .49, .62, 12).translate(0, .3, 
 function descartar(g) {
   g.traverse(o => { if (o.geometry && !o.geometry.userData.fixo && o.geometry !== geoToque) o.geometry.dispose(); if (o.material && o.material.isShaderMaterial) o.material.dispose(); if (o.isInstancedMesh) o.dispose(); });
 }
+let MUNDO = MUNDOS[0]; const CORPADRAO = { ...COR };
+function aplicarMundo(k) {
+  const m = MUNDOS[k]; if (m !== MUNDO || !cache.size) { MUNDO = m; for (const g of cache.values()) g.dispose(); cache.clear(); for (const a of formasArv.values()) { a.copa.dispose(); a.tronco && a.tronco.dispose(); } formasArv.clear(); }
+  Object.assign(COR, CORPADRAO, m.cor); MP.copa.userData.un.uSeca.value.set(m.seca); MP.capim.userData.un.uSeca.value.set(m.capimSeco || '#c7b184'); MP.fixa.userData.un.uSeca.value.set(m.seca);
+  U.uChao.value = m.chao || 0; U.uMar.value = { agua: 1, areia: 2, nuvens: 3 }[m.mar] || 0; U.uAgua2.value.set(m.agua2 || '#2f3f96'); montarLonge(m.longe);
+  document.documentElement.style.setProperty('--agua2', m.agua2 || '#3a4aa0'); passaros.userData.m.color.set(m.mar === 'agua' ? '#f4f4ee' : '#4d5a58');
+}
 function aplicarTema(t) {
+  U.uMar1.value.set(MUNDO.mar === 'areia' ? t.seco : t.mar1); U.uMar2.value.set(MUNDO.mar === 'areia' ? t.nevoa : t.mar2); new THREE.Color(MUNDO.mar === 'agua' ? t.mar1 : MUNDO.mar === 'areia' ? t.seco : t.nevoa).lerp(new THREE.Color(t.nevoa), t.noite ? .6 : .25).getRGB(U.uPe.value, THREE.SRGBColorSpace);
+  if (t.noite && MUNDO.mar === 'areia') U.uMar1.value.lerp(new THREE.Color(t.nevoa), .7); noite.visible = !!t.noite;
   cena.background.set(t.nevoa); cena.fog.color.set(t.nevoa); U.uNevoa.value.set(t.nevoa); U.uVerde.value.set(t.verde); U.uSeco.value.set(t.seco); U.uSolo.value.set(t.solo); U.uNoite.value = t.noite ? 1 : 0;
   ceu.color.set(t.ceu); ceu.groundColor.set(t.solo); ceu.intensity = t.noite ? 1.25 : 1.55; sol.color.set(t.sol); sol.intensity = t.forca; matLonge.color.set(t.longe);
   U.uSolDir.value.set(Math.sin(t.angulo + 2.2), 1.15, Math.cos(t.angulo + 2.2)).normalize(); U.uSolCor.value.set(t.sol);
-  passaros.visible = !t.noite;
+  passaros.visible = !t.noite && MUNDO.som.ave !== 'nada' && MUNDO.mar !== 'nuvens';
   const r = document.documentElement.style; r.setProperty('--nevoa', t.nevoa); r.setProperty('--tinta', t.tinta); r.setProperty('--vidro', t.noite ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.36)'); r.setProperty('--acento', t.noite ? '#8fd6de' : '#2b7f8c');
   document.querySelector('meta[name=theme-color]').content = t.nevoa;
 }
@@ -1213,7 +1477,7 @@ function aplicarTema(t) {
 function montar(indice) {
   if (J.ilha) { cena.remove(J.ilha.grupo); anelSobre.removeFromParent(); anelDica.removeFromParent(); fantasma.removeFromParent(); descartar(J.ilha.grupo); J.ilha.largar(); }
   Part.limpar();
-  const F = lerFase(indice, salvo.dif ?? 1), tema = temaDa(indice); aplicarTema(tema);
+  const F = lerFase(indice, salvo.dif ?? 1), tema = temaDa(indice); aplicarMundo(F.mundo); aplicarTema(tema);
   const ilha = criarIlha(F, tema); J.F = F; J.ilha = ilha; J.tema = tema; J.passos = []; J.onda = 0; J.dica = null; J.sobre = J.cursor = null; J.tGanhou = 0; J.toques = []; J.veus = []; J.andar = null; J.vazam = 0; J.avisouAgua = false;
   // andamento salvo desta fase
   const s = salvo.andamento[chaveAnd(indice)];
@@ -1244,7 +1508,7 @@ function montar(indice) {
   Cam.raio = .5 * Math.hypot(F.larg + 1.5, F.prof + 1.5); Cam.meioX = F.larg / 2; Cam.meioZ = F.prof / 2; Cam.topo = .55 + (Math.max(...F.celulas.map(c => c.h)) - Math.min(...F.celulas.map(c => c.h))) * DEGRAU * .6; Cam.altoMedio = F.celulas.reduce((a, c) => a + c.h, 0) / F.celulas.length * DEGRAU + .2; Cam.deriva = 0;
   Cam.quer.px = Cam.quer.pz = 0; longe.scale.set(Cam.raio / 3.3, 1, Cam.raio / 3.3);
   const r = Cam.raio + 2.4; Object.assign(sol.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: 40 }); sol.shadow.camera.updateProjectionMatrix(); sol.position.copy(U.uSolDir.value).multiplyScalar(18);
-  cena.add(ilha.grupo); correr(F); J.surgir = CALMO ? 1 : 0; J.sombra = 60;
+  Som.mundo(F.mundo, tema.clima); Clima.trocar(tema.clima, Cam.raio * 2 + 5); cena.add(ilha.grupo); correr(F); J.surgir = CALMO ? 1 : 0; J.sombra = 60;
 }
 // quedaLocal: lado dentro da peça; serve para cascata ou fio que escorre
 // As fitas de água só são criadas quando a água precisa delas pela primeira vez.
@@ -1287,7 +1551,7 @@ async function abrirFase(indice, { texto = '' } = {}) {
   J.estado = 'carregando'; $('veu-texto').textContent = texto; $('veu').style.opacity = 1; esconderFim(); aviso('');
   await new Promise(r => setTimeout(r, CALMO ? 30 : J.F ? 950 : 60));
   salvo.fase = indice; salvar();
-  montar(indice); $('nome').textContent = FASES[indice].n; $('onde').textContent = `${MUNDOS[J.F.mundo].nome}, fase ${indice % 10 + 1} de 10`; mostrarDestinos(true); atualizarBotoes(); document.title = `${FASES[indice].n} · Nascente`;
+  montar(indice); $('nome').textContent = FASES[indice].n; $('onde').textContent = `${MUNDOS[J.F.mundo].nome}, ${indice % 10 + 1} de 10`; mostrarDestinos(true); atualizarBotoes(); document.title = `${FASES[indice].n} · Nascente`;
   $('barra').classList.remove('some'); Cam.trocar(cameraPadrao());
   R.compile(cena, camera);
   await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));
@@ -1366,7 +1630,7 @@ function fluir(dt) {
     if (n.cheio >= 1) cheios++;
     quedas(c, n, dt);
     if (c.destino) {
-      const ligado = atendido(c), k = limitar(c.k + (ligado ? dt / 2.8 : -dt / 3.5)); if (k !== c.k) { c.k = k; c.obj.vida(k); J.sombra = Math.max(J.sombra, 3); }
+      const ligado = atendido(c), k = limitar(c.k + (ligado ? dt / 2.8 : -dt / 3.5)); if (k !== c.k) { c.k = k; c.obj.vida(k); J.sombra = Math.max(J.sombra, 3); } else if (c.obj.anima && k > 0) c.obj.vida(k);
       const q = c.obj.queda, f = limitar((q.userData.f || 0) + (n.cheio >= 1 && n.nivel > .4 ? dt / .4 : -dt / .5)); q.userData.f = f; q.visible = f > 0; q.material.uniforms.uForca.value = f; q.material.uniforms.uCor.value = n.cor; for (const p of c.obj.pocas || []) p.material.uniforms.uCor.value = n.cor;
     }
   }
@@ -1464,6 +1728,7 @@ function realcar(c) {
 }
 function quadroMundo(dt) {
   const ganhou = J.estado === 'florido' ? 1 : 0;
+  if (noite.visible) { const a = Cam.az + Math.PI + .32, l = noite.userData.lua; l.position.set(Math.sin(a) * 34, 1.5, Math.cos(a) * 34); l.quaternion.copy(camera.quaternion); }
   passaros.userData.m.opacity += ((ganhou ? .8 : .4) - passaros.userData.m.opacity) * dt;
   for (const p of passaros.children) { const d = p.userData, t = U.uT.value * .16 + d.f, r = d.r + Cam.raio * .9, b = Math.sin(U.uT.value * 5 + d.f * 3) * (.35 + .25 * Math.sin(U.uT.value * .6 + d.f)); p.position.set(Math.sin(t) * r, d.y + Math.sin(t * 2.3) * .35, Math.cos(t * .93) * r); p.rotation.y = t + Math.PI / 2; p.children[0].rotation.z = b; p.children[1].rotation.z = -b; }
 }
@@ -1560,7 +1825,7 @@ addEventListener('keydown', e => {
   } else if ((t === ' ' || t === 'enter') && (document.activeElement === tela || document.activeElement === document.body)) { e.preventDefault(); if (J.estado === 'florido') seguir(); else girar(J.cursor, e.shiftKey ? -1 : 1); }
   else if (t === 'z') desfazer(); else if (t === 'd') pedirDica(); else if (t === 'c') $('b-camera').click(); else if (t === 'a') trocarAndar(); else if (t === 'm') $('mudo').click(); else if (t === 'r') reiniciar(); else if (t === 'f') abrirLista();
 });
-function ajustar() { const w = innerWidth, h = innerHeight; R.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); Part.m.uniforms.uEsc.value = h * R.getPixelRatio() / (2 * Math.tan(camera.fov * Math.PI / 360)); }
+function ajustar() { const w = innerWidth, h = innerHeight; R.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); Clima.m.uniforms.uEsc.value = Part.m.uniforms.uEsc.value = h * R.getPixelRatio() / (2 * Math.tan(camera.fov * Math.PI / 360)); }
 addEventListener('resize', ajustar);
 
 // ============================================================ 12. LAÇO PRINCIPAL

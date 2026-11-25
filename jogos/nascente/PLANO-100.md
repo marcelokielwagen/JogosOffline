@@ -23,8 +23,8 @@ Antes do commit, `git status`: outra conversa usa a mesma pasta. Gastar pouco: s
 - [x] 1. Regras novas + gerador + resolvedor (`ferramentas/nascente/gerar.mjs`), fases gravadas no HTML
 - [x] 2. Jogo lê as fases novas: andares, peças novas em 3D, duas águas, botão de andar, câmera
 - [x] 3. Dificuldades, seletor por mundo, progresso v2 e migração
-- [ ] 4. Cenários, climas e construções dos 10 mundos
-- [ ] 5. Sons por mundo
+- [x] 4. Cenários, climas e construções dos 10 mundos
+- [x] 5. Sons por mundo
 - [ ] 6. Testes (lista abaixo)
 - [ ] 7. `js/comum.js`, `sw.js`, cartão, `PROGRESSO.md`, memória; apagar o aviso (CronDelete); perguntar se publica
 
@@ -39,3 +39,4 @@ trocar 100 fases; migração; sem internet; toque e pinça; pico do som <= 0,35.
 - Etapas 2 e 3 feitas: `t2.mjs` (distrações), `t6.mjs <de> <até> <giros>` (robô; passou 300 de 300), `foto.mjs` (folha de fotos).
   Falta conferir migração e a tela de fases no celular (t4/t7 antigos ainda precisam ser adaptados à v2; usar `#semescolha`).
   MUNDOS está provisório (nomes + temas antigos) logo antes de `// <regras>`; a etapa 4 troca. `LUGAR.marco` também é provisório.
+- Etapas 4 e 5 feitas (MUNDOS com 10 cenários, ARV, ADERECOS, MARCOS, CLIMAS, Som.mundo). Falta a etapa 6 (t4, t7, t10, folha de fotos) e a 7.
