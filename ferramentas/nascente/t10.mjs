@@ -3,8 +3,8 @@ await p.cmd('Network.enable'); await p.cmd('Page.navigate',{url:base+'/index.htm
 console.log('menu:',await p.av(`[...document.querySelectorAll('.cartao h2')].map(e=>e.textContent).join(', ')+' | '+document.getElementById('status-offline').textContent`));
 await p.av(`[...document.querySelectorAll('.cartao')].pop().scrollIntoView({block:'center'})`); await dorme(800); await p.foto('menu.png');
 await p.cmd('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
-await p.av(`[...document.querySelectorAll('.cartao')].pop().click()`); await dorme(7000);
-console.log('sem internet:',await p.av(`location.pathname+' '+document.getElementById('nome')?.textContent+' '+(window.__nascente&&__nascente.J.estado)+' rede '+performance.getEntriesByType('resource').map(r=>r.name.split('/').slice(2,4).join('/')+' '+r.name.split('/').pop()).join(';')`)); await p.foto('jogo.png');
-await p.av(`localStorage['nascente.v1']=JSON.stringify({concluidas:[0,1,2]});document.querySelector('.topo a').click()`); await dorme(2500);
-await p.av(`document.querySelector('[data-abre=stats]').click()`); console.log('voltou:',await p.av(`location.pathname+' | '+[...document.querySelectorAll('.stat')].pop().innerText`));
+await p.av(`document.querySelector('.cartao[href*=nascente]').click()`); await dorme(7000);
+console.log('sem internet:',await p.av(`location.pathname+' '+document.getElementById('nome')?.textContent+' '+(window.__nascente&&__nascente.J.estado)+' rede '+performance.getEntriesByType('resource').map(r=>r.name.split('/').slice(2,4).join('/')+' '+r.name.split('/').pop()).join(';')`));
+await p.av(`localStorage['nascente.v2']=JSON.stringify({feitas:[[0,1],[1,2],[5]]});document.querySelector('.topo a').click()`); await dorme(2500);
+await p.av(`document.querySelector('[data-abre=stats]').click()`); console.log('voltou:',await p.av(`location.pathname+' | '+[...document.querySelectorAll('.stat')].map(e=>e.innerText).find(t=>t.includes('Nascente'))`));
 console.log('erros',p.erros.filter(e=>!/manifest/.test(e)).join('\n')||'nenhum'); p.fim();

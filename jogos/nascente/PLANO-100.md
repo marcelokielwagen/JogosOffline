@@ -25,8 +25,8 @@ Antes do commit, `git status`: outra conversa usa a mesma pasta. Gastar pouco: s
 - [x] 3. Dificuldades, seletor por mundo, progresso v2 e migração
 - [x] 4. Cenários, climas e construções dos 10 mundos
 - [x] 5. Sons por mundo
-- [ ] 6. Testes (lista abaixo)
-- [ ] 7. `js/comum.js`, `sw.js`, cartão, `PROGRESSO.md`, memória; apagar o aviso (CronDelete); perguntar se publica
+- [x] 6. Testes (lista abaixo)
+- [x] 7. `js/comum.js`, `sw.js`, cartão, `PROGRESSO.md`, memória; apagar o aviso (CronDelete); perguntar se publica
 
 ## Como testar
 `node ferramentas/nascente/<arquivo>.mjs` (Chrome invisível, `nav.mjs`). Pronto = resolvedor 100 × 3; robô (giros ao acaso = regras,
@@ -40,3 +40,6 @@ trocar 100 fases; migração; sem internet; toque e pinça; pico do som <= 0,35.
   Falta conferir migração e a tela de fases no celular (t4/t7 antigos ainda precisam ser adaptados à v2; usar `#semescolha`).
   MUNDOS está provisório (nomes + temas antigos) logo antes de `// <regras>`; a etapa 4 troca. `LUGAR.marco` também é provisório.
 - Etapas 4 e 5 feitas (MUNDOS com 10 cenários, ARV, ADERECOS, MARCOS, CLIMAS, Som.mundo). Falta a etapa 6 (t4, t7, t10, folha de fotos) e a 7.
+- Etapas 6 e 7 feitas em 25/11/2026. Resultados: t1 (100 x 3 com solução; médio 1 solução em todas), t2 sem falhas, t6 300 de 300 sem erros,
+  t4 tudo ok, t7 61 quadros/s nas mais pesadas, memória estável em 3 voltas de 100 fases, som com pico 0,27, sem CDN ok, t10 offline ok.
+  Só falta o "sim" do dono para publicar (git push).

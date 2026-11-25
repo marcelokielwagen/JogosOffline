@@ -4,7 +4,7 @@
   NASCENTE: quebra-cabeça calmo de aquedutos, em 3D, num arquivo só.
 
   MAPA DO ARQUIVO (procure pelos títulos com "====")
-     1. FASES E TEMAS ........ o lugar para criar fases novas e climas novos
+     1. FASES E MUNDOS ....... as 100 fases (geradas) e os 10 cenários
      2. PEÇAS ................ tipos de peça e como cada símbolo do mapa vira peça
      3. REGRAS DA ÁGUA ....... por onde a água corre (não depende do 3D)
      4. PROGRESSO SALVO ...... localStorage
@@ -350,8 +350,8 @@ const MUNDOS = [
   { nome: 'Oásis', texto: 'Dunas quietas, tamareiras e água guardada a fundo.', teto: 'cupula', arv: [['palmeira', 5, 1]], dentro: ['palmeira', .5], seca: '#b59a63', longe: 'dunas', chao: 4, mar: 'areia', relevo: { duna: 1, onda: .8, larg: 2.1 }, arvMax: 16, capim: .55, flores: .4, pocas: 2,
     cor: { pedra: '#ecdcb8', cornija: '#d8c195', base: '#dcc79c', baseClara: '#e9d9b3', cal: '#efe2c6', telha: '#3f8c8c', telha2: '#357878', madeira: '#7d5a38', rocha: '#cbb088', rocha2: '#bda078', terra: '#8a6a44' },
     horta: { cores: ['#6f9a4e', '#86a552', '#5c8a52'], frutos: ['#a2553a', '#c98a3e', '#8d3f4a'] }, som: { vento: 1.2, ventoF: 480, escala: 'hijaz', ave: 'grilo' },
-    luz: [{ nevoa: '#f2e5c8', longe: '#dcc394', sol: '#fff3d6', forca: 3, ceu: '#eaf0ee', solo: '#c09a62', verde: '#6f9650', seco: '#e0c38d', flores: ['#f7ecd0', '#e8927c', '#f2cf86', '#c9b2d8'], angulo: .5, tinta: '#463820', clima: 'poeira' },
-      { nevoa: '#f0c9a0', longe: '#d69e74', sol: '#ffc07c', forca: 2.9, ceu: '#f0d9c8', seco: '#d8aa74', angulo: 1.5, tinta: '#4a2f1d', clima: 'poeira' },
+    luz: [{ nevoa: '#f2e5c8', longe: '#dcc394', sol: '#fff3d6', forca: 3, ceu: '#eaf0ee', solo: '#c09a62', verde: '#6f9650', seco: '#d3ae76', flores: ['#f7ecd0', '#e8927c', '#f2cf86', '#c9b2d8'], angulo: .5, tinta: '#463820', clima: 'poeira' },
+      { nevoa: '#f0c9a0', longe: '#d69e74', sol: '#ffc07c', forca: 2.9, ceu: '#f0d9c8', seco: '#c2925f', angulo: 1.5, tinta: '#4a2f1d', clima: 'poeira' },
       { nevoa: '#3f4c6b', longe: '#2f3a57', sol: '#cdd8fa', forca: 1.9, ceu: '#8c9cc6', solo: '#6b6258', verde: '#5f8a68', seco: '#a89a80', angulo: .8, tinta: '#ecf0f8', noite: true, clima: 'nada' }] },
 
   { nome: 'Jardim dos Bordos', texto: 'Areia penteada, musgo e folhas que caem sem pressa.', teto: 'curvo', arv: [['bordo', 4, 1], ['pinheiro', 1, .9]], dentro: ['bordo', .52], seca: '#9c7c62', longe: 'montes', chao: 2, relevo: { onda: .35, larg: .8 }, arvMax: 18, capim: .45, flores: .25, pedras: 1.8, pocas: 2,
@@ -364,15 +364,15 @@ const MUNDOS = [
   { nome: 'Costa do Farol', texto: 'Casas caiadas, vento de sal e duas águas que não se entendem.', teto: 'plano', agua2: '#2f3f96', nomeAgua2: 'água do mar', arv: [['pinheiroMar', 3, 1], ['agave', 3, 1]], dentro: ['agave', .8], seca: '#b3a781', longe: 'ilhotas', mar: 'agua', relevo: { larg: .42, onda: .9 }, arvMax: 16, capim: 1.1, orla: -.1,
     cor: { pedra: '#e6e1d3', cornija: '#cfc7b3', base: '#d5cdb9', baseClara: '#e6dfce', cal: '#f5f1e6', telha: '#4a7fa5', telha2: '#3f6f93', madeira: '#5f7f93', rocha: '#c9c0ac', rocha2: '#b8ae98', terra: '#94805f' },
     horta: { cores: ['#8a9a6a', '#7d9460', '#9aa872'], frutos: ['#a08ac9', '#8f7abf', '#b8a5d6'] }, som: { vento: 1.3, ondas: 1, escala: 'lidio', ave: 'gaivota' },
-    luz: [{ nevoa: '#d3e4ea', longe: '#9fbccb', sol: '#fff6e0', forca: 2.9, ceu: '#dcecf5', solo: '#c0b294', verde: '#7f9a58', seco: '#cfc096', flores: ['#f6f0e2', '#a58fd0', '#e6a3b0', '#f2d78a'], angulo: .5, tinta: '#24404d', clima: 'nada', mar1: '#6ba6b6', mar2: '#a9d2d8' },
-      { nevoa: '#f1cfae', longe: '#cf9f86', sol: '#ffc283', forca: 2.9, ceu: '#f3dcc9', seco: '#cdb085', angulo: 1.6, tinta: '#4a2f22', mar1: '#8d95a0', mar2: '#e6c0a0' },
+    luz: [{ nevoa: '#d3e4ea', longe: '#9fbccb', sol: '#fff6e0', forca: 2.9, ceu: '#dcecf5', solo: '#c0b294', verde: '#7f9a58', seco: '#bfae80', flores: ['#f6f0e2', '#a58fd0', '#e6a3b0', '#f2d78a'], angulo: .5, tinta: '#24404d', clima: 'nada', mar1: '#6ba6b6', mar2: '#a9d2d8' },
+      { nevoa: '#f1cfae', longe: '#cf9f86', sol: '#ffc283', forca: 2.9, ceu: '#f3dcc9', seco: '#b4966c', angulo: 1.6, tinta: '#4a2f22', mar1: '#8d95a0', mar2: '#e6c0a0' },
       { nevoa: '#4d6280', longe: '#3a4d6a', sol: '#c9d8fb', forca: 1.9, ceu: '#93a9d2', solo: '#7a7a78', verde: '#5f8878', seco: '#a3a294', angulo: .9, tinta: '#eaf1f8', noite: true, mar1: '#2c4265', mar2: '#496890' }] },
 
   { nome: 'Floresta das Ruínas', texto: 'Raízes sobre pedra antiga; a mata guarda o que sobrou da cidade.', teto: 'palha', arv: [['gigante', 4, 1], ['bananeira', 2, .8], ['samambaia', 4, 1]], dentro: ['samambaia', .9], seca: '#8b8a62', longe: 'mata', relevo: { onda: 1.3, sobe: .25 }, orla: .4, arvMax: 34, capim: 1.4, arbustos: 2, flores: .8, tanque: 'quadrado', musgo: 1,
-    cor: { pedra: '#a9ab94', cornija: '#8d907a', base: '#95977f', baseClara: '#a7a992', cal: '#9c8f6c', telha: '#7f7546', telha2: '#6f683f', madeira: '#54412f', rocha: '#7a7f6c', rocha2: '#6b715f', terra: '#4b3f2f', fixa: '#62665e', fixaBase: '#51554e' },
+    cor: { pedra: '#c3c5b0', cornija: '#a3a68f', base: '#adaf98', baseClara: '#c0c2ac', cal: '#9c8f6c', telha: '#7f7546', telha2: '#6f683f', madeira: '#54412f', rocha: '#7a7f6c', rocha2: '#6b715f', terra: '#4b3f2f', fixa: '#62665e', fixaBase: '#51554e' },
     horta: { cores: ['#5f9a4a', '#4f8a50', '#75a850'], frutos: ['#d97b3f', '#c9484f', '#e0b648'] }, som: { vento: .7, escala: 'menor', ave: 'mata', insetos: 1 },
-    luz: [{ nevoa: '#c3d3bd', longe: '#89a287', sol: '#fdf6cf', forca: 2.4, ceu: '#d7e8d6', solo: '#5f6049', verde: '#5b8550', seco: '#8f8c62', flores: ['#e8744f', '#f0d35e', '#d05f86', '#f2ece0'], angulo: .4, tinta: '#24352a', clima: 'polen' },
-      { nevoa: '#a3b6a8', longe: '#71897c', sol: '#dcebe0', forca: 1.8, ceu: '#bfd3cb', seco: '#7c7f5c', angulo: 1, clima: 'chuva' },
+    luz: [{ nevoa: '#c3d3bd', longe: '#89a287', sol: '#fdf6cf', forca: 2.4, ceu: '#d7e8d6', solo: '#5f6049', verde: '#5b8550', seco: '#7a7754', flores: ['#e8744f', '#f0d35e', '#d05f86', '#f2ece0'], angulo: .4, tinta: '#24352a', clima: 'polen' },
+      { nevoa: '#a3b6a8', longe: '#71897c', sol: '#dcebe0', forca: 1.8, ceu: '#bfd3cb', seco: '#6a6d4e', angulo: 1, clima: 'chuva' },
       { nevoa: '#dcd3a0', longe: '#a59e68', sol: '#ffdf94', forca: 2.9, ceu: '#e6e6c6', seco: '#978a58', angulo: 1.9, tinta: '#3a3518', clima: 'polen' }] },
 
   { nome: 'Montanha do Degelo', texto: 'A neve cede onde a água passa; debaixo dela, o chão ainda é quente.', teto: 'neve', agua2: '#c8743a', nomeAgua2: 'água termal', arv: [['abeto', 5, 1]], dentro: ['abeto', .5], seca: '#e8eef2', longe: 'picos', chao: 3, relevo: { onda: 1.5, sobe: .3 }, capim: .8, capimSeco: '#dfe6ea', pedras: 1.4,
@@ -1157,7 +1157,7 @@ const MARCOS = [
   // farol
   (g, l) => { const j = janelas(); for (let i = 0; i < 4; i++) l.push([new THREE.CylinderGeometry(.135 - i * .012, .147 - i * .012, .19, 20).translate(.06, .095 + i * .19, .22), i % 2 ? '#b5574c' : COR.cal]); l.push([new THREE.CylinderGeometry(.14, .14, .025, 20).translate(.06, .77, .22), COR.cornija], [new THREE.CylinderGeometry(.06, .06, .12, 12).translate(.06, .84, .22), '#dfe9ea'], [new THREE.ConeGeometry(.1, .09, 14).translate(.06, .945, .22), '#b5574c'], [caixa(-.36, -.1, -.02, .2, .12, .4), COR.cal], ...TETOS.duas(.26, .28, COR.telha).map(([q, c]) => [q, c, M4(-.23, .2, .26)])); j.por(-.23, .1, .404); j.por(.06, .25, .362); j.por(.06, .5, .352); const luz = j.malhas(g);
     const m = new THREE.MeshBasicMaterial({ color: '#ffe9b0', transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, toneMapped: false }), facho = new THREE.Group(); for (const s of [0, Math.PI]) { const c = new THREE.Mesh(guardar('facho', () => { const q = new THREE.ConeGeometry(.28, 2.2, 14, 1, true).translate(0, -1.1, 0).rotateZ(Math.PI / 2); return q; }), m); c.rotation.y = s; facho.add(c); } facho.position.set(.06, .84, .22); g.add(facho); const lamp = new THREE.Mesh(new THREE.SphereGeometry(.045, 12, 10), new THREE.MeshBasicMaterial({ color: '#fff0c0', transparent: true, opacity: 0, toneMapped: false })); lamp.position.copy(facho.position); g.add(lamp);
-    return k => { luz(k); m.opacity = k * (U.uNoite.value ? .22 : .1); lamp.material.opacity = k; facho.rotation.y = U.uT.value * .5; facho.visible = k > 0; }; },
+    return k => { luz(k); m.opacity = k * (U.uNoite.value ? .2 : .045); lamp.material.opacity = k; facho.rotation.y = U.uT.value * .5; facho.visible = k > 0; }; },
   // templo em degraus, que a mata cobre de flores
   (g, l) => { for (let i = 0; i < 4; i++) { const w = .4 - i * .085; l.push([caixa(-w, w, i * .12 - .02, i * .12 + .12, .25 - w * .55, .25 + w * .55), i % 2 ? COR.cornija : COR.pedra]); } l.push([caixa(-.1, .1, .46, .6, .18, .32), COR.pedra], [caixa(-.13, .13, .6, .63, .15, .35), COR.cornija], [caixa(-.04, .04, .46, .56, .322, .326), '#2f2d26']); for (let i = 0; i < 8; i++) l.push([caixa(-.07, .07, 0, .06 + i * .057, .49 - i * .032, .5 - i * .032 + .03), COR.baseClara]);
     const v = []; for (let i = 0; i < 16; i++) { const a = i * 2.4, n = i % 4, w = .4 - n * .085, x = Math.sin(a) * w, z = .25 + Math.cos(a) * w * .5; v.push([bolota(.06, 1, i + 3, .3, .7), ['#5f9a4a', '#6fa850', '#4f8a46', '#7aa552'][i % 4], M4(x, n * .12 + .11, z)], [bolota(.02, 1, i, .2), i % 2 ? '#e8744f' : '#f0d35e', M4(x + .02, n * .12 + .16, z)]); } const m = new THREE.Mesh(juntar(v), matLiso); m.castShadow = true; g.add(m); return k => { m.scale.set(1, Math.max(.001, k), 1); m.visible = k > .02; }; },

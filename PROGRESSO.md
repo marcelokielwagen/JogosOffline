@@ -332,3 +332,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   No menu, nas Estatísticas e no modo offline; com o modo offline ativo usa o Three.js de `lib/three`, senão o da internet. Cache `jogos-offline-v50`.
   Testado: robô nas 12 fases (4.500 conferências da água), toque simulado, pinça, teclado, em pé e deitado, 61 quadros/s. Não testado num celular de
   verdade; sons medidos, não ouvidos.
+- **Nascente, 100 fases (25/11/2026)**: 10 mundos x 10 fases (cenário, clima, construções e som próprios), 3 dificuldades com progresso separado
+  (`nascente.v2`, migra da v1), andares (aqueduto alto, queda e parafuso d'água), eixo emperrado, peças irmãs, comportas e duas águas com mistura.
+  Fases geradas e conferidas por `ferramentas/nascente` (solução única no Médio); detalhes e testes em `jogos/nascente/PLANO-100.md`. `sw.js` v51.
+  Em commits locais, falta o dono autorizar a publicação.
