@@ -327,3 +327,8 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Cruzadas de volta à versão anterior (24/11/2026)**, pedido do dono: a versão 3D ficou "muito infantil". Voltou a 2D das partidas rápidas (Mini e
   Média) do commit `a65c85a`, com as 270 palavras extras de `banco-geral.js`; a versão 3D fica no histórico (commit `4f676c6`). O Caça-Palavras segue em
   3D. Cache `jogos-offline-v49`.
+- **Nascente (25/11/2026)**, pedido do dono: quebra-cabeça calmo de aquedutos em 3D, em arquivo único (`jogos/nascente/index.html`), com 12 fases, 6 climas,
+  sifão e curvas gêmeas, 3 câmeras, dica, desfazer, sons por código e progresso salvo (`nascente.v1`). Fase nova: desenhar o mapa resolvido em `FASES`.
+  No menu, nas Estatísticas e no modo offline; com o modo offline ativo usa o Three.js de `lib/three`, senão o da internet. Cache `jogos-offline-v50`.
+  Testado: robô nas 12 fases (4.500 conferências da água), toque simulado, pinça, teclado, em pé e deitado, 61 quadros/s. Não testado num celular de
+  verdade; sons medidos, não ouvidos.
