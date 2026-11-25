@@ -55,11 +55,12 @@ const JO = (() => {
   const relogio = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   function estatisticas() {
     const v = carregar('velha', null), r = carregar('resta-um', null), p = carregar('paciencia', null), c = carregar('cruzadas', null);
-    const k = carregar('caca', null), d = carregar('dobro', null), fc = carregar('freecell', null);
+    const k = carregar('caca', null), fc = carregar('freecell', null);
     const ps = carregar('pinballShow', null), pz = carregar('ponteZero', null);
     const fcn = (n, nome) => { const s = fc && fc.stats && fc.stats[n]; return [nome, s && s.j ? `${s.v} de ${s.j} (${Math.round(100 * s.v / s.j)}%)` : '–']; };
     const pn = (n, nome) => { const s = p && p.stats && p.stats.n && p.stats.n[n]; return [nome, s && s.v ? `${s.v} · melhor ${relogio(s.melhor)}` : '–']; };
-    const temposCaca = k && k.stats ? Object.values(k.stats.melhor || {}) : [];
+    // Cruzadas e Caça-Palavras: fases vencidas, estrelas e temas completos.
+    const fases = x => { const ts = Object.values((x && x.fases) || {}).map(t => Object.values(t)); return [['Fases vencidas', ts.flat().length], ['Estrelas', ts.flat().reduce((a, f) => a + f.e, 0)], ['Temas completos', ts.filter(t => t.length >= 10).length]]; };
     const pl = m => (v && v.placar && v.placar[m]) || { X: 0, O: 0, E: 0 };
     const pc = m => `${pl(m).X} vitórias · ${pl(m).E} empates · ${pl(m).O} derrotas`;
     const feitas = c && c.g ? Object.values(c.g).filter(g => g && g.fim).length : 0;
@@ -68,9 +69,8 @@ const JO = (() => {
       ['Resta Um', [['Vitórias', r && r.stats ? r.stats.vitorias : 0], ['Melhor resultado', r && r.stats && r.stats.melhor != null ? (r.stats.melhor === 1 ? '1 peça' : r.stats.melhor + ' peças') : '–']]],
       ['Paciência', [['Vitórias', p && p.stats ? p.stats.v : 0], ['Melhor tempo', p && p.stats && p.stats.melhor != null ? relogio(p.stats.melhor) : '–'], pn('mfacil', 'Muito fácil'), pn('facil', 'Fácil'), pn('medio', 'Médio'), pn('dificil', 'Difícil')]],
       ['FreeCell (vitórias)', [fcn('mfacil', 'Muito fácil'), fcn('facil', 'Fácil'), fcn('medio', 'Médio'), fcn('dificil', 'Difícil')]],
-      ['Palavras Cruzadas', [['Partidas rápidas', c && c.qn ? Object.values(c.qn).reduce((a, b) => a + b, 0) : 0], ['Grades grandes completas', feitas + ' de ' + ((c && c.total) || 26)]]],
-      ['Caça-Palavras', [['Jogos completos', k && k.stats ? k.stats.v : 0], ['Melhor tempo', temposCaca.length ? relogio(Math.min(...temposCaca)) : '–']]],
-      ['Dobro', [['Recorde de pontos', d && d.stats ? d.stats.melhor : 0], ['Maior peça', d && d.stats && d.stats.maior ? d.stats.maior : '–']]],
+      ['Palavras Cruzadas', [...fases(c), ['Grades grandes completas', feitas + ' de ' + ((c && c.total) || 26)]]],
+      ['Caça-Palavras', fases(k)],
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
       ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 8` : '0 de 8']]],
     ];

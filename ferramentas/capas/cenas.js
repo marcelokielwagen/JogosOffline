@@ -176,5 +176,5 @@ const CENAS = {
   velha, 'resta-um': restaUm, paciencia, freecell, cruzadas, 'caca-palavras': cacaPalavras, dobro,
   pinball: r => pinballGalaxia(W, H, r), 'pinball-show': r => galaticPinball(W, H, r), 'pinball-show-larga': r => galaticPinball(1200, 750, r),
 };
-export const NOMES = Object.keys(CENAS).filter(n => n !== 'pinball');   // Pinball Galáxia está guardado (guardados/pinball); dá para pedir pelo nome
+export const NOMES = Object.keys(CENAS).filter(n => n !== 'pinball' && n !== 'dobro');   // Pinball Galáxia e Dobro estão em guardados/; dá para pedir pelo nome
 export async function capa(nome, rapido) { semear(11); Math.random = sorte; await document.fonts.ready; return CENAS[nome](rapido); }

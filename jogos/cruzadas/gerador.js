@@ -1,4 +1,4 @@
-// Monta na hora as grades pequenas das partidas rápidas.
+// Monta na hora as grades das fases.
 const Gerador = (() => {
   // ---------- Temas: { nome: [[palavra, dica], ...] } ----------
   function temas() {
@@ -32,10 +32,10 @@ const Gerador = (() => {
   function por(g, T, w, l, c, d) {
     for (let i = 0; i < w.length; i++) { const x = (l + (d === 'v' ? i : 0)) * T + c + (d === 'h' ? i : 0); g[x] = { ...(g[x] || { ch: w[i] }), [d]: true }; }
   }
-  function tentar(banco, T, meta) {
+  function tentar(banco, T, meta, idade) {
     const g = Array(T * T).fill(null), p = [], usadas = new Set();
     const coloca = (x, l, c, d) => { por(g, T, x[0], l, c, d); usadas.add(x[0]); p.push([l, c, d, x[0], x[1]]); };
-    const grandes = banco.filter(x => x[0].length >= T - 2), prim = (grandes.length ? grandes : banco)[Math.floor(Math.random() * (grandes.length || banco.length))];
+    const grandes = banco.filter(x => x[0].length >= T - 2 && !idade.get(x[0])), prim = (grandes.length ? grandes : banco)[Math.floor(Math.random() * (grandes.length || banco.length))];
     coloca(prim, Math.floor(T / 2), Math.floor((T - prim[0].length) / 2), 'h');
     let cruzes = 0;
     while (p.length < meta) {
@@ -47,7 +47,7 @@ const Gerador = (() => {
         if (irma) continue;
         for (const d of ['h', 'v']) for (let l = 0; l < T; l++) for (let c = 0; c < T; c++) {
           const k = cabe(g, T, w, l, c, d); if (!k || k === w.length) continue;
-          const nota = k * 4 + Math.random() * 6;
+          const nota = k * 4 + Math.random() * 6 + (idade.get(w) || 0);
           if (!m || nota > m.nota) m = { nota, k, x, l, c, d };
         }
       }
@@ -63,15 +63,18 @@ const Gerador = (() => {
     const h = l1 - l0 + 1, w = c1 - c0 + 1, t = Math.max(h, w), fl = Math.floor((t - h) / 2) - l0, fc = Math.floor((t - w) / 2) - c0;
     return { t, p: p.map(x => [x[0] + fl, x[1] + fc, x[2], x[3], x[4]]) };
   }
-  // banco: [[palavra, dica]]; T: lado máximo; meta: quantas palavras; evitar: usadas há pouco.
-  function nova(banco, T, meta, evitar) {
-    const cabem = banco.filter(x => x[0].length >= 3 && x[0].length <= T);
-    let uso = cabem.filter(x => !evitar.has(x[0])), m = null;
-    if (uso.length < meta * 2) uso = cabem;
-    for (let k = 0; k < 60; k++) {
-      const r = tentar(k < 40 || (m && m.p.length >= meta) ? uso : cabem, T, meta);
+  // banco: [[palavra, dica]]; T: lado máximo; meta: quantas palavras; antigas: usadas há pouco, da mais nova para a mais velha.
+  function nova(banco, T, meta, antigas) {
+    const cabem = banco.filter(x => x[0].length >= 3 && x[0].length <= T), idade = new Map();
+    // Palavra repetida só entra quando não há outra: quanto mais recente, mais evitada.
+    antigas.forEach((w, k) => idade.set(w, -(9 - 4 * k / Math.max(1, antigas.length))));
+    let m = null; const t0 = performance.now();
+    for (let k = 0; k < 40; k++) {
+      const r = tentar(cabem, T, meta, idade);
+      r.nota -= r.p.filter(x => idade.has(x[3])).length * 4;
       if (!m || r.nota > m.nota) m = r;
-      if (k >= 12 && m.p.length >= meta) break;
+      const gasto = performance.now() - t0; // em celular lento, aceita antes
+      if (m.p.length >= meta ? k >= 10 || gasto > 120 : gasto > 450) break;
     }
     return aparar(m.p);
   }

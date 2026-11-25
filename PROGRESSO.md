@@ -304,3 +304,14 @@ O roteiro completo das etapas está em `PROMPT.md`.
   Testado com toque simulado no Chrome: partida inteira de FreeCell sem esperar animação, arrasto e toque na Paciência, completar sozinho (o botão não
   funcionava no toque, corrigido), cruzadas resolvidas pelo teclado da tela, 29 temas nos 3 níveis, 360x640 a 1440x900, jogos salvos antigos. Não
   testado num celular de verdade.
+- **Cruzadas e Caça-Palavras em 3D, com som e 10 fases por tema; Dobro guardado (24/11/2026)**, pedido do dono.
+  Comum aos dois: `js/tabuleiro3d.js` (peças 3D com letra, câmera que se ajusta à tela, confete; 10 materiais, um por fase, de Madeira a Diamante),
+  `js/cenarios3d.js` (25 cenários por tema, formas paradas juntadas: 10 a 20 chamadas por quadro, até 76 mil triângulos), `js/sons-palavras.js`
+  (efeitos e 3 estilos de música feitos por código; música 4 a 5 vezes mais baixa que os efeitos, botão 🎵), `js/fases.js` e `css/palavras.css`.
+  Fases: vencer abre a próxima e pula sozinho (janela com contagem de 5 s); estrelas por ajuda usada. Cruzadas: 15 temas, de 4 a 9 palavras; mais 270
+  palavras em `banco-geral.js`; as grades grandes continuam. Caça-Palavras: 29 temas, quadro de 7x7 a 11x11, dica nova; os níveis Fácil/Médio/Difícil
+  viraram fases. Salvos antigos: grades grandes preservadas; partidas em andamento das versões antigas são descartadas.
+  Dobro inteiro em `guardados/dobro/` (com a capa); recordes seguem no aparelho. Para reativar: devolver a `jogos/dobro/` e `capas/dobro.webp`, o
+  cartão em `index.html`, a linha em `js/comum.js` e os arquivos em `sw.js`. Cache `jogos-offline-v47`.
+  Testado com toque simulado no Chrome: 10 fases seguidas nos dois jogos, fase trancada, pulo sozinho, dica, pausa, música, grade grande, continuar,
+  360x640 a 1366x768 e deitado, sem internet, processador 6x mais lento (57 a 61 quadros/s). Não testado num celular de verdade; sons medidos, não ouvidos.
