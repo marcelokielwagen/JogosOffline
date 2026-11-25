@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v56';
+const VERSAO = 'jogos-offline-v57';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',
@@ -21,7 +21,12 @@ const ARQUIVOS = [
   './jogos/ponte-zero/recursos/personagens.bin',
   './jogos/nascente/index.html',
   './jogos/candeia/index.html',
-  './jogos/gem-shatter/index.html',
+  './jogos/gem-shatter/index.html', './jogos/gem-shatter/arte/minerais.webp',
+  './jogos/gem-shatter/arte/g0-0.webp', './jogos/gem-shatter/arte/g0-1.webp', './jogos/gem-shatter/arte/g0-2.webp', './jogos/gem-shatter/arte/g0-3.webp', './jogos/gem-shatter/arte/g0-4.webp', './jogos/gem-shatter/arte/g0-5.webp',
+  './jogos/gem-shatter/arte/g1-0.webp', './jogos/gem-shatter/arte/g1-1.webp', './jogos/gem-shatter/arte/g1-2.webp', './jogos/gem-shatter/arte/g1-3.webp', './jogos/gem-shatter/arte/g1-4.webp', './jogos/gem-shatter/arte/g1-5.webp',
+  './jogos/gem-shatter/arte/g2-0.webp', './jogos/gem-shatter/arte/g2-1.webp', './jogos/gem-shatter/arte/g2-2.webp', './jogos/gem-shatter/arte/g2-3.webp', './jogos/gem-shatter/arte/g2-4.webp', './jogos/gem-shatter/arte/g2-5.webp',
+  './jogos/gem-shatter/arte/g3-0.webp', './jogos/gem-shatter/arte/g3-1.webp', './jogos/gem-shatter/arte/g3-2.webp', './jogos/gem-shatter/arte/g3-3.webp', './jogos/gem-shatter/arte/g3-4.webp', './jogos/gem-shatter/arte/g3-5.webp',
+  './jogos/gem-shatter/arte/g4-0.webp', './jogos/gem-shatter/arte/g4-1.webp', './jogos/gem-shatter/arte/g4-2.webp', './jogos/gem-shatter/arte/g4-3.webp', './jogos/gem-shatter/arte/g4-4.webp', './jogos/gem-shatter/arte/g4-5.webp',
   './lib/three/three.module.min.js',
   './lib/three/addons/EffectComposer.js', './lib/three/addons/RenderPass.js', './lib/three/addons/ShaderPass.js',
   './lib/three/addons/MaskPass.js', './lib/three/addons/Pass.js', './lib/three/addons/UnrealBloomPass.js',

@@ -348,3 +348,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   minerais, arquivo único, 50 fases em 5 galerias, especiais que se combinam, ressonância em cadeia, sons por código, progresso em `gem-shatter.v1`. No menu, nas
   Estatísticas e no modo offline. Cache `jogos-offline-v56`. Testado: robô nas 50 fases (regras e jogadas), 50 fases com toque simulado, 9 tamanhos de tela,
   sons medidos, processador 6x mais lento (44 a 59 quadros/s). Não testado num celular de verdade. Publicado com autorização do dono.
+- **Gem Shatter, Fase 2 (25/11/2026)**: restauração de 5 galerias com as estrelas (25 obras, imagens 3D próprias em `jogos/gem-shatter/arte`), coleção de 40
+  minerais, 16 marcos, molduras, salvamento com cópia e código para outro aparelho (`gem-shatter.v2`, migra da v1). Cache `jogos-offline-v57`. Detalhes e testes
+  em `jogos/gem-shatter/PLANO.md`. Testado: 188 mil conferências da progressão, telas com toque simulado, salvo estragado, sem internet. Não testado num celular
+  de verdade. Publicado com autorização do dono.

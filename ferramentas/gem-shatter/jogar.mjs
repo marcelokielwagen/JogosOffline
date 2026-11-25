@@ -13,4 +13,4 @@ let venc = 0, qmin = 99; for (const n of ns) {
   const i = await E('JSON.stringify({q:__gemShatter.Tela.qps,m:__gemShatter.Jogo.P.metas,mv:__gemShatter.Jogo.metasVis,movs:__gemShatter.Jogo.P.movs,pts:[__gemShatter.Jogo.P.pontos,__gemShatter.Jogo.pts]})'), o = JSON.parse(i); qmin = Math.min(qmin, o.q); if (fim === 'vitoria') venc++;
   const ruim = fim === 'vitoria' && (Object.values(o.mv).some(v => v > 0) || o.pts[0] !== o.pts[1]); console.log(n, fim, 'toques', toques, 'qps', o.q, ruim || !/vitoria|derrota/.test(fim) ? 'PROBLEMA ' + i : ''); if (pasta && n === ns[0]) { await dorme(1500); await p.foto(`${pasta}/fim${n}.png`); }
 }
-console.log('venceu', venc, 'de', ns.length, 'qps mínimo', qmin, 'erros:', [...new Set(p.erros)].slice(0, 4).join('\n') || 'nenhum'); console.log(await E("localStorage.getItem('gem-shatter.v1')")); p.fim();
+console.log('venceu', venc, 'de', ns.length, 'qps mínimo', qmin, 'erros:', [...new Set(p.erros)].slice(0, 4).join('\n') || 'nenhum'); console.log(await E("localStorage.getItem('gem-shatter.v2')")); p.fim();

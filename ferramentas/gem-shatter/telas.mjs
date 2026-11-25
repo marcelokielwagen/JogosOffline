@@ -1,0 +1,35 @@
+// Gem Shatter: testa a Fase 2 no Chrome (migração, mina, coleção, marcos, cópia do progresso, vitória).   node telas.mjs pasta-das-fotos
+import { abrir, dorme } from './nav.mjs';
+const S = process.argv[2], p = await abrir({ w: 390, h: 844, movel: true, dpr: 2 }), E = x => p.av(x.replaceAll('@', '__gemShatter.')); let falha = 0;
+const ok = (c, m) => { if (!c) falha++; console.log(c ? 'ok' : 'FALHA', m); }, foto = n => S && p.foto(`${S}/${n}.png`);
+const c = async sel => { const r = await E(`(()=>{const e=document.querySelector(${JSON.stringify(sel)});e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,t=document.elementFromPoint(x,y);return [x,y,!!(t&&t.closest(${JSON.stringify(sel)}))]})()`); if (!r[2]) console.log('  (coberto:', sel, ')'); await p.toque(r[0], r[1]); await dorme(350); };
+const grava = x => E(`localStorage.clear();localStorage.setItem('gem-shatter.v1',${JSON.stringify(JSON.stringify(x))})`);
+// recarregar salva a ficha aberta ao esconder a página: por isso vai antes para uma página sem o jogo
+const recarrega = async (mexer) => { await p.cmd('Page.navigate', { url: p.base + '/sw.js' }); await dorme(500); if (mexer) await mexer(); await p.cmd('Page.navigate', { url: p.base + '/jogos/gem-shatter/index.html' }); await dorme(1600); };
+
+// 1. quem vem da Fase 1
+await recarrega(() => grava({ v: 1, atual: 8, liberada: 8, estrelas: { 1: 3, 2: 2, 3: 3, 4: 1, 5: 3, 6: 2, 7: 3 }, recorde: { 1: 3000 }, op: { som: true, ambiente: true, tremor: true, vibra: true }, est: { jogadas: 90, vitorias: 7, pedras: 600, maiorCadeia: 3, especiais: 30 } }));
+ok(await E('@Progresso.origem') === 'v1', 'trouxe o salvo da Fase 1'); await foto('a1'); await c('#aFecha'); await foto('a2'); ok(await E("localStorage.getItem('gem-shatter.v1').length>50"), 'salvo da Fase 1 intocado');
+// 2. mina
+await c('#bHero'); await dorme(500); await foto('a3'); await c('#bObra'); await dorme(700); await foto('a4'); await dorme(1700); ok(await E("@Progresso.d.obras[0].join('')") === '10000', 'obra 1 feita');
+for (let i = 0; i < 3; i++) { await c('#bObra'); await dorme(2400); } await foto('a5'); ok(await E("@Progresso.d.obras[0].join('')") === '11110' && await E('@Meta.livres(@Progresso.d)') === 3, 'quatro obras, sobram 3 estrelas');
+await E('(()=>{const d=@Progresso.d;d.estrelas[8]=3;d.estrelas[9]=3;d.liberada=11;@Telas.mina(0)})()'); await dorme(300); await c('#bObra'); await dorme(2700); ok(await E("document.getElementById('aviso').classList.contains('on')"), 'galeria restaurada'); await foto('a6'); await c('#aFecha'); await c('#mina [data-volta]'); ok(await E('@Jogo.aberto') === 'abertura', 'voltou ao início');
+// 3. coleção, marcos, ajustes
+await E('(()=>{const d=@Progresso.d;for(let i=0;i<8;i++)d.frag[i]=@Meta.EX[i].q;d.frag[9]=1;@Telas.hub()})()'); await c('#bColecao'); await dorme(400); await foto('a7'); await c('.ex[data-i="7"]'); await foto('a8'); await c('#aFecha'); await c('.mold[data-m="1"]'); ok(await E('@Progresso.d.moldura') === 1, 'moldura escolhida'); await c('#colecao [data-volta]');
+await c('#bMarcos'); await foto('a9'); const antes = await E("document.querySelectorAll('#kLista .pronto').length"); await c('#kLista [data-id]'); await dorme(500); await foto('a10'); await c('#aFecha'); ok(antes > 0 && await E("Object.keys(@Progresso.d.marcos).length") === 1, 'marco recebido'); await c('#marcos [data-volta]');
+await c('#bAjustes'); await c('#bCopia'); const cod = await E('jCod.value'); ok(cod.startsWith('GS2-') && cod.length > 200, 'código com ' + cod.length + ' letras'); await foto('a11'); await E("jCod.value='GS2-xxxx'"); await c('#bTraz'); ok(/inválido/.test(await E('jMsg.textContent')), 'código ruim recusado'); await c('#ajustes [data-volta]');
+// 4. recarregar, aparelho novo, salvo estragado
+const total = () => E('@Meta.total(@Progresso.d)'), est = await total(); await E('@Progresso.salvar()'); await recarrega(); ok(await E('@Progresso.origem') === 'v2' && await total() === est, 'recarregou igual');
+await recarrega(() => E('localStorage.clear()')); ok(await total() === 0, 'aparelho novo começa vazio'); ok(await E(`@Progresso.importar(${JSON.stringify(cod)})`) && await total() === est && await E("@Progresso.d.obras[0].join('')") === '11111', 'o código trouxe tudo');
+await E('@Progresso.salvar()'); await recarrega(() => E("localStorage.setItem('gem-shatter.v2',localStorage.getItem('gem-shatter.v2').slice(0,200))")); ok(await E('@Progresso.origem') === 'copia' && await total() === est, 'salvo cortado: voltou pela cópia');
+await recarrega(() => E("(()=>{const s=JSON.parse(localStorage.getItem('gem-shatter.v2'));s.d.estrelas[1]=99;localStorage.setItem('gem-shatter.v2',JSON.stringify(s));localStorage.removeItem('gem-shatter.v2.copia')})()")); ok(await E('@Progresso.origem') === 'remendada' && await total() === est, 'salvo mexido: remendado');
+// 5. fase com jogada extra, ir ao início e voltar, vitória
+await E('@Jogo.comecar(5)'); await dorme(900); ok(await E('@Jogo.P.movs===@Nucleo.fase(5).movs+1'), 'uma jogada a mais na galeria restaurada'); await c('#bMapa'); ok(await E('@Jogo.aberto') === 'abertura', 'seta vai ao início'); await c('#bJogar'); ok(await E('@Jogo.livre()'), 'continua a mesma fase');
+const vence = async n => { await E(`@Jogo.comecar(${n})`); await dorme(1200); await E("(()=>{const J=@Jogo,P=J.P;for(const m in P.metas)P.metas[m]=0;const i=P.grupos()[0][0].i;P.metas['c'+P.g[i].c]=1;J.jogar(i)})()"); for (let k = 0; k < 60 && await E('@Jogo.aberto') !== 'vitoria'; k++) await dorme(200); await dorme(2800); };
+await E('(()=>{const d=@Progresso.d;d.frag.fill(0);delete d.estrelas[6]})()'); await vence(6); ok(await E('@Jogo.aberto') === 'vitoria', 'venceu'); console.log('  achados:', await E("vAchados.innerText.replace(/\\n/g,' ')"), '|', await E('vGanhas.textContent'), '|', await E('bVObra.textContent')); await foto('a12');
+await c('#bVObra'); ok(await E('@Jogo.aberto') === 'mina', 'vitória leva à mina'); await c('#mina [data-volta]'); ok(await E('@Jogo.aberto') === 'vitoria', 'volta à vitória'); await c('#bProx'); ok(await E('@Jogo.n') === 7 && await E('@Jogo.livre()'), 'próxima fase'); await foto('a13');
+await E("@Jogo.P.movs=1"); await E("@Jogo.jogar(@Jogo.P.grupos()[0][0].i)&&0"); for (let k = 0; k < 30 && await E('@Jogo.aberto') !== 'derrota'; k++) await dorme(200); ok(await E('@Jogo.aberto') === 'derrota' && await E('@Progresso.d.est.seq') === 0, 'derrota zera a sequência');
+// 6. outros tamanhos
+for (const [w, h] of [[320, 568], [844, 390], [1366, 768]]) { await p.vp(w, h, w < 1000, 1); for (const [n, f] of [['h', 'hub()'], ['m', 'mina(0)'], ['c', 'colecao()']]) { await E('@Telas.' + f); await dorme(450); await foto(n + w); const sob = await E("(t=>t.scrollWidth-t.clientWidth)(document.querySelector('.tela.on'))"); ok(sob <= 0, `${n} ${w}x${h} sem sobra lateral`); } }
+await p.vp(320, 568, true, 1); await vence(5); await foto('v320');
+console.log('falhas', falha, 'erros', p.erros.slice(0, 5)); p.fim();
