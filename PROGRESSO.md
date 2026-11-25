@@ -356,3 +356,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   dificuldade refeita e tomada única para anúncios e compras (no site: vídeo de teste e nada à venda). Cache `jogos-offline-v58`. Detalhes em
   `jogos/gem-shatter/PLANO.md`. Testado: 1,5 milhão de conferências, telas com toque simulado, ficha da Fase 2 trazida inteira. Corrigido: os 250 pontos do geodo não
   apareciam no placar. Não testado num celular de verdade. Publicado com autorização do dono.
+- **Keepsake Hunt, Fase 1 (25/11/2026)**: jogo 2 da série de 6 (objetos escondidos), pedido do dono. Mesa que dá para remexer com o dedo, 50 fases em 5 cômodos, 8 modos,
+  119 objetos 3D feitos por código (`ferramentas/keepsake-hunt`), lupa, dica, combo, lembrança escondida em cada fase, sons por código, progresso em `keepsake.v1`. No menu, nas
+  Estatísticas e no modo offline. Cache `jogos-offline-v59`. Detalhes em `jogos/keepsake-hunt/PLANO.md`. Testado: 50 fases com toque simulado, 53 conferências de telas e gestos,
+  7 tamanhos de tela, sem internet, sons medidos. Não testado num celular de verdade. Publicado com autorização do dono.

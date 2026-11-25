@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101816">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Remexa mesas cheias de objetos e ache o que a casa esconde. 50 fases.">
+<meta property="og:title" content="Keepsake Hunt">
+<meta property="og:description" content="Remexa mesas cheias de objetos e ache o que a casa esconde. 50 fases.">
+<meta property="og:image" content="https://marcelokielwagen.github.io/JogosOffline/capas/keepsake-hunt.webp">
+<link rel="icon" href="../../icones/icone-192.png">
+<title>Keepsake Hunt</title>
+<style>
+/* ============================================================ APARÊNCIA */
+:root { --osso:#f0e9d9; --osso2:#b3b8ab; --tinta:#101816; --painel:#1a2622; --painel2:#22322c; --ouro:#e0b45c; --linha:rgba(240,233,217,.15); --papel:#e4d9bf;
+  --serifa:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; --corpo:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+[hidden] { display:none !important; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; background:var(--tinta); color:var(--osso); font-family:var(--corpo);
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; position:fixed; inset:0; width:100%; }
+#gl,#fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#gl { z-index:3; } #fx { z-index:4; }
+#app { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:8px; touch-action:none;
+  padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); background:radial-gradient(120% 80% at 50% 30%,#1d2a26,#0d1412); }
+.barra { display:flex; align-items:center; gap:8px; }
+.barra h1 { flex:1; margin:0; font:600 17px/1.15 var(--serifa); text-align:center; }
+.barra h1 small { display:block; font:400 12.5px/1.3 var(--corpo); color:var(--osso2); }
+.ic { width:44px; height:44px; border-radius:12px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); display:grid; place-items:center; padding:0; cursor:pointer; flex:none; }
+.ic:active { transform:scale(.93); }
+.ic svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.placar { display:flex; align-items:center; gap:10px; margin-top:8px; }
+#tempo { width:74px; font:700 26px/1 var(--serifa); font-variant-numeric:tabular-nums; text-align:center; flex:none; } #tempo.pouco { color:#ff9d72; }
+.meio { flex:1; min-width:0; }
+.prog { height:13px; border-radius:8px; background:#0b110f; border:1px solid var(--linha); overflow:hidden; } .prog i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#8d6a2b,var(--ouro)); transition:width .3s; }
+.gasto { height:4px; margin-top:4px; border-radius:3px; background:#0b110f; overflow:hidden; } .gasto i { display:block; height:100%; width:100%; background:#6f9d8b; transform-origin:left; }
+#combo { width:74px; text-align:center; font:700 21px/1 var(--serifa); color:var(--osso2); flex:none; } #combo small { display:block; font:400 11.5px/1.3 var(--corpo); } #combo.on { color:var(--ouro); } #combo.pula { animation:pula .22s; }
+@keyframes pula { 40% { transform:scale(1.28); } }
+#dica { min-height:20px; margin-top:6px; text-align:center; font-size:15px; line-height:1.3; }
+#app.vitrine #lado,#app.vitrine .bandeja { display:none; }
+#area { flex:1; min-height:0; position:relative; cursor:pointer; }
+#moldura { position:absolute; inset:0; border:9px solid #2d1c12; border-radius:14px; box-shadow:0 0 0 1px #000,0 10px 34px rgba(0,0,0,.55),inset 0 0 0 1px #0a0604; border-color:#4a2f1d #2f1d12 #24160d #3c2617; pointer-events:none; z-index:5; }
+.bandeja { display:flex; gap:8px; align-items:stretch; }
+#vagas { flex:1; display:flex; gap:7px; justify-content:center; min-width:0; }
+.vaga { flex:1; max-width:96px; min-width:0; text-align:center; display:flex; flex-direction:column; }
+.vaga .cx { height:64px; border-radius:13px; background:linear-gradient(#efe6cf,#cfc1a0); box-shadow:inset 0 2px 5px rgba(60,40,10,.45),inset 0 0 0 1px rgba(80,55,20,.5); display:grid; place-items:center; color:#2c2012; }
+.vaga .cx b { font:700 15px/1.12 var(--serifa); padding:2px; overflow-wrap:anywhere; } .vaga .cx u { text-decoration:none; font:700 30px/1 var(--serifa); color:#8a7348; }
+.vaga span { hyphens:auto; -webkit-hyphens:auto; overflow-wrap:anywhere; font-size:12px; line-height:1.15; margin-top:4px; min-height:28px; display:block; color:var(--osso); }
+.vaga.feita .cx { background:linear-gradient(#f3dfa0,#d3a94d); } .vaga.pula .cx { animation:encaixa .3s; } @keyframes encaixa { 30% { transform:scale(1.1,.88); } 65% { transform:scale(.95,1.06); } }
+#bDica { width:64px; height:64px; flex:none; border-radius:50%; border:0; position:relative; background:conic-gradient(var(--ouro) var(--c,0%),#0b110f 0); color:var(--osso); cursor:pointer; padding:0; }
+#bDica::after { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--painel2); } #bDica svg { position:relative; z-index:1; width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.5; } #bDica.ok svg { opacity:1; color:var(--ouro); } #bDica:active { transform:scale(.94); }
+#bDica small { position:absolute; z-index:2; right:-2px; top:-2px; min-width:22px; height:22px; border-radius:12px; background:var(--ouro); color:#241803; font:700 13px/22px var(--corpo); }
+.gdica { width:64px; text-align:center; font-size:12px; color:var(--osso2); } .gdica span { display:block; margin-top:4px; }
+/* celular deitado e telas largas baixas: painel ao lado da mesa */
+@media (orientation:landscape) and (max-height:640px) {
+  #app { flex-direction:row; gap:10px; } #lado { width:236px; flex:none; order:-1; display:flex; flex-direction:column; min-height:0; } .bandeja { width:104px; flex-direction:column; align-items:center; } #vagas { flex-direction:column; gap:4px; width:100%; align-items:center; justify-content:flex-start; min-height:0; }
+  .vaga { flex:0 1 auto; width:84px; } .vaga .cx { height:min(52px,12vh); } .vaga span { font-size:11px; min-height:0; margin-top:2px; } #tempo,#combo { width:60px; }
+}
+@media (min-width:900px) and (min-height:641px) { .vaga { max-width:120px; } .vaga .cx { height:84px; } .vaga span { font-size:14px; } #lado { width:100%; max-width:820px; margin:0 auto; } .bandeja { width:100%; max-width:820px; margin:0 auto; } }
+/* telas por cima */
+.tela { position:absolute; inset:0; z-index:6; display:none; background:rgba(8,13,11,.66); padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom)); overflow:auto; touch-action:pan-y; overscroll-behavior:contain; }
+.tela.on { display:flex; animation:surge .18s; }
+@keyframes surge { from { opacity:0; } }
+.caixa { margin:auto; width:100%; max-width:380px; background:#18231f; border:1px solid var(--linha); border-radius:20px; padding:22px 20px; text-align:center; box-shadow:0 18px 60px rgba(0,0,0,.6); }
+.caixa h2 { margin:0 0 6px; font:700 30px/1.1 var(--serifa); } .caixa p { margin:6px 0 0; color:var(--osso2); font-size:16px; line-height:1.45; } .caixa p b { color:var(--osso); }
+.bt { display:block; width:100%; min-height:54px; margin-top:12px; border-radius:15px; border:1px solid var(--linha); background:var(--painel2); color:var(--osso); font:600 18px/1.2 var(--corpo); cursor:pointer; }
+.bt.pri { background:linear-gradient(#e9c272,#bf9038); color:#241803; border-color:#f0cf88; font-size:20px; min-height:60px; } .bt:active { transform:scale(.97); }
+.estrelas { display:flex; justify-content:center; gap:10px; margin:10px 0 4px; } .estrelas svg { width:58px; height:58px; fill:#23302b; stroke:#40514a; stroke-width:1.4; } .estrelas svg.on { fill:var(--ouro); stroke:#fbe3ab; animation:estrela .38s cubic-bezier(.2,1.7,.4,1); }
+@keyframes estrela { from { transform:scale(0) rotate(-40deg); } }
+.linha2 { display:flex; gap:10px; } .linha2 .bt { margin-top:10px; }
+.op { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:50px; margin-top:8px; padding:0 16px; border-radius:13px; border:1px solid var(--linha); background:var(--painel2); color:var(--osso); font:500 17px var(--corpo); cursor:pointer; }
+.op b { width:46px; height:26px; border-radius:20px; background:#3c4a44; position:relative; transition:.15s; } .op b::after { content:""; position:absolute; width:20px; height:20px; border-radius:50%; background:var(--osso); left:3px; top:3px; transition:.15s; } .op[aria-pressed=true] b { background:#b98835; } .op[aria-pressed=true] b::after { left:23px; }
+.lem { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; padding:8px; border-radius:13px; background:rgba(224,180,92,.12); border:1px solid rgba(224,180,92,.4); font-size:15.5px; } .lem svg { width:26px; height:26px; flex:none; fill:var(--ouro); } .lem.falta { opacity:.65; background:none; border-color:var(--linha); } .lem.falta svg { fill:#4b5a53; }
+#abertura { background:linear-gradient(rgba(8,13,11,.15),rgba(8,13,11,.5) 45%,rgba(8,13,11,.92)); }
+.capa { margin:auto auto 0; width:100%; max-width:400px; text-align:center; padding-bottom:8px; } .capa h2 { margin:0; font:700 clamp(52px,16vw,82px)/.95 var(--serifa); text-shadow:0 4px 26px #000,0 1px 4px #000; } .capa p { margin:12px 0 10px; font-size:18px; line-height:1.4; text-shadow:0 1px 6px #000,0 0 14px #000; } .capa a { display:inline-block; margin-top:14px; padding:10px; color:var(--osso2); font-size:15px; }
+#mapa { background:rgba(8,13,11,.95); }
+.mapa { margin:0 auto; width:100%; max-width:460px; } .mapa h3 { margin:22px 0 10px; font:600 21px var(--serifa); display:flex; justify-content:space-between; align-items:baseline; } .mapa h3 small { font:400 14px var(--corpo); color:var(--osso2); }
+.grade { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.fs { aspect-ratio:1; border-radius:14px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); font:700 21px var(--serifa); cursor:pointer; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; position:relative; } .fs small { font-size:12px; letter-spacing:1px; color:var(--ouro); height:14px; } .fs.atual { border-color:var(--ouro); box-shadow:0 0 0 2px var(--ouro) inset; } .fs:disabled { opacity:.38; cursor:default; } .fs svg { position:absolute; right:5px; top:5px; width:13px; height:13px; fill:var(--ouro); }
+.vh { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+#carga { position:absolute; inset:0; z-index:9; display:grid; place-items:center; background:var(--tinta); font:400 18px var(--corpo); color:var(--osso2); text-align:center; padding:24px; }
+:focus-visible { outline:3px solid var(--ouro); outline-offset:2px; }
+@media (prefers-reduced-motion:reduce) { .tela.on,.estrelas svg.on,#combo.pula,.vaga.pula .cx { animation:none; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="lado">
+    <div class="barra">
+      <button class="ic" id="bVolta" aria-label="Voltar às fases"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1><span id="tFase">Fase 1</span><small id="tLugar"></small></h1>
+      <button class="ic" id="bSom" aria-label="Som"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.500 9.5z"/><path class="ligado" d="M15.500 9a4 4 0 010 6M18 6.500a8 8 0 010 11"/><path class="mudo" d="M16 9.500l5 5M21 9.500l-5 5"/></svg></button>
+      <button class="ic" id="bPausa" aria-label="Pausar"><svg viewBox="0 0 24 24"><path d="M9 5.500v13M15 5.500v13"/></svg></button>
+    </div>
+    <div class="placar"><div id="tempo" role="timer">0:00</div><div class="meio"><div class="prog" role="progressbar" aria-label="Objetos achados"><i id="barra"></i></div><div class="gasto"><i id="gasto"></i></div></div><div id="combo">0<small>pontos</small></div></div>
+    <div id="dica"></div>
+  </div>
+  <div id="area"><div id="moldura"></div></div>
+  <div class="bandeja"><div id="vagas"></div><div class="gdica"><button id="bDica" aria-label="Dica"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8.500 15c-1.800-1.300-3-3-3-5.200a6.500 6.500 0 0113 0c0 2.200-1.200 3.900-3 5.200z"/></svg><small id="nDica">1</small></button><span>Dica</span></div></div>
+</div>
+<canvas id="gl"></canvas><canvas id="fx"></canvas>
+
+<section class="tela" id="abertura"><div class="capa"><h2>Keepsake Hunt</h2><p>A velha casa guarda 50 lembranças.<br>Remexa, procure e ache.</p><button class="bt pri" id="bJogar">Jogar</button><div class="linha2"><button class="bt" id="bMapa">Fases</button><button class="bt" id="bAjustes">Ajustes</button></div><a href="../../index.html">Todos os jogos</a></div></section>
+<section class="tela" id="mapa"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Fases<small id="mResumo"></small></h1><span style="width:44px"></span></div><div id="mLista"></div></div></section>
+<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><button class="bt" id="pSair">Todos os jogos</button></div></section>
+<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Achou tudo!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><div class="lem" id="vLem"></div><button class="bt pri" id="vProx">Próxima</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Fases</button></div></div></section>
+<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">O tempo acabou</h2><p id="dTxt"></p><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt" id="dFases">Fases</button></div></section>
+<section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" data-volta>Voltar</button></div></section>
+<div id="carga">Abrindo as gavetas…</div>
+
+<script id="nucleo">
+'use strict';
+// ============================================================ NÚCLEO: objetos, fases, mesa e regras. Sem tela: dá para testar no Node.
+const Nucleo = (() => {
+  const K = 26, MARGEM = 14, AREA = 36 * 44, TOTAL = 50, RES = K / 8;      // K: pontos da folha por unidade de mesa; RES: resolução das máscaras de toque
+  const CAT = /*ATLAS*/[["caneta","Caneta-tinteiro",0,63,769,65,361,1.2,"plastico"],["tinteiro","Tinteiro",0,1620,355,164,164,3,"vidro"],["carimbo","Carimbo",0,1129,872,148,190,2,"madeira"],["lacre","Selo de cera",0,1805,833,143,142,0.7,"plastico"],["envelope","Envelope",0,1105,1470,273,195,0.3,"papel"],["livro","Livro",0,419,1271,217,278,1.9,"papel"],["oculos","Óculos",0,1545,679,260,155,0.6,"plastico"],["lupa","Lupa",0,128,732,175,341,0.9,"vidro"],["relogio","Relógio de bolso",0,805,754,169,210,1.1,"metal"],["clipe","Clipe",0,1950,0,86,168,0.3,"metal"],["tesoura","Tesoura",0,248,340,172,335,0.7,"metal"],["regua","Régua",0,0,0,83,392,0.35,"madeira"],["borracha","Borracha",0,1277,800,86,145,1,"borracha"],["lapis","Lápis",0,92,1500,54,352,0.8,"madeira"],["apontador","Apontador",0,911,1164,110,93,1.1,"metal"],["abridor","Abridor de cartas",0,93,371,65,361,0.8,"metal"],["grampeador","Grampeador",0,591,960,83,273,2.2,"metal"],["percevejo","Percevejo",0,1515,393,104,91,1.2,"plastico"],["cadeado","Cadeado",0,803,1672,143,218,1.6,"metal"],["chave","Chave antiga",0,420,326,112,284,0.7,"metal"],["moeda","Moeda",0,686,1672,117,117,0.35,"metal"],["colher","Colher",1,0,1136,99,364,0.8,"metal"],["garfo","Garfo",1,0,1500,92,354,0.6,"metal"],["faca","Faca",1,0,769,63,367,0.9,"metal"],["xicara","Xícara",1,1605,0,229,184,3,"louca"],["bule","Bule",1,884,463,315,210,4,"louca"],["saleiro","Saleiro",1,1440,1838,105,171,2,"vidro"],["ralador","Ralador",1,311,979,148,292,1.9,"metal"],["rolo","Rolo de massa",1,0,392,93,377,2.2,"madeira"],["fue","Batedor",1,146,1481,112,317,1.6,"metal"],["limao","Limão cortado",1,1663,834,140,140,1.4,"fruta"],["maca","Maçã",1,1545,519,158,160,3,"fruta"],["ovo","Ovo",1,1545,834,118,142,2.4,"louca"],["cenoura","Cenoura",1,303,0,127,326,1.8,"fruta"],["pimenta","Pimenta",1,1177,0,118,206,1.1,"fruta"],["cortador","Forminha",1,1799,353,172,165,1.2,"metal"],["sacarolha","Saca-rolhas",1,747,1054,164,213,1.1,"metal"],["rolha","Rolha",1,1127,1357,86,112,1.8,"madeira"],["funil","Funil",1,974,673,229,199,2.6,"metal"],["alho","Alho",1,1378,910,135,136,2,"fruta"],["biscoito","Biscoito",1,1663,974,139,139,0.9,"madeira"],["tampinha","Tampinha",1,1913,1107,111,111,0.6,"metal"],["queijo","Queijo",1,1802,975,169,132,1.6,"fruta"],["concha","Concha de sopa",1,83,0,136,371,1.3,"metal"],["peneira","Peneira de chá",1,430,0,134,284,1.2,"metal"],["carretel","Carretel vermelho",2,1545,976,106,133,2.4,"madeira"],["carretelAzul","Carretel azul",2,1545,1109,106,133,2.4,"madeira"],["botao","Botão roxo",2,1394,1296,106,106,0.6,"plastico"],["botaoOsso","Botão de osso",2,1277,1296,117,117,0.6,"plastico"],["agulha","Agulha com linha",2,146,1798,99,236,0.3,"metal"],["alfinete","Alfinete",2,75,1854,57,188,0.6,"metal"],["dedal","Dedal",2,311,1271,96,109,1.9,"metal"],["fita","Fita métrica",2,663,1794,140,234,1.1,"tecido"],["novelo","Novelo",2,988,0,189,207,2.6,"tecido"],["ziper","Zíper",2,219,0,84,340,0.5,"tecido"],["almofada","Almofada de alfinetes",2,1182,1665,174,174,2.6,"tecido"],["laco","Laço",2,1226,1839,214,174,1,"tecido"],["broche","Broche",2,1387,759,151,151,1,"metal"],["bastidor","Bastidor",2,453,1549,233,245,0.8,"madeira"],["leque","Leque",2,1295,0,310,203,0.7,"papel"],["colar","Colar de pérolas",2,946,1670,236,196,0.5,"louca"],["camafeu","Camafeu",2,946,1866,148,178,0.9,"louca"],["croche","Agulha de crochê",2,401,1685,52,294,0.6,"metal"],["presilha","Presilha",2,1500,1320,184,72,0.6,"plastico"],["anel","Anel",2,1378,1046,103,128,0.9,"metal"],["pente","Pente",2,1651,1113,262,112,0.6,"plastico"],["perfume","Frasco de perfume",2,1199,411,132,199,1.9,"vidro"],["espelho","Espelho de mão",2,258,1382,161,303,0.8,"vidro"],["luva","Luva",2,564,0,177,280,0.8,"tecido"],["chip","Processador",3,1378,1174,122,122,0.8,"plastico"],["disquete","Disquete preto",3,1203,610,184,190,0.5,"plastico"],["disqueteAzul","Disquete azul",3,1331,411,184,190,0.5,"plastico"],["cd","CD",3,755,247,216,216,0.25,"plastico"],["memoria","Pente de memória",3,1378,1523,314,96,0.6,"plastico"],["pilha","Pilha",3,1703,519,78,159,1.6,"metal"],["parafuso","Parafuso",3,1971,353,75,139,1.3,"metal"],["fenda","Chave de fenda",3,99,1130,82,351,1.7,"plastico"],["tecla","Tecla Enter",3,1021,1164,105,85,1.2,"plastico"],["teclaEsc","Tecla Esc",3,974,872,87,85,1.2,"plastico"],["mouse","Mouse",3,532,284,138,282,1.8,"plastico"],["pendrive","Pen drive",3,0,1854,75,194,0.9,"plastico"],["cabo","Cabo de rede",3,405,675,209,285,1.1,"plastico"],["ventoinha","Ventoinha",3,905,1470,200,200,1.3,"plastico"],["placa","Placa de circuito",3,1799,184,221,169,1.1,"plastico"],["lampada","Lâmpada",3,674,836,131,218,2,"vidro"],["resistor","Resistor",3,747,1267,55,186,0.8,"plastico"],["capacitor","Capacitor",3,802,1267,80,168,1.6,"plastico"],["cassete","Fita cassete",3,1784,518,236,161,1.1,"plastico"],["celular","Celular antigo",3,258,1685,143,301,1.7,"plastico"],["alicate","Alicate",3,181,1073,130,309,1.2,"metal"],["engrenagem","Engrenagem",3,1387,601,158,158,0.9,"metal"],["fone","Fone de ouvido",3,911,964,218,200,1.5,"plastico"],["cartao","Cartão de memória",3,1948,833,91,112,0.35,"plastico"],["cracha","Crachá",3,459,960,132,278,0.4,"plastico"],["bussola","Bússola",4,1181,206,179,205,1.5,"metal"],["ancora","Âncora",4,453,1794,210,243,0.8,"metal"],["conchinha","Concha do mar",4,1805,679,238,154,1,"louca"],["estrela","Estrela-do-mar",4,971,247,210,209,1,"fruta"],["timao","Leme",4,741,0,247,247,1,"madeira"],["sino","Sino",4,1127,1164,150,193,2.4,"metal"],["garrafa","Garrafa com bilhete",4,614,566,124,270,2,"vidro"],["luneta","Luneta",4,303,675,102,304,1.9,"metal"],["corda","Corda enrolada",4,905,1267,222,203,1.4,"tecido"],["anzol","Anzol",4,1356,1665,93,173,0.3,"metal"],["boia","Boia",4,686,1453,219,219,1.8,"plastico"],["mapa","Mapa enrolado",4,670,280,85,257,1.8,"papel"],["ampulheta","Ampulheta",4,1360,203,117,190,2,"vidro"],["piao","Pião",4,1094,1866,132,177,2.4,"madeira"],["rei","Rei do xadrez",4,636,1233,111,220,1.9,"madeira"],["cavalo","Cavalo do xadrez",4,1834,0,116,184,1.9,"madeira"],["dado","Dado",4,805,964,88,88,2.2,"madeira"],["domino","Dominó",4,803,1890,88,148,1,"madeira"],["carta","Carta de baralho",4,1477,203,143,190,0.2,"papel"],["apito","Apito",4,1129,1062,175,101,1.6,"metal"],["ferradura","Ferradura",4,1620,184,179,171,0.6,"metal"],["gaita","Gaita",4,1500,1242,195,78,1.4,"metal"],["pena","Pena",4,158,371,90,341,0.4,"papel"],["cachimbo","Cachimbo",4,1378,1413,249,110,1.8,"madeira"],["medalhao","Lembrança",9,738,537,146,217,1.4,"metal"]]/*FIM*/.map(([id, nome, tema, x, y, w, h, hz, som], i) => {
+    const cu = (w - 2 * MARGEM) / K, ch = (h - 2 * MARGEM) / K;
+    return { i, id, nome, tema, x, y, w, h, hz, som, lu: w / K, lh: h / K, cu, ch, deita: cu > ch, raio: Math.min(cu, ch) / 2, braco: Math.abs(cu - ch) / 2, massa: cu * ch };
+  });
+  const POR = Object.fromEntries(CAT.map(c => [c.id, c.i])), MED = POR.medalhao;
+  const LUGARES = ['Escritório', 'Cozinha', 'Ateliê', 'Sala de TI', 'Sótão'];
+  // modos: L lista, R remexer (lista com objetos enterrados), I iguais, S sombras, P pares, E escuro, V um por vez, N só nomes
+  const MODOS = ['LLRILSPEVL', 'LSILNPREVL', 'LNPSREIVNL', 'LIVSPNERSL', 'LEPNIRVSNL'];
+  const SERRA = [0, .03, .06, .08, .16, .04, .07, .1, .18, .24];           // dificuldade sobe e desce dentro do cômodo: a 5, a 9 e a 10 apertam
+  const CONTA = { L: [5, 6], R: [4, 4], I: [6, 6], S: [5, 5], P: [3, 4], E: [4, 5], V: [6, 7], N: [5, 5] };
+  const SEG = { L: 8.5, R: 13, I: 7.5, S: 10.5, P: 16, E: 14, V: 8.5, N: 10 };
+  const DICAS = {
+    1: 'Toque nos objetos da bandeja', 2: 'Segure o dedo na mesa para abrir a lupa', 3: 'Tem coisa por baixo: arraste o dedo para remexer', 4: 'Ache todos os iguais', 5: 'Travou? Use a dica',
+    6: 'Ache pela sombra', 7: 'Só alguns têm par: toque nos dois', 8: 'Arraste para levar a luz', 9: 'Um objeto por vez', 10: 'Cada fase esconde uma lembrança dourada'
+  };
+  const TXT = { L: '', R: 'Arraste o dedo para remexer', I: 'Ache todos os iguais', S: 'Ache pela sombra', P: 'Toque nos dois iguais de cada par', E: 'Arraste para levar a luz', V: 'Um objeto por vez', N: 'Só os nomes' };
+  // objetos bons para "ache todos os iguais" e o parecido que entra para confundir
+  const IGUAIS = [['moeda', 'botaoOsso'], ['chave', 'abridor'], ['clipe', 'anzol'], ['percevejo', 'alfinete'], ['rolha', 'dado'], ['tampinha', 'moeda'], ['ovo', 'alho'], ['botao', 'botaoOsso'], ['carretel', 'carretelAzul'], ['dedal', 'rolha'], ['parafuso', 'pilha'], ['tecla', 'teclaEsc'], ['resistor', 'alfinete'], ['cartao', 'chip'], ['conchinha', 'leque'], ['dado', 'domino'], ['anzol', 'clipe'], ['rei', 'cavalo']];
+  // formas parecidas demais para achar só pela sombra
+  const SEM_SOMBRA = new Set('borracha memoria regua livro envelope placa carta disquete disqueteAzul domino cartao rolha moeda botao botaoOsso dado tecla teclaEsc chip cd ovo queijo cracha almofada biscoito novelo tinteiro grampeador mapa pilha'.split(' '));
+  const semente = s => { let a = s >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+
+  function fase(n) {
+    const lugar = Math.floor((n - 1) / 10), pos = (n - 1) % 10, modo = MODOS[lugar][pos], d = Math.min(1, (n - 1) / 49 * .78 + SERRA[pos]);
+    let alvos = Math.round(CONTA[modo][0] + CONTA[modo][1] * d) + (pos === 9 ? 3 : 0), total = Math.round(24 + 68 * d);
+    if (n === 1) { alvos = 4; total = 22; } if (n === 2) { alvos = 5; total = 28; }
+    if (modo === 'P') total = Math.min(total, 62); if (modo === 'R') total += 18;
+    const seg = SEG[modo] * (1 - .12 * d) * (.72 + .42 * total / 60), tempo = Math.round((alvos * seg + 14) / 5) * 5;
+    const fundo = modo === 'R' ? (n === 3 ? .5 : .85) : modo === 'E' || n < 3 ? 0 : .08 + .42 * d;
+    return { n, lugar, pos, modo, d, alvos, total, tempo, fundo, aviso: pos === 9 ? 'Muito difícil' : pos === 4 || pos === 8 ? 'Difícil' : '', dica: DICAS[n] || TXT[modo] };
+  }
+  function medidas(asp) { const a = Math.max(.48, Math.min(2.1, asp)), W = Math.sqrt(AREA * a); return { W, H: AREA / W }; }
+  // meia largura e meia altura ocupadas por um objeto girado
+  function meia(o) { const c = CAT[o.k], co = Math.abs(Math.cos(o.r)), si = Math.abs(Math.sin(o.r)); return [(c.cu * co + c.ch * si) / 2, (c.cu * si + c.ch * co) / 2]; }
+  function prende(o, W, H) { const [a, b] = meia(o), mx = Math.max(.2, W / 2 - Math.max(.9, a * .86)), my = Math.max(.2, H / 2 - Math.max(.9, b * .86)); let bateu = false; if (o.x < -mx) { o.x = -mx; bateu = true; } if (o.x > mx) { o.x = mx; bateu = true; } if (o.y < -my) { o.y = -my; bateu = true; } if (o.y > my) { o.y = my; bateu = true; } return bateu; }
+
+  // ---------- máscaras: quem está por cima em cada ponto da mesa
+  const naMascara = (m, c, lx, ly) => { const u = Math.round((lx / c.lu + .5) * m.w), v = Math.round((ly / c.lh + .5) * m.h); return u >= 0 && v >= 0 && u < m.w && v < m.h && m.d[v * m.w + u] > 0; };
+  function mapa(objs, W, H, masc) {
+    const w = Math.ceil(W * RES), h = Math.ceil(H * RES), id = new Int16Array(w * h).fill(-1), area = new Int32Array(objs.length), vis = new Int32Array(objs.length);
+    objs.forEach((o, i) => {
+      if (!o.vivo) return; const c = CAT[o.k], m = masc[o.k], R = Math.hypot(c.lu, c.lh) / 2, co = Math.cos(o.r), si = Math.sin(o.r);
+      const x0 = Math.max(0, Math.floor((o.x - R + W / 2) * RES)), x1 = Math.min(w - 1, Math.ceil((o.x + R + W / 2) * RES)), y0 = Math.max(0, Math.floor((o.y - R + H / 2) * RES)), y1 = Math.min(h - 1, Math.ceil((o.y + R + H / 2) * RES));
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const dx = (x + .5) / RES - W / 2 - o.x, dy = (y + .5) / RES - H / 2 - o.y; if (naMascara(m, c, dx * co + dy * si, -dx * si + dy * co)) { id[y * w + x] = i; area[i]++; } }
+    });
+    for (const k of id) if (k >= 0) vis[k]++;
+    return { id, w, h, area, vis, fracao: i => area[i] ? vis[i] / area[i] : 0 };
+  }
+  function topo(objs, x, y, masc, folga = 0) {
+    for (let i = objs.length - 1; i >= 0; i--) { const o = objs[i]; if (!o.vivo) continue; const c = CAT[o.k], dx = x - o.x, dy = y - o.y; if (Math.abs(dx) + Math.abs(dy) > (c.lu + c.lh) * .75 + folga) continue; const co = Math.cos(o.r), si = Math.sin(o.r); if (naMascara(masc[o.k], c, dx * co + dy * si, -dx * si + dy * co)) return i; }
+    return -1;
+  }
+
+  // ---------- monta a mesa de uma fase. A mesma fase na mesma tentativa sai sempre igual
+  function gerar(n, tent, asp, masc) {
+    const F = fase(n), rnd = semente(n * 7919 + tent * 104729 + 17), { W, H } = medidas(asp), al = (a, b) => a + (b - a) * rnd(), mist = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const usaveis = CAT.filter(c => c.tema < 5);
+    // objetos do cômodo entram com mais chance; os outros cômodos completam a bagunça
+    const fila = usaveis.map(c => ({ k: c.i, p: rnd() + (c.tema === F.lugar ? .55 : 0) - (n < 4 && c.massa > 60 ? .3 : 0) })).sort((a, b) => b.p - a.p).map(q => q.k);
+    let alvosK = [], itens = [];
+    if (F.modo === 'I') {
+      const ops = IGUAIS.filter(([a]) => CAT[POR[a]].tema === F.lugar), par = (ops.length ? ops : IGUAIS)[Math.floor(rnd() * (ops.length || IGUAIS.length))], k = POR[par[0]], dec = POR[par[1]];
+      for (let i = 0; i < F.alvos; i++) itens.push({ k, alvo: true });
+      for (let i = 0; i < Math.round(2 + 3 * F.d); i++) itens.push({ k: dec, alvo: false });
+      alvosK = [k]; for (const q of fila) if (itens.length < F.total && q !== k) itens.push({ k: q, alvo: false });
+    } else if (F.modo === 'P') {
+      const ks = fila.filter(k => CAT[k].massa < 75).slice(0, F.alvos); for (const k of ks) itens.push({ k, alvo: true }, { k, alvo: true }); alvosK = ks;
+      for (const q of fila) if (itens.length < F.total && !ks.includes(q)) itens.push({ k: q, alvo: false });
+    } else {
+      const cand = mist(fila.slice(0, Math.max(F.alvos + (F.modo === 'S' ? 24 : 6), Math.min(40, F.total)))).filter(k => (n > 3 || CAT[k].massa > 9) && !(F.modo === 'S' && SEM_SOMBRA.has(CAT[k].id))); alvosK = cand.slice(0, F.alvos); for (const k of alvosK) itens.push({ k, alvo: true });
+      for (const q of fila) if (itens.length < F.total && !alvosK.includes(q)) itens.push({ k: q, alvo: false });
+      let g = 0; while (itens.length < F.total && g++ < 200) { const q = fila[Math.floor(rnd() * fila.length)]; if (!alvosK.includes(q)) itens.push({ k: q, alvo: false }); }
+    }
+    // ordem de baixo para cima: grandes embaixo, alvos enterrados embaixo
+    const nAlvo = itens.filter(q => q.alvo).length, nFundo = Math.round(nAlvo * F.fundo); let f = 0; mist(itens);
+    for (const q of itens) { q.fundo = q.alvo && f++ < nFundo; q.z = q.alvo ? (q.fundo ? al(.02, .3) : al(.62, 1)) : Math.max(0, Math.min(1, 1 - CAT[q.k].massa / 90)) * .55 + rnd() * .45; }
+    itens.push({ k: MED, alvo: false, lembranca: true, fundo: true, z: -1 + rnd() * .5 }); itens.sort((a, b) => a.z - b.z);
+    const objs = [], pos = q => { let m = null; for (let t = 0; t < 9; t++) { const o = { k: q.k, x: al(-W / 2, W / 2), y: al(-H / 2, H / 2), r: al(0, 6.283), vivo: true, alvo: q.alvo, fundo: !!q.fundo, lembranca: !!q.lembranca, vx: 0, vy: 0, vr: 0 }; prende(o, W, H); let d = 1e9; for (const p of objs) d = Math.min(d, Math.hypot(p.x - o.x, p.y - o.y) - (CAT[p.k].raio + CAT[q.k].raio) * .7); if (!m || d > m.d) m = { o, d }; } return m.o; };
+    for (const q of itens) objs.push(pos(q));
+    // ajusta o quanto cada alvo aparece
+    if (masc) {
+      let M = mapa(objs, W, H, masc);
+      const ESCONDE = F.modo === 'R' ? (n === 3 ? [.06, .3] : [0, .14]) : [.1, .42];       // quanto do alvo enterrado pode aparecer
+      const nota = (o, v) => o.lembranca ? (v <= .22 ? 0 : v - .22) : o.fundo ? (v < ESCONDE[0] ? (ESCONDE[0] - v) * 4 : v > ESCONDE[1] ? v - ESCONDE[1] : 0) : v < .62 ? .62 - v : 0;
+      for (let volta = 0; volta < 3; volta++) objs.forEach((o, i) => {
+        if (!o.alvo && !o.lembranca) return; let mel = nota(o, M.fracao(i)); if (mel <= 0) return; let guarda = { x: o.x, y: o.y, r: o.r };
+        for (let t = 0; t < 7 && mel > 0; t++) { o.x = al(-W / 2, W / 2); o.y = al(-H / 2, H / 2); o.r = al(0, 6.283); prende(o, W, H); const Q = mapa(objs, W, H, masc), v = nota(o, Q.fracao(i)); if (v < mel) { mel = v; guarda = { x: o.x, y: o.y, r: o.r }; } }
+        Object.assign(o, guarda); M = mapa(objs, W, H, masc);
+      });
+      // enterrado que ainda aparece demais: um objeto grande vem por cima
+      objs.forEach((o, i) => {
+        if (!(o.fundo && o.alvo)) return; for (let t = 0; t < 4 && M.fracao(i) > ESCONDE[1]; t++) {
+          const op = objs.map((q, j) => j).filter(j => j > i && !objs[j].alvo && !objs[j].lembranca && !objs[j].cobre && CAT[objs[j].k].massa > CAT[o.k].massa * .5); if (!op.length) break; const c = objs[op[Math.floor(rnd() * op.length)]]; c.cobre = true; c.x = o.x + al(-1, 1); c.y = o.y + al(-1, 1); c.r = o.r + al(-.4, .4) + (CAT[c.k].deita === CAT[o.k].deita ? 0 : 1.57); prende(c, W, H); M = mapa(objs, W, H, masc);
+        }
+      });
+      // quem ainda ficou escondido demais sobe para o alto da pilha
+      objs.forEach((o, i) => { if (o.alvo && !o.fundo && M.fracao(i) < .4) o.sobe = true; });
+      const s = objs.filter(o => o.sobe); if (s.length) { const r = objs.filter(o => !o.sobe); objs.length = 0; objs.push(...r, ...s); M = mapa(objs, W, H, masc); }
+      // trava de segurança: fora da fase de remexer, nada fica totalmente coberto
+      if (F.modo !== 'R') for (let g = 0; g < 6; g++) { const i = objs.findIndex((o, j) => o.alvo && M.fracao(j) < .08); if (i < 0) break; objs.push(...objs.splice(i, 1)); M = mapa(objs, W, H, masc); }
+    }
+    return { F, W, H, objs, alvosK: F.modo === 'I' || F.modo === 'P' ? alvosK : mist(alvosK) };
+  }
+
+  // ---------- remexer: o dedo em (x,y) andou (dx,dy). Quem está por cima vai mais longe, e é isso que mostra o que está por baixo
+  const RAIO_DEDO = 2.6;
+  function remexer(objs, x, y, dx, dy, masc) {
+    const andou = Math.hypot(dx, dy), toc = []; if (andou < .001) return toc;
+    let ordem = 0; for (let i = objs.length - 1; i >= 0 && ordem < 9; i--) {
+      const o = objs[i]; if (!o.vivo || o.preso) continue; const c = CAT[o.k], co = Math.cos(o.r), si = Math.sin(o.r); let lx = (x - o.x) * co + (y - o.y) * si, ly = -(x - o.x) * si + (y - o.y) * co;
+      const t = c.deita ? Math.max(-c.braco, Math.min(c.braco, lx)) : Math.max(-c.braco, Math.min(c.braco, ly)), px = c.deita ? t : 0, py = c.deita ? 0 : t, d = Math.hypot(lx - px, ly - py) - c.raio * .8;
+      if (d > RAIO_DEDO) continue; const perto = d <= 0 ? 1 : 1 - d / RAIO_DEDO, f = perto * perto * (3 - 2 * perto) * Math.pow(.62, ordem) / (1 + c.massa / 160); if (f < .02) continue; ordem += perto;
+      const gx = x - o.x, gy = y - o.y, l = Math.hypot(gx, gy) || 1, ab = andou * f * .35;         // anda junto com o dedo e abre um pouco para os lados
+      const mx = dx * f - gx / l * ab, my = dy * f - gy / l * ab, gira = (gx * my - gy * mx) / (6 + c.massa * .7 + c.braco * c.braco * 2);
+      o.x += mx; o.y += my; o.r += Math.max(-.12, Math.min(.12, gira)); o.vx = o.vx * .5 + mx * 9; o.vy = o.vy * .5 + my * 9; o.vr = o.vr * .5 + gira * 6; toc.push({ o, v: andou * f });
+    }
+    return toc;
+  }
+  function anda(objs, W, H, dt) {
+    let mexeu = false; const fr = Math.exp(-7.5 * dt);
+    for (const o of objs) { if (!o.vivo) continue; if (Math.abs(o.vx) + Math.abs(o.vy) + Math.abs(o.vr) > .02) { o.x += o.vx * dt; o.y += o.vy * dt; o.r += o.vr * dt; o.vx *= fr; o.vy *= fr; o.vr *= fr; mexeu = true; } else o.vx = o.vy = o.vr = 0; if (prende(o, W, H)) { o.vx *= .4; o.vy *= .4; } }
+    return mexeu;
+  }
+  // afasta tudo de um ponto (dica e vitória)
+  function sopra(objs, x, y, raio, forca, menos) { for (const o of objs) { if (!o.vivo || o === menos) continue; const dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy); if (d > raio) continue; const f = forca * (1 - d / raio), l = d || 1; o.vx += (d ? dx / l : 1) * f; o.vy += dy / l * f; o.vr += (o.k % 2 ? 1 : -1) * f * .05; } }
+
+  // ---------- regras de uma partida
+  const VAGAS = 5, ERRO = 4, JANELA = 6, RECARGA = 45;
+  class Partida {
+    constructor(n, tent, asp, masc) {
+      Object.assign(this, gerar(n, tent, asp, masc)); this.masc = masc; this.tempo = this.F.tempo; this.pontos = 0; this.combo = 0; this.maiorCombo = 0; this.erros = 0; this.achados = 0; this.dicas = 1; this.recarga = 0; this.ult = -99; this.relogio = 0; this.lembranca = false; this.usouDica = 0; this.fim = ''; this.marcado = null;
+      this.meta = this.F.alvos; const L = this.F.modo;
+      this.vagas = L === 'I' ? [{ k: this.alvosK[0], feita: false }] : L === 'P' ? this.alvosK.map(() => ({ k: -1, feita: false })) : this.alvosK.slice(0, L === 'V' ? 1 : VAGAS).map(k => ({ k, feita: false })); this.fila = L === 'I' || L === 'P' ? [] : this.alvosK.slice(this.vagas.length);
+    }
+    get mult() { return Math.min(5, 1 + Math.floor(this.combo / 2)); }
+    // é um alvo que o jogador pode pegar agora?
+    vale(o) { if (!o.vivo) return false; if (o.lembranca) return true; if (!o.alvo) return false; const m = this.F.modo; if (m === 'I') return true; if (m === 'P') return true; return this.vagas.some(v => v.k === o.k && !v.feita); }
+    // toque com folga: se o dedo quase acertou um alvo que aparece, vale
+    noDedo(x, y, folga) {
+      const c = topo(this.objs, x, y, this.masc); if (c >= 0 && this.vale(this.objs[c]) && this.F.modo !== 'P') return c;
+      if (this.F.modo === 'P') { if (c >= 0) return c; } else for (const r of [.5, 1]) for (let i = 0; i < 10; i++) { const a = i * .6283, t = topo(this.objs, x + Math.cos(a) * folga * r, y + Math.sin(a) * folga * r, this.masc); if (t >= 0 && this.vale(this.objs[t])) return t; }
+      return c;
+    }
+    tocar(i) {
+      if (this.fim || i < 0) return { e: 'nada' }; const o = this.objs[i]; if (!o || !o.vivo) return { e: 'nada' };
+      if (o.lembranca) { o.vivo = false; this.lembranca = true; this.pontos += 500; return { e: 'lembranca', o, pts: 500 }; }
+      if (this.F.modo === 'P') {
+        if (this.marcado === o) { this.marcado = null; o.preso = false; return { e: 'solta', o }; }
+        if (!this.marcado) { this.marcado = o; o.preso = true; return { e: 'marca', o }; }
+        const a = this.marcado; this.marcado = null; a.preso = false; if (a.k !== o.k || !o.alvo) return { ...this.errar(o), solto: a };
+        a.vivo = o.vivo = false; const v = this.vagas.findIndex(q => !q.feita); this.vagas[v] = { k: o.k, feita: true }; return this.acertar({ o, par: a, vaga: v });
+      }
+      if (!this.vale(o)) return this.errar(o);
+      o.vivo = false; let v = 0; if (this.F.modo !== 'I') { v = this.vagas.findIndex(q => q.k === o.k && !q.feita); this.vagas[v].feita = true; } return this.acertar({ o, vaga: v });
+    }
+    errar(o) { this.erros++; this.combo = 0; this.tempo = Math.max(0, this.tempo - ERRO); return { e: 'erro', o, perde: ERRO }; }
+    acertar(x) {
+      const rapido = this.relogio - this.ult < JANELA; this.combo = rapido ? this.combo + 1 : 1; this.maiorCombo = Math.max(this.maiorCombo, this.combo); const ganho = this.relogio - this.ult; this.ult = this.relogio; this.achados++;
+      const pts = 100 * this.mult + (rapido ? Math.round((JANELA - ganho) * 10) : 0); this.pontos += pts; const extra = this.combo >= 3 ? 1 : 0; this.tempo += extra; this.recarga += 4;
+      if (this.achados >= this.meta) { this.fim = 'vitoria'; this.pontos += Math.round(this.tempo) * 10; } return { e: 'achou', ...x, pts, combo: this.combo, mult: this.mult, extra, fim: this.fim };
+    }
+    // a vaga cumprida recebe o próximo da fila (chamado quando o objeto chega na bandeja)
+    repor(v) { if (this.F.modo === 'I' || this.F.modo === 'P') return false; if (!this.fila.length) return false; this.vagas[v] = { k: this.fila.shift(), feita: false }; return true; }
+    passar(dt) {
+      if (this.fim) return; this.relogio += dt; this.tempo -= dt; if (this.combo && this.relogio - this.ult > JANELA) this.combo = 0;
+      if (this.dicas < 1) { this.recarga += dt; if (this.recarga >= RECARGA) { this.dicas++; this.recarga = 0; } } else this.recarga = 0;
+      if (this.tempo <= 0) { this.tempo = 0; this.fim = 'derrota'; }
+    }
+    get carga() { return this.dicas > 0 ? 1 : this.recarga / RECARGA; }
+    dica() {
+      if (this.fim || this.dicas < 1) return null; const c = this.objs.map((o, i) => [o, i]).filter(([o]) => o.alvo && this.vale(o)); if (!c.length) return null; const M = mapa(this.objs, this.W, this.H, this.masc);
+      let l = c; if (this.F.modo === 'P' && this.marcado && this.marcado.alvo) l = c.filter(([o]) => o.k === this.marcado.k && o !== this.marcado); l.sort((a, b) => M.fracao(a[1]) - M.fracao(b[1])); const [o, i] = l[0];
+      this.dicas--; this.usouDica++; this.recarga = 0; return { o, i, visivel: M.fracao(i), par: this.F.modo === 'P' ? c.map(q => q[0]).find(q => q !== o && q.k === o.k) : null };
+    }
+    get estrelas() { const r = this.tempo / this.F.tempo; return r >= .4 ? 3 : r >= .18 ? 2 : 1; }
+    // a tela girou: leva os objetos para as novas medidas
+    remodelar(asp) { const { W, H } = medidas(asp); if (Math.abs(W - this.W) < .05) return; for (const o of this.objs) { o.x *= W / this.W; o.y *= H / this.H; } this.W = W; this.H = H; for (const o of this.objs) prende(o, W, H); }
+  }
+  return { K, MARGEM, RES, CAT, POR, MED, LUGARES, TOTAL, VAGAS, JANELA, fase, medidas, gerar, mapa, topo, remexer, anda, sopra, prende, Partida };
+})();
+</script>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+// ============================================================ EVENTOS E GANCHOS (as próximas fases do projeto se ligam aqui)
+const Eventos = (() => { const m = {}; return {
+  on(n, f) { (m[n] = m[n] || []).push(f); }, emite(n, d) { for (const f of m[n] || []) try { f(d); } catch (e) { console.error(e); } }
+}; })();
+// Fase 2: progressão · Fase 3: economia e anúncios. Hoje não fazem nada.
+const Ganchos = {
+  antesDaFase: async n => ({}),                   // boosters escolhidos antes de começar
+  oferecerContinuar: async p => null,             // o tempo acabou: pode devolver segundos a mais
+  entreFases: async n => {},                      // espaço entre uma fase e outra
+  premio: (tipo, dados) => {}                     // estrela nova, lembrança achada, recorde
+};
+
+// ============================================================ PROGRESSO (guardado no aparelho)
+const Progresso = (() => {
+  const CHAVE = 'keepsake.v1', novo = () => ({ v: 1, fase: 1, estrelas: {}, recordes: {}, lembrancas: {}, tentativas: {}, op: { som: true, ambiente: true, vibra: true }, soma: { achados: 0, erros: 0, vitorias: 0, derrotas: 0, combo: 0 } });
+  let d = novo();
+  try { const x = JSON.parse(localStorage.getItem(CHAVE)); if (x && x.v === 1) { const b = novo(); d = { ...b, ...x, op: { ...b.op, ...x.op }, soma: { ...b.soma, ...x.soma } }; d.fase = Math.max(1, Math.min(Nucleo.TOTAL + 1, d.fase | 0)); } } catch (e) { /* ficha ilegível: começa do zero */ }
+  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(d)); Eventos.emite('salvou', d); } catch (e) { /* sem espaço ou modo anônimo */ } };
+  return { d, salvar, get totalEstrelas() { return Object.values(d.estrelas).reduce((a, b) => a + b, 0); }, get totalLembrancas() { return Object.keys(d.lembrancas).length; } };
+})();
+
+// ============================================================ SOM (tudo por código, Web Audio)
+const Som = (() => {
+  // alto-falante de celular quase não toca graves: ali o som sai mais forte e mais agudo
+  const PEQUENO = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) < 600);
+  let ctx, mestre, efeitos, musica, eco, ruidoB, final, fundo = null, parado = null, refeitos = 0, vozes = 0, lugar = 0, tocando = false, aperto = 0, proxN = 0, passoN = 0, proxE = 0;
+  const ALEA = (a, b) => a + Math.random() * (b - a), op = () => Progresso.d.op, pronto = () => ctx && ctx.state === 'running' && op().som;
+  const ESC = [0, 2, 4, 7, 9], BASE = [196, 220, 233.08, 207.65, 185], grau = (g, b = BASE[lugar]) => b * Math.pow(2, (ESC[((g % 5) + 5) % 5] + 12 * Math.floor(g / 5)) / 12), LIMITE = PEQUENO ? 52 : 90;
+  function retomar() { const p = ctx.resume(); if (p) p.catch(() => {}); }
+  // o celular às vezes deixa o áudio travado: se o relógio dele não anda, refaz
+  function acordar() {
+    if (document.hidden) return false; const roda = ctx.state === 'running', ag = performance.now(); if (!roda && ctx.state !== 'closed') retomar();
+    if (!parado || parado.roda !== roda || parado.t !== ctx.currentTime) { parado = { roda, t: ctx.currentTime, em: ag }; return false; }
+    if (ag - parado.em < 2500 || refeitos >= 3) return false; refeitos++; parado = null; const velho = ctx; ctx = null; if (velho.state !== 'closed') velho.close().catch(() => {}); return true;
+  }
+  const filtro = (t, f, g, q = .7) => { const b = ctx.createBiquadFilter(); b.type = t; b.frequency.value = f; b.Q.value = q; b.gain.value = g || 0; return b; };
+  function iniciar() {
+    if (ctx && !acordar()) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC({ latencyHint: 'interactive' }); parado = null; canais = {}; vozes = 0; fundo = null;
+    mestre = ctx.createGain(); mestre.gain.value = 0; efeitos = ctx.createGain(); musica = ctx.createGain(); musica.gain.value = 0; efeitos.connect(mestre); musica.connect(mestre);
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .18; mestre.connect(comp); final = ctx.createGain();
+    if (PEQUENO) { const g = ctx.createGain(), teto = ctx.createDynamicsCompressor(); g.gain.value = 2; teto.threshold.value = -9; teto.knee.value = 6; teto.ratio.value = 14; teto.attack.value = .002; teto.release.value = .2; final.gain.value = .66; comp.connect(filtro('highpass', 110)).connect(filtro('highshelf', 450, 5)).connect(g).connect(teto).connect(final); }
+    else { const teto = ctx.createDynamicsCompressor(); teto.threshold.value = -10; teto.knee.value = 4; teto.ratio.value = 20; teto.attack.value = .001; teto.release.value = .15; final.gain.value = .85; comp.connect(teto).connect(final); }
+    final.connect(ctx.destination);
+    const n = ctx.sampleRate * 1.3 | 0, imp = ctx.createBuffer(2, n, ctx.sampleRate); for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); let s = 0; for (let i = 0; i < n; i++) { s += ((Math.random() * 2 - 1) - s) * .55; d[i] = s * Math.pow(1 - i / n, 3.4); } }
+    eco = ctx.createConvolver(); eco.buffer = imp; const ge = ctx.createGain(); ge.gain.value = .3; eco.connect(ge).connect(mestre);
+    ruidoB = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate); const d = ruidoB.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    proxN = ctx.currentTime + .6; proxE = ctx.currentTime + 2; arFundo(); volume(); if (ctx.state !== 'running') retomar();
+  }
+  // ar de cada cômodo: sala com lareira, cozinha, chuva na janela, ventoinhas, mar
+  const AR = [[['lowpass', 320, .05]], [['bandpass', 700, .02], ['lowpass', 240, .035]], [['highpass', 2600, .02], ['bandpass', 900, .022]], [['bandpass', 210, .075], ['bandpass', 1150, .012]], [['lowpass', 520, .09]]];
+  function arFundo() {
+    if (!ctx) return; if (fundo) { const v = fundo; v.g.gain.setTargetAtTime(0, ctx.currentTime, .4); setTimeout(() => { try { v.s.stop(); v.l.stop(); v.g.disconnect(); } catch (e) { /* já parou */ } }, 1800); }
+    const s = ctx.createBufferSource(), g = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain(); s.buffer = ruidoB; s.loop = true; g.gain.value = 0; g.gain.setTargetAtTime(1, ctx.currentTime, .7);
+    for (const [t, f, v] of AR[lugar]) { const gg = ctx.createGain(); gg.gain.value = v * .7; s.connect(filtro(t, f, 0, t === 'bandpass' ? 1.6 : .7)).connect(gg).connect(g); } l.frequency.value = lugar === 4 ? .11 : .06; lg.gain.value = lugar === 4 ? .5 : .12; l.connect(lg).connect(g.gain); g.connect(musica); s.start(); l.start(); fundo = { s, l, g };
+  }
+  function volume() {
+    try { if (navigator.audioSession) navigator.audioSession.type = op().som ? 'playback' : 'ambient'; } catch (e) { /* sem esse ajuste */ }
+    if (!ctx) return; mestre.gain.setTargetAtTime(op().som ? .9 : 0, ctx.currentTime, .05); musica.gain.setTargetAtTime(op().ambiente && tocando ? 1 : 0, ctx.currentTime, .6);
+  }
+  let canais = {};
+  function canal(pan, molhado, saida) {
+    const i = Math.max(-2, Math.min(2, Math.round(pan * 3))), m = molhado < .04 ? 0 : molhado < .2 ? 1 : molhado < .45 ? 2 : 3, ch = i + '/' + m + (saida === musica ? 'm' : ''); if (canais[ch]) return canais[ch];
+    const no = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (no.pan) no.pan.value = i / 3; no.connect(saida); if (m) { const w = ctx.createGain(); w.gain.value = [0, .1, .3, .6][m]; no.connect(w).connect(eco); } return canais[ch] = no;
+  }
+  function tom(f, t0, dur, v, { tipo = 'sine', ate = 0, tGl = dur, ataque = .003, pan = 0, molhado = .2, saida = efeitos } = {}) {
+    if (f > 10000 || vozes > LIMITE) return; vozes++; const o = ctx.createOscillator(), g = ctx.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0); if (ate) o.frequency.exponentialRampToValueAtTime(ate, t0 + tGl);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + ataque); g.gain.exponentialRampToValueAtTime(.0001, t0 + Math.max(dur, ataque + .02)); o.connect(g).connect(canal(pan, molhado, saida)); o.onended = () => { vozes--; g.disconnect(); }; o.start(t0); o.stop(t0 + dur + .06);
+  }
+  function chiado(t0, dur, v, f, { q = 1, ate = 0, ataque = .002, pan = 0, molhado = .1, tipo = 'bandpass', saida = efeitos } = {}) {
+    if (vozes > LIMITE) return; vozes++; const s = ctx.createBufferSource(), b = filtro(tipo, f, 0, q), g = ctx.createGain(); s.buffer = ruidoB; if (ate) b.frequency.exponentialRampToValueAtTime(ate, t0 + dur);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + ataque); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur); s.connect(b).connect(g).connect(canal(pan, molhado, saida)); s.onended = () => { vozes--; g.disconnect(); }; s.start(t0, Math.random() * 2, dur + .05);
+  }
+  const sino = (f, t, v, dur = 1.2, pan = 0) => { tom(f, t, dur, v, { molhado: .5, pan }); tom(f * 2.005, t, dur * .55, v * .34, { molhado: .4, pan }); tom(f * 5.4, t, .08, v * .12, { pan }); };
+  // batidinha de cada material: [tons [frequência, força, duração], chiado [frequência, força, duração, q]]
+  const MAT = { madeira: [[[430, 1, .07], [1010, .4, .035]], [1500, .5, .03, 1.2]], metal: [[[2350, .55, .22], [3870, .35, .16], [5900, .2, .1]], [4200, .25, .02, 1]], vidro: [[[3100, .6, .28], [5230, .28, .16]], [6000, .2, .015, 1]], louca: [[[1820, .7, .16], [3340, .35, .1]], [3600, .25, .02, 1]], papel: [[], [3400, 1, .07, .6]], plastico: [[[780, .7, .05], [1720, .4, .03]], [2400, .4, .025, 1.4]], tecido: [[], [900, .9, .08, .6]], fruta: [[[240, 1, .08]], [700, .4, .04, .8]], borracha: [[[190, 1, .07]], [520, .5, .05, 1]] };
+  function bate(m, t, v, pan = 0, tomx = 1) { const [ts, [f, fv, fd, q]] = MAT[m] || MAT.madeira, a = ALEA(.93, 1.08) * tomx; for (const [tf, tv, td] of ts) tom(tf * a, t, td, tv * v, { pan, molhado: .12, tipo: m === 'madeira' || m === 'plastico' ? 'triangle' : 'sine' }); chiado(t, fd, fv * v, f * a, { q, pan, molhado: .05 }); }
+  // música de fundo: piano de feltro bem espaçado em volta de um pulso leve
+  const MEL = [0, -1, 4, -1, 2, -1, -1, 7, -1, 5, -1, -1, 3, -1, 4, -1];
+  function feltro(f, t, v, pan) { tom(f, t, 1.8, v, { ataque: .012, saida: musica, molhado: .5, pan }); tom(f * 2, t, .9, v * .28, { ataque: .01, saida: musica, molhado: .4, pan }); tom(f * 3.01, t, .4, v * .09, { saida: musica, molhado: .3, pan }); }
+  setInterval(() => {
+    if (!ctx || ctx.state !== 'running' || document.hidden) return; const ag = ctx.currentTime; if (proxN < ag - .5) proxN = ag + .05; const ligado = op().som && op().ambiente && tocando;
+    const seg = 60 / (66 + aperto * 18) / 2;
+    while (proxN < ag + .35) {
+      const k = passoN % 16, v8 = Math.floor(passoN / 16) % 4;
+      if (ligado) { if (MEL[k] >= 0 && Math.random() < .78) feltro(grau(MEL[k] + [0, 0, -2, -1][v8] + (Math.random() < .12 ? 5 : 0)), proxN, .045, ALEA(-.4, .4)); if (k === 0 || k === 8) feltro(grau([0, 3, -2, -1][v8] - (k ? 0 : 5)) / 1, proxN, .05, 0); if (aperto > .5 && k % 2 === 0) { tom(1250, proxN, .03, .05, { tipo: 'triangle', molhado: .05, saida: musica }); } }
+      passoN++; proxN += seg;
+    }
+    if (ag > proxE && ligado) {
+      const t = ag + .03, pan = ALEA(-.8, .8);
+      if (lugar === 0) { proxE = ag + ALEA(.5, 2.4); for (let i = 0; i < 1 + Math.random() * 3; i++) chiado(t + i * ALEA(.03, .12), .02, ALEA(.02, .06), ALEA(1800, 4200), { q: 2, pan, saida: musica }); }                       // lareira
+      else if (lugar === 1) { proxE = ag + ALEA(3, 8); const f = ALEA(2300, 3100); for (let i = 0; i < 3; i++) tom(f * (1 + i * .06), t + i * .13, .09, .014, { ate: f * 1.25, saida: musica, molhado: .6, pan }); }                 // passarinho
+      else if (lugar === 2) { proxE = ag + ALEA(.15, .7); tom(ALEA(1500, 2600), t, .03, .012, { ate: 900, saida: musica, molhado: .3, pan }); }                                                                                 // pingos
+      else if (lugar === 3) { proxE = ag + ALEA(2, 6); for (let i = 0; i < 2 + Math.random() * 4; i++) chiado(t + i * .05, .012, .03, 2600, { q: 5, pan, saida: musica }); }                                                    // disco trabalhando
+      else { proxE = ag + ALEA(4, 9); chiado(t, .5, .03, 260, { q: 6, ate: 420, ataque: .15, pan, saida: musica, molhado: .4 }); }                                                                                              // madeira rangendo
+    }
+  }, 120);
+  let ultR = 0, ultP = 0;
+  return {
+    iniciar, volume, get estado() { return ctx ? ctx.state : 'parado'; }, get contexto() { return ctx; }, get final() { return final; }, pequeno: PEQUENO,
+    lugar(l) { if (l === lugar && fundo) return; lugar = l; if (ctx) arFundo(); }, aperto(v) { aperto = v; }, ligar(v) { tocando = v; volume(); },
+    dormir(v) { if (!ctx || ctx.state === 'closed') return; parado = null; if (v) { const p = ctx.suspend(); if (p) p.catch(() => {}); } else retomar(); },
+    botao() { if (!pronto()) return; const t = ctx.currentTime; tom(520, t, .07, .13, { tipo: 'triangle', molhado: .1 }); tom(1040, t, .04, .05, { molhado: 0 }); },
+    toque(m, pan) { if (!pronto()) return; bate(m, ctx.currentTime, .22, pan); },
+    // remexer: cliques do material, mais fortes quanto mais rápido o dedo anda
+    remexe(m, v, pan) { if (!pronto()) return; const t = ctx.currentTime; if (t - ultR < .045) return; ultR = t; bate(m, t + Math.random() * .012, Math.min(.16, .03 + v * .16), pan, ALEA(.85, 1.2)); if (Math.random() < .5) chiado(t, .06, Math.min(.06, v * .07), ALEA(700, 1500), { q: .7, pan, molhado: 0 }); },
+    // achou: estalo do material + notas que sobem com o combo
+    achou(m, combo, pan) { if (!pronto()) return; const t = ctx.currentTime, g = Math.min(combo - 1, 12); bate(m, t, .3, pan); const b = BASE[lugar] * 2; sino(grau(g, b), t + .03, .2, .8, pan); sino(grau(g + 2, b), t + .1, .16, .9, pan); if (combo >= 3) sino(grau(g + 4, b), t + .17, .13, 1, pan); if (combo >= 5) sino(grau(g + 5, b), t + .24, .11, 1.1, pan); chiado(t + .02, .25, .07, 2400, { ate: 7000, q: 1.2, pan, molhado: .3 }); },
+    encaixa(g) { if (!pronto()) return; const t = ctx.currentTime; tom(330, t, .06, .16, { tipo: 'triangle', molhado: .05 }); tom(grau(4 + Math.min(g, 8), BASE[lugar] * 2), t + .02, .3, .09); },
+    vagaNova() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .12, .06, 1400, { ate: 3000, q: .8 }); },
+    erro() { if (!pronto()) return; const t = ctx.currentTime; tom(196, t, .16, .26, { ate: 130, tipo: 'triangle', molhado: .05 }); tom(147, t + .02, .2, .16, { ate: 110, molhado: .05 }); chiado(t, .06, .14, 520, { molhado: .03 }); },
+    marca() { if (!pronto()) return; const t = ctx.currentTime; tom(grau(3) * 2, t, .16, .14, { molhado: .2 }); tom(grau(3) * 4, t, .08, .05); },
+    solta() { if (!pronto()) return; const t = ctx.currentTime; tom(grau(1) * 2, t, .12, .11, { molhado: .1 }); },
+    lupa() { if (!pronto()) return; const t = ctx.currentTime; tom(900, t, .12, .06, { ate: 1500, molhado: .2 }); },
+    dica() { if (!pronto()) return; const t = ctx.currentTime; for (let i = 0; i < 6; i++) sino(grau(i + 2) * 2, t + i * .07, .075, .9, i / 3 - .8); chiado(t, .7, .05, 1500, { ate: 6000, q: .8, ataque: .2, molhado: .4 }); },
+    lembranca() { if (!pronto()) return; const t = ctx.currentTime; [0, 2, 4, 5, 7, 9].forEach((g, i) => sino(grau(g) * 2, t + i * .085, .16, 1.5, (i % 3 - 1) * .5)); chiado(t, .9, .06, 2000, { ate: 8000, q: .7, ataque: .25, molhado: .5 }); },
+    derrama(n) { if (!pronto()) return; const t = ctx.currentTime, ms = ['madeira', 'metal', 'plastico', 'louca', 'papel', 'metal']; for (let i = 0; i < 16; i++) bate(ms[i % 6], t + .05 + i * .032 + Math.random() * .02, ALEA(.05, .13), ALEA(-.7, .7)); },
+    segundo(u) { if (!pronto()) return; const t = ctx.currentTime; tom(u ? 1180 : 980, t, .05, .13, { tipo: 'triangle', molhado: .05 }); tom(2400, t, .015, .06, { molhado: 0 }); },
+    estrela(i) { if (!pronto()) return; const t = ctx.currentTime; sino(grau(i * 2 + 2) * 2, t, .2, 1.1); tom(grau(i * 2) , t, .4, .1); },
+    vitoria() { if (!pronto()) return; const t = ctx.currentTime, b = BASE[lugar]; [[0, 0], [2, .12], [4, .24], [5, .36], [7, .52]].forEach(([g, d]) => { sino(grau(g, b * 2), t + d, .17, 1.3); tom(grau(g, b), t + d, .5, .09); }); for (const g of [0, 2, 4]) tom(grau(g, b), t + .55, 1.8, .08, { ataque: .08, molhado: .5 }); chiado(t + .5, .8, .05, 3000, { ate: 7500, q: .6, ataque: .2, molhado: .5 }); },
+    derrota() { if (!pronto()) return; const t = ctx.currentTime, b = BASE[lugar]; [[4, 0], [2, .2], [1, .4], [-1, .64]].forEach(([g, d]) => { tom(grau(g, b), t + d, .6, .16, { molhado: .4, tipo: 'triangle' }); tom(grau(g, b) / 2, t + d, .6, .1); }); }
+  };
+})();
+const vibra = p => { if (Progresso.d.op.vibra && navigator.vibrate) try { navigator.vibrate(p); } catch (e) { /* sem vibração */ } };
+
+// ============================================================ TELA: a mesa em WebGL (luz de verdade em cada objeto) e os efeitos por cima
+const Tela = (() => {
+  const { CAT, K, LUGARES } = Nucleo, glc = $('gl'), fxc = $('fx'), fx = fxc.getContext('2d'), calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let gl, prog, uni, buf, vao, tex = {}, L = 0, A = 0, dpr = 1, cena = { x: 0, y: 0, w: 1, h: 1 }, sujo = true, dados = new Float32Array(16 * 600), nI = 0, imgs = {}, masc = null;
+  const VS = `#version 300 es
+layout(location=0) in vec4 aP;layout(location=1) in vec4 aR;layout(location=2) in vec4 aU;layout(location=3) in vec4 aX;uniform vec2 uT;out vec2 vU;out vec2 vC;flat out vec4 vR;flat out vec4 vX;out vec2 vPx;
+void main(){vec2 c=vec2(gl_VertexID&1,gl_VertexID>>1);vec2 q=(c-.5)*aP.zw;vec2 p=aP.xy+vec2(q.x*aR.x-q.y*aR.y,q.x*aR.y+q.y*aR.x);vPx=p;vC=c;vU=aU.xy+c*aU.zw;vR=aR;vX=aX;gl_Position=vec4(p/uT*vec2(2.,-2.)+vec2(-1.,1.),0.,1.);}`;
+  // aR: cos, sin, tipo, livre · aX: opacidade, realce, brilho, dentro da mesa
+  const FS = `#version 300 es
+precision highp float;in vec2 vU;in vec2 vC;flat in vec4 vR;flat in vec4 vX;in vec2 vPx;out vec4 o;uniform sampler2D tC,tN,tS,tM;uniform vec4 uCena,uLuz,uLente;uniform float uGiro;
+vec3 ceu(vec3 r,float a){float y=-r.y;vec3 c=mix(vec3(.10,.085,.075),vec3(.62,.66,.70),smoothstep(-.7,.8,y+r.z*.15));float j=smoothstep(.36-.0,.30-.25*a,abs(r.x+.42))*smoothstep(.55,.2,abs(y-.52));c+=vec3(1.7,1.55,1.3)*j*(1.-a*.75);float k=smoothstep(.2,.06,abs(r.x-.62))*smoothstep(.7,.1,abs(y+.1));c+=vec3(.5,.6,.75)*k*(1.-a*.7);return mix(c,vec3(.5,.48,.45),a*.55);}
+float luz(){float f=1.;if(uLuz.w>.5&&vX.w>.5){float d=distance(vPx,uLuz.xy)/uLuz.z;f=mix(.0045,1.15,pow(smoothstep(1.,.18,d),1.5));}return f;}
+float beira(){if(vX.w<.5)return 1.;vec2 a=vPx-uCena.xy,b=uCena.xy+uCena.zw-vPx;float m=min(min(a.x,b.x),min(a.y*.8,b.y))/min(uCena.z,uCena.w);return .58+.42*smoothstep(0.,.055,m);}
+void main(){if(uLente.w>.5&&distance(vPx,uLente.xy)>uLente.z)discard;float tipo=vR.z;
+ if(tipo>2.5){vec2 u=uGiro>.5?vec2(vC.y,vC.x):vC;vec3 c=pow(texture(tM,u).rgb,vec3(2.2));c*=beira()*luz();o=vec4(pow(c,vec3(1./2.2)),1.);return;}
+ if(tipo>.5&&tipo<1.5){float s=texture(tS,vU).r;s=smoothstep(.0,1.,s)*vX.x;vec3 c=vX.y>.5?vec3(1.,.8,.36):vec3(0.);o=vec4(c*s,s);return;}
+ vec4 t=texture(tC,vU);if(t.a<.004)discard;if(tipo>1.5){float k=min(1.,t.a*2.6);o=vec4(vec3(.105,.085,.06)*k,k)*vX.x;return;}
+ vec4 nm=texture(tN,vU);vec2 n2=(nm.xy*2.-1.)*vec2(1.,-1.);float q=dot(n2,n2);vec3 n=vec3(n2,sqrt(max(.03,1.-q)));n.xy=vec2(n.x*vR.x-n.y*vR.y,n.x*vR.y+n.y*vR.x);n=normalize(n);
+ bool me=nm.z>.5;float a=clamp(me?(nm.z-.52)/.48:nm.z/.48,.04,1.);vec3 c=pow(t.rgb/max(t.a,.01),vec3(2.2));float cz=dot(c,vec3(.3,.59,.11));c=max(vec3(0.),mix(vec3(cz),c,me?.9:1.12));
+ vec3 Ld=normalize(vec3(-.44,-.56,.72)),H=normalize(Ld+vec3(0,0,1));float nl=max(0.,dot(n,Ld)),nh=max(0.,dot(n,H)),e=2./max(.0008,a*a*a*a)-2.;float sp=pow(nh,min(e,900.))*(min(e,900.)+2.)*.04;
+ vec3 amb=mix(vec3(.30,.27,.25),vec3(.50,.53,.58),.5-.5*n.y),dif=amb*.95+vec3(1.28,1.17,.99)*nl*.95;vec3 r=reflect(vec3(0,0,-1),n);vec3 en=ceu(r,a);float fr=pow(1.-n.z,4.);vec3 f;
+ if(me){vec3 f0=mix(c*1.2,vec3(1.),fr*.6);f=f0*en*(1.25-.4*a)+c*dif*(.18+.25*a)+f0*sp*nl*.9;}else{float f0=.045+.5*fr*(1.-a);f=c*dif+en*f0*(1.-a*.8)*.95+vec3(1.,.95,.85)*sp*nl*.35*(1.-a*.5);}
+ f*=beira()*luz();f=mix(f,f*1.25+vec3(.07,.05,.01),vX.z);f=f*(1.+f*.12)/(1.+f*.62)*1.22;o=vec4(pow(clamp(f,0.,1.),vec3(1./2.2))*t.a,t.a)*vX.x;}`;
+  const carregaImg = src => new Promise((ok, no) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = () => no(new Error('imagem ' + src)); i.src = src; });
+  function textura(img, mip, pre) { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, pre); gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); if (mip) gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mip ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR); for (const k of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE); return t; }
+  function ligaGL() {
+    gl = glc.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' }); if (!gl) return false;
+    const sh = (k, s) => { const x = gl.createShader(k); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
+    prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog); uni = {}; for (const u of ['uT', 'uCena', 'uLuz', 'uLente', 'uGiro', 'tC', 'tN', 'tS', 'tM']) uni[u] = gl.getUniformLocation(prog, u);
+    vao = gl.createVertexArray(); gl.bindVertexArray(vao); buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, dados.byteLength, gl.DYNAMIC_DRAW); for (let i = 0; i < 4; i++) { gl.enableVertexAttribArray(i); gl.vertexAttribPointer(i, 4, gl.FLOAT, false, 64, i * 16); gl.vertexAttribDivisor(i, 1); }
+    ['tC', 'tN', 'tS', 'tM'].forEach((u, i) => gl.uniform1i(uni[u], i)); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    tex = { cor: textura(imgs.cor, true, true), nor: textura(imgs.nor, true, false), sombra: textura(imgs.sombra, false, false), m: {} }; sujo = true; return true;
+  }
+  async function carregar() {
+    const [cor, nor, sombra] = await Promise.all(['cor', 'nor', 'sombra'].map(n => carregaImg(`arte/${n}.webp`))); Object.assign(imgs, { cor, nor, sombra });
+    if (!ligaGL()) throw new Error('sem-webgl'); glc.addEventListener('webglcontextlost', e => e.preventDefault()); glc.addEventListener('webglcontextrestored', () => { ligaGL(); for (const k in imgs) if (/^m\d/.test(k)) tex.m[k] = textura(imgs[k], false, false); });
+    // máscaras de toque: um oitavo da folha
+    const c = document.createElement('canvas'), n = cor.width / 8; c.width = c.height = n; const q = c.getContext('2d', { willReadFrequently: true }); q.drawImage(cor, 0, 0, n, n); const d = q.getImageData(0, 0, n, n).data;
+    masc = CAT.map(o => { const w = Math.round(o.w / 8), h = Math.round(o.h / 8), x0 = Math.round(o.x / 8), y0 = Math.round(o.y / 8), m = new Uint8Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) m[y * w + x] = d[((y0 + y) * n + x0 + x) * 4 + 3] > 70 ? 1 : 0; return { w, h, d: m }; });
+  }
+  async function mesa(l) { const k = 'm' + l; if (!imgs[k]) imgs[k] = await carregaImg(`arte/${k}.webp`); if (!tex.m[k]) tex.m[k] = textura(imgs[k], false, false); sujo = true; }
+  function medir() {
+    const a = $('area').getBoundingClientRect(), m = $('moldura'), fw = Math.min(a.width, Math.max(60, a.height) * 1.75), fh = Math.min(a.height, fw * 2); m.style.inset = `${(a.height - fh) / 2}px ${(a.width - fw) / 2}px`; const r = m.getBoundingClientRect(); dpr = Math.min(window.devicePixelRatio || 1, 2); L = innerWidth; A = innerHeight; for (const c of [glc, fxc]) { const w = Math.round(L * dpr), h = Math.round(A * dpr); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } }
+    cena = { x: r.left + 8, y: r.top + 8, w: Math.max(10, r.width - 16), h: Math.max(10, r.height - 16) }; sujo = true; return cena.w / cena.h;
+  }
+  // ---------- câmera
+  const cam = { z: 1, x: 0, y: 0 };
+  const escala = P => cena.w / P.W * cam.z, paraTela = (P, x, y) => { const e = escala(P); return [cena.x + cena.w / 2 + (x - cam.x) * e, cena.y + cena.h / 2 + (y - cam.y) * e]; }, paraMesa = (P, px, py) => { const e = escala(P); return [(px - cena.x - cena.w / 2) / e + cam.x, (py - cena.y - cena.h / 2) / e + cam.y]; };
+  function prendeCam(P) { cam.z = Math.max(1, Math.min(2.8, cam.z)); const mx = P.W / 2 * (1 - 1 / cam.z), my = P.H / 2 * (1 - 1 / cam.z); cam.x = Math.max(-mx, Math.min(mx, cam.x)); cam.y = Math.max(-my, Math.min(my, cam.y)); }
+  // ---------- desenho
+  function poe(x, y, w, h, r, tipo, u, alfa = 1, realce = 0, brilho = 0, dentro = 1) {
+    if ((nI + 1) * 16 > dados.length) { const n = new Float32Array(dados.length * 2); n.set(dados); dados = n; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, dados.byteLength, gl.DYNAMIC_DRAW); }
+    const i = nI * 16; dados[i] = x * dpr; dados[i + 1] = y * dpr; dados[i + 2] = w * dpr; dados[i + 3] = h * dpr; dados[i + 4] = Math.cos(r); dados[i + 5] = Math.sin(r); dados[i + 6] = tipo; dados[i + 8] = u[0]; dados[i + 9] = u[1]; dados[i + 10] = u[2]; dados[i + 11] = u[3]; dados[i + 12] = alfa; dados[i + 13] = realce; dados[i + 14] = brilho; dados[i + 15] = dentro; nI++;
+  }
+  const FOLHA = 2048, UV = CAT.map(c => [c.x / FOLHA, c.y / FOLHA, c.w / FOLHA, c.h / FOLHA]), NADA = [0, 0, 1, 1];
+  // um objeto com a sua sombra. e: pontos de tela por unidade
+  function objeto(k, x, y, r, e, { sobe = 0, alfa = 1, halo = 0, brilho = 0, dentro = 1, sombra = 1, tipo = 0 } = {}) {
+    const c = CAT[k], w = c.lu * e, h = c.lh * e, d = (.16 + c.hz * .2 + sobe * 1.6) * e; if (sombra) poe(x + d * .62, y + d * .8, w * (1.02 + sobe * .06), h * (1.02 + sobe * .06), r, 1, UV[k], (.62 - sobe * .22) * alfa, 0, 0, dentro);
+    if (halo) poe(x, y, w + halo * e * .9, h + halo * e * .9, r, 1, UV[k], Math.min(1, halo) * .9 * alfa, 1, 0, dentro); poe(x, y, w, h, r, tipo, UV[k], alfa, 0, brilho, dentro);
+  }
+  function lote(rec, lente) {
+    if (!nI) return; gl.bufferSubData(gl.ARRAY_BUFFER, 0, dados.subarray(0, nI * 16)); if (rec) { gl.enable(gl.SCISSOR_TEST); gl.scissor(Math.round(rec.x * dpr), Math.round((A - rec.y - rec.h) * dpr), Math.round(rec.w * dpr), Math.round(rec.h * dpr)); } else gl.disable(gl.SCISSOR_TEST);
+    gl.uniform4f(uni.uLente, lente ? lente.x * dpr : 0, lente ? lente.y * dpr : 0, lente ? lente.r * dpr : 0, lente ? 1 : 0); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, nI); nI = 0;
+  }
+  function mesaCheia(P, e, ox, oy, t) {
+    poe(ox, oy, P.W * e, P.H * e, 0, 3, NADA);
+    for (const o of P.objs) { if (!o.vivo && !o.saindo) continue; const s = o.esc ?? 1; if (s <= .01) continue; const tr = o.treme ? Math.sin(t * 55) * o.treme * .22 : 0; objeto(o.k, ox + (o.x + tr) * e, oy + o.y * e, o.r + (o.treme ? Math.sin(t * 47) * o.treme * .05 : 0), e * s, { sobe: o.sobe_ || 0, halo: o.halo || 0, brilho: o.halo ? .5 : 0, alfa: o.alfa ?? 1 }); }
+  }
+  function desenhar(P, t, extra) {
+    if (!gl || gl.isContextLost()) return; gl.viewport(0, 0, glc.width, glc.height); gl.disable(gl.SCISSOR_TEST); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); if (!P) return;
+    gl.useProgram(prog); gl.bindVertexArray(vao); gl.bindBuffer(gl.ARRAY_BUFFER, buf);[tex.cor, tex.nor, tex.sombra, tex.m['m' + P.F.lugar]].forEach((x, i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, x || null); });
+    const tr = extra.tremor ? [Math.sin(t * 61) * extra.tremor, Math.cos(t * 53) * extra.tremor] : [0, 0], e = escala(P), ox = cena.x + cena.w / 2 - cam.x * e + tr[0], oy = cena.y + cena.h / 2 - cam.y * e + tr[1];
+    gl.uniform2f(uni.uT, glc.width, glc.height); gl.uniform4f(uni.uCena, (ox - P.W * e / 2) * dpr, (oy - P.H * e / 2) * dpr, P.W * e * dpr, P.H * e * dpr); gl.uniform1f(uni.uGiro, P.W > P.H ? 1 : 0); const lz = extra.luz; gl.uniform4f(uni.uLuz, lz ? lz.x * dpr : 0, lz ? lz.y * dpr : 0, lz ? lz.r * dpr : 1, lz ? 1 : 0);
+    mesaCheia(P, e, ox, oy, t); lote(cena);
+    if (extra.bandeja) { for (const b of extra.bandeja) icone(b); lote(null); }
+    if (extra.voando) { for (const v of extra.voando) objeto(v.k, v.x, v.y, v.r, v.e, { sobe: v.sobe, dentro: 0, brilho: v.brilho || 0, alfa: v.alfa ?? 1 }); lote(null); }
+    if (extra.lupa) { const { x, y, px, py, r, z } = extra.lupa, e2 = e * z, [mx, my] = paraMesa(P, x, y); gl.uniform4f(uni.uCena, (px - (mx + P.W / 2) * e2) * dpr, (py - (my + P.H / 2) * e2) * dpr, P.W * e2 * dpr, P.H * e2 * dpr); mesaCheia(P, e2, px - mx * e2, py - my * e2, t); lote({ x: px - r, y: py - r, w: r * 2, h: r * 2 }, { x: px, y: py, r }); }
+  }
+  // objeto dentro de uma vaga da bandeja: deita na diagonal o que for comprido
+  function encaixe(k, w, h) { const c = CAT[k], fino = Math.max(c.cu, c.ch) / Math.min(c.cu, c.ch) > 1.9, r = fino ? (c.deita ? -.5 : .85) : 0, co = Math.abs(Math.cos(r)), si = Math.abs(Math.sin(r)), bw = c.cu * co + c.ch * si, bh = c.cu * si + c.ch * co; return { r, e: Math.min((w - 8) / bw, (h - 8) / bh, 13) }; }
+  function icone({ k, x, y, w, h, esc = 1, tipo = 0, alfa = 1 }) { const q = encaixe(k, w, h); if (esc > .02) objeto(k, x, y, q.r, q.e * esc, { dentro: 0, tipo, sombra: tipo === 2 ? 0 : 1, alfa }); }
+
+  // ---------- efeitos por cima: partículas, números, anéis
+  let part = [], textos = [], aneis = [], fxLimpo = true; const ALEA = (a, b) => a + Math.random() * (b - a);
+  function faiscas(x, y, n, cor = ['#f3d38a', '#fff3d0', '#d9a84a'], v = 190) { if (calmo) n = Math.ceil(n / 4); for (let i = 0; i < n && part.length < 220; i++) { const a = ALEA(0, 6.28), s = ALEA(.25, 1) * v; part.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, t: 0, d: ALEA(.45, .95), r: ALEA(1.6, 4.2), c: cor[i % cor.length], g: ALEA(0, 6.28), w: ALEA(-8, 8) }); } }
+  const poeira = (x, y, n) => { if (calmo) return; for (let i = 0; i < n && part.length < 160; i++) part.push({ x: x + ALEA(-12, 12), y: y + ALEA(-12, 12), vx: ALEA(-24, 24), vy: ALEA(-34, 4), t: 0, d: ALEA(.4, .8), r: ALEA(1, 2.2), c: 'rgba(230,220,195,.5)', po: 1 }); };
+  const texto = (s, x, y, cor = '#fff', tam = 24, d = .95) => textos.push({ s, x: Math.max(50, Math.min(L - 50, x)), y, cor, tam, t: 0, d }), anel = (x, y, r0, r1, d = .5, cor = '#f3d38a', l = 4) => aneis.push({ x, y, r0, r1, d, t: 0, cor, l });
+  function efeitos(dt, lupa, luz) {
+    if (!part.length && !textos.length && !aneis.length && !lupa) { if (!fxLimpo) { fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, fxc.width, fxc.height); fxLimpo = true; } return; }
+    fxLimpo = false; fx.setTransform(dpr, 0, 0, dpr, 0, 0); fx.clearRect(0, 0, L, A);
+    if (lupa) { const { px, py, r, x, y } = lupa; fx.lineWidth = 7; fx.strokeStyle = '#2a1c10'; fx.beginPath(); fx.arc(px, py, r + 1, 0, 7); fx.stroke(); fx.lineWidth = 4.5; const g = fx.createLinearGradient(px - r, py - r, px + r, py + r); g.addColorStop(0, '#f4dc9a'); g.addColorStop(.5, '#a87a34'); g.addColorStop(1, '#e9c472'); fx.strokeStyle = g; fx.beginPath(); fx.arc(px, py, r + 1, 0, 7); fx.stroke(); fx.fillStyle = 'rgba(255,255,255,.10)'; fx.beginPath(); fx.ellipse(px - r * .3, py - r * .42, r * .45, r * .22, -.6, 0, 7); fx.fill(); fx.strokeStyle = 'rgba(255,255,255,.75)'; fx.lineWidth = 1.6; fx.beginPath(); fx.arc(px, py, 5, 0, 7); fx.stroke(); }
+    aneis = aneis.filter(a => (a.t += dt) < a.d); for (const a of aneis) { const k = a.t / a.d, s = 1 - Math.pow(1 - k, 3); fx.globalAlpha = 1 - k * k; fx.strokeStyle = a.cor; fx.lineWidth = a.l * (1 - k * .6); fx.beginPath(); fx.arc(a.x, a.y, a.r0 + (a.r1 - a.r0) * s, 0, 7); fx.stroke(); }
+    part = part.filter(p => (p.t += dt) < p.d); for (const p of part) { const k = p.t / p.d; p.vx *= 1 - 2.2 * dt; p.vy = p.vy * (1 - 2 * dt) + (p.po ? 0 : 260 * dt); p.x += p.vx * dt; p.y += p.vy * dt; fx.globalAlpha = 1 - k * k; fx.fillStyle = p.c; if (p.po) { fx.beginPath(); fx.arc(p.x, p.y, p.r, 0, 7); fx.fill(); } else { p.g += p.w * dt; const r = p.r * (1 - k * .5), c = Math.cos(p.g) * r, s = Math.sin(p.g) * r; fx.beginPath(); fx.moveTo(p.x + c, p.y + s); fx.lineTo(p.x - s * .6, p.y + c * .6); fx.lineTo(p.x - c, p.y - s); fx.lineTo(p.x + s * .6, p.y - c * .6); fx.fill(); } }
+    textos = textos.filter(q => (q.t += dt) < q.d); fx.textAlign = 'center'; fx.textBaseline = 'middle'; for (const q of textos) { const k = q.t / q.d, s = k < .18 ? .5 + k / .18 * .65 : 1.15 - Math.min(1, (k - .18) / .15) * .15; fx.globalAlpha = k > .65 ? (1 - k) / .35 : 1; fx.font = `700 ${q.tam * s}px Georgia,serif`; fx.lineWidth = 5; fx.strokeStyle = 'rgba(12,16,14,.85)'; fx.lineJoin = 'round'; const y = q.y - 46 * (1 - Math.pow(1 - k, 2)), mw = fx.measureText(q.s).width / 2 + 8; q.x = Math.max(mw, Math.min(L - mw, q.x)); fx.strokeText(q.s, q.x, y); fx.fillStyle = q.cor; fx.fillText(q.s, q.x, y); }
+    fx.globalAlpha = 1;
+  }
+  return { carregar, mesa, medir, desenhar, efeitos, faiscas, poeira, texto, anel, paraTela, paraMesa, escala, encaixe, cam, prendeCam, get cena() { return cena; }, get masc() { return masc; }, get largura() { return L; }, get altura() { return A; }, calmo, sujar() { sujo = true; }, get sujo() { return sujo; }, limpo() { sujo = false; } };
+})();
+
+// ============================================================ JOGO: liga o núcleo, a tela, o som e o dedo
+const Jogo = (() => {
+  const N = Nucleo, D = Progresso.d; let P = null, n = 0, aberto = '', voltaPara = '', antes = 0, voando = [], tremor = 0, pausado = true, entrada = 0, lupa = null, luz = null, ultSeg = 99, encerrando = 0, dicaAtiva = null, aces = 0, vagaAnim = {}, retVagas = [], brilhoMed = 0;
+  const sai = k => 1 - Math.pow(1 - k, 3), quica = k => { const c = 1.70158 * 1.2, q = k - 1; return 1 + (c + 1) * q * q * q + c * q * q; };
+  // ---------- começar
+  async function comecar(f, novaTent = true) {
+    n = Math.max(1, Math.min(N.TOTAL, f)); const F = N.fase(n); D.tentativas[n] = (D.tentativas[n] || 0) + (novaTent ? 1 : 0); Progresso.salvar();
+    await Ganchos.antesDaFase(n); await Tela.mesa(F.lugar); Telas.fechar(); $('app').classList.remove('vitrine'); Tela.cam.z = 1; Tela.cam.x = Tela.cam.y = 0; Telas.hud(F); const asp = Tela.medir(); P = new N.Partida(n, D.tentativas[n], asp, Tela.masc); voando = []; lupa = null; dicaAtiva = null; tremor = 0; encerrando = 0; ultSeg = 99; vagaAnim = {}; brilhoMed = 3;
+    if (F.modo === 'E') { const c = Tela.cena; luz = { x: c.x + c.w / 2, y: c.y + c.h / 2, r: Math.min(c.w, c.h) * .34 }; } else luz = null;
+    montarVagas(); Tela.medir(); P.remodelar(Tela.cena.w / Tela.cena.h); medirVagas(); entrada = .001; pausado = false; P.objs.forEach((o, i) => { o.esc = 0; o.ent = i / P.objs.length * .42 + Math.random() * .06; });
+    Som.lugar(F.lugar); Som.ligar(true); Som.aperto(0); Som.derrama(); $('dica').textContent = F.aviso ? `${F.aviso}${F.dica ? ' · ' + F.dica : ''}` : F.dica; placar(); Tela.sujar(); Eventos.emite('fase:inicio', { n, modo: F.modo });
+  }
+  // ---------- bandeja
+  function montarVagas() {
+    const m = P.F.modo, v = $('vagas'); v.innerHTML = '';
+    P.vagas.forEach((q, i) => { const d = document.createElement('div'); d.className = 'vaga'; d.innerHTML = '<div class="cx"></div><span></span>'; v.appendChild(d); textoVaga(i); });
+    if (m === 'I') v.firstChild.style.maxWidth = '160px';
+  }
+  function textoVaga(i) {
+    const d = $('vagas').children[i], q = P.vagas[i], m = P.F.modo; if (!d) return; const cx = d.firstChild, nome = q.k >= 0 ? N.CAT[q.k].nome : ''; d.classList.toggle('feita', q.feita && m !== 'I'); cx.innerHTML = m === 'N' && !q.feita ? `<b>${nome}</b>` : m === 'P' && !q.feita ? '<u>2</u>' : '';
+    d.lastChild.textContent = m === 'I' ? `${nome}: ${P.achados} de ${P.meta}` : m === 'S' && !q.feita ? '' : m === 'N' && !q.feita ? '' : nome;
+  }
+  function medirVagas() { retVagas = [...$('vagas').children].map(d => { const r = d.firstChild.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }); }
+  function bandeja(t) {
+    const m = P.F.modo, l = []; P.vagas.forEach((q, i) => { const r = retVagas[i]; if (!r || q.k < 0) return; const a = vagaAnim[i], chegando = voando.some(v => v.vaga === i && v.final), esc = a ? quica(Math.min(1, (t - a) / .3)) : 1; if (q.feita && chegando) { if (m === 'P') return; } const mostra = m === 'N' && !q.feita ? false : true; if (mostra) l.push({ k: q.k, ...r, esc, tipo: m === 'S' && !q.feita ? 2 : 0, alfa: m !== 'I' && !q.feita ? 1 : 1 }); }); return l;
+  }
+  function placar() {
+    const s = Math.ceil(P.tempo); $('tempo').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; $('tempo').classList.toggle('pouco', s <= 12); $('barra').style.width = P.achados / P.meta * 100 + '%'; $('gasto').style.transform = `scaleX(${Math.max(0, Math.min(1, P.tempo / P.F.tempo))})`;
+    const c = $('combo'), tx = P.combo > 1 ? `×${P.mult}<small>combo ${P.combo}</small>` : `${P.pontos}<small>pontos</small>`; if (c.dataset.t !== tx) { c.innerHTML = c.dataset.t = tx; c.classList.toggle('on', P.combo > 1); } $('bDica').style.setProperty('--c', P.carga * 100 + '%'); $('bDica').classList.toggle('ok', P.dicas > 0); $('nDica').textContent = P.dicas; $('nDica').hidden = !P.dicas;
+  }
+  // ---------- toque num ponto da tela
+  function tocar(px, py, suave) {
+    if (!P || P.fim || pausado || entrada) return; const [x, y] = Tela.paraMesa(P, px, py), folga = 13 / Tela.escala(P), i = P.noDedo(x, y, folga); if (i < 0) return; const o = P.objs[i]; if (suave && !P.vale(o)) return;
+    const pan = (px / Tela.largura) * 2 - 1, mat = N.CAT[o.k].som, [ox, oy] = Tela.paraTela(P, o.x, o.y), r = P.tocar(i); if (r.e === 'nada') return; Tela.sujar();
+    if (r.e === 'erro') { o.treme = 1; if (r.solto) r.solto.sobe_ = 0; tremor = 3; Som.toque(mat, pan); Som.erro(); vibra(40); Tela.texto(`−${r.perde} s`, px, py - 10, '#ff9d72', 24); D.soma.erros++; }
+    else if (r.e === 'marca') { Som.marca(); Som.toque(mat, pan); vibra(8); } else if (r.e === 'solta') Som.solta();
+    else if (r.e === 'lembranca') { o.saindo = true; voar(o, null); Som.lembranca(); vibra([15, 40, 15, 40, 30]); Tela.faiscas(ox, oy, 46, undefined, 260); Tela.anel(ox, oy, 10, 120, .8); Tela.texto('Lembrança! +500', ox, oy - 20, '#f8dd8f', 26, 1.5); Eventos.emite('lembranca', { n }); }
+    else { // achou
+      D.soma.achados++; D.soma.combo = Math.max(D.soma.combo, r.combo); dicaAtiva = null; for (const q of P.objs) q.halo = 0; for (const q of [o, r.par]) if (q) { q.saindo = true; voar(q, r.vaga, q === o); const [a, b] = Tela.paraTela(P, q.x, q.y); Tela.faiscas(a, b, 14 + Math.min(r.combo, 6) * 4, undefined, 150 + r.combo * 22); Tela.anel(a, b, 8, 46 + r.combo * 8, .45); }
+      Som.achou(mat, r.combo, pan); vibra(r.combo > 2 ? [12, 20, 18] : 14); if (r.combo >= 3) tremor = Math.max(tremor, Math.min(7, 1.5 + r.combo)); Tela.texto(`+${r.pts}`, ox, oy - 6, r.combo > 1 ? '#f8dd8f' : '#ffffff', 22 + Math.min(r.combo, 6) * 2.5); if (r.combo >= 3) Tela.texto(`Combo ${r.combo}${r.extra ? '  +1 s' : ''}`, ox, oy + 24, '#a9dcc4', 18); const c = $('combo'); c.classList.remove('pula'); void c.offsetWidth; c.classList.add('pula'); Eventos.emite('achou', { n, k: o.k, combo: r.combo }); if (r.fim) vencer();
+    }
+    placar();
+  }
+  // o objeto sai da mesa e voa até a bandeja
+  function voar(o, vaga, final = true) { const [x, y] = Tela.paraTela(P, o.x, o.y), e = Tela.escala(P), r = vaga != null ? retVagas[vaga] : null, dest = r ? { ...Tela.encaixe(o.k, r.w, r.h), x: r.x, y: r.y } : { r: o.r, e: e * 2.4, x: Tela.largura / 2, y: Tela.altura * .42 }; let giro = dest.r - o.r; giro = Math.atan2(Math.sin(giro), Math.cos(giro)); voando.push({ k: o.k, x, y, r: o.r, e, x0: x, y0: y, r0: o.r, e0: e, x1: dest.x, y1: dest.y, r1: o.r + giro, e1: dest.e, t: 0, d: vaga != null ? .52 : 1.5, vaga, final, sobe: 0, o, especial: vaga == null }); o.esc = 0; o.saindo = false; }
+  function animarVoos(dt, t) {
+    for (const v of voando) {
+      v.t += dt; const k = Math.min(1, v.t / v.d); if (v.especial) { const a = Math.min(1, v.t / .5), s = sai(a); v.x = v.x0 + (v.x1 - v.x0) * s; v.y = v.y0 + (v.y1 - v.y0) * s; v.e = (v.e0 + (v.e1 - v.e0) * quica(a)) * (k > .8 ? 1 - (k - .8) / .2 : 1); v.r = v.r0 * (1 - s) + Math.sin(v.t * 2.4) * .08; v.sobe = 1; v.brilho = .3; continue; }
+      if (v.t < .15) { const a = v.t / .15; v.e = v.e0 * (1 + .34 * sai(a)); v.sobe = a; v.brilho = .6 * a; } else { const a = (v.t - .15) / (v.d - .15), s = a * a * (3 - 2 * a); v.x = v.x0 + (v.x1 - v.x0) * s; v.y = v.y0 + (v.y1 - v.y0) * s - Math.sin(a * 3.14) * 46; v.e = v.e0 * 1.34 + (v.e1 - v.e0 * 1.34) * s; v.r = v.r0 + (v.r1 - v.r0) * s; v.sobe = 1 - s; v.brilho = .6 * (1 - s); }
+    }
+    const chegou = voando.filter(v => v.t >= v.d); if (!chegou.length) return; voando = voando.filter(v => v.t < v.d);
+    for (const v of chegou) { if (v.especial || !v.final) continue; const d = $('vagas').children[v.vaga]; if (!d) continue; d.classList.remove('pula'); void d.offsetWidth; d.classList.add('pula'); Som.encaixa(P.achados); textoVaga(v.vaga); const r = retVagas[v.vaga]; if (r) Tela.faiscas(r.x, r.y, 8, undefined, 90); if (P.F.modo !== 'I' && P.F.modo !== 'P' && !P.fim) { const vg = v.vaga; setTimeout(() => { if (P && P.vagas[vg] && P.vagas[vg].feita && P.repor(vg)) { vagaAnim[vg] = performance.now() / 1000; textoVaga(vg); Som.vagaNova(); Tela.sujar(); } }, P.F.modo === 'V' ? 120 : 260); } }
+  }
+  // ---------- dica
+  function pedirDica() { if (!P || pausado || P.fim || entrada) return; const r = P.dica(); if (!r) { Som.solta(); return; } Som.dica(); vibra(12); const [x, y] = Tela.paraTela(P, r.o.x, r.o.y); if (r.visivel < .5) N.sopra(P.objs, r.o.x, r.o.y, 7, 26, r.o); dicaAtiva = { o: r.o, par: r.par, t: 0 }; Tela.anel(x, y, Math.max(Tela.cena.w, Tela.cena.h) * .7, 26, .9, '#f3d38a', 5); if (luz) { luz.x = x; luz.y = y; } $('dica').textContent = ''; Eventos.emite('dica', { n }); placar(); }
+  // ---------- fim da fase
+  function vencer() {
+    encerrando = 1; Som.aperto(0); const e = P.estrelas, antes = D.estrelas[n] || 0; D.estrelas[n] = Math.max(antes, e); D.recordes[n] = Math.max(D.recordes[n] || 0, P.pontos); if (P.lembranca) D.lembrancas[n] = 1; D.fase = Math.max(D.fase, Math.min(N.TOTAL + 1, n + 1)); D.soma.vitorias++; Progresso.salvar(); if (e > antes) Ganchos.premio('estrelas', { n, e }); if (P.lembranca) Ganchos.premio('lembranca', { n });
+    const p = P; setTimeout(() => { if (P !== p) return; Som.vitoria(); N.sopra(P.objs, 0, 0, 60, Tela.calmo ? 4 : 22); tremor = 5; vibra([20, 50, 20, 50, 60]); const c = Tela.cena; for (let i = 0; i < 5; i++) setTimeout(() => Tela.faiscas(c.x + c.w * (.15 + .7 * Math.random()), c.y + c.h * (.2 + .5 * Math.random()), 22, undefined, 220), i * 120); Tela.anel(c.x + c.w / 2, c.y + c.h / 2, 20, c.w * .7, .9); }, 620);
+    setTimeout(() => { if (P === p) { Eventos.emite('fase:vitoria', { n, estrelas: e, pontos: p.pontos }); Telas.vitoria(n, p, e); } }, 1650);
+  }
+  async function perder() {
+    encerrando = 1; D.soma.derrotas++; Progresso.salvar(); Som.aperto(0); Som.derrota(); vibra(120); const p = P, faltou = P.meta - P.achados; for (const o of P.objs) if (P.F.modo === 'P' || P.F.modo === 'I' ? o.alvo && o.vivo : o.vivo && o.alvo) o.halo = 1; luz = null; Tela.sujar(); Eventos.emite('fase:derrota', { n, faltou });
+    const extra = await Ganchos.oferecerContinuar({ n, faltou }); if (extra) { P.fim = ''; P.tempo = extra; encerrando = 0; for (const o of P.objs) o.halo = 0; return; } setTimeout(() => { if (P === p) Telas.derrota(n, p, faltou); }, 1500);
+  }
+  // ---------- dedo e mouse
+  const dedos = new Map(); let gesto = null, tSeg = 0; const area = $('area');
+  function abrirLupa(x, y) { lupa = { x, y, r: Math.min(92, Tela.cena.w * .27), z: 2.1 }; posLupa(x, y); Som.lupa(); vibra(8); Tela.sujar(); }
+  function posLupa(x, y) { const r = lupa.r, c = Tela.cena; lupa.x = Math.max(c.x, Math.min(c.x + c.w, x)); lupa.y = Math.max(c.y, Math.min(c.y + c.h, y)); lupa.px = Math.max(r + 8, Math.min(Tela.largura - r - 8, x)); lupa.py = y - r - 46; if (lupa.py < r + 8) { lupa.py = r + 8; if (y - lupa.py < r + 30) { lupa.px = x > Tela.largura / 2 ? x - r - 60 : x + r + 60; lupa.px = Math.max(r + 8, Math.min(Tela.largura - r - 8, lupa.px)); } } }
+  area.addEventListener('pointerdown', e => {
+    e.preventDefault(); if (!P || pausado) return; try { area.setPointerCapture(e.pointerId); } catch (x) { /* ponteiro simulado */ } dedos.set(e.pointerId, { x: e.clientX, y: e.clientY }); clearTimeout(tSeg);
+    if (dedos.size === 1) { gesto = { tipo: '', x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; if (luz) { luz.ax = e.clientX; luz.ay = e.clientY; } else tSeg = setTimeout(() => { if (gesto && gesto.tipo === '' && P && !P.fim && !pausado && !entrada) { gesto.tipo = 'lupa'; abrirLupa(gesto.x, gesto.y); } }, 330); }
+    else if (dedos.size === 2) { lupa = null; const [a, b] = [...dedos.values()]; gesto = { tipo: 'pinca', d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; Tela.sujar(); }
+  });
+  area.addEventListener('pointermove', e => {
+    const q = dedos.get(e.pointerId); if (!q || !gesto || !P) return; const ax = q.x, ay = q.y; q.x = e.clientX; q.y = e.clientY; if (pausado) return;
+    if (gesto.tipo === 'pinca') { if (dedos.size < 2) return; const [a, b] = [...dedos.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; ampliar(d / (gesto.d || d), mx, my); const es = Tela.escala(P); Tela.cam.x -= (mx - gesto.mx) / es; Tela.cam.y -= (my - gesto.my) / es; Tela.prendeCam(P); Object.assign(gesto, { d, mx, my }); Tela.sujar(); return; }
+    gesto.x = q.x; gesto.y = q.y; if (gesto.tipo === '' && Math.hypot(q.x - gesto.x0, q.y - gesto.y0) > 9) { gesto.tipo = luz ? 'luz' : 'remexe'; clearTimeout(tSeg); }
+    if (gesto.tipo === 'lupa') { posLupa(q.x, q.y); Tela.sujar(); } else if (gesto.tipo === 'luz') { luz.ax = q.x; luz.ay = q.y; }
+    else if (gesto.tipo === 'remexe' && !P.fim && !entrada) {
+      const es = Tela.escala(P); let x = ax, y = ay; const passos = Math.max(1, Math.ceil(Math.hypot(q.x - ax, q.y - ay) / 8)), dx = (q.x - ax) / passos, dy = (q.y - ay) / passos; let mais = null;
+      for (let i = 0; i < passos; i++) { const [mx, my] = Tela.paraMesa(P, x, y); for (const tq of N.remexer(P.objs, mx, my, dx / es, dy / es, Tela.masc)) if (!mais || tq.v > mais.v) mais = tq; x += dx; y += dy; }
+      if (mais) { Som.remexe(N.CAT[mais.o.k].som, Math.min(1, mais.v * 1.1), q.x / Tela.largura * 2 - 1); if (Math.random() < .25) Tela.poeira(q.x, q.y, 1); } Tela.sujar();
+    }
+  });
+  function solta(e, cancela) { const q = dedos.get(e.pointerId); if (!q) return; dedos.delete(e.pointerId); clearTimeout(tSeg); const g = gesto; if (!g) return; if (g.tipo === 'pinca') { if (!dedos.size) gesto = null; return; } gesto = null; const l = lupa; lupa = null; Tela.sujar(); if (cancela) return; if (g.tipo === '') { if (luz) { luz.ax = q.x; luz.ay = q.y; } tocar(q.x, q.y); } else if (g.tipo === 'lupa' && l) tocar(l.x, l.y, true); }
+  area.addEventListener('pointerup', e => solta(e, false)); area.addEventListener('pointercancel', e => solta(e, true)); area.addEventListener('contextmenu', e => e.preventDefault());
+  function ampliar(f, px, py) { const [x, y] = Tela.paraMesa(P, px, py); Tela.cam.z *= f; Tela.prendeCam(P); const [x2, y2] = Tela.paraMesa(P, px, py); Tela.cam.x += x - x2; Tela.cam.y += y - y2; Tela.prendeCam(P); Tela.sujar(); }
+  area.addEventListener('wheel', e => { e.preventDefault(); if (P && !pausado) ampliar(Math.exp(-e.deltaY * .0016), e.clientX, e.clientY); }, { passive: false });
+  for (const t of ['touchstart', 'touchmove']) document.addEventListener(t, e => { if (e.target.closest && e.target.closest('#area')) e.preventDefault(); }, { passive: false }); for (const t of ['gesturestart', 'dblclick']) document.addEventListener(t, e => e.preventDefault());
+  // ---------- quadro a quadro
+  let ultimoP = -1;
+  function quadro(ms) {
+    requestAnimationFrame(quadro); const t = ms / 1000, dt = Math.min(.05, t - antes || 0); antes = t; if (!P) return; if (pausado && !Tela.sujo && !voando.length) { Tela.efeitos(dt); return; }
+    if (!pausado || encerrando || aberto === 'abertura') {
+      if (entrada) { entrada += dt; let falta = false; for (const o of P.objs) { const k = Math.max(0, Math.min(1, (entrada - o.ent) / .2)); o.esc = k <= 0 ? 0 : 1.28 - .28 * quica(k); o.sobe_ = k < 1 ? (1 - k) * .9 : 0; if (k < 1) falta = true; } if (!falta) { entrada = 0; for (const o of P.objs) { o.esc = 1; o.sobe_ = 0; } } Tela.sujar(); }
+      if (N.anda(P.objs, P.W, P.H, dt)) Tela.sujar();
+      for (const o of P.objs) { if (o.treme) { o.treme = Math.max(0, o.treme - dt * 2.6); Tela.sujar(); } const alvoS = P.marcado === o ? .8 : 0; if (!entrada && Math.abs((o.sobe_ || 0) - alvoS) > .01) { o.sobe_ = (o.sobe_ || 0) + (alvoS - (o.sobe_ || 0)) * Math.min(1, dt * 14); o.esc = 1 + o.sobe_ * .16; o.halo = P.marcado === o ? 1 : o.halo && !dicaAtiva && !P.fim ? 0 : o.halo; Tela.sujar(); } }
+      if (dicaAtiva) { dicaAtiva.t += dt; const v = dicaAtiva.t > 4.5 ? 0 : .75 + .25 * Math.sin(dicaAtiva.t * 4); dicaAtiva.o.halo = dicaAtiva.o.vivo ? v : 0; if (dicaAtiva.par) dicaAtiva.par.halo = v; if (!v) dicaAtiva = null; Tela.sujar(); }
+      if (tremor) { tremor = Math.max(0, tremor - dt * 22); Tela.sujar(); } if (luz && luz.ax != null) { luz.x += (luz.ax - luz.x) * Math.min(1, dt * 16); luz.y += (luz.ay - luz.y) * Math.min(1, dt * 16); if (Math.hypot(luz.ax - luz.x, luz.ay - luz.y) > .3) Tela.sujar(); }
+      if (voando.length) { animarVoos(dt, t); Tela.sujar(); } for (const i in vagaAnim) { if (t - vagaAnim[i] < .4) Tela.sujar(); else delete vagaAnim[i]; }
+      if (!pausado && !entrada && !P.fim && aberto === '') {
+        P.passar(dt); const s = Math.ceil(P.tempo); if (s !== ultSeg) { ultSeg = s; if (s <= 10 && s > 0) Som.segundo(s % 2); Som.aperto(s <= 15 ? 1 : 0); } placar(); if (P.fim === 'derrota') perder();
+        // de vez em quando a lembrança dá um reflexo, se algum pedaço dela aparece
+        brilhoMed -= dt; if (brilhoMed < 0) { brilhoMed = 6 + Math.random() * 4; const i = P.objs.findIndex(o => o.lembranca && o.vivo); if (i >= 0 && !luz) { const o = P.objs[i], c = []; for (let k = 0; k < 14; k++) { const x = o.x + (Math.random() - .5) * 3, y = o.y + (Math.random() - .5) * 4; if (N.topo(P.objs, x, y, Tela.masc) === i) c.push([x, y]); } if (c.length) { const [x, y] = Tela.paraTela(P, ...c[0]); Tela.faiscas(x, y, 3, ['#fff3d0'], 40); } } }
+      }
+    }
+    if (Tela.sujo) { Tela.desenhar(P, t, { tremor, luz, lupa, voando, bandeja: aberto === 'abertura' ? null : bandeja(t) }); Tela.limpo(); } Tela.efeitos(dt, lupa, luz);
+  }
+  requestAnimationFrame(quadro);
+  function refazer() { if (!P) { Tela.medir(); return; } Tela.medir(); P.remodelar(Tela.cena.w / Tela.cena.h); Tela.prendeCam(P); medirVagas(); if (luz) luz.r = Math.min(Tela.cena.w, Tela.cena.h) * .34; Tela.sujar(); }
+  addEventListener('resize', () => { refazer(); setTimeout(refazer, 250); });
+  document.addEventListener('visibilitychange', () => { Som.dormir(document.hidden); if (document.hidden) { dedos.clear(); gesto = null; lupa = null; if (P && !P.fim && !pausado && aberto === '') Telas.abrir('pausa'); } });
+  // mesa de vitrine atrás da abertura
+  async function vitrine() { const l = Math.min(4, Math.floor((Math.min(N.TOTAL, D.fase) - 1) / 10)); await Tela.mesa(l); $('app').classList.toggle('vitrine', aberto === 'abertura'); Tela.medir(); P = new N.Partida(l * 10 + 10, 1, Tela.cena.w / Tela.cena.h, Tela.masc); P.objs.forEach(o => { o.esc = 1; }); entrada = 0; luz = null; pausado = true; Telas.hud(P.F); $('vagas').innerHTML = ''; Tela.sujar(); }
+  return { comecar, vitrine, pedirDica, refazer, get P() { return P; }, get n() { return n; }, get pausado() { return pausado; }, pausar(v) { pausado = v; if (v) { lupa = null; gesto = null; dedos.clear(); } Tela.sujar(); }, set aberto(v) { aberto = v; }, get aberto() { return aberto; }, tocar, get voando() { return voando; }, get entrada() { return entrada; }, get luz() { return luz; }, get lupa() { return lupa; } };
+})();
+
+// ============================================================ TELAS
+const Telas = (() => {
+  const D = Progresso.d, N = Nucleo, EST = '<svg viewBox="0 0 24 24"><path d="M12 2.600l2.900 6 6.500.9-4.700 4.600 1.100 6.500-5.800-3.100-5.800 3.100 1.100-6.500L2.600 9.500l6.500-.9z"/></svg>', MED = '<svg viewBox="0 0 24 24"><path d="M12 1.500a3 3 0 012.200 5A8 8 0 1112 6.200a8 8 0 01-2.200.3 3 3 0 012.200-5zm0 2a1 1 0 100 2 1 1 0 000-2z"/></svg>';
+  let pilha = [];
+  function mostra(id) { document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === id)); Jogo.aberto = id; $('app').classList.toggle('vitrine', id === 'abertura'); if (id) Jogo.pausar(true); }
+  const abrir = id => { pilha.push(id); mostra(id); if (id === 'mapa') mapa(); if (id === 'ajustes') ajustes(); if (id === 'abertura') Som.ligar(false); }, fechar = () => { pilha = []; mostra(''); }, trocar = id => { pilha = []; abrir(id); };
+  function voltar() { pilha.pop(); const id = pilha[pilha.length - 1] || ''; if (!id) inicio(); else { mostra(id); if (id === 'mapa') mapa(); } }
+  function inicio() { trocar('abertura'); Jogo.vitrine(); }
+  function hud(F) { $('tFase').textContent = 'Fase ' + F.n; $('tLugar').textContent = N.LUGARES[F.lugar]; $('dica').textContent = ''; somIcone(); }
+  function somIcone() { const b = $('bSom'), s = D.op.som; b.querySelector('.ligado').style.display = s ? '' : 'none'; b.querySelector('.mudo').style.display = s ? 'none' : ''; b.setAttribute('aria-label', s ? 'Desligar som' : 'Ligar som'); b.setAttribute('aria-pressed', s); }
+  function mapa() {
+    $('mResumo').textContent = `${Progresso.totalEstrelas} de ${N.TOTAL * 3} estrelas · ${Progresso.totalLembrancas} de ${N.TOTAL} lembranças`; let h = '';
+    N.LUGARES.forEach((l, g) => { let e = 0, m = 0, b = ''; for (let i = 1; i <= 10; i++) { const f = g * 10 + i, q = D.estrelas[f] || 0; e += q; m += D.lembrancas[f] ? 1 : 0; b += `<button class="fs${f === D.fase ? ' atual' : ''}" data-f="${f}" ${f > D.fase ? 'disabled' : ''} aria-label="Fase ${f}, ${q} estrelas${D.lembrancas[f] ? ', lembrança achada' : ''}">${D.lembrancas[f] ? MED : ''}${f}<small>${'★'.repeat(q)}</small></button>`; } h += `<h3>${l}<small>${e} de 30 ★ · ${m} de 10 lembranças</small></h3><div class="grade">${b}</div>`; });
+    $('mLista').innerHTML = h; setTimeout(() => { const a = document.querySelector('.fs.atual'); if (a) a.scrollIntoView({ block: 'center' }); }, 20);
+  }
+  function ajustes() { document.querySelectorAll('.op').forEach(b => b.setAttribute('aria-pressed', D.op[b.dataset.op])); }
+  function vitoria(n, p, e) {
+    $('vTit').textContent = n === N.TOTAL ? 'A casa está em ordem!' : p.erros === 0 && e === 3 ? 'Impecável!' : 'Achou tudo!'; $('vEst').innerHTML = EST.repeat(3); [...$('vEst').children].forEach((s, i) => { if (i < e) setTimeout(() => { s.classList.add('on'); Som.estrela(i); vibra(12); }, 250 + i * 260); });
+    $('vTxt').innerHTML = `<b>${p.pontos}</b> pontos · recorde ${D.recordes[n]}<br>Sobraram ${Math.round(p.tempo)} s · maior combo ${p.maiorCombo}${e < 3 ? `<br>3 estrelas: sobrar ${Math.ceil(p.F.tempo * .4)} s` : ''}`; const tem = D.lembrancas[n]; $('vLem').className = 'lem' + (tem ? '' : ' falta'); $('vLem').innerHTML = MED + `<span>${p.lembranca ? 'Você achou a lembrança desta fase!' : tem ? 'Lembrança já achada' : 'A lembrança continua escondida'}</span>`;
+    $('vProx').textContent = n === N.TOTAL ? 'Ver as fases' : 'Próxima'; trocar('vitoria');
+  }
+  function derrota(n, p, f) { $('dTit').textContent = f <= 2 ? 'Foi por pouco!' : 'O tempo acabou'; $('dTxt').innerHTML = `Faltou achar <b>${f}</b> de ${p.meta}.<br>O que faltava ficou marcado na mesa.`; trocar('derrota'); }
+  const b = (id, f) => $(id).addEventListener('click', () => { Som.iniciar(); Som.botao(); f(); });
+  b('bJogar', () => Jogo.comecar(Math.min(N.TOTAL, D.fase))); b('bMapa', () => abrir('mapa')); b('bAjustes', () => abrir('ajustes')); b('bPausa', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); }); b('bVolta', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); });
+  const continua = () => { fechar(); Jogo.pausar(false); Jogo.refazer(); }; b('pContinua', continua); b('pRecomeca', () => Jogo.comecar(Jogo.n)); b('pFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); }); b('pAjustes', () => abrir('ajustes')); b('pSair', () => { location.href = '../../index.html'; });
+  b('vProx', async () => { const n = Jogo.n; await Ganchos.entreFases(n); if (n >= N.TOTAL) { pilha = ['abertura']; abrir('mapa'); } else Jogo.comecar(n + 1); }); b('vDeNovo', () => Jogo.comecar(Jogo.n)); b('vFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); }); b('dDeNovo', () => Jogo.comecar(Jogo.n)); b('dFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); });
+  b('bSom', () => { D.op.som = !D.op.som; Progresso.salvar(); Som.volume(); somIcone(); if (D.op.som) Som.botao(); }); b('bDica', () => Jogo.pedirDica());
+  document.querySelectorAll('[data-volta]').forEach(x => x.addEventListener('click', () => { Som.botao(); voltar(); })); document.querySelectorAll('.op').forEach(x => x.addEventListener('click', () => { D.op[x.dataset.op] = !D.op[x.dataset.op]; Progresso.salvar(); Som.iniciar(); Som.volume(); ajustes(); somIcone(); Som.botao(); if (x.dataset.op === 'vibra') vibra(30); }));
+  $('mLista').addEventListener('click', e => { const q = e.target.closest('.fs'); if (q && !q.disabled) { Som.iniciar(); Som.botao(); Jogo.comecar(+q.dataset.f); } });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { if (Jogo.aberto === 'pausa') continua(); else if (!Jogo.aberto && Jogo.P && !Jogo.P.fim) abrir('pausa'); else if (Jogo.aberto && Jogo.aberto !== 'abertura' && Jogo.aberto !== 'vitoria' && Jogo.aberto !== 'derrota') voltar(); } if ((e.key === 'd' || e.key === 'D') && !Jogo.aberto) Jogo.pedirDica(); });
+  // o navegador só libera som depois de um toque de verdade
+  for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) document.addEventListener(t, () => Som.iniciar(), { passive: true, capture: true });
+  return { abrir, fechar, trocar, voltar, inicio, hud, vitoria, derrota, somIcone };
+})();
+
+// ============================================================ ABRIR
+(async () => {
+  try { await Tela.carregar(); Telas.somIcone(); Telas.trocar('abertura'); await Jogo.vitrine(); $('carga').remove(); if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__keepsake = { Nucleo, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos }; }
+  catch (e) { console.error(e); $('carga').textContent = e.message === 'sem-webgl' ? 'Este navegador não consegue desenhar o jogo. Atualize o navegador e tente de novo.' : 'Não deu para abrir as imagens do jogo. Confira a internet e recarregue a página.'; }
+})();
+</script>
+</body>
+</html>
