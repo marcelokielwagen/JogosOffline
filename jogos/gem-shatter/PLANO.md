@@ -7,13 +7,13 @@ Série em fases, um jogo por vez e uma fase por conversa: 1 grupos de cubos (est
 |---|---|---|
 | 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v56) em 25/11/2026 |
 | 2 | Restauração da mina, coleção, marcos e salvamento robusto | pronta e publicada (v57) em 25/11/2026 |
-| 3 | Moedas, boosters, dificuldade, recompensa diária, ganchos de anúncio e compra | falta |
+| 3 | Moedas, vidas, boosters, dificuldade, diária, missões, ganchos de anúncio e compra | publicada em 25/11/2026 (v58) |
 | 4 | Preparação para as lojas | falta |
 
 ## Como é
 - `index.html` sem dependências; imagens próprias em `arte/` (galerias e minerais). Aberto sem a pasta `arte`, o jogo funciona com a parede de pedra no lugar das fotos.
-- Blocos: `<script id="nucleo">` (regras) e `<script id="meta">` (progressão), os dois sem tela e testáveis no Node; depois Eventos e Ganchos, Progresso, Som, Arte,
-  Tela, Jogo, Telas.
+- Blocos: `nucleo` (regras), `eco` (economia) e `meta` (progressão), os três sem tela e testáveis no Node; depois Eventos e Ganchos, Progresso, Som, Arte, Tela, Jogo,
+  Telas, Monetizacao, Econ.
 - Regra própria: **ressonância** (4 ou mais pedras da cor quebrada que caem juntas quebram sozinhas). Especiais: 5 broca, 7 carga, 9 prisma; encostados se combinam.
 
 ## Fase 2
@@ -28,7 +28,25 @@ Série em fases, um jogo por vez e uma fase por conversa: 1 grupos de cubos (est
 - Eventos: `fase:inicio, fase:vitoria (com achados), fase:derrota, jogada, ressonancia, especial:criado, especial:usado, obra, galeria:restaurada, marco, salvou`.
   Ganchos prontos para a Fase 3: `especiaisIniciais`, `oferecerContinuar`, `entreFases`.
 
+## Fase 3
+- **Uma moeda só** (moedas) e vidas; sem gemas, sem caixa-surpresa e sem compra por dinheiro no site. Todos os números ficam no topo do bloco `eco`.
+- **Moedas:** primeira vitória 10 + 4 por estrela + até 5 pelas jogadas que sobram (repetindo, 3 + até 3); marcos 10/20/40; galeria 60; coleção 80; diária, missões, evento.
+- **Vidas:** 5, uma a cada 15 min; até a fase 10 não gasta; recomeçar ou trocar de fase no meio gasta 1; encher custa 150.
+- **Ferramentas** (não gastam jogada): Martelo (fase 6, 80), Mistura (9, 60), Perfuratriz (12, 120). **Antes da fase:** Broca (8, 60), Carga (14, 80), Prisma (20, 140).
+  Ganha 2 de cada ao liberar. "Próxima" e "Tentar de novo" são na hora; o preparo só aparece sozinho nas fases difíceis.
+- **Continuar:** +5 jogadas por 100, 160, 240 moedas, ou por vídeo na primeira vez.
+- **Dificuldade:** dente de serra de 10 em 10 (a 5 e a 9 são difíceis, a 10 muito difícil, com aviso na tela); 10 fases aliviadas; quem perde 3, 5 ou 7 vezes a mesma
+  fase ganha 1, 2 ou 3 jogadas, e o jogo avisa.
+- **Retenção:** diária de 7 passos que não zera ao faltar; 3 missões por dia; evento semanal de quebrar uma cor (muda na segunda).
+- **Ritmo medido:** médio que gasta termina as 50 fases com cerca de 220 moedas; sem gastar, 1.800; fica sem vida menos de 1 vez (iniciante, 2).
+- **Anúncios e compras:** tudo passa por `Monetizacao.usar(provedor)` com `recompensado(local)`, `intersticial()`, `podeComprar`, `precos()`, `comprar(id)`, `restaurar()`.
+  Na web o vídeo é uma contagem de 5 s de teste (sem rede), não há anúncio entre fases e nada é vendido. `?loja=teste` no localhost simula compras.
+  Limites: 8 vídeos por dia; entre fases só depois da 12, a cada 4 vitórias, com 3 min de intervalo, nunca para quem comprou. Compra é entregue uma vez por transação.
+- **Salvo:** `d.eco` dentro da ficha v2 (validar e mesclar próprios; ao juntar fichas, o que se gasta vem da mais nova, para o código não multiplicar moedas).
+- Eventos novos: `booster, gasto, continuou, video:inicio, video:fim, intersticial, compra, compra:falhou, diaria, premio`.
+
 ## Testes (`ferramentas/gem-shatter`)
+- `node eco.mjs` confere a economia e as ferramentas e mede o ritmo das moedas; `node economia.mjs pasta` testa as telas da Fase 3.
 - `node calibrar.mjs` confere as regras e mede as 50 fases com um robô que pensa duas jogadas; `--gravar` recalcula as jogadas (mexer em `T` pede `--gravar --jogos=100`).
 - `node meta.mjs` confere a progressão e mede o ritmo; `node telas.mjs pasta` testa as telas da Fase 2 com toque simulado.
 - `node jogar.mjs 1-50 [--lento] [--foto=pasta]` joga com toque simulado; `node som.mjs [--pc]` mede os sons.

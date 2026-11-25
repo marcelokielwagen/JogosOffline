@@ -1,6 +1,6 @@
 // Gem Shatter: confere a progressão (obras, coleção, marcos, ficha salva) e mede o ritmo.   node meta.mjs
 import { readFileSync } from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';
-const html = readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../jogos/gem-shatter/index.html'), 'utf8'), M = new Function(html.match(/<script id="meta">([\s\S]*?)<\/script>/)[1] + ';return Meta;')();
+const html = readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../jogos/gem-shatter/index.html'), 'utf8'), bl = id => html.match(new RegExp('<script id="' + id + '">([\\s\\S]*?)</script>'))[1], M = new Function(bl('eco') + bl('meta').replace("'use strict';", '') + ';return Meta;')();
 let erros = 0, n = 0; const ok = (c, m) => { n++; if (!c) { erros++; console.log('ERRO', m); } };
 const ord = x => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(k => [k, ord(x[k])])) : x, F = 50, igual = (a, b) => JSON.stringify(ord(a)) === JSON.stringify(ord(b));
 function sao(d, m) { ok(igual(M.validar(JSON.parse(JSON.stringify(d)), F), d), m + ': ficha muda ao ser conferida'); ok(M.total(d) - M.gastas(d) >= 0, m + ': gastou estrela que não tinha'); d.obras.forEach((l, g) => ok(igual(l, [...l].sort((a, b) => b - a)), m + ': obra fora de ordem')); M.EX.forEach(e => ok(d.frag[e.i] >= 0 && d.frag[e.i] <= e.q, m + ': fragmento demais')); }

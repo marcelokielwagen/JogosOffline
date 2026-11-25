@@ -39,7 +39,7 @@ export function jogarFase(n, movs, est) {
   const usadas = P.jogadas, sobra = P.movs, v = P.venceu, e = P.estrelas; if (v && sobra) { P.bonus(); invariantes(P, n); } return { v, usadas, e };
 }
 for (let n = 1; n <= N.TOTAL; n++) { const f = N.fase(n); for (const [m] of f.metas) if (m[0] === 'c') confere(+m[1] < f.cores, n + ': meta de cor que não existe'); }
-const alvo = n => { const d = (n - 1) % 10, g = (n - 1) / 10 | 0; return Math.max(.5, .97 - g * .07 - [0, .02, .04, .07, .1, .05, .1, .13, .16, .22][d]); };   // dente de serra
+const alvo = n => { const d = (n - 1) % 10, g = (n - 1) / 10 | 0; return Math.max(.5, .97 - g * .06 - [0, .02, .04, .06, .15, .03, .06, .09, .17, .22][d]); };   // dente de serra: a 5 e a 9 são difíceis, a 10 muito difícil
 const fatia = process.argv.find(a => a.startsWith('--so='));
 if (fatia) { const r = {}; for (const n of fatia.slice(5).split(',').map(Number)) { const est = { j: 0, cad: 0, max: 0, esp: 0, emb: 0 }, f = N.fase(n), l = []; for (let k = 0; k < JOGOS; k++) l.push(jogarFase(n, gravar ? 90 : f.movs, est)); r[n] = { l, est }; } console.log('R' + JSON.stringify({ r, erros: [...erros] })); process.exit(0); }
 const K = Math.max(2, os.cpus().length - 2), R = {}, est = { j: 0, cad: 0, max: 0, esp: 0, emb: 0 };
