@@ -564,6 +564,9 @@ function salvarAndamento() {
 
 // ============================================================ 5. SOM (Web Audio, sem arquivos)
 const Som = (() => {
+  // alto-falante de celular quase não reproduz graves: ali o som sai mais forte e mais agudo
+  const PEQUENO = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) < 600);
+  let parado = null, refeitos = 0, saidaFinal;      // vigia do contexto de áudio (o celular às vezes o deixa travado)
   let ctx, mestre, eco, rio, curto, ultimaGota = 0, proxNota = 0, proxAve = 0;
   let ares = null, mundoSom = {}, climaSom = '', notas = null;   // ambiente do mundo atual
   const ALEA = (a, b) => a + Math.random() * (b - a);
@@ -581,13 +584,32 @@ const Som = (() => {
     for (let i = 0; i < n; i++) d[i] = i < x ? bruto[i] * Math.sqrt(i / x) + bruto[n + i] * Math.sqrt(1 - i / x) : bruto[i];
     return b;
   }
+  // chamado a cada toque. Devolve true se o áudio travou e precisa ser refeito.
+  function acordar() {
+    if (document.hidden) return false;
+    const rodando = ctx.state === 'running', agora = performance.now();   // no iPhone existe também 'interrupted' (ligação, outro app)
+    if (!rodando && ctx.state !== 'closed') retomar();
+    if (!parado || parado.rodando !== rodando || parado.t !== ctx.currentTime) { parado = { rodando, t: ctx.currentTime, em: agora }; return false; }
+    if (agora - parado.em < 2500 || refeitos >= 3) return false;
+    refeitos++; parado = null; const velho = ctx; ctx = ares = null; ultimaGota = 0; if (velho.state !== 'closed') velho.close().catch(() => {});
+    return true;
+  }
+  function retomar() { const p = ctx.resume(); if (p) p.catch(() => {}); }
+  // EQ e reforço para alto-falante pequeno, com um limitador no fim para não estourar
+  function reforco(entrada) {
+    const no = (tipo, f, g) => { const b = ctx.createBiquadFilter(); b.type = tipo; b.frequency.value = f; b.Q.value = .7; b.gain.value = g || 0; return b; };
+    const forca = ctx.createGain(), teto = ctx.createDynamicsCompressor(); forca.gain.value = 3.4;
+    teto.threshold.value = -9; teto.knee.value = 6; teto.ratio.value = 12; teto.attack.value = .003; teto.release.value = .25;
+    const fim = ctx.createGain(); fim.gain.value = .7;
+    entrada.connect(no('highpass', 110)).connect(no('highshelf', 450, 6)).connect(forca).connect(teto).connect(fim); return fim;
+  }
   function iniciar() {
-    if (ctx) { if (ctx.state === 'suspended' && !document.hidden) ctx.resume(); return; }
+    if (ctx && !acordar()) return;
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    ctx = new AC();
+    ctx = new AC(); parado = null;
     mestre = ctx.createGain(); mestre.gain.value = 0;
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3;
-    mestre.connect(comp).connect(ctx.destination);
+    mestre.connect(comp); saidaFinal = PEQUENO ? reforco(comp) : comp; saidaFinal.connect(ctx.destination);
     // eco de vale: ruído que se apaga
     const imp = ctx.createBuffer(2, ctx.sampleRate * 3.2 | 0, ctx.sampleRate);
     for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); let s = 0; for (let i = 0; i < d.length; i++) { s += ((Math.random() * 2 - 1) - s) * .35; d[i] = s * Math.pow(1 - i / d.length, 2.6); } }
@@ -602,6 +624,7 @@ const Som = (() => {
     rio = laco(ruido(5), [['bandpass', 760, .7], ['lowpass', 1800, .3]], 0, .11);     // água: cresce com os canais cheios
     volume(); ambiente();
     proxNota = ctx.currentTime + 4; proxAve = ctx.currentTime + 9;
+    if (ctx.state !== 'running') retomar();
   }
   function laco(buf, filtros, ganho, lfoHz, fundo = .25) {
     const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.playbackRate.value = ALEA(.9, 1.1);
@@ -627,16 +650,18 @@ const Som = (() => {
     b.type = 'bandpass'; b.frequency.value = f; b.Q.value = q; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + dur * .35); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
     s.connect(b).connect(g).connect(mestre); s.start(t0, Math.random() * (1.4 - Math.min(1.3, dur)), dur + .05);
   }
-  const sino = (f, t0, v, dur = 2.6, pan = 0) => { const k = mundoSom.sino || 1; dur *= Math.sqrt(k); tom(f, t0, dur, v, { molhado: .8, pan }); tom(f * 2.01, t0, dur * .5, v * .28, { molhado: .6, pan }); tom(f * 5.4, t0, .12, v * .12, { pan }); };
-  function volume() { if (mestre) mestre.gain.setTargetAtTime(salvo.mudo ? 0 : Math.pow(salvo.volume / 100, 1.6) * 1.9, ctx.currentTime, .12); }
+  const sino = (f, t0, v, dur = 2.6, pan = 0) => { const k = mundoSom.sino || 1; dur *= Math.sqrt(k); tom(f, t0, dur, v, { molhado: .8, pan }); tom(f * 2.01, t0, dur * (PEQUENO ? .8 : .5), v * (PEQUENO ? .8 : .28), { molhado: .6, pan }); if (PEQUENO) tom(f * 4.02, t0, dur * .45, v * .3, { molhado: .6, pan }); tom(f * 5.4, t0, .12, v * .12, { pan }); };
+  // iPhone: 'playback' faz o jogo tocar mesmo com a chavinha de silencioso; mudo no jogo, deixa a música de outros apps em paz
+  function sessao() { try { if (navigator.audioSession) navigator.audioSession.type = salvo.mudo || !salvo.volume ? 'ambient' : 'playback'; } catch { /* navegador sem esse ajuste */ } }
+  function volume() { sessao(); if (mestre) mestre.gain.setTargetAtTime(salvo.mudo ? 0 : Math.pow(salvo.volume / 100, 1.6) * 1.9, ctx.currentTime, .12); }
 
   return {
     iniciar, volume,
     // troca de mundo: escala, vento, mar, chuva, bichos
     mundo(k, clima) { mundoSom = MUNDOS[k].som; climaSom = clima; afinar(k); ambiente(); },
     get estado() { return ctx ? ctx.state : 'parado'; },
-    get saida() { return mestre; }, get contexto() { return ctx; },
-    dormir(v) { if (ctx) v ? ctx.suspend() : ctx.resume(); },
+    get saida() { return mestre; }, get final() { return saidaFinal; }, pequeno: PEQUENO, get contexto() { return ctx; },
+    dormir(v) { if (!ctx || ctx.state === 'closed') return; parado = null; if (v) { const p = ctx.suspend(); if (p) p.catch(() => {}); } else retomar(); },
     // pedra raspando enquanto gira
     raspar() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .26, .07, ALEA(420, 640), 1.4); chiado(t + .05, .2, .025, ALEA(1500, 2100), 2); },
     // cerâmica assentando: ressonâncias curtas, sempre um pouco diferentes
@@ -1782,8 +1807,8 @@ $('b-andar').onclick = trocarAndar;
 function mostrarSom() { const s = salvo.mudo || salvo.volume === 0; $('mudo').innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 10v4h3l5 4V6L7 10z"/>${s ? '<path d="m16 10 4 4M20 10l-4 4"/>' : '<path d="M15 9a4 4 0 0 1 0 6M17 6a8 8 0 0 1 0 12"/>'}</svg>`; $('mudo').setAttribute('aria-pressed', s); $('volume').value = salvo.mudo ? 0 : salvo.volume; }
 $('volume').oninput = e => { salvo.volume = +e.target.value; salvo.mudo = salvo.volume === 0; Som.iniciar(); Som.volume(); $('mudo').setAttribute('aria-pressed', salvo.mudo); salvar(); mostrarSom(); };
 $('mudo').onclick = () => { salvo.mudo = !salvo.mudo; if (!salvo.mudo && salvo.volume === 0) salvo.volume = 60; Som.iniciar(); Som.volume(); mostrarSom(); salvar(); };
-// o navegador só libera som depois do primeiro toque
-for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, () => Som.iniciar(), { passive: true });
+// o navegador só libera som com um gesto, e no celular o gesto só conta quando o dedo SOLTA a tela (touchend/click), não quando encosta
+for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) addEventListener(ev, () => Som.iniciar(), { passive: true, capture: true });
 document.addEventListener('visibilitychange', () => Som.dormir(document.hidden));
 
 // ---- mouse e toque: um dedo toca ou gira a câmera; dois dedos aproximam e movem
