@@ -1,0 +1,224 @@
+/* Zen: jardim de areia. Todas as cores saem daqui; o desenho do jogo (canvas)
+   lê estas mesmas variáveis. */
+
+/* Registradas como cor, as variáveis mudam aos poucos quando a paleta troca.
+   Navegador antigo ignora isto e troca de uma vez. */
+@property --areia  { syntax: '<color>'; inherits: true; initial-value: #1c2238; }
+@property --areia2 { syntax: '<color>'; inherits: true; initial-value: #141a2c; }
+@property --sulco  { syntax: '<color>'; inherits: true; initial-value: #2a3250; }
+@property --tinta  { syntax: '<color>'; inherits: true; initial-value: #e9ecf6; }
+@property --tinta2 { syntax: '<color>'; inherits: true; initial-value: #a3acc8; }
+@property --luz    { syntax: '<color>'; inherits: true; initial-value: #f0c9a0; }
+@property --sobre  { syntax: '<color>'; inherits: true; initial-value: #1c2238; }
+@property --pedra  { syntax: '<color>'; inherits: true; initial-value: #56618a; }
+@property --sombra { syntax: '<color>'; inherits: true; initial-value: #10152a; }
+
+/* areia/areia2: fundo · sulco: riscos · tinta/tinta2: textos · luz: destaque
+   sobre: texto em cima do destaque · pedra: formas · sombra: sombra das pedras */
+:root {
+  --topo: env(safe-area-inset-top, 0px);
+  --base: env(safe-area-inset-bottom, 0px);
+  --esq: env(safe-area-inset-left, 0px);
+  --dir: env(safe-area-inset-right, 0px);
+  --fonte: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", "Segoe UI", system-ui, Roboto, sans-serif;
+  --suave: cubic-bezier(.3, .1, .2, 1);
+  transition: --areia 1.6s, --areia2 1.6s, --sulco 1.6s, --tinta 1.6s, --tinta2 1.6s, --luz 1.6s, --sobre 1.6s, --pedra 1.6s, --sombra 1.6s;
+}
+
+/* ---------- paletas: 2 temas x 5 (uma a cada 10 fases) ---------- */
+[data-tema=noite]                  { color-scheme: dark;  --areia:#1c2238; --areia2:#141a2c; --sulco:#2a3250; --tinta:#e9ecf6; --tinta2:#a3acc8; --luz:#f0c9a0; --sobre:#241a10; --pedra:#56618a; --sombra:#10152a; }
+[data-tema=noite][data-paleta="1"] { --areia:#14292f; --areia2:#0e1f25; --sulco:#21404a; --tinta:#e6f1f0; --tinta2:#9bb8ba; --luz:#9fe0c8; --sobre:#0d241d; --pedra:#43707a; --sombra:#09161b; }
+[data-tema=noite][data-paleta="2"] { --areia:#2a1f36; --areia2:#1e1628; --sulco:#40304f; --tinta:#f1eaf6; --tinta2:#bba9cb; --luz:#f2b6c6; --sobre:#33131d; --pedra:#72588a; --sombra:#160f1f; }
+[data-tema=noite][data-paleta="3"] { --areia:#1b2a22; --areia2:#131f19; --sulco:#2d4236; --tinta:#eaf2ec; --tinta2:#a2bba9; --luz:#e3d68c; --sobre:#262007; --pedra:#55775f; --sombra:#0c1510; }
+[data-tema=noite][data-paleta="4"] { --areia:#2b2428; --areia2:#1e191d; --sulco:#43373d; --tinta:#f5edee; --tinta2:#c0aeb2; --luz:#f3b08a; --sobre:#32170a; --pedra:#7b636b; --sombra:#151114; }
+
+[data-tema=pastel]                  { color-scheme: light; --areia:#dfe7f0; --areia2:#cfdae8; --sulco:#c5d1e1; --tinta:#26344a; --tinta2:#4f6079; --luz:#2f6f9f; --sobre:#ffffff; --pedra:#8fa3bb; --sombra:#b3c2d5; }
+[data-tema=pastel][data-paleta="1"] { --areia:#dde8df; --areia2:#cdddd0; --sulco:#c1d3c5; --tinta:#243a2d; --tinta2:#4a6252; --luz:#2c7a5a; --sobre:#ffffff; --pedra:#8daa95; --sombra:#b0c6b5; }
+[data-tema=pastel][data-paleta="2"] { --areia:#e6e0ef; --areia2:#d8cfe6; --sulco:#cdc3de; --tinta:#352a4a; --tinta2:#5f5278; --luz:#6b4fa0; --sobre:#ffffff; --pedra:#a393bd; --sombra:#c1b4d4; }
+[data-tema=pastel][data-paleta="3"] { --areia:#f1e0e0; --areia2:#e6cfd0; --sulco:#dcc2c4; --tinta:#472a30; --tinta2:#735058; --luz:#a8485f; --sobre:#ffffff; --pedra:#c3979e; --sombra:#d6b5b9; }
+[data-tema=pastel][data-paleta="4"] { --areia:#f2e3d3; --areia2:#e8d3bd; --sulco:#dec7ae; --tinta:#43311f; --tinta2:#6d5740; --luz:#93541b; --sobre:#ffffff; --pedra:#c2a281; --sombra:#d8bd9f; }
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+html { background: var(--areia); }
+body {
+  overflow: hidden; overscroll-behavior: none;
+  background: linear-gradient(var(--areia), var(--areia2)) fixed;
+  color: var(--tinta); font: 400 16px/1.45 var(--fonte);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+button, input { font: inherit; color: inherit; }
+button, label, a { touch-action: manipulation; }
+button { background: none; border: 0; cursor: pointer; padding: 0; }
+fieldset { border: 0; padding: 0; min-width: 0; }
+svg { display: block; }
+h1, h2 { font-weight: 400; line-height: 1.2; text-wrap: balance; }
+.so-leitor, input[type=radio] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--luz); outline-offset: 3px; }
+canvas:focus-visible { outline: none; }
+
+/* ---------- jardim ao fundo ---------- */
+.jardim { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .9s var(--suave); }
+/* sem ".jardim" na frente: os anéis são copiados por <use> e só enxergam a própria classe */
+.sulco { fill: none; stroke: var(--sulco); stroke-width: 1.6; }
+.chao { fill: var(--areia); }
+.jardim .pedra { fill: var(--pedra); }
+.jardim .sombra { fill: var(--sombra); }
+body[data-tela=partida] .jardim { opacity: 0; }
+
+/* ---------- telas ---------- */
+.tela { position: fixed; inset: 0; transition: opacity .6s var(--suave), visibility .6s; }
+.tela.fora { opacity: 0; visibility: hidden; pointer-events: none; }
+.tela.fora * { pointer-events: none !important; }
+.barra {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: calc(10px + var(--topo)) calc(12px + var(--dir)) 10px calc(12px + var(--esq));
+}
+.redondo {
+  flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--tinta2); text-decoration: none; transition: background-color .4s, color .4s, opacity .4s;
+}
+.redondo svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.redondo:disabled { opacity: .3; cursor: default; }
+.redondo:active:not(:disabled) { background: color-mix(in srgb, var(--pedra) 34%, transparent); }
+.mudo[aria-pressed=true] { color: var(--luz); }
+
+/* ---------- tela inicial ---------- */
+#inicio { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#inicio .barra { max-width: 1080px; margin: 0 auto; }
+#inicio h1 { flex: 1; font-size: 34px; font-weight: 300; padding-left: 8px; }
+.colunas {
+  display: grid; gap: 28px; max-width: 1080px; margin: 0 auto;
+  padding: 6px calc(20px + var(--dir)) calc(36px + var(--base)) calc(20px + var(--esq));
+}
+.escolhas { display: grid; gap: 16px; align-content: start; }
+.jogos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.jogo, .segmentos, .fases {
+  background: color-mix(in srgb, var(--areia) 92%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--sulco);
+}
+.jogo {
+  position: relative; display: grid; justify-items: start; align-content: start; gap: 2px;
+  padding: 14px 16px 16px; border-radius: 22px; cursor: pointer;
+  transition: box-shadow .5s, background-color .5s;
+}
+.jogo > svg { width: 100%; max-width: 132px; height: auto; aspect-ratio: 96/72; margin: 0 auto 8px; overflow: visible; opacity: .62; transition: opacity .5s; }
+.jogo .nome { font-size: 18px; line-height: 1.25; }
+.jogo .linha { font-size: 14px; line-height: 1.35; color: var(--tinta2); }
+.jogo:has(:checked) { box-shadow: inset 0 0 0 2px var(--luz); }
+.jogo:has(:checked) > svg { opacity: 1; }
+.jogo:has(:focus-visible), .segmentos label:has(:focus-visible) { outline: 2px solid var(--luz); outline-offset: 3px; }
+/* emblemas */
+.faixa path { fill: none; stroke: var(--pedra); stroke-width: 11; transition: stroke .6s; }
+.faixa.fina path { stroke: var(--areia); stroke-width: 2; }
+.jogo:has(:checked) .faixa:not(.fina) path { stroke: var(--luz); }
+.rastro { fill: none; stroke: var(--tinta2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: .1 6.5; }
+.forma { fill: var(--pedra); }
+.bola { fill: var(--tinta2); transition: fill .6s; }
+.jogo:has(:checked) .bola { fill: var(--luz); }
+
+.segmentos { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 4px; border-radius: 26px; }
+.segmentos label { position: relative; border-radius: 22px; cursor: pointer; }
+.segmentos span { display: grid; place-items: center; min-height: 44px; border-radius: 22px; color: var(--tinta2); transition: background-color .4s, color .4s; }
+.segmentos :checked + span { background: var(--pedra); color: #fff; }
+[data-tema=pastel] .segmentos :checked + span { background: var(--tinta2); }
+
+.principal, .secundario { min-height: 52px; padding: 0 26px; border-radius: 26px; font-size: 17px; transition: filter .3s, background-color .4s, transform .2s var(--suave); }
+.principal { background: var(--luz); color: var(--sobre); }
+.secundario { box-shadow: inset 0 0 0 1.5px var(--sulco); }
+.principal:active, .secundario:active { transform: scale(.98); }
+
+.fases { border-radius: 22px; padding: 16px 16px 18px; align-self: start; }
+.fases h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 18px; margin-bottom: 12px; }
+.fases h2 span { font-size: 15px; color: var(--tinta2); font-variant-numeric: tabular-nums; }
+.grade-fases { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.fase {
+  position: relative; min-height: 48px; border-radius: 16px; color: var(--tinta2);
+  font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--pedra) 18%, transparent);
+  transition: background-color .4s, color .4s, box-shadow .4s;
+}
+/* fase feita: pedra cheia · fase atual: contorno */
+.fase.feita { background: color-mix(in srgb, var(--luz) 24%, var(--areia)); color: var(--tinta); }
+.fase.feita::after { content: ""; position: absolute; left: 50%; bottom: 7px; width: 14px; height: 2px; margin-left: -7px; border-radius: 1px; background: var(--luz); }
+.fase.atual { box-shadow: inset 0 0 0 2px var(--luz); color: var(--tinta); }
+
+/* ---------- partida ---------- */
+#quadro { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#partida .barra { position: absolute; top: 0; left: 0; pointer-events: none; }
+#partida .barra > button { pointer-events: auto; }
+.titulo-fase { flex: 1; min-width: 0; padding-left: 4px; line-height: 1.25; }
+.titulo-fase b { display: block; font-weight: 400; font-size: 18px; }
+.titulo-fase span { display: block; font-size: 14px; color: var(--tinta2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rodape {
+  position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 22px;
+  padding: 8px 16px calc(14px + var(--base)); pointer-events: none; transition: opacity .5s;
+}
+.rodape > button { pointer-events: auto; }
+.aviso {
+  position: absolute; left: 20px; right: 20px; bottom: calc(78px + var(--base)); text-align: center; text-wrap: balance;
+  color: var(--tinta2); opacity: 0; pointer-events: none; transition: opacity .8s;
+}
+.aviso.visivel { opacity: 1; }
+.aviso { padding: 8px 12px; border-radius: 18px; width: fit-content; margin: 0 auto; background: color-mix(in srgb, var(--areia2) 88%, transparent); color: var(--tinta); }
+.fim {
+  position: absolute; left: 50%; bottom: calc(16px + var(--base)); width: min(440px, calc(100% - 32px)); translate: -50% 0;
+  display: grid; gap: 14px; padding: 20px; border-radius: 26px; text-align: center;
+  background: var(--areia2); box-shadow: inset 0 0 0 1.5px var(--sulco), 0 12px 34px -14px var(--sombra);
+  animation: subir .7s var(--suave) both;
+}
+.fim b { display: block; font-weight: 400; font-size: 20px; }
+.fim-texto span { color: var(--tinta2); }
+.fim-botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fim-botoes button { padding: 0 12px; }
+#partida.venceu .rodape { opacity: 0; visibility: hidden; }
+@keyframes subir { from { opacity: 0; translate: -50% 14px; } }
+
+/* ---------- som e aparência ---------- */
+.folha {
+  width: min(400px, calc(100% - 32px)); margin: auto; padding: 24px; border: 0; border-radius: 28px;
+  background: var(--areia2); color: var(--tinta); box-shadow: inset 0 0 0 1.5px var(--sulco);
+}
+.folha::backdrop { background: rgba(8, 10, 20, .5); }
+.folha[open] { animation: aparecer .4s var(--suave); }
+@keyframes aparecer { from { opacity: 0; } }
+.folha form { display: grid; gap: 18px; }
+.folha h2 { font-size: 20px; }
+.campo { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 12px; min-height: 44px; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: none; cursor: pointer; border-radius: 12px; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--pedra); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--pedra); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border: 0; border-radius: 50%; background: var(--luz); }
+input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: var(--luz); }
+
+.chave { grid-template-columns: 1fr auto; cursor: pointer; }
+input[type=checkbox] { -webkit-appearance: none; appearance: none; position: relative; width: 52px; height: 32px; border-radius: 16px; background: var(--pedra); cursor: pointer; transition: background-color .4s; }
+input[type=checkbox]::after { content: ""; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--areia); transition: translate .3s var(--suave); }
+input[type=checkbox]:checked { background: var(--luz); }
+input[type=checkbox]:checked::after { translate: 20px 0; }
+
+/* ---------- telas largas e celular deitado ---------- */
+@media (hover: hover) {
+  .redondo:not(:disabled):hover { background: color-mix(in srgb, var(--pedra) 24%, transparent); color: var(--tinta); }
+  .jogo:hover > svg { opacity: 1; }
+  .fase:hover { background: color-mix(in srgb, var(--luz) 34%, var(--areia)); color: var(--tinta); }
+  .principal:hover { filter: brightness(1.06); }
+}
+@media (min-width: 560px) and (max-width: 859px) { .grade-fases { grid-template-columns: repeat(10, 1fr); } }
+@media (min-width: 860px), (orientation: landscape) and (min-width: 640px) {
+  .colunas { grid-template-columns: minmax(300px, 5fr) 7fr; }
+  .grade-fases { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); }
+}
+@media (min-width: 1000px) { .grade-fases { grid-template-columns: repeat(10, 1fr); gap: 6px; } }
+@media (orientation: landscape) and (max-height: 520px) {
+  .jogo > svg { max-width: 92px; margin-bottom: 4px; }
+  .rodape { flex-direction: column; left: auto; top: 0; justify-content: center; gap: 8px; padding: 60px calc(10px + var(--dir)) 8px 10px; }
+  .aviso { bottom: calc(14px + var(--base)); }
+  .fim { left: auto; right: calc(12px + var(--dir)); bottom: calc(12px + var(--base)); width: 300px; translate: 0 0; padding: 14px; gap: 10px; animation-name: aparecer; }
+  .fim-botoes button { min-height: 46px; font-size: 16px; }
+}
+@media (max-width: 340px) { .jogos { gap: 8px; } .jogo { padding: 12px; } .jogo .nome { font-size: 16px; } }
+/* opção "Menos movimento" (o app.js liga data-movimento) */
+[data-movimento=menos], [data-movimento=menos] *, [data-movimento=menos] *::before, [data-movimento=menos] *::after { animation-duration: .01s !important; transition-duration: .01s !important; }

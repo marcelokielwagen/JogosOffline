@@ -360,3 +360,8 @@ O roteiro completo das etapas está em `PROMPT.md`.
   119 objetos 3D feitos por código (`ferramentas/keepsake-hunt`), lupa, dica, combo, lembrança escondida em cada fase, sons por código, progresso em `keepsake.v1`. No menu, nas
   Estatísticas e no modo offline. Cache `jogos-offline-v59`. Detalhes em `jogos/keepsake-hunt/PLANO.md`. Testado: 50 fases com toque simulado, 53 conferências de telas e gestos,
   7 tamanhos de tela, sem internet, sons medidos. Não testado num celular de verdade. Publicado com autorização do dono.
+- **Zen (25/11/2026)**, pedido do dono, em 4 etapas: dois jogos num app só (`jogos/zen`, 6 arquivos, sem dependências). Loop Zen (girar peças até fechar o circuito) e
+  Ricochet Zen (estilingue, apagar tudo em um lançamento), 50 fases em 3 dificuldades cada (300), geradas por semente; visual próprio de jardim de areia, 10 paletas, música
+  e efeitos por código, progresso em `zen.v1`. Mudar gerador ou receita muda as fases: depois rodar `ferramentas/zen/loop-fases.mjs escolher` e `okay-fases.mjs escolher`.
+  No menu, nas Estatísticas e no modo offline. Cache `jogos-offline-v60`. Testado: as 300 fases conferidas (solução, repetição), 10.800 lançamentos sem atravessar nada, app inteiro
+  com toque simulado (`app-testes.mjs`), sons medidos, regras do iPhone simuladas. Não testado num celular de verdade. Publicado com autorização do dono.

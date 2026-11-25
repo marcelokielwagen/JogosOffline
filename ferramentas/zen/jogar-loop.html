@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="noite" data-paleta="0">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loop Zen: jogar (teste)</title>
+<!-- página só de teste, até o app.js da Etapa 4: não salva nada -->
+<link rel="stylesheet" href="../../jogos/zen/style.css">
+<style>select{min-height:44px;border-radius:22px;border:0;padding:0 12px;background:var(--pedra);color:#fff;font:inherit;pointer-events:auto}</style>
+</head><body data-tela="partida">
+<section id="partida" class="tela"><canvas id="quadro" tabindex="0"></canvas>
+<header class="barra"><p class="titulo-fase"><b id="t"></b><span id="i"></span></p>
+<select id="dif"><option value="facil">Fácil</option><option value="medio">Médio</option><option value="dificil">Difícil</option></select><select id="fase"></select><select id="tema"><option value="noite">Noite</option><option value="pastel">Pastel</option></select></header>
+<footer class="rodape"><button class="redondo" id="ant" aria-label="Anterior">‹</button><button class="redondo" id="ref" aria-label="Recomeçar">↺</button><button class="redondo" id="pro" aria-label="Próxima">›</button></footer>
+<div id="fim" class="fim" hidden><p class="fim-texto"><b>Circuito fechado</b><span id="d"></span></p><div class="fim-botoes"><button class="secundario" id="ref2">Jogar de novo</button><button class="principal" id="pro2">Próxima fase</button></div></div></section>
+<script src="nucleo.js"></script>
+<script src="../../jogos/zen/audio.js"></script><script src="../../jogos/zen/loop_game.js"></script>
+<script>
+const $=i=>document.getElementById(i),c=$('quadro'),R=document.documentElement;let J=null;
+for(let k=1;k<=50;k++)$('fase').add(new Option('Fase '+k,k));
+// lê as cores do style.css; durante a troca de paleta é lido de novo a cada quadro
+const tela=document.createElement('canvas').getContext('2d',{willReadFrequently:true});
+function cores(){const s=getComputedStyle(R),o={};for(const n of['areia','areia2','sulco','tinta','tinta2','luz','sobre','pedra','sombra']){tela.fillStyle=s.getPropertyValue('--'+n).trim();tela.fillRect(0,0,1,1);o[n]=[...tela.getImageData(0,0,1,1).data].slice(0,3)}return o}
+let corAte=0;const pinta=()=>corAte=performance.now()+1800;
+function medir(){const baixo=innerHeight<520&&innerWidth>innerHeight;J&&J.redimensionar(innerWidth,innerHeight,Math.min(devicePixelRatio||1,2.5),baixo?{topo:64,base:14,esq:70,dir:70}:{topo:74,base:84,esq:12,dir:12})}
+function abrir(){const dif=$('dif').value,fase=+$('fase').value;R.dataset.tema=$('tema').value;R.dataset.paleta=Math.floor((fase-1)/10);$('fim').hidden=true;pinta();Zen.Audio.cena('loop',fase);
+ J=window.J=Zen.jogos.loop.criar(c,{dif,fase,cores:cores(),aoMudar:m=>$('i').textContent=m.pontas+' pontas soltas',aoVencer:v=>{$('d').textContent=v.giros+' giros';$('fim').hidden=false}});$('t').textContent='Loop Zen';$('i').textContent=J.info.pontas+' pontas soltas';medir()}
+const vai=n=>{$('fase').value=Math.max(1,Math.min(50,+$('fase').value+n));abrir()},ref=()=>{J.refazer();$('fim').hidden=true};
+for(const s of['dif','fase','tema'])$(s).onchange=abrir;$('ant').onclick=()=>vai(-1);$('pro').onclick=$('pro2').onclick=()=>vai(1);$('ref').onclick=$('ref2').onclick=ref;
+c.addEventListener('pointerdown',e=>{e.preventDefault();J.toqueInicio(e.clientX,e.clientY,e.pointerId,e.button===2||e.shiftKey)});c.addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('keydown',e=>{if(e.target.tagName!=='SELECT'&&J.tecla(e.key))e.preventDefault()});addEventListener('resize',medir);
+let antes=0;function laco(t){if(t<corAte)J.cores(cores());window.mexe=J.quadro((t-antes)/1000);antes=t;requestAnimationFrame(laco)}
+const q=new URLSearchParams(location.search);if(q.get('dif'))$('dif').value=q.get('dif');if(q.get('fase'))$('fase').value=q.get('fase');if(q.get('tema'))$('tema').value=q.get('tema');abrir();requestAnimationFrame(laco);
+</script></body></html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="noite" data-paleta="0">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zen: ouvir os sons</title>
+<!-- página só de teste: não faz parte do aplicativo -->
+<link rel="stylesheet" href="../../jogos/zen/style.css">
+<style>body{overflow:auto}main{max-width:560px;margin:0 auto;padding:24px 20px 60px;display:grid;gap:22px}section{display:grid;gap:10px}h2{font-size:18px}.b{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}p{color:var(--tinta2)}</style>
+<script>window.Zen={};</script><script src="../../jogos/zen/audio.js"></script></head>
+<body><main>
+<h1>Ouvir os sons</h1><p>Toque em qualquer botão. A música começa em poucos segundos e continua sozinha.</p>
+<section><h2>Música</h2><div class="b">
+<button class="secundario" onclick="Zen.Audio.cena('menu')">Tela inicial</button><button class="secundario" onclick="Zen.Audio.cena('loop',1)">Loop Zen</button><button class="secundario" onclick="Zen.Audio.cena('okay',1)">Ricochet Zen</button>
+<button class="secundario" onclick="Zen.Audio.cena('loop',25)">Loop, fase 25</button><button class="secundario" onclick="Zen.Audio.cena('okay',35)">Ricochet, fase 35</button></div>
+<label class="campo"><span>Música</span><input type="range" value="70" oninput="Zen.Audio.ajustar({musica:this.value/100})"></label>
+<label class="campo"><span>Efeitos</span><input type="range" value="80" oninput="Zen.Audio.ajustar({efeitos:this.value/100})"></label>
+<button class="secundario" onclick="Zen.Audio.ajustar({mudo:!Zen.Audio.config.mudo});this.textContent=Zen.Audio.config.mudo?'Ligar o som':'Mudo'">Mudo</button></section>
+<section><h2>Loop Zen</h2><div class="b">
+<button class="secundario" onclick="g=(window.g||0)+1;Zen.Audio.girar(Math.random(),Math.random(),g%4)">Girar peça</button><button class="secundario" onclick="Zen.Audio.encaixar(Math.random())">Encaixe</button><button class="secundario" onclick="Zen.Audio.fechar()">Circuito fechado</button></div></section>
+<section><h2>Ricochet Zen</h2><div class="b">
+<button class="secundario" onclick="[0,.2,.4,.6,.8,1].forEach((f,i)=>setTimeout(()=>Zen.Audio.esticar(f),i*110))">Esticar</button><button class="secundario" onclick="Zen.Audio.soltar(.8)">Soltar</button>
+<button class="secundario" onclick="lanca(10)">Lançamento com 10 batidas</button><button class="secundario" onclick="Zen.Audio.limpar(9)">Tela limpa</button><button class="secundario" onclick="Zen.Audio.quase()">Não limpou</button></div></section>
+</main><script>function lanca(n){Zen.Audio.soltar(.9);for(let i=0;i<n;i++)setTimeout(()=>Zen.Audio.ricochete(i,i%4==2?'parede':i%5==4?'barreira':'alvo',.9-i*.04,Math.sin(i)*.6),350+i*260);setTimeout(()=>Zen.Audio.limpar(n),350+n*260)}</script>
+</body></html>
