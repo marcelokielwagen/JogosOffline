@@ -37,6 +37,13 @@ function carregar() {
   return s;
 }
 const S = carregar();
+// cada cartão do menu abre o seu jogo: index.html?jogo=loop ou ?jogo=okay. Sem isso, os dois aparecem para escolher.
+const FIXO = (x => JOGOS.includes(x) ? x : '')(new URLSearchParams(location.search).get('jogo'));
+if (FIXO) {
+  S.jogo = FIXO; document.title = document.querySelector('#inicio h1').textContent = Zen.NOMES[FIXO];
+  document.body.classList.add('um-jogo');
+  for (const r of document.querySelectorAll('input[name=jogo]')) r.disabled = r.value !== FIXO;
+}
 let gravarEm = 0;
 function gravar() { clearTimeout(gravarEm); gravarEm = 0; try { localStorage.setItem(Zen.CHAVE, JSON.stringify(S)); } catch (e) { /* sem espaço ou modo privado: o jogo segue */ } }
 const gravarLogo = () => { if (!gravarEm) gravarEm = setTimeout(gravar, 400); };       // junta várias mudanças numa gravação só

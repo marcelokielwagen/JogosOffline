@@ -83,7 +83,8 @@ const JO = (() => {
       ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
       ['Gem Shatter', [['Fases vencidas', `${fl.length} de 50`], ['Estrelas', `${fl.reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Obras na mina', `${gm && gm.obras ? gm.obras.flat().filter(Boolean).length : 0} de 25`]]],
       ['Keepsake Hunt', [['Fases vencidas', `${Object.keys((kh && kh.estrelas) || {}).length} de 50`], ['Estrelas', `${Object.values((kh && kh.estrelas) || {}).reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Lembranças', `${Object.keys((kh && kh.lembrancas) || {}).length} de 50`]]],
-      ['Zen', [['Loop Zen', znJ('loop')], ['Ricochet Zen', znJ('okay')]]],
+      ['Loop Zen', [['Fases concluídas', znJ('loop')]]],
+      ['Ricochet Zen', [['Fases concluídas', znJ('okay')]]],
     ];
   }
   function preencherEstatisticas(cx) {

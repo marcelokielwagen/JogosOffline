@@ -89,7 +89,7 @@ body[data-tela=partida] .jardim { opacity: 0; }
 /* ---------- tela inicial ---------- */
 #inicio { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 #inicio .barra { max-width: 1080px; margin: 0 auto; }
-#inicio h1 { flex: 1; font-size: 34px; font-weight: 300; padding-left: 8px; }
+#inicio h1 { flex: 1; min-width: 0; font-size: 34px; white-space: nowrap; font-weight: 300; padding-left: 8px; }
 .colunas {
   display: grid; gap: 28px; max-width: 1080px; margin: 0 auto;
   padding: 6px calc(20px + var(--dir)) calc(36px + var(--base)) calc(20px + var(--esq));
@@ -115,6 +115,11 @@ body[data-tela=partida] .jardim { opacity: 0; }
 .faixa path { fill: none; stroke: var(--pedra); stroke-width: 11; transition: stroke .6s; }
 .faixa.fina path { stroke: var(--areia); stroke-width: 2; }
 .jogo:has(:checked) .faixa:not(.fina) path { stroke: var(--luz); }
+/* aberto pelo cartão de um dos jogos: só o emblema dele */
+.um-jogo .jogos { grid-template-columns: 1fr; }
+.um-jogo .jogo { cursor: default; justify-items: center; text-align: center; }
+.um-jogo .jogo:has(:disabled), .um-jogo .jogo .nome { display: none; }
+.um-jogo .jogo:has(:checked) { box-shadow: inset 0 0 0 1.5px var(--sulco); }
 .rastro { fill: none; stroke: var(--tinta2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: .1 6.5; }
 .forma { fill: var(--pedra); }
 .bola { fill: var(--tinta2); transition: fill .6s; }
@@ -219,6 +224,7 @@ input[type=checkbox]:checked::after { translate: 20px 0; }
   .fim { left: auto; right: calc(12px + var(--dir)); bottom: calc(12px + var(--base)); width: 300px; translate: 0 0; padding: 14px; gap: 10px; animation-name: aparecer; }
   .fim-botoes button { min-height: 46px; font-size: 16px; }
 }
+@media (max-width: 380px) { .um-jogo #inicio h1 { font-size: 27px; padding-left: 2px; } }
 @media (max-width: 340px) { .jogos { gap: 8px; } .jogo { padding: 12px; } .jogo .nome { font-size: 16px; } }
 /* opção "Menos movimento" (o app.js liga data-movimento) */
 [data-movimento=menos], [data-movimento=menos] *, [data-movimento=menos] *::before, [data-movimento=menos] *::after { animation-duration: .01s !important; transition-duration: .01s !important; }
