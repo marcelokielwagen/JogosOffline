@@ -24,7 +24,7 @@
 <title>Nascente</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232f8f9d' d='M12 2c4 5 7 9 7 13a7 7 0 0 1-14 0c0-4 3-8 7-13z'/></svg>">
 <style>
-  :root { --nevoa: #dfe5dc; --tinta: #2d3a37; --vidro: rgba(255,255,255,.34); --risco: rgba(45,58,55,.16); --acento: #2b7f8c; }
+  :root { --nevoa: #dfe5dc; --tinta: #2d3a37; --vidro: rgba(255,255,255,.34); --risco: rgba(45,58,55,.16); --acento: #2b7f8c; --agua2: #3a4aa0; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--nevoa); color: var(--tinta);
     font: 400 16px/1.45 "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; }
@@ -43,6 +43,8 @@
   .gotas { display: inline-flex; gap: 4px; }
   .gotas i { width: 10px; height: 10px; border-radius: 50% 50% 50% 0; transform: rotate(135deg); border: 1.4px solid currentColor; opacity: .55; transition: background .8s, border-color .8s, opacity .8s; }
   .gotas i.cheia { background: var(--acento); border-color: var(--acento); opacity: 1; }
+  .gotas i.a2.cheia { background: var(--agua2); border-color: var(--agua2); } .gotas i.a2 { border-color: var(--agua2); opacity: .9; } .gotas i.a3 { border-style: double; border-width: 3px; } .gotas i.a3.cheia { background: linear-gradient(45deg, var(--acento) 50%, var(--agua2) 50%); }
+  .fase-atual p.onde { margin-top: 3px; font-size: 13px; opacity: .8; }
   .som { display: flex; align-items: center; gap: 6px; }
   .som input { width: 84px; accent-color: var(--acento); opacity: .75; height: 24px; margin: 0; cursor: pointer; }
 
@@ -64,7 +66,7 @@
 
   /* ---- avisos e conclusão ---- */
   .aviso { position: fixed; left: 0; right: 0; margin: 0 auto; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 62px); width: fit-content; max-width: min(90vw, 460px); text-align: center; text-wrap: balance;
-    font-size: 16px; line-height: 1.3; padding: 7px 18px; border-radius: 18px; background: rgba(250,248,240,.82); color: #2d3a37; opacity: 0; transition: opacity .7s; pointer-events: none; }
+    font-size: 16px; line-height: 1.3; padding: 7px 18px; z-index: 2; border-radius: 18px; background: rgba(250,248,240,.82); color: #2d3a37; opacity: 0; transition: opacity .7s; pointer-events: none; }
   .aviso.ver { opacity: 1; }
   .fim { position: fixed; left: 0; right: 0; margin: 0 auto; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateY(14px); text-align: center; opacity: 0; visibility: hidden; transition: opacity 1.2s, transform 1.2s, visibility 0s 1.2s; width: fit-content; max-width: 92vw;
     padding: 16px 26px 18px; border-radius: 18px; background: rgba(250,248,240,.82); color: #2d3a37; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
@@ -89,9 +91,22 @@
   .fases b { font-weight: 400; opacity: .7; font-variant-numeric: tabular-nums; } .fases small { display: block; opacity: .75; font-size: 13px; line-height: 1.2; }
   .fases .gotas i { width: 12px; height: 12px; opacity: .35; } .fases .gotas i.cheia { opacity: 1; }
 
+  .difs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(45,58,55,.07); width: fit-content; margin: 4px 0 10px; }
+  .difs button { min-height: 40px; padding: 6px 18px; border-radius: 999px; } .difs [aria-pressed=true] { background: #27646e; color: #fbf8ee; }
+  .painel #resumo { margin: 0 0 12px; font-size: 15px; }
+  .mundos { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 4px; margin-bottom: 12px; }
+  .mundos button { display: grid; grid-template-columns: 26px 1fr; gap: 9px; align-items: center; text-align: left; min-height: 50px; padding: 5px 8px; border-radius: 12px; line-height: 1.15; font-size: 15px; } .mundos small { display: block; font-size: 13px; opacity: .75; }
+  .mundos .cor { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(to top, var(--c1) 48%, var(--c2) 48%); border: 1px solid rgba(45,58,55,.2); }
+  .mundos button:hover { background: rgba(43,127,140,.1); } .mundos .aqui { background: rgba(43,127,140,.17); }
+  .mundo-texto { margin: 0 0 6px; font-size: 15px; font-style: italic; border-top: 1px solid var(--risco); padding-top: 12px; }
+  #b-andar[data-andar="0"] .cima, #b-andar[data-andar="1"] .baixo { opacity: .25; } #b-andar[data-andar="0"] .baixo, #b-andar[data-andar="1"] .cima { stroke-width: 2.4; }
+  [hidden] { display: none !important; }
+  .escolha { width: min(92vw, 470px); } .escolha h2 { margin: 0 0 4px; } .escolha p { margin: 0 0 16px; font-size: 15px; } .cartas { display: grid; gap: 8px; }
+  .cartas button { text-align: left; padding: 12px 18px; border-radius: 14px; background: rgba(45,58,55,.06); min-height: 64px; } .cartas button:hover { background: rgba(43,127,140,.15); } .cartas b { font-weight: 400; font-size: 19px; display: block; } .cartas span { font-size: 14px; line-height: 1.3; display: block; opacity: .85; }
+
   #veu { position: fixed; inset: 0; background: var(--nevoa); transition: opacity 1s ease; pointer-events: none; display: grid; place-items: center; }
   #veu p { font-size: 18px; max-width: 80vw; text-align: center; transition: opacity .5s; }
-  @media (max-width: 560px) { .barra { gap: 8px; } .som input { width: 66px; } .redondo { width: 44px; height: 44px; } .fim { padding: 14px 16px 16px; } .fim .acoes { gap: 4px; } .leve, .cheio { padding: 8px 14px; } }
+  @media (max-width: 560px) { .mundos { grid-template-columns: 1fr 1fr; } .mundos button { font-size: 14px; padding: 4px 6px; } dialog { max-height: 92vh; } .barra { gap: 7px; } .som input { width: 66px; } .redondo { width: 44px; height: 44px; } .fim { padding: 14px 16px 16px; } .fim .acoes { gap: 4px; } .leve, .cheio { padding: 8px 14px; } }
   @media (max-height: 430px) {
     .barra { flex-direction: column; left: auto; right: max(14px, env(safe-area-inset-right)); bottom: 10px; gap: 6px; }
     .redondo { width: 40px; height: 40px; } .som { margin-right: 56px; } .aviso { bottom: 12px; } .redondo[data-nome]::after { display: none; }
@@ -104,7 +119,7 @@
 
 <div class="topo">
   <a class="redondo" href="../../index.html" aria-label="Voltar para a tela inicial"><svg viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></a>
-  <div class="fase-atual"><h1 id="nome"></h1><p><span class="gotas" id="gotas"></span><span id="contagem"></span></p></div>
+  <div class="fase-atual"><h1 id="nome"></h1><p class="onde" id="onde"></p><p><span class="gotas" id="gotas"></span><span id="contagem"></span></p></div>
   <div class="som">
     <input id="volume" type="range" min="0" max="100" aria-label="Volume">
     <button id="mudo" class="redondo" aria-label="Ligar ou desligar o som"></button>
@@ -115,6 +130,7 @@
   <button id="b-fases" class="redondo" data-nome="Fases" aria-label="Escolher fase"><svg viewBox="0 0 24 24"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>
   <button id="b-desfazer" class="redondo" data-nome="Desfazer" aria-label="Desfazer o último giro"><svg viewBox="0 0 24 24"><path d="M8 5 4 9l4 4"/><path d="M4 9h10a5 5 0 0 1 0 10H9"/></svg></button>
   <button id="b-dica" class="redondo" data-nome="Dica" aria-label="Ver uma dica"><svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/><path d="M9 14a3 3 0 0 0 3 3"/></svg></button>
+  <button id="b-andar" class="redondo" data-nome="Andares" aria-label="Vendo os dois andares" data-andar="todos" hidden><svg viewBox="0 0 24 24"><path class="cima" d="m12 4-8 4 8 4 8-4z"/><path class="baixo" d="m4 14 8 4 8-4"/><path class="baixo" d="m4 14 8-4 8 4"/></svg></button>
   <button id="b-camera" class="redondo" data-nome="Câmera" aria-label="Trocar o ângulo da câmera"><svg viewBox="0 0 24 24"><path d="m12 3-8 4.5v9l8 4.5 8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></button>
   <button id="b-reiniciar" class="redondo" data-nome="Reiniciar" aria-label="Reiniciar a fase"><svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2-5"/><path d="M20 3v4h-4"/></svg></button>
 </div>
@@ -128,7 +144,20 @@
 
 <dialog id="d-fases"><div class="painel">
   <header><h2>Fases</h2><button class="redondo" id="fecha-fases" aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
-  <p id="resumo"></p><ol class="fases" id="lista"></ol>
+  <div class="difs" id="difs" role="group" aria-label="Dificuldade"></div>
+  <p id="resumo"></p>
+  <div class="mundos" id="mundos"></div>
+  <p id="mundo-texto" class="mundo-texto"></p>
+  <ol class="fases" id="lista"></ol>
+</div></dialog>
+
+<dialog id="d-dif" class="escolha"><div class="painel">
+  <h2>Como você quer jogar?</h2><p>Sem relógio, sem pontos, sem pressa. Dá para trocar depois, na tela de fases.</p>
+  <div class="cartas">
+    <button data-d="0"><b>Fácil</b><span>Parte das peças já vem no lugar, e há poucas peças sobrando.</span></button>
+    <button data-d="1"><b>Médio</b><span>O quebra-cabeça inteiro, com caminhos que enganam.</span></button>
+    <button data-d="2"><b>Difícil</b><span>Mais peças que enganam e nenhuma ponta pode vazar. A dica mostra só o lugar.</span></button>
+  </div>
 </div></dialog>
 
 <div id="veu"><p id="veu-texto">Preparando o vale…</p></div>
@@ -154,110 +183,131 @@ const CALMO = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ============================================================ 1. FASES E TEMAS
 /*
-  COMO CRIAR UMA FASE: desenhe o mapa JÁ RESOLVIDO. O jogo embaralha sozinho.
-    ─ │          canal reto          ┌ ┐ └ ┘     curva
-    ├ ┤ ┬ ┴      bifurcação          ┼           encruzilhada (reparte para os 4 lados)
-    +            sifão: dois canais se cruzam sem misturar
-    ╱ ╲          curvas gêmeas: dois canais separados na mesma peça
-    peça!        com "!" a peça é fixa (não gira)
-    N            nascente            V H R P     vila, horta, reservatório, poço
-    Depois de N V H R P vem o lado da boca do canal:  ^ norte   > leste   v sul   < oeste
-    .            terreno livre
-  alturas (opcional): um dígito por casa. A água desce degraus, mas nunca sobe.
-  Peças que a água não usa no mapa resolvido viram distração, sem problema.
+  COMO SÃO AS FASES: cada uma é o mapa JÁ RESOLVIDO; o jogo embaralha sozinho. Os mapas saem de ferramentas/nascente/gerar.mjs.
+    n nome · m mapa do chão · a andar de cima · h alturas (um dígito por casa) · d dica · f mapa próprio do Fácil. "/" separa as linhas.
+    ─ │ reto   ┌ ┐ └ ┘ curva   ├ ┤ ┬ ┴ bifurcação   ┼ encruzilhada   ╵ ╶ ╷ ╴ ponta   . terreno livre
+    + sifão: dois canais se cruzam sem misturar      ╱ ╲ curvas gêmeas: dois canais separados na mesma peça
+    ═ ‖ comporta (letra A-D = grupo; x = fechada na solução)
+    Depois do símbolo: ! fixa · ~ eixo emperrado (só meia-volta) · a-d irmãs que giram juntas · ↑ parafuso (sobe um andar) · ↓ queda (desce)
+                       * distração (no Fácil a maioria some) · ° distração só do Difícil
+    N nascente, T segunda água; V H R P M destinos (vila, horta, reservatório, poço, marco do mundo) + lado da boca ^ > v <
+    Número depois do lado do destino: 2 = quer a segunda água, 3 = quer as duas misturadas.
+  A água desce degraus, mas nunca sobe. O andar de cima fica 2 degraus acima do chão.
 */
+// <fases>  (gravado por ferramentas/nascente/gravar.mjs; pode editar à mão)
 const FASES = [
-  { nome: 'Primeiro fio d’água', tema: 'manha', dica: 'Toque nas peças para girar e levar a água até a horta', mapa: `
-    N> ─  ┐  .
-    .  .  │  .
-    .  .  └  H<` },
-  { nome: 'A volta do morro', tema: 'primavera', mapa: `
-    .  ┌  ─  ┐  .
-    N> ┘  .  │  .
-    .  .  .  └  V<` },
-  { nome: 'Dois vizinhos', tema: 'nevoa', dica: 'Uma bifurcação reparte a água em dois caminhos', mapa: `
-    .  ┌  ─  H<
-    N> ┤  .  .
-    .  │  .  .
-    .  └  ─  V<` },
-  { nome: 'Degraus de pedra', tema: 'tarde', dica: 'A água desce os degraus, mas não sobe', mapa: `
-    N> ─  ┐  .  .
-    .  .  │  .  .
-    .  .  └  ┬  H<
-    .  .  .  │  .
-    .  .  .  └  R<`, alturas: `
-    22211
-    22211
-    11111
-    10000
-    00000` },
-  { nome: 'Pedras antigas', tema: 'manha', dica: 'As peças de pedra escura são fixas: construa em volta delas', mapa: `
-    .  P> ─  ┐  .
-    N> ─! ┬  ┤! .
-    .  H> ┘  │  .
-    .  .  .  └  V<` },
-  { nome: 'Águas que se cruzam', tema: 'lua', dica: 'No sifão, uma água passa por baixo da outra sem misturar', mapa: `
-    .  .  Nv .  .
-    .  .  │  ┐  .
-    N> ─  +! ─  ┐
-    .  └  │  .  │
-    .  H> ┘  .  V^` },
-  { nome: 'Curvas gêmeas', tema: 'primavera', dica: 'As curvas gêmeas levam duas águas separadas na mesma peça', mapa: `
-    .  ┌  ─  ┐  .
-    N> ╱  ─  ╲  V<
-    .  │  .  │  .
-    .  N^ .  H^ .` },
-  { nome: 'Escada de cascatas', tema: 'tarde', mapa: `
-    N> ─  ┬  ─  ┐  .
-    .  .  │  .  └  H<
-    .  P> ┤  .  .  .
-    .  .  └  ┬! ─  V<
-    .  .  .  R^ .  .`, alturas: `
-    333222
-    322222
-    222111
-    211111
-    111000` },
-  { nome: 'O jardim de dentro', tema: 'entardecer', mapa: `
-    .  V> ┬  ─  H<
-    .  ┐  │  ┌  .
-    N> ─  ┼! ─  P<
-    .  ┘  │  .  Rv
-    .  .  └  ─  ┘` },
-  { nome: 'Dois rios', tema: 'nevoa', mapa: `
-    .  Nv .  .  .  .
-    .  ├  ─  ┐  .  .
-    .  │  ┌  ╲  ─  V<
-    N> +! ┘  │  ┘  .
-    .  │  H> ┴  ─  P<
-    .  └  ─  R< .  .` },
-  { nome: 'Encosta das oliveiras', tema: 'tarde', mapa: `
-    .  .  Nv .  .  .  .
-    H> ─  ┼! ─  ┐  .  .
-    .  .  │  .  ├  ─  V<
-    .  ┌  ┘  .  │  .  .
-    P> ┴  ─  R< └  ─  H<`, alturas: `
-    3333322
-    2232222
-    2222111
-    2111111
-    1100000` },
-  { nome: 'O vale inteiro', tema: 'entardecer', mapa: `
-    .  .  .  Nv .  .  .
-    .  ┌  ─  ┼! ─  ┐  .
-    .  V^ .  │  .  ├  H<
-    N> ─  ─  +! ─  ╲  P<
-    .  .  .  │  .  │  .
-    .  ┌  ─  ┤  .  ├  H<
-    .  H^ .  V^ .  R^ .`, alturas: `
-    3333333
-    2223222
-    2122222
-    2222221
-    1111111
-    1111111
-    0000000` },
+  // mundo 1
+  {"n":"Primeiro fio d’água","m":"N> ┐ └* └° ├°/└° ├ ─ P< ─°/├° │ ┼* └* ┼*/. └ ┐ ┼* ├*/├* ┌ ┴ ─ ┐/M> ┘ └° ┼° P^","h":"33211/32211/22110/21100/21100/11000","d":"Toque nas peças para girar e levar a água até os destinos","f":{"m":"N> ─ ┐ ./. . │ ./. . └ H<"}},
+  {"n":"A volta do morro","m":"R> ┐ ─* ├* └*/├° ├! ─ ─ M</┼° │ ─* ─° ┼°/┌ ┤ ├* ┼* ./│ └ ┐ . Pv/└ N< └ ─ ┘","f":{"m":". ┌ ─ ┐ ./N> ┘ . │ ./. . . └ V<"}},
+  {"n":"Dois vizinhos","m":"┌ N< ├° └* ┼* └*/├ ─ ┐ └* ┼* ─*/│ └° │ . ├° └*/│ V> ┴ ─ ┐ Mv/│ . └° H> ┴ ┘/R^ . └* ─* ─° └°","h":"443321/433211/332110/322100/221000/211000","d":"Uma bifurcação reparte a água em dois caminhos","f":{"m":". ┌ ─ H</N> ┤ . ./. │ . ./. └ ─ V<"}},
+  {"n":"Degraus de pedra","m":"┼* └* ┼* ┌ ┐ ./─* Pv ┼* │ N^ ┼*/┌ ┴ ─ ┤ . ./│ . ─° ├ ─ ┐/M^ ─° ┌ ┘ ┼* R^/─* . └ V< . └*","h":"122222/112222/111111/011111/001101/000000","d":"A água desce os degraus, mas não sobe","f":{"m":"N> ─ ┐ . ./. . │ . ./. . └ ┬ H</. . . │ ./. . . └ R<","h":"22211/22211/11111/10000/00000"}},
+  {"n":"Pedras antigas","m":"├* ┌ ─ ┐ └* Nv/. P^ ┌ ┴ ─ ┤/├* ┌ ┘ ├* . │/M> ┘ ├* M> ┬ ┘/├° └* └* └° │ ├*/. ─* └* ├* │ ┼°/─* . R> ─ ┘ ─°","h":"222223/121222/111122/111112/010111/000011/000001","d":"As peças de pedra escura são fixas: construa em volta delas","f":{"m":". P> ─ ┐ ./N> ─! ┬ ┤! ./. H> ┘ │ ./. . . └ V<"}},
+  {"n":"Escada de cascatas","m":"┼° ─° └* ┼* N> ┐/. . P> ┬ ─ ┘/R> ─ ┐ │ . ├*/├* ┌ ┼ ┘ ├* ├*/─* M^ ├ ┐ └° └°/├* ┌ ┘ │ ─* ┼*/M> ┘ └* P^ . ┼*","h":"112233/111223/011222/001122/001112/000112/000011","f":{"m":"N> ─ ┬ ─ ┐ ./. . │ . └ H</. P> ┤ . . ./. . └ ┬! ─ V</. . . R^ . .","h":"333222/322222/222111/211111/111000"}},
+  {"n":"O jardim de dentro","m":"├* ├* ├° └° N> ┐/─* └* ─° ├* ┌ ┤/├* ├* ─* ┌ ┤ P^/└* M> ┬! ┘ └ ┐/┌ ─ ┤ └° H> ┘/V^ ├° │ └* └* ├°/─* ─* └ M< ─* ├°","h":"222221/222211/222111/111110/111100/111000/000000","f":{"m":". V> ┬ ─ H</. ┐ │ ┌ ./N> ─ ┼! ─ P</. ┘ │ . Rv/. . └ ─ ┘"}},
+  {"n":"Encosta das oliveiras","m":"─° ─° ├° └° └* ┼*/└* ├* Nv └* ─* └°/└* ├* └ ┐ ─* └*/N> ┐ ┼* └ ┐ Vv/┌ ┴ ┐ H> ┼ ┘/M^ ─* └ ┐ └ ┐/├* └* └° └ M< │/R> ─ ─ ─ ─ ┘","f":{"m":". . Nv . . . ./H> ─ ┼! ─ ┐ . ./. . │ . ├ ─ V</. ┌ ┘ . │ . ./P> ┴ ─ R< └ ─ H<","h":"3333322/2232222/2222111/2111111/1100000"}},
+  {"n":"O lagar e o pomar","m":"└* Mv ├* ┌ M< └*/─* │ ┌ ┤ ┼* ├°/┌ ┤! M^ ├ ─ N</N^ │ ─° │ ─* ─°/├* │ ┌ ┘ ┼* ├°/─* │ │ Hv . ├*/V> ┘ └ ┤ └* ./└* └* ─* └ ─ P<"},
+  {"n":"A colheita","m":"Nv ├* ├* ┼° . ┌ R</└ ┐ Vv ┌ ─ ┘ └*/└* └ ┴ ┘ ┼* └* └*/┌ R< ├° └* ├* M> ┐/│ └* . ├* └* ─* │/├ ─ ─ ┐ M> ┬ ┘/N^ . ─* └ ─ ┴ H<"},
+  // mundo 2
+  {"n":"Águas que se cruzam","m":"Rv +* . ─* . └*/└ ┐ +* +° ┌ H</+* └ ─ ─ ┤ ├°/─° ╲* . ╲° │ ├*/└° +° N> ┬ ┤! ├*/H> ─ ─ ┘ └ V<","d":"No sifão, uma água passa por baixo da outra sem misturar","f":{"m":". . Nv . ./. . │ ┐ ./N> ─ +! ─ ┐/. └ │ . │/. H> ┘ . V^"}},
+  {"n":"Curvas gêmeas","m":"Pv +* ─° └* ─° ./│ └* +* ┌ V< ./│ . . └ ┐ ╲*/│ └* ─° └* │ ├°/├ ─ ┬ ─ ┴ N</M^ ├* └ M< ├° ├*","d":"As curvas gêmeas levam duas águas separadas na mesma peça","f":{"m":". ┌ ─ ┐ ./N> ╱ ─ ╲ V</. │ . │ ./. N^ . H^ ."}},
+  {"n":"Dois rios","m":"P> ─ ─ ┐ ┌ H</╲* . Mv ├ ┘ ┼*/├* ┼* └ ┤ Nv └*/├° +* ┌ ┴ ┘ ╲*/┌ ─ ┘ └° └° ─*/M^ ├° └° ├° ├* .","f":{"m":". Nv . . . ./. ├ ─ ┐ . ./. │ ┌ ╲ ─ V</N> +! ┘ │ ┘ ./. │ H> ┴ ─ P</. └ ─ R< . ."}},
+  {"n":"O vale inteiro","m":"Pv ─* ┌ ─ ─ ┐/└ ┬ ┘ └° M> ┘/. │ Pv . . +*/+° ├ ┤ ╲* ─* ╲*/+* H^ │ ├* +* └*/. +° │ +° ╲* ┼*/└° ╲° N^ ├* ╲* .","f":{"m":". . . Nv . . ./. ┌ ─ ┼! ─ ┐ ./. V^ . │ . ├ H</N> ─ ─ +! ─ ╲ P</. . . │ . │ ./. ┌ ─ ┤ . ├ H</. H^ . V^ . R^ .","h":"3333333/2223222/2122222/2222221/1111111/1111111/0000000"}},
+  {"n":"Araucárias","m":"├° ┌ H< └* ╲* Rv/. ├ ┐ ┌ ─ ┘/─* N^ │ ├ N< ├*/└* ┌ + ┘ ╲* ╲°/┌ ╱ ┴ ┐ . +°/R^ │ Hv │ ╲* ┼*/. └ ┘ M^ ─° └*"},
+  {"n":"Manhã sem horizonte","m":"└° ├* H> ┐ . ┼*/└* └* . └ ┐ ./├° ├* ┌ M< │ ./+* ├° │ ├* │ ├*/┌ ─ ┴ ─ ┤ +*/│ └* └° P> ┤ +*/M^ ├* ┌ ─ ┤ ╲*/┼° └* V^ ─* └ N<"},
+  {"n":"O pinhão e a brasa","m":"Mv ├* +* └° ├° Nv/│ ├° ├* ─* ┌ ┘/├ ┐ ├* Mv │ ├*/M^ └ ┐ ├! ┘ ├°/─* ┼* ├ ┘ . Vv/┌ ─ ┘ ╲* ┌ ┘/└ M< ┼* ┌ ┘ ╲°/├* └* . └ N< ╲*"},
+  {"n":"Geada fina","m":"Nv ┌ ─ ─ ┬ R</└ ┘ └* └* │ ├°/└* ├* Pv ├* ├ ┐/Nv ┌ ┘ └* V^ │/└ ┴ ┐ └* . │/└* ┼* │ . └° │/+* ─* M^ └* ╲* M^/+* └° └* . ├° ┼*"},
+  {"n":"Campos de cima","m":"╲* ├* ╲* ┌ N< +* ╲°/─* . +* │ └° ┌ N</Vv ┼* ┌ ┤ +* │ ╲*/└ ─ ┤! P^ ┼* │ ─°/╲* ─* │ ╲° ┌ ┤ └*/R> ┬ ┘ ├* │ P^ ╲*/┌ ┘ ─* ┌ ┘ ├* └°/└ M< . └ V< +* └*"},
+  {"n":"Quando a névoa abre","m":"Nv ─° ┌ R< +* └° └*/└ ─ ┤ └* ╲* M> ┐/└* ├* │ ┼* ┌ ─ ┘/└* N> ╲ ─ ┤ ├° ┼*/─* └* │ ├* │ └* ./┌ ─ ┴ P< │ . Hv/│ P> ─ ┐ └ ─ ┘/└ ─ M< └ N< ├* ╲*"},
+  // mundo 3
+  {"n":"O primeiro espelho","m":"└* R> ─ ┐ └* └*/└* ├° └* └ ┐~ Nv/. ╲* ├* ╲° └ ┤/M> ┐ ├° . ┼° │/. └ ┐ ┼° ┌ ┤~/─° P> ┴ ─ ┘ V^","h":"123344/112334/011233/001223/000122/000112","d":"Peça com cinta de ferro: o eixo emperrou e só dá meia-volta"},
+  {"n":"Eixos cansados","m":"M> ┐~ └* ┼° ├° ├*/─* ├ ─ ─ ┐ Nv/┌ ┤ . ╲* ├ ┘/R^ │ ├° Rv │ └°/┌ ┘~ . └ ┘ ├*/└~ V< ─° ├° └* └*","h":"112233/111223/011122/001122/000112/000011"},
+  {"n":"A muda de arroz","m":"┌ N< ├* └° . ./│ ├° ╲* Hv ╲° ╲*/│ ┌~ ─ ┤~ └* ├°/│ N^ └* └ P< ├*/├ ─ ┬ ┐ ├° └*/│ └* V^ │ ├° └*/R^ ─° ├* └~ ─ M<","h":"332211/322111/222110/221100/211100/211000/110000"},
+  {"n":"Sete patamares","m":"M> ─ ─ ┬~ N< └*/└* ├* └° │ . ─°/╲* ├* ┌ ┴ ┐ Hv/. ┌~ ╱ ┐ └ ┘/┌ ┘~ M^ └ ┐ ╲°/│ ├* └* └* ├ N</V^ └° ╲* R> ┘~ └°","h":"112233/111223/011222/001122/001112/000112/000011"},
+  {"n":"O búfalo e o açude","m":"┼* . . . └* ─*/└° ├* └* ╲° . ├*/└* └* ├* ┌ M< ├*/┌ P< ┌ ┤ ┼° ─°/├~ ┬~ ┘ P^ └° ─*/N^ ├ ─ ┐~ ├* └*/┼* └ R< └ ─ ┐~/├* └° ┼* └* M> ┘~","h":"332211/322211/322110/221110/221100/211000/211000/110000"},
+  {"n":"Chuva mansa","m":". Vv ┼* Nv ╲° └*/└* └~ ─ ┤ . └*/╲* └* ┌ ┤ ┼* └*/└* ┌ ┘~ ├~ ┬ M</└° │ H> ┘~ │ ─*/├° │ . ─* │ └*/. │ . ┼° │ ├*/M> ┘ ╲° ┼* M^ ├*","h":"444444/444433/333332/233322/222221/122111/111100/001000"},
+  {"n":"Os degraus do avô","m":"─° ├* └* └* ─* └*/─* ┌ ┬ M< ┌~ ┐/N> ┘~ ├ ┬ ┘ P^/├° ┼* H^ │ ╲° ╲*/└* ├* ┌~ ┴~ ┐ └*/├* R> ┤~ └* │ ─°/╲* ┌ ┘ M> ┘ ╲°/V> ┘ . . └* .","h":"332211/322211/322110/221110/221100/211000/211000/110000"},
+  {"n":"Bambuzal","m":"└* ┌ ─ ┐ ─* Nv └*/├° V^ └* └~ ┬~ + ┐~/. . └* ┌ ╱ ┘ N^/Rv ─* ┌ + ┘ ├* ┼*/└~ ┬ ┘ │ Vv └* └*/└° │ └* └ ┴~ ┐~ ├°/┌ ┴ M< . ├* │ └*/V^ ┼* ╲* . ├* └ M<","h":"1122233/1112223/0111223/0111222/0011122/0001112/0000112/0000111"},
+  {"n":"Lua na água rasa","m":"Nv ─* └* ┌~ H< ─* └*/└ ┐~ ┌~ ┘ └° ┼* └*/└* └ ┤ R> ┐ ─* ├°/Nv └* └ ┬ ┤ └° Mv/└ ┐ P> ┘~ ├~ ─ ┘/└* │ ├* ├* │ ─* ╲*/╲* │ └* ╲° └~ M< └*/├° M^ . └° └° ├* └*","h":"3322211/3222111/3221110/2221110/2211100/2111000/2110000/1110000"},
+  {"n":"A grande escadaria","m":"└* ├* └* ┌~ N< ┌~ P</╲° └* ┼* └~ ┬ ┘~ ╲*/. ├* ┌~ M< │ ─* ├*/┌ ┬ ┘ ├* ├~ V< └°/N^ │ └* ├* │ └* ┼°/┼* │ Rv └* │ ├° ./└* └~ ┘ ─* │ ┼* └*/└* ┼* ├* . └ M< └*","h":"3322211/3222111/3221110/2221110/2211100/2111000/2110000/1110000"},
+  // mundo 4
+  {"n":"A ponte sobre a sombra","m":"V> └* ┌ P< ├°/. ├* │ . ┐/└* │ ├ ┘ N^/┌ ┘ └ P< ./├ R< . └* └*/└ ╲° . ─* H<","a":". ┐ . . ./. ├ ─ ┬ ./. . . . ./. . . . ./. . . . ./. ─ ─ ─ .","h":"20002/20002/22002/22002/20002/20002","d":"O aqueduto alto passa por cima. Use o botão dos andares para ver um de cada vez"},
+  {"n":"Paredão de ferro","m":"└* └* ╲* ├° ├* ├*/Nv ├ ─ ┐ Mv ./└ ┴ R< ├ ┘ ├°/. └* ┌ ┘ ├* M</╲* ╲° │ ├* ─* ┐/┼° H> ┘ ├° ─* M^","a":". ┌ ─ ┐ ┼° ./. . . │ . ./. . . │ . ./. . . └ ┬ ./. └° ─° ├° └ ./. . . . . .","h":"200002/220002/220002/200002/200002/200002","d":"Do alto, a água também pode cair para o canal de baixo"},
+  {"n":"Vento no desfiladeiro","m":"─* └* R> ┐ └° ─*/└* . ╲* │ ┼° └°/N> ┐ ┼* │ ┌ N</. ├ ─ ┤ ┘ ./└* M^ └° └ P< └*/V> └* ─° └* └° H<","a":". . . ├* . ./. . ─° . └* ./. . . ├* . ./. . . ┌ . ./. . . │ . ./. ─ ─ ┴ ─ .","h":"200002/200002/200022/200022/200002/200002"},
+  {"n":"O arco natural","m":"├* Rv ┌ P< └° ./├* └* . └* ├* ┐/├* └* ├° ├* └* N^/└° ╲° ├* └° ╲* └*/┼* │ . M> └* ┐/. M^ . └° ╲* P^","a":". . . . . ./. ├~ ┘ ┼* ┌ ./. ├ ─ ─ ┤ ./. │ . . │ ./. . . . ┴ ./. . . . ╲* .","h":"200002/200002/200002/200002/220002/220002"},
+  {"n":"Barro e milho","m":"R> ─* ├* ├* ─° └°/─* . R> ┐ ┼* Nv/┌ ╲* ┼° │ ├* │/M^ ┼* └° . Hv │/└* ├* └* └* ┤ │/┌ ├° . Pv ├ ┘/M^ ╲* ├° └ ┘~ ├*","a":". ┐ ┼° ╲° . ./. │ . . . ./. ┤ ├* . . ./. ├ ─ ┤ . ./. │ ╲* └ . ./. ┘ . . . ./. . . . . .","h":"200002/200002/200002/200022/200022/200022/200002"},
+  {"n":"Três travessias","m":"Nv ╲° └* └* ─* ├*/├ ┐ V> ┐ └° ├*/└ └ ─ ┤ ─* Vv/└* ╲* └* │ ╲* ┘/P> . ┼° │ . M</└° │ Mv │ └* └*/├* └ ┘ M^ └* └*","a":". . . . . ./. . . ├* . ./. ┬ ─ ┐ └° ./. │ . └~ ┬ ./. ┤ └* . └ ./. . . . . ./. . . . . .","h":"200022/200002/200002/200002/200002/200002/200022"},
+  {"n":"A trilha do condor","m":". P> └* M> ┐ Nv/├* ┼* ╲* └* ┘ │/├* ├* └* ─* V> ┤/N> ┼* └* └* ├* │/┌ . . ┼* ┼* │/│ R^ ├* . . │/P^ . ─* └* ├* M^","a":". . ┐ . . ./. . └ ┬ . ./. . ┌ ┘ . ./. ┬~ ┘ ╲° . ./. ┤ . ├* └* ./. . . . . ./. . ├* ├* ├° .","h":"200002/200022/200022/200022/200002/200002/200002"},
+  {"n":"Calor de pedra","m":"└* M> ┐ └* └* ├*/Hv └* ├~ R< ┼* ├°/├ ┬ └ ┐ └* ╲*/│ P^ └* └~ ┐ ─*/N^ └* └* ─* │ ./├* ├* H> ─ ┴ N</┌ . ├° ├* . ┐/H^ ─° ─* └* ├* V^","a":". . ┼* . ┼* ./. . ─* . └° ./. . ┐ . . ./. . │ └° . ./. ┌ ┘ ├* └* ./. │ . . . ./. ┴ ─ ─ ─ ./. . . └* └° .","h":"200002/200002/220002/220002/200002/200002/200002/200002"},
+  {"n":"O eco","m":"╲* ┼* . ├° ─° └*/V> └* ├* . └* ─*/└* └* . └* ├° N</. V^ ╲* ├* ├* ─*/└* ┼* ├* └* ├* ├*/└* ┼* . ┼* Mv └*/└* ├* ┼° ╲* ├* ./H> └* ├* └° ─* R<","a":". . ┼* └* . ./. ┐ └* . └* ./. ├~ ─ ┬ ─ ./. . ┼* │ . ./. . └° │ . ./. . . │ . ./. └* └* ├~ ┘ ./. ─ ─ ┴ ─ .","h":"200002/200002/200002/220002/220002/220002/200002/200002"},
+  {"n":"Catedral vermelha","m":"H> ├* ├* M< ├* └*/├* . └* ┼* └* Mv/Mv ┼* ┼* . └* ┘/└ ─* P> ┘ V^ ─*/┌~ ├* ╲° . ├* ├*/│ . └* Pv ─* └°/│ └* └* ├* └° ─*/N^ ┼* ╲* ┼° ┼° N<","a":". ─ ┬ . . ./. . │ . . ./. ┌ ┴ ┬~ ┬ ./. ┤ . . . ./. ┘ ├* ╲* . ./. ─* . . ├* ./. └* └* └ ┐ ./. ─* ─* . └ .","h":"200002/200002/200002/200022/200022/200002/200002/200002"},
+  // mundo 5
+  {"n":"Sede antiga","m":". ╲° ╲* └* ─* ├*/┌ ┐ └* ├* └° ┼°/H^ │ ├* ├° ├* M</└° │ ╷↑ ├° H< └*/┌ ┴ ┤ V> ┐ Nv/└ M< └ ─ ┴ ┘","a":". . . . . ./. . . ├° . ./. . . ┌ ─ ./. └° ╶ ┴ . ./. . . . . ./. . . . . .","d":"Na queda, a água desce ao andar de baixo; no parafuso, ela sobe um andar"},
+  {"n":"O parafuso d’água","m":"┼* ┼° Nv └* ┌ R</V> ┬ ┴ ─ ┘ ├°/╶↑ ┤ └° ┌ ╷↑ ├*/│ M^ . │ N^ ─*/│ └° └* ╵↑ ─ ┐/H^ └* ├° └* H> ┘","a":". . . . . ./. . . . . ./╷ . . . ╴ ./. . ┼* ├° . ./. . └* ╶ . ./. ├° . . . .","h":"011100/011100/011100/100011/100011/100011"},
+  {"n":"Tamareiras","m":"P> ┐ ├* ├* ┌ R</. └ ┬ M< │ ├°/├* ╷↑ ┴ ┐ │ ┼*/─* ╵ H< │ │ ┼*/└* ╷↑ └* M^ └ N</N> ┘ . . . ├*","a":". . . . . ./. ├° . . . ./╲° ╶ . . . ./. ┌↓ . . . ./. ╵ . . . ./. . ─* . . .","h":"001111/001111/001111/001111/001111/110000"},
+  {"n":"A caravana para","m":". ╲* . ├° ─* ─*/├* P> ┐ ┌ ┐ Nv/╲° └* └ + + ┤/. ┌ ┬ ┘ N^ │/. R^ ╵↑ . ┌ ┘/╲* ┌ ┬ ─ ┴ V</M> ┘ └ P< └* └*","a":". . . . . ./. . . . . ./. . . . ├* ./. . . . . ├*/. . ╷ Mv ─* └*/. . └ ┘ . ./. . . . . ."},
+  {"n":"Poço fundo","m":"├° N> ┐ ├* ╲* Rv/. ╶↑ ┤ ┌ ─ ┤/┼* ┌ ┘ ├ R< │/╲* ╵↑ . │ . │/. └* . ┴ ┐ M^/└* ├* ╷↑ H> ┘ ├°/N> ─ ┘ ─* ┼° ├*","a":". . . . . ./V> ╴ ╲* . . ./. ╲* . . . ./. ╶ P< . . ./. . ┌ . . ./─* ┼* ╵ . . ./. . . . . .","h":"111000/000111/000111/000111/000111/000111/111000"},
+  {"n":"Pátio de azulejos","m":"┌ ─ ─ ┬ ┐ Mv/N^ ├* └* ╵↑ └ ┤/╲* ╲° ├* . Mv ╵↑/├* └* H^ └* │ ╲°/Nv . ┌ ─ ┘↑ ./└ ─ ┘ ├° . ├*/└* ╲* ┼* . └* ┼*","a":". . . . . ./. . ┌ ╴ . ├*/. ─* │ . . ╷/. . . . . │/. . . . ╷ P^/. . . . H^ └°/. . . . └° ."},
+  {"n":"Dunas que andam","m":"─* ┼* M> ┐ ┼° ./Mv └* ╲* ├ ┐ ─*/│ ┼* └* │ M^ ./└ . └° . ─ R</Nv └* ├° . └* ┼*/└ ┐↑ └* ├* └* ├*/P> ╵↑ ╲* ╲* ─° └*/├* └* ╲* └° └* └°","a":"╲* . . . . └*/. . . . └* ./. . . . . ./. ─ ┬ ┴ . ./. . ├ M< . ./. ╶ ┘ ├* . ./. ╴ └* ┼° . ./. . . . . .","h":"011100/011100/011100/100011/100011/100011/100011/011100"},
+  {"n":"A cisterna alta","m":"├° ─* Hv . └* └*/─° ╲* │ ─* Vv ╲*/R> ─ ┼ ─ . ╷↑/╲* ╲* │ . ╲* N^/─* └° │ ─* ─* └*/M> ├* │ ╷↑ H< ─*/. ┼° ╵↑ └ ┐ Nv/╲° └* P^ ├° ╶↑ ┘","a":"─* . . . ├* ./. . . . . └°/. . . . ┴ ╴/. └* └* └* . ./. . └* └* . ./. ┐ ┼* ╶ . ./. └ ┐ └* . ./. . . . ╵ .","h":"011100/011100/011100/100011/100011/100011/100011/011100"},
+  {"n":"Noite de estrelas","m":"├* ╲° ┌ ┬ ╷↑ ┼°/╲* └* │ V^ │ R^/├* ╲* P^ ╲* └ ┐/Nv └* . ├* M> ┤/│ . ╶↑ ┐ └* │/│ └* . │ ┌ ┘/├ ╴↑ ╶ ┘ └ N</M^ . └* └* └* .","a":"└° . . . ─ ┐/└* . . . . ./└* . . . ─* ./. ├* ├* . . ./. V> ╴ . . ./. ╲* Rv . . ./. ╶ ┘↓ └* . ./. ├* . ┼* . .","h":"011100/011100/011100/100011/100011/100011/100011/100011"},
+  {"n":"O coração do oásis","m":"Nv ┌ ┐ ├* Vv . ./└ ┤ P^ ┌ ┘ ├* ─*/└° └ ╴↑ └* ─ ─ M</└* ┼* └* └* M< └* └*/├* ╲* ─° . ├* ─* ─*/R> ─* ╷↑ ─* ─° └* └*/└* └* │ └° └* └* ./└* N> ┘ ├* ├* └* ╲*","a":". . . . . . ./. . . . └* ├* ┼*/. └* ╶ ╱ . . ./└* . ┌ ┴ . . ./└* └* ├ M< . . ./. ─ ┘ ├* . . ./─* ╲* . . . . ./. . . . ├° . ┼°","h":"1111000/1111000/0000111/0000111/0000111/0000111/0000111/1111000"},
+  // mundo 6
+  {"n":"Duas mãos","m":". . ┼° Rv ┼* ./Rv └* Hv └ ┐a ─*/└ ┬ ┴ ┬ + N</─° │ M> ┘ │ └°/┌ ┘ ├* ├* │ └*/│ ─° ├* ┌ ┘ ├°/P^ ├* ╲* │ ┼° ./└* . N> ┘a └* └°","d":"Peças irmãs, com o mesmo símbolo, giram juntas"},
+  {"n":"A primeira folha","m":"─* ─* ┌ N< └* └°/┌ ┐ ├ ─ ─ V</N^ │ │ . ├° ├°/└* │a └ P< ┼* └*/└° ├ ┐ ╲* ┼° ├*/─* │b M^ ╲° └* Mv/Rv ├a ─ ─ ┬ ┘~/└ ┘b ╲° M> ┘ ├°"},
+  {"n":"Pedras penteadas","m":"╲° ┌ ─ M< ┌ ┐/┌ ┤ ─* ├* │ V^/P^ │ ├* . │ ./└° │a ┼* ┌ ┴ ┐/├° │ ┌ ┘ ╲° R^/N> + ┴a ┐ . └°/┌ ┘ ├* └ ┐ ├*/└ N< ┼° └* └ H<"},
+  {"n":"O lago das carpas","m":"├* ─° Mv ├* ╲* ┌ R</N> ┬ + ┐ Hv │ ┼°/┌ ┘ └ + ┴ ┤~ ./└ H< ├° │ └* │ Hv/└* ├° . M^ └* ├a ┘/└° ├* ┌ ─ ─b ┴b ┐/└* ┌ ┘a ─* ─* . │/V> ┘b ┼* ─* ├* . N^"},
+  {"n":"Musgo","m":"┌ ┐ P> ┐ ┌~ N< ./N^ └ ┐ ├ ┤b ├* ├*/├* ┌ + ┘ └a ┐ ─°/┌ + ┤a Rv ┼* │ └*/│ │ └ ┘ └* │ Rv/│ └ V< ╲° ┌ ┴ ┘b/│ └* . ├° │ . ./H^ ├* ┼* M> ┘ . └*"},
+  {"n":"A lanterna acesa","m":"┌~ H< ─° ├* P> ┬c ┐b/└a ┬ ┬ ─b ─ ┘ V^/Nv │ ├ M< . ├* └*/└b ┘~ └c ┐ . └* ├*/├* ┼* ├* │a Mv ┼* ./└* ├° └° ├ ┘ ├* ─°/┼* . ┌ ┘ └* ╲* └°/. H> ┘ ┼* ─* . ├*"},
+  {"n":"Ponte de madeira","m":"╲* Rv ─* Nv ├* ├° Nv/└° └ ─b + ─a ─ ┘/┼* Mv ─* │ ╲° . └*/┌b ┤c ┌ ┘ ┼* ├° ./H^ ├a ┘~ ├* └* └° ╲*/└* │ Vv ─* . ╲* ├*/┌ ┴ ┤~ ╲* ┼* . └*/M^ └* └ ┬c ─ ┐ Vv/└* ├* ├* └b V< └ ┘"},
+  {"n":"Chuva de bordos","m":"M> ┐ ┼* └* └° ┌ N</└* └~ ┬ ─b ─ ┘ ┼*/╲° ┌ ┘a Rv ┌ N< ┼°/┼° │a Rv └~ ┤b ├* └*/┌c ┤ └ ─ ┴ ┐ ╲*/R^ │ ├° └° H> ┘ └*/└° │b ├* ┼* ├* ─* └*/┌ ┘ └* └* ┼° ┼° Vv/P^ ┼* ╲* N> ─c ─ ┘"},
+  {"n":"Silêncio da tarde","m":"M> ─ ┬ N< ─* ├° Nv/╲* ─* ├c ─ ─ ┐d │/└* . │ ╲° R> ┘ │b/P> ─d ┘ └* └* └* │/─° └* ─* └* ┌ V< │a/─* Rv └* ╲* └ ┬~ ┘/└* └c ─ ┬~ ┐a │ ./├* ├* └* V^ ├b ┘~ ├*/╲° M> ─ ─b ┴d M< ─°"},
+  {"n":"O mestre do jardim","m":"V> ┐~ . . └* └* ├* ├°/. │c ─* └* └* ├* └° └*/├* ├b P< ├* ┼* ╲* ┌d N</├* └~ ┐c └° R> ─ ┤ ├*/┼* Mv └d ┐ └* ├* P^ ├*/┼* │ └* │a ├* ├° └* ─*/┌d ┴~ ┬b ┴ ┬a P< ├° ╲*/└ V< └b H< └ ─ ─ N<"},
+  // mundo 7
+  {"n":"Doce e salgada","m":"Nv ─* ┌ ─ ─ ┐/├ ─ ┘ └° Tv │/│ . . ┌ ┘ │/│ R>2 ─ ┤ └* │/│ └° ─* └ ┐ P^/└ ┐ ┼° Rv │ ╲*/╲* ├ ─ ┘ P^2 ./├* └ M< └° └* ┼°","h":"322222/222221/221111/211111/111111/110010/100000/100000","d":"Há duas águas. Cada destino mostra, na cor do anel, a água que espera"},
+  {"n":"As salinas","m":"└* ├* ├* ┌ N< ┼°/R>2 ┬ ─ + ─ ┐/├* │ Hv2 └ ┐ T^/├° └ ┤ ┼° │ └*/╲* R>2 ┘ Mv ├ ┐/├° . ┌ ┴ ┘ │/┌ ─ ┘ ├* Hv │/M^ . . . └ ┘","h":"112233/112223/011223/011122/001122/000112/000112/000011"},
+  {"n":"Maré baixa","m":"Rv └* ├° ┼° └* Nv └°/│ ┼* └° Nv ┌ ┘ ./└ ─ ─ + ┘ └* └*/Vv2 ┌ ─ + ┐ . Tv/└ ┘ P> ┤ ├ ─ ┤/┌ ─ ─ ┘ └ V<2 │/└ M< ┼* +* └* ┌ ┘/└* ╲° . ╲° P>2 ┘ ├*","h":"1223344/1123344/1122334/0112233/0011223/0001223/0001122/0000112"},
+  {"n":"Casas brancas","m":"─* ├* ┼* ┼* N> ┐ ╲°/+* ╲° └* +° . │ ├°/┼° . ┼* ┌ ─ ┤ Tv/─° ├* ┌ ┤ R> ┘ │/Mv2 ┌ + + ┐ . │/└ ┘ V^ │ ├ ─ ┤/└* ┌ ─ ┘ │a Rv2 │/└* M^ └* ┼* H^2 └a ┘","h":"1122222/1122222/1112222/1111111/0011111/0001111/0001101/0000000"},
+  {"n":"O barco que espera","m":"└° Nv ╲* +* ┼° ├* ├*/┌ ╲ ┬ ─ ─ ─ H</T^ ├ + ─ ┐ ╲* ├*/┌ ┘ │ M>2 ┘ +° +*/│a └* │ ├° . Mv +*/│ Mv2 ├a ─ ─ ┴ ┐/├ ┘ └ ─ V< ╲* │/H^2 . +* . ├° V> ┘","h":"3322211/3222111/3221110/2221110/2211100/2111000/2110000/1110000"},
+  {"n":"Falésia","m":"N> ┐ ┌ T< └° . ─*/+* ├a ╲ ┐ . ├* └°/─* │ M^ │ ├* ╲° Hv2/─* └ ┐ ├ ─ ─a ┘/└* ├* └ + ┐ Mv2 ├*/├* ┌ ─ ┴ + ┤ ├*/R>2 ┘ . H> ┴ ╲ ┐/+* ─* ├* └* └* M^ │/╲* └° . +° ├* ├° M^2","h":"3222221/2222221/2212211/2111111/2111110/1111110/1101100/1000000/1000000"},
+  {"n":"Rede de pescador","m":"+° Tv └° ├* ─* Nv ├*/└* │b └° ├° ┌a + ┐/╲* │ ┌ ─ ╱ ┘ N^/P>2 ┤a │ H> ┘ ╲* ├*/├* └b + ┐ └* ┼* +*/╲° ┌ ┴ ╲ ┐ ├* ┼*/+* ├ M< └ ╲ V<2 ./M> ┘ +° . └b ┐ ╲°/├* +* ┼* ├* └* M^ ├*","h":"3333343/2222333/2222333/2212222/1111222/1111122/1001111/0000111/0000010"},
+  {"n":"Farol ao longe","m":"─° ├° +° Tv ┌ ─ N</┼* └* ├* └ + ┐ ./. ├° ╲* ┌ ┘ └ ┐/├* ╲* ┌ ┤ ┌ V<2 │/─* Rv │ └ ╲ ┬ ┘/├* └a ┤ P> ┘ ├ R<2/┼* +* │ ├* . └a ┐/├* ┼* ├ ┐ ┼* ╲* │/M> ─ ┘ H^ ─° +° M^2","h":"1222223/1222222/1121122/1111112/0111112/0111111/0010011/0000001/0000001"},
+  {"n":"Vento sul","m":"├* N> ┐ ╲* └° ─° ├* ─*/─* ─* ├ V< . ┌ ─ ┐/Tv ─* └a ┐ ┌ ┘ ╲* H^2/├ ─ ─b + ┤ └* └* ├*/│ . Rv │ └b ┐ Mv2 +°/│ ╲* ├ ┴ ─ ╲ ┤ ╲*/│b ┼* └a M< ├* │ └ M<2/H^2 └* ╲* ┼* . └ V< ├°","h":"33222211/33222111/32221110/22211100/22111100/21111000/21110000/11100000"},
+  {"n":"A luz do farol","m":"└* Nv ─* +° Nv ─* ┌ ┐/. │ . ┼* │ ┌ ┤ T^/┌b ┘ ├* ┌ + ┤ └ ┐/V^ └* Hv2 │ └ ╲ R<2 │/└* +* ├ ┘ ├* ├ ┐ │/├° ┌b ┘ V> ─b ┘ │ │/+* │a . +* └* ─* │ R^2/H> + ─ ─ ─ ─ ┤a ─*/╲* └ P<2 ├* ├° M> ┘ └*","h":"11222222/11222222/11122222/11111112/00111111/00111111/00011111/00000001/00000000"},
+  // mundo 8
+  {"n":"Portas d’água","m":"┌ H< . └* . ./├ ┐ P> ┐ . Rv/N^ └ ┬ ┴ ─ ┘/+* ├* ├ R< └* ─°/. ├° ‖A ‖Ax . └*/└* Vv ├ ─ ─ V</. └ ┘ └° ┼* ├*","d":"Comporta: um toque abre ou fecha. As do mesmo símbolo mudam juntas"},
+  {"n":"Sob as raízes","m":"┼° Vv ═Ax ┌ M< ╲*/. ├ ─ ┴ ═A ┐/N> ┘ ├* ├* ├° P^/├° ├* └* Rv . +°/┼° ─* └* ├ ┐ └*/P> ─ ─ ┤ P^ └°/╲* ├* N> ┘ └° ."},
+  {"n":"O degrau coberto","m":"└* ─° ─* . Mv ┼* +*/+* P> ═A ═B ┴ ┐ ╲*/┌ ┐ Pv ‖Bx ├* └ N</│ H^ └ ─a ┐ └* ./├a ┐ ‖Ax V> ┤ └° ╲*/N^ └ ─ ┬ ┴ ┐ +*/├* ┼° V> ┘ . R^ ."},
+  {"n":"Cipós","m":"Rv ┌ M< ┼* Mv ├*/└ ┴ ┐ ┌ ┘ └*/└* . └ ┤a Vv ./Nv ├* ‖Bx └ ┤ ./└a ┐ ├° H> ┤ +°/┼* │ P> ┐ ├ V</Nv └ ═A ╱ ┘ ╲*/└ ═B ─ ┘ ‖Ax └*"},
+  {"n":"A praça esquecida","m":"┌ ┐ ├° . ┌ M</V^ └ ┐ ┌ ┤ +*/└* Hv ├ ┘ └ ┐/┌ + ┴ V< └* │/‖A │ ‖Ax ├* M> ┘/└ ╲ ┐ ┌ ─ R</Nv │ └ ┤ ┼* ├°/└ ┘ ┼° N^ ─* ."},
+  {"n":"Chuva na mata","m":"├* Nv ═Ax ┌ M< ./+* └ ─a ┤ ‖Bx └*/┌ M< . └ ┐a Nv/‖A ┼° . R> ╱ ┘/‖B ─* V> ┐ │ +*/├ M< ┌ ┴ ┘ ./├ ─ ┴ ┐ ├° ┼*/R^ ╲* P> ┘ ┼* ┼°"},
+  {"n":"Colunas caídas","m":"└* └* +* └* V> ┐ ┼*/H> ┐ . ╷↑ ╲* ├ N</┌ ┘a . ╵ ═Bx └ ┐/N^ ┼* ┼* └* └° V> ┘a/├* ├° ╶ ┐↑ . ├° └*/┌ ╴↑ └* └ ═B ┐ ┼*/‖A ‖Ax └* . ┌ ┤ Mv/└ N< . ─* P^ └ ┘","a":"└° ─* +* ─° . . ./. ├* ┌ ╴ . . ./. . H^ ╷↓ . . ./. . ┼* │ . . ./. +* ╷↓ ╵ . . ./. ╶ ┘ ┼° ─* . ./. . . . . . ./. . . . . . ."},
+  {"n":"A árvore-mãe","m":"┌ ─b ┐ Vv +* Mv ─*/‖A . └ ┤ Pv │b ┼*/╵ ╷↑ . └ ┴ ┘b ├*/╶↑ ╲ ┐ └* ‖Bx ‖Ax Nv/├* │ └ ─ ┬ ─ ┤/┌ ┤ └° V> ┘ ‖Cx │/│ └a ═C ─a M< └* ‖B/N^ ├* ├* . +* M> ┘","a":". . ╲* . . . ./╲* Hv ─* . . . ./╷↓ └ R< └* . . ./╵ . +* ─° . . ./. . . . ─° . ./╲* . . . . . ./. +* ─* . . ┼° ╲*/. . . . . . ."},
+  {"n":"O altar verde","m":"└* ├* ┌ N< ┌ ┐ Rv/╶↑b ─ ┤ ┌b ┤ M^ ‖A/─* M< └ ┤ H^ ┌ ┘/┼* ─* ├* ├ ═C ┘a ‖Bx/└* ├* . ╵↑ ├* ┌ N</P> ┐b ═Ax ╶↑ ═B ┤a ─*/├* ‖C . └* +* P^ ╲*/└* N^ +° ┼* . ┼* +°","a":"└* . . . . . ./╷ +° . . . . ./└ . . ╲* . . ./├* └° ├* ├* . . ./. ┼° V> ╴ ├* . ./. └* . ╷ . . ./. ╲* R> ┘ . . ./─° . . . . . ."},
+  {"n":"Cidade das águas","m":"├* . ┌ ┬ M< └* +*/└° ╷↑ R^ └ ┬ H< ╲°/╲* └a ┐ └* ├ ┐ ‖Bx/└* Nv ‖B ═Ax ╵↑ └b ┐/├* ╵↑ │ . ├* Hv │/. ╲* ‖C ┼* V^ ‖A N^/╲* ├° ‖C M> ┬ ┘ └*/├* └* └ ─a ┴b ─b V<","a":". Pv └* ├* . . ./┼* ╵ . ├* . . ./╲* . . ┼* ┼* . ./└* . . . ╷ . ./┼° ╶ ╴↓ V> ┤ . ./. . ├* . . . ./╲* +° ┼* . . . ./. ╲* . . . . ."},
+  // mundo 9
+  {"n":"Primeiro degelo","m":". ┌ N< ─* ├* ┌ ┐/├° └ ┐ └* ╲* │ T^/Pv2 ├* └ ┐ ┌ ┘ ├°/├ ─ ┬ + ┘ Nv ./│ . │ └ ┐ │ └*/│ H>2 ┘ M> ┤ └ ┐/└ ┬ ─ ─ ┘ ┼* │/P>3 ┘ └° ┼* . ─° R^","h":"2222222/1112222/1111222/1111221/1001111/0001111/0000111/0000000","d":"Anel de duas cores: este destino quer as duas águas misturadas"},
+  {"n":"A fonte quente","m":"┌ N< └° ╲* ├* ╲* Nv/│ . ┌ ─ ┐ . │/│ └* V^2 ├° │ Tv │/├ ┬ ─ ┐ └ ┤ │/│ └ ┐ M^ ┌ ╱ ┘/├ R<3 │ ┌ ┘ │ ─°/└ ─ + ┘ ├* └ H</┼* P> ┘ . ╲* ╲° ╲°","h":"2222222/1112222/1111222/1111221/1001111/0001111/0000111/0000000"},
+  {"n":"Neve e vapor","m":"T> ┐ ├* └° ─° ┌ ┐/├° │ Nv ┌ ─ ┤ M^/└* └ ╲ ┤ . │ └°/└* └* ├ + M<2 ├ ┐~/┌ ─ + ┘ ─* M^ │/│ H>2 ┤ . ┌ ┬ ┘/└ ┬ ┴ ─ ┘ │ └*/H>3 ┘ ┼* . └* └ V<3","h":"2222211/2222211/2222111/1111111/1111100/1111000/0011000/0000000"},
+  {"n":"Refúgio","m":"╲* . ┌ N< . ┼* ╲*/Tv ├* │ ├* ├* └* ╲*/‖A ┼° └ ┐ └* ├* ├°/│ ├* Vv2 │ ‖Ax └* ─°/└ ┬ ┤ ├ ┐ . Mv2/Pv2 │ └ + + ┬~ ┘/└ ┘ ┌ ┘ V^ │ ./P> ─ ┼ ┐ ┌ ┘ Rv3/└° └° M^ └ ┴ ─ ┘","h":"3333323/3333222/2232222/2222211/2222111/1111111/1111000/1111000/0000000"},
+  {"n":"As duas correntes","m":"Tv ├* └* . . . ─° ─*/├ ─ ═A ─ ┐ ‖Ax ├° ╲*/│ ╲* ─* R>2 ┤ ┌ P< ├°/└ ┐~ ├* ├° └ + ┬ ┐/N> + ─ ┬ ─ ┤ │ M^2/├* ├ ─ ┤ └* │ │ ├*/┌ ┘ ┌ ┘ Mv │ └~ ┐/R^2 ─* └ V<3 └ ┘ └* H^2","h":"32222221/22222211/22112111/22111110/21111110/11101100/11000000/10000000"},
+  {"n":"O passo alto","m":"└* N> ┬ ┐ ┼* ├° ./┼* ┌ ╱ + T< ┼* ├°/┌ ╱ ┘ └ ┐ └° ./├ ┴ ┐ └° ├ ─ M</│ Mv2 │ ═Ax │ ├* ./H^3 ├ ┴ ┐ ├~ H< └*/└* └ V<2 ‖A └ ┐ ─*/. ┼° └* └ ─ ┤ Vv3/└* └* └* ├* ├° └ ┘","h":"4444444/3444443/3334333/2333332/2223222/1222221/1112111/0111110/0001000"},
+  {"n":"Morno","m":"└* ┼* └* ├* . ┼* ┌ N</┼* T> ┐ ┼* ┌~ ═A ┤ ┼*/├° ─° └ ┐ ‖B V> ┤ ./╲* └* P> + ┤ ═Bx │ └*/├* ┌ ─ ┤ └ ┐ │ └*/H>2 ┤ └* ├~ ─ + + P<2/└° │ ┼° │ ├* │ │ ─°/└* │ └° └ ┐ M^ │ ├*/├* └ P<2 ‖Ax └ ─ ┴ M<3","h":"44443344/44333333/33332233/33222222/22221122/22111111/11110011/11000000/00000000"},
+  {"n":"Gelo azul","m":"├* └* ═Ax ┌ ─ ┐ ├* Nv/H>3 ┬ ═A ╱ T< ├ ─ ┘/┌~ ╲ ┬~ ┘ ┌ ┘ ╲* └*/P^ │ │ ┌ ┴ M< └* └*/═Bx ├ + ┘ ╲* └* . ./┌~ ┘ ‖B Pv2 ╲* └* └* ─°/│ ┼* └ ┤ Hv2 └° ╲* └*/│ . ─* └ ┤ ┼* └* └*/M^ . └* ╲* └ M<2 └* .","h":"12222223/11222222/11221122/11111122/01111112/00111111/00110011/00000011/00000001"},
+  {"n":"A capela da encosta","m":"└* T> ═B ┐ . └* └° └°/└* . └* │ N> ─ ┐ ┼*/└* ├° ═Ax ‖A ═Bx ┌ ┼ ┐/┼* V>2 ─ ┤ ┌ ┘~ │ V^/─* ╲* ╲* ├ ┤ ┌ ┘ ├*/╲* ┌ ─ ┤~ M^3 │ Mv └*/┼* R^2 └* ├ ┐ ├ ┤ └°/┼* ┼* └* H^2 └ + ┴~ P<3/┼* └* . ├* └* └ M< ├°","h":"44444444/34444433/33343333/23333322/22232222/12222211/11121111/01111100/00010000"},
+  {"n":"Primavera no cume","m":"Nv ┌ ─ ─ ┬ T< ─* └*/└ + ┐ . └ ─ ┐~ ├*/┌ ┘~ ├ ┐ ┼* ├* ├ ┐/│ └* M^ │ └* ├° │ R^2/│ └* ═Ax ├ ┐ └* │ └*/│ Hv ┌ ┘ │ Mv2 ‖A └*/├ ┴ ┤ ├° └ ╲ ┤ Rv2/│ └° R^ ─* └* │ └ ┘/H^3 ├* ─° . ─° └ M< .","h":"44444443/44444333/34433332/33333222/23322221/22222111/12211110/11111000/01100000"},
+  // mundo 10
+  {"n":"Terraço da lua","m":"+° Mv ┌ H< . Rv/. └ ┴ ┐ └° │/T> ─ ─ ╲ ─ ┘/└* ┌ ─ ├ ─ ┐/└° │ P>2 ┤ ╷↑ ╵↑/├* │ . │ │ ./P> ┘ M>2 ┘ │ P^2/. ╲* ├* ├* N^ └*","a":". . . . . ./. . . . . ./. . . ├* ╷↓ ─*/. . . ─ ┤ ┼°/. . . . ╵ ╷/. . . . . │/. . . . . ./. . . . . .","d":"Tudo o que você aprendeu, sob a lua"},
+  {"n":"Glicínias","m":". ├* ─° ┼* Tv ┼*/M> ─ ┐ . │ └*/┼* M> ┤ P> + ┐/. ┌ ┴ ─ + ┘/┌ ┤ Pv ╶↑ ┴ M<2/N^ ╵↑ ├* ╷ ├* ./─° ┌ ─ ┴ ─ ┐/─* P^2 . ─* ╲° V^2","a":". . . . . ./. . . . . ./. . . . . ./. . . . . ./. . . ╷ . ./. ╶ ┘ ╵↓ . ./. . . ├* ├* ╲*/. . . +° . ."},
+  {"n":"O lago suspenso","m":"╲* . Mv2 ┼* └° +* +*/┌ ┬ ┘ ╲* └° ├° Nv/M^2 ╵ +° ├* └* Hv │/─* ╷↑ Mv ├* ─* └↑ ┘/└° ├ ╲ ╴ R^ +° ├°/└° V^2 └ ─ ─ ┬ M<2/. ─* ├° ╲* T> ┘ +*","a":". . . . . . ./. . . . . . ./. ╷↓ . . . . ./├° ╵ . ┌ ┬ ╴ └°/. └* ┼* ╵↓ . ├* ./. . . . . . ./. . . . . . ."},
+  {"n":"Jardim sem chão","m":"┌ ─ ─ M<2 ├* ┌ N</│ . +* ├° ─° │ └*/└ ┌ P< ┼* ┌ ┘ Rv/Tv ├ ┬ ╴a ╵↑ . │/└ │ ╲ V< └* ─* │/. │ └ ─ ┬ ╴ ┤/. M^ ╲* . V^3 . N^/. ┼* ├* ╲* . +° ├*","a":". . . . . . ./. Hv2 . . ┼* . ./. ┤ . . ├* . ./. │ ├* ╶↓ ╴ . ./. ┴a . . ┼° . ./. . +° ┼* ├* ╶↓ ./. . . . . . ./. └° └* +* ╲* . .","h":"2000002/2000002/2000002/2000002/2000002/2000002/2000022/2000022"},
+  {"n":"Sete cascatas","m":"╷↑ . └° T> ┐a . ╲*/│ V^ ┼° ┌ ┴ H<2 ┼*/│a ├* ┌ ┤ . └* ./│ Mv2 │ └ ╴↑ ╲* ┼*/├ + + ─ ┐ ├* Pv/N^ └ ┘ . └ ┬ ┤/. ┼° ┼* ─* ┼* M^ │/─° ├* ├* ─* H> ─ ┘","a":"╶ ┐ . . . . ./. . . . . . ./└* . . . Rv2 . ./╲° . . . │ . ./. . . . │ . ./. . . M>2 ┘ . ./. . └* . ├* . ./+* ─° ┼* . . . ."},
+  {"n":"Fio de prata","m":"╲° N> ┐ ┼* └* ├* └*/┼° ┌ ┼ M< . ├* ├*/Hv │ └ ┐ ═Ax ┌ T</└ ╱ ┐ M^ ┌a ┘ ╲*/╲* H^2 │ . ‖A ╲* └*/└* +° │ ├* ╵↑ ─* └*/Rv2 ╷ └↑ ╴ ├* . ├*/└* ╵↑ . ┼° . . ┼*","a":". . . . . . ./. . . . . . ./. . . . . . ./. . . . . . ./. . . . . . └*/. . . ─* ╷ ┼* ./. ╶↓ ╴ ┌↓ ┤ . ./└ ╴ V>2 ┘ └a P<2 └*"},
+  {"n":"A torre das águas","m":"├* └° └° H< ═Ax ┌ ┐/┌ ╲* └* ─* ╶↑ ╴ N^/│ ┌ ┐ └* P> ┐ ┼°/│ M^2 │ ├° +* └ ┐/│ . │ . └* └* │/│ Hv3 └ ─ ╴↑ Rv ‖A/└ ┴ . ├* ╲* └ ┤/T> ╲* └* . ┼° ╲* N^","a":". . ┌ . . . ./. ─ ┴a ─ ╴ ╵↓ ./. . ├* . . . ./. . └* . . . ./. └* ├° M>2 ┐a └* ./. . ╷↓ . ╵ . ./. . ┤ . . . ./. ─ ┴ P<2 . . .","h":"2000022/2000002/2000002/2000002/2000002/2000002/2000002/2000022"},
+  {"n":"Constelação","m":"├* ┌ N< ├* ├* +* └*/┌ ┴ ─b ┐ ┌ ─ ┐/R^ ─° ├* ╵↑ ╵↑a . ╵/├° └* Pv2 ├* Hv ╷↑ ╲*/+* +* └ ─a ┬ ┘ └°/─* Vv ‖Ax │ │ ├° Tv/┌b ┼ ─ ┘ └ ─ ┤/M^ └ M< ├* ─* H>2 ┘b","a":". . . ╲° . . ./. . ├* ┼* +* ├° ./. . ┼* ╷ ╶ V<2 ╷↓/. . . ‖A . ╶ ┘/. . . ├ ┘ . ./. . . . └* . ./─* . . . . . ./. . . ┼° ─* . ."},
+  {"n":"Antes da aurora","m":"└° Hv ═Ax ┌ M< └* └*/┌ ┴ ┬ ┘ . ╲* ┼°/│ ├* └ ─ ─ M< ./N^ ┼* ─* . ╷↑a ├* +*/. └* ╷↑b ╶ ┘ └* ./┌ ┬ ┘a └* ╲* Hv2 ─*/T^ ├b ─ ┐ . ├* ├*/─* └ P<2 ╵↑ ├* ╶ V<2","a":". . . . . . ./. . ╲° ┼* . . ./├* ╲* ├* ─° . . ./. . ├* R>2 ╴ . ./. ├* ╶ ╴↓b . . ./. ╲* . . . . ./. . . ┌ M<2 │ ./. ├* . └ ═A ┘↓ ."},
+  {"n":"O jardim inteiro","m":"P>2 └* └* ┌a ╴↑ ┼° R<2/┌ ╷ ┌a ┘ ─* . ├*/T^ │ │ . ├* ─* ├*/─* ╵↑ │ ╷ . ├* ┼*/═Ax ┌ ┘ └ ╴↑ ┌ ┐/┌ ┴b H<2 └* ├* R^ │/T^ ┌ ═A ┬ P< ┌ ┤b/. └ M< └ ─ ┘ N^","a":". ┐ └° ┼* ┌ ─ ./. ┘↓ └* ┼* └ V<2 ./. . . Vv2 . . ./. ╶b ─ ┘↓ Mv2 . ./. ├* . └* ╵ . ./. . . . . . ./. . . . . . ./. . . . . . .","h":"2000002/2000002/2000002/2000022/2000022/2000002/2000002/2000002"},
 ];
+// </fases>
 
 // Climas: cores da névoa, da luz e do verde que nasce. Cada fase aponta para um deles.
 const TEMAS = {
@@ -269,9 +319,14 @@ const TEMAS = {
   lua:        { nevoa: '#46566d', longe: '#35435a', sol: '#c4d6fb', forca: 1.9, ceu: '#8fa5cc', solo: '#5a5c5c', verde: '#5d8a6e', seco: '#9c937f', flores: ['#e6ecfb', '#b5bff0', '#cfe3f0', '#e8dcc0'], angulo: .5, tinta: '#e9eef6', noite: true },
 };
 
+const NOMES_MUNDO = ['Vale das Oliveiras', 'Serra da Névoa', 'Terraços de Arroz', 'Cânion Vermelho', 'Oásis', 'Jardim dos Bordos', 'Costa do Farol', 'Floresta das Ruínas', 'Montanha do Degelo', 'Jardins do Luar'];
+const MUNDOS = NOMES_MUNDO.map((nome, i) => ({ nome, texto: '', luz: [Object.values(TEMAS)[i % 6]] }));
+const temaDa = i => MUNDOS[i / 10 | 0].luz[0];
+
+// <regras>  (trecho sem 3D: o gerador de fases em ferramentas/nascente lê e executa exatamente este texto)
 // ============================================================ 2. PEÇAS
-// Lados: 0 norte (−z), 1 leste (+x), 2 sul (+z), 3 oeste (−x). Girar = somar 1 (sentido do relógio).
-const DX = [0, 1, 0, -1], DZ = [-1, 0, 1, 0];
+// Lados: 0 norte (−z), 1 leste (+x), 2 sul (+z), 3 oeste (−x), 4 para cima, 5 para baixo. Girar = somar 1 (sentido do relógio).
+const DX = [0, 1, 0, -1, 0, 0], DZ = [-1, 0, 1, 0, 0, 0];
 
 // Cada tipo lista seus "canais". Um canal é um grupo de lados ligados entre si.
 // PEÇA NOVA: acrescente aqui, dê um símbolo em SIMBOLOS e, se for preciso, uma forma em formaPeca (seção 7).
@@ -282,93 +337,159 @@ const TIPOS = {
   cruz:  [[0, 1, 2, 3]],
   sifao: [[1, 3], [0, 2]],          // o primeiro canal passa por cima, o segundo por baixo
   dupla: [[0, 1], [2, 3]],
+  ponta: [[0]],                     // um braço só: usado com os elos entre andares
+  comporta: [[0, 2]],               // não gira: abre e fecha (giro 0 = aberta, 1 = fechada)
 };
 // símbolo do mapa -> [tipo, giro]
 const SIMBOLOS = {
   '│': ['reto', 0], '─': ['reto', 1], '└': ['curva', 0], '┌': ['curva', 1], '┐': ['curva', 2], '┘': ['curva', 3],
   '├': ['te', 0], '┬': ['te', 1], '┤': ['te', 2], '┴': ['te', 3], '┼': ['cruz', 0], '+': ['sifao', 0], '╲': ['dupla', 0], '╱': ['dupla', 1],
+  '╵': ['ponta', 0], '╶': ['ponta', 1], '╷': ['ponta', 2], '╴': ['ponta', 3], '‖': ['comporta', 0], '═': ['comporta', 1],
 };
-const LUGARES = { N: 'nascente', V: 'vila', H: 'horta', R: 'reservatorio', P: 'poco' };
+const LUGARES = { N: 'nascente', T: 'nascente', V: 'vila', H: 'horta', R: 'reservatorio', P: 'poco', M: 'marco' };
 const LADOS = { '^': 0, '>': 1, 'v': 2, '<': 3 };
-const giroDe = (lado, giro) => ((lado + giro) % 4 + 4) % 4;
+const giroDe = (lado, giro) => lado > 3 ? lado : ((lado + giro) % 4 + 4) % 4;
 // "assinatura" da posição: duas rotações que dão o mesmo desenho têm a mesma assinatura
-const assinatura = (tipo, giro) => TIPOS[tipo].map(g => g.map(l => giroDe(l, giro)).sort().join('')).sort().join('|');
+const assinatura = (tipo, giro) => tipo === 'comporta' ? giro + '' : TIPOS[tipo].map(g => g.map(l => giroDe(l, giro)).sort().join('')).sort().join('|');
+const certa = c => assinatura(c.tipo, c.giro) === assinatura(c.tipo, c.certo);
 
 // ============================================================ 3. REGRAS DA ÁGUA (sem 3D)
-function lerFase(indice) {
-  const def = FASES[indice];
-  const linhas = def.mapa.trim().split('\n').map(l => l.trim().split(/\s+/));
-  const alt = def.alturas ? def.alturas.trim().split('\n').map(l => [...l.trim()].map(Number)) : null;
-  const larg = linhas[0].length, prof = linhas.length, sorte = sorteador(1000 + indice * 77);
-  const F = { indice, def, larg, prof, alt: (x, z) => alt ? alt[z][x] : 0, celulas: [], grade: [] };
-  linhas.forEach((linha, z) => {
+// dif: 0 fácil, 1 médio, 2 difícil. Cada dificuldade é o mesmo mapa com mais ou menos distrações e apoios.
+function lerFase(indice, dif = 1) {
+  const base = FASES[indice], def = dif === 0 && base.f ? base.f : base, sorte = sorteador(1000 + indice * 77 + dif * 7919);
+  const abrirMapa = t => t.trim().split(/[\n/]/).map(l => l.trim().split(/\s+/));
+  const mapas = [abrirMapa(def.m)]; if (def.a) mapas.push(abrirMapa(def.a));
+  const alt = def.h ? def.h.trim().split(/[\n/]/).map(l => [...l.trim()].map(Number)) : null;
+  const larg = mapas[0][0].length, prof = mapas[0].length;
+  const F = { indice, dif, def, larg, prof, mundo: indice / 10 | 0, andares: mapas.length, alt: (x, z) => alt ? alt[z][x] : 0, celulas: [], grade: [], unidades: [] };
+  const grupos = {};
+  mapas.forEach((linhas, andar) => linhas.forEach((linha, z) => {
     if (linha.length !== larg) throw new Error(`Fase ${indice + 1}: a linha ${z + 1} tem tamanho diferente`);
     linha.forEach((t, x) => {
-      const i = z * larg + x;
-      F.grade[i] = null;
+      const i = (andar * prof + z) * larg + x; F.grade[i] = null;
       if (t === '.') return;
-      const c = { i, x, z, h: F.alt(x, z), giro: 0, girando: false };
-      if (LUGARES[t[0]]) { c.tipo = LUGARES[t[0]]; c.lugar = true; c.fixa = true; c.lado = LADOS[t[1]]; c.nos = [{ lados: [c.lado] }]; }
-      else if (SIMBOLOS[t[0]]) {
-        [c.tipo, c.certo] = SIMBOLOS[t[0]]; c.fixa = t[1] === '!';
-        c.nos = TIPOS[c.tipo].map(g => ({ lados: g }));
+      const c = { i, x, z, andar, h: F.alt(x, z) + andar * 2, giro: 0, girando: false }, s = t.slice(1);
+      if (s.includes('°') && dif < 2) return;                                   // distração só do difícil
+      if (s.includes('*') && dif === 0 && sorte() < .6) return;                 // distração: no fácil a maioria some
+      if (LUGARES[t[0]]) {
+        c.tipo = LUGARES[t[0]]; c.lugar = true; c.fixa = true; c.lado = LADOS[t[1]]; c.nos = [{ lados: [c.lado] }];
+        c.agua = t[0] === 'T' ? 2 : 1; c.pede = +t[2] || 1;                       // destino pede água 1, 2 ou 3 (as duas misturadas)
+      } else if (SIMBOLOS[t[0]]) {
+        [c.tipo, c.certo] = SIMBOLOS[t[0]]; c.fixa = s.includes('!'); c.distracao = /[*°]/.test(s); c.emperrada = s.includes('~');
+        if (s.includes('↑')) c.sobe = true; if (s.includes('↓')) c.desce = true;
+        c.nos = TIPOS[c.tipo].map(g => ({ lados: g.slice() }));
+        if (c.tipo === 'comporta') { c.eixo = c.certo; c.certo = s.includes('x') ? 1 : 0; }
+        c.grupo = (s.match(/[a-dA-D]/) || [])[0]; if (c.grupo) (grupos[c.grupo] ||= []).push(c);
       } else throw new Error(`Fase ${indice + 1}: símbolo desconhecido "${t}"`);
       c.destino = !!c.lugar && c.tipo !== 'nascente';
-      for (const n of c.nos) Object.assign(n, { c, cheio: 0, nivel: 0, entrada: n.lados[0], pai: null, alcance: false });
       F.celulas.push(F.grade[i] = c);
     });
-  });
+  }));
+  for (const c of F.celulas) {                                                    // elos verticais: a outra metade ganha o lado que falta
+    if (!c.sobe && !c.desce) continue;
+    const o = F.grade[c.i + (c.sobe ? 1 : -1) * larg * prof]; if (!o) throw new Error(`Fase ${indice + 1}: elo vertical sem par`);
+    c.vert = c.sobe ? 4 : 5; o.vert = 9 - c.vert;
+  }
+  for (const c of F.celulas) {
+    if (c.vert) c.nos[0].lados.push(c.vert);
+    for (const n of c.nos) Object.assign(n, { c, cheio: 0, nivel: 0, entrada: n.lados[0], pai: null, alcance: 0, cor: 0 });
+    if (c.lugar) continue;
+    // unidade = o que se move num toque: uma peça sozinha ou um grupo de irmãs / de comportas
+    if (!c.grupo) F.unidades.push(c.unidade = { membros: [c] });
+    else if (grupos[c.grupo][0] === c) F.unidades.push(c.unidade = { membros: grupos[c.grupo] });
+    else c.unidade = grupos[c.grupo][0].unidade;
+  }
   // caminho da solução (na ordem em que a água passa), usado pela dica
   for (const c of F.celulas) if (!c.lugar) c.giro = c.certo;
+  F.duas = F.celulas.some(c => c.agua === 2 && c.tipo === 'nascente');
   const ordem = correr(F);
-  F.resolvido = completa(F);
-  F.caminho = [...new Set(ordem.map(n => n.c))].filter(c => !c.fixa);
+  F.resolvido = completa(F); F.estanque = F.resolvido && !vazamentos(F);
+  F.molhadas = [...new Set(ordem.map(n => n.c))];
+  F.caminho = F.molhadas.filter(c => !c.fixa);
+  if (dif === 0 && !base.f) for (const c of F.caminho) if (!c.grupo && sorte() < .34) c.fixa = c.apoio = true;   // apoios do fácil: já no lugar
+  F.caminho = F.caminho.filter(c => !c.fixa);
   // embaralha até ficar longe da solução
-  do for (const c of F.celulas) if (!c.lugar && !c.fixa) {
-    const outros = [0, 1, 2, 3].filter(g => assinatura(c.tipo, g) !== assinatura(c.tipo, c.certo));
-    c.giro = outros.length && sorte() < .85 ? outros[sorte() * outros.length | 0] : sorte() * 4 | 0;
-  } while (correr(F) && completa(F));
+  const soltas = F.unidades.filter(u => !u.membros[0].fixa); let voltas = 0;
+  do for (const u of soltas) {
+    const p = passosDe(u.membros[0]), fora = p.filter(p => u.membros.some(m => assinatura(m.tipo, giroMais(m, p)) !== assinatura(m.tipo, m.certo)));
+    const op = fora.length && sorte() < (dif === 2 ? 1 : .85) ? fora : p, q = op[sorte() * op.length | 0];
+    for (const m of u.membros) m.giro = giroMais(m, q);
+  } while ((correr(F), venceu(F)) && voltas++ < 50);
   for (const c of F.celulas) c.inicio = c.giro;
   return F;
 }
+// posições que um toque alcança, contadas a partir da certa
+const passosDe = c => c.tipo === 'comporta' ? [0, 1] : c.emperrada ? [0, 2] : [0, 1, 2, 3];
+const giroMais = (c, p) => c.tipo === 'comporta' ? c.certo ^ (p & 1) : giroDe(c.certo, p);
+// lados do mundo que o canal liga agora
+const ladosDe = n => { const c = n.c; return c.tipo === 'comporta' ? (c.giro ? [] : n.lados.map(l => giroDe(l, c.eixo))) : n.lados.map(l => giroDe(l, c.giro)); };
+const temLado = (n, lado) => ladosDe(n).includes(lado);
 
 // Para onde vai a água que sai de um nó por um lado do mundo? Devolve o nó vizinho ou null.
 function vizinho(F, no, lado) {
-  const c = no.c, x = c.x + DX[lado], z = c.z + DZ[lado];
+  const c = no.c, placa = F.larg * F.prof;
+  if (lado > 3) {
+    const v = F.grade[c.i + (lado === 4 ? placa : -placa)];
+    if (!v || v.girando || (lado === 4 ? !c.sobe : !c.desce)) return null;       // para cima só o parafuso leva; para baixo, a queda
+    return v.nos.find(n => temLado(n, 9 - lado)) || null;
+  }
+  const x = c.x + DX[lado], z = c.z + DZ[lado];
   if (x < 0 || z < 0 || x >= F.larg || z >= F.prof) return null;
-  const v = F.grade[z * F.larg + x];
-  if (!v || v.girando || v.h > c.h) return null;            // água não sobe degrau
-  return v.nos.find(n => n.lados.some(l => giroDe(l, v.giro) === (lado + 2) % 4)) || null;
+  for (let a = F.andares - 1; a >= 0; a--) {
+    const v = F.grade[(a * F.prof + z) * F.larg + x];
+    if (!v || v.h > c.h) continue;                                               // não sobe degrau; passa por baixo do andar alto
+    return v.girando ? null : v.nos.find(n => temLado(n, (lado + 2) % 4)) || null;
+  }
+  return null;
 }
-// Percorre a água a partir das nascentes. Marca alcance, pai e lado de entrada; devolve os nós em ordem.
+// Percorre a água a partir das nascentes. alcance: 0 seco, 1 água clara, 2 segunda água, 3 as duas. Devolve os nós em ordem.
 function correr(F) {
   const fila = [];
-  for (const c of F.celulas) for (const n of c.nos) {
-    n.alcance = c.tipo === 'nascente'; n.pai = null; if (n.alcance) fila.push(n);
-  }
+  for (const c of F.celulas) for (const n of c.nos) { n.alcance = c.tipo === 'nascente' ? c.agua : 0; n.pai = null; if (n.alcance) fila.push(n); }
   for (let k = 0; k < fila.length; k++) {
     const n = fila[k];
     if (n.c.girando || n.c.destino) continue;
-    for (const l of n.lados) {
-      const lado = giroDe(l, n.c.giro), v = vizinho(F, n, lado);
-      if (!v || v.alcance || v.c.tipo === 'nascente') continue;
-      v.alcance = true; v.pai = n; v.entradaNova = giroDe(lado + 2, -v.c.giro); fila.push(v);
+    for (const lado of ladosDe(n)) {
+      const v = vizinho(F, n, lado);
+      if (!v || v.c.tipo === 'nascente' || (v.alcance | n.alcance) === v.alcance) continue;
+      if (!v.alcance) { v.pai = n; v.entradaNova = lado > 3 ? 9 - lado : giroDe((lado + 2) % 4, v.c.tipo === 'comporta' ? -v.c.eixo : v.c.lugar ? 0 : -v.c.giro); }
+      v.alcance |= n.alcance; fila.push(v);
     }
   }
   return fila;
 }
-const completa = F => F.celulas.every(c => !c.destino || c.nos[0].alcance);
+// a ponta deste canal está ligada a alguma coisa? (ou a água escapa por ela)
+function ligado(F, n, lado) {
+  if (vizinho(F, n, lado)) return true;
+  const x = n.c.x + DX[lado], z = n.c.z + DZ[lado], volta = lado > 3 ? 9 - lado : (lado + 2) % 4; if (x < 0 || z < 0 || x >= F.larg || z >= F.prof) return false;
+  for (let a = 0; a < F.andares; a++) { const v = F.grade[(a * F.prof + z) * F.larg + x]; if (v && v !== n.c && v.tipo === 'comporta' && v.giro && v.h <= n.c.h && lado < 4 && v.nos[0].lados.some(l => giroDe(l, v.eixo) === volta)) return true;   // comporta fechada segura a água
+    if (v && v !== n.c && v.nos.some(m => temLado(m, volta) && vizinho(F, m, volta) === n)) return true; }
+  return false;
+}
+function vazamentos(F) { let k = 0; for (const c of F.celulas) for (const n of c.nos) if (n.alcance && !c.destino) for (const l of ladosDe(n)) if (!ligado(F, n, l)) k++; return k; }
+const completa = F => F.celulas.every(c => !c.destino || c.nos[0].alcance === c.pede);
+const venceu = F => completa(F) && (F.dif < 2 || !vazamentos(F));
+// </regras>
 
 // ============================================================ 4. PROGRESSO SALVO
-const CHAVE = 'nascente.v1';
-const salvo = Object.assign({ fase: 0, concluidas: [], andamento: {}, volume: 70, mudo: false, camera: 'iso' },
-  (() => { try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch { return {}; } })());
+const CHAVE = 'nascente.v2';
+const DIFS = ['Fácil', 'Médio', 'Difícil'];
+const lerJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const salvo = Object.assign({ dif: null, fase: 0, feitas: [[], [], []], andamento: {}, volume: 70, mudo: false, camera: null }, lerJSON(CHAVE) || migrar(lerJSON('nascente.v1')));
+// Quem jogou a primeira versão (12 fases): aquelas fases são hoje o Fácil de 12 das 100, e o que foi concluído continua valendo.
+function migrar(v) {
+  if (!v) return {};
+  const ANTIGAS = [0, 1, 2, 3, 4, 7, 8, 10, 5, 6, 9, 11], NOVAS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13], nova = i => NOVAS[ANTIGAS.indexOf(i)], andamento = {};
+  for (const k in v.andamento || {}) { const a = v.andamento[k], i = nova(+k); if (a && i !== undefined && FASES[i].f) andamento['0:' + i] = { giros: a.giros, passos: a.passos || [], m: FASES[i].f.m }; }
+  return { feitas: [(v.concluidas || []).map(nova).filter(i => i !== undefined), [], []], andamento, fase: nova(v.fase | 0) || 0, volume: v.volume ?? 70, mudo: !!v.mudo };
+}
 salvo.fase = limitar(salvo.fase | 0, 0, FASES.length - 1);
 const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(salvo)); } catch { /* sem espaço ou modo privado: o jogo segue */ } };
+const chaveAnd = i => (salvo.dif ?? 1) + ':' + i;
 // guarda a posição de cada peça e a lista de giros (o "desfazer" sobrevive ao fechar a página)
 function salvarAndamento() {
   salvo.fase = J.F.indice;
-  salvo.andamento[J.F.indice] = { giros: J.F.celulas.map(c => c.giro), passos: J.passos.slice(-200), mapa: J.F.def.mapa };
+  salvo.andamento[chaveAnd(J.F.indice)] = { giros: J.F.celulas.map(c => c.giro), passos: J.passos.slice(-200), m: J.F.def.m };
   salvar();
 }
 
@@ -441,6 +562,7 @@ const Som = (() => {
       for (const [f, v, d] of [[312, .05, .22], [741, .03, .16], [1236, .014, .1], [2110, .006, .06]]) tom(f * k * ALEA(.985, 1.015), t + ALEA(0, .006), d * ALEA(.85, 1.2), v, { pan: p, ataque: .002, molhado: .22 });
       chiado(t, .05, .05, ALEA(700, 1100), .8);
     },
+    portao() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .3, .05, ALEA(240, 330), 1.2); tom(ALEA(150, 170), t + .22, .2, .09, { ate: 96, molhado: .15 }); tom(ALEA(480, 520), t + .23, .14, .025, { molhado: .2 }); },
     fixa() { if (!pronto()) return; tom(ALEA(120, 134), ctx.currentTime, .18, .09, { ate: 90, molhado: .15 }); },
     // gota: a bolha sobe de tom, como na vida real
     gota(forca = 1) {
@@ -507,6 +629,7 @@ const U = {
   uT: { value: 0 }, uVida: { value: null }, uVidaMin: { value: new THREE.Vector2() }, uVidaTam: { value: new THREE.Vector2(1, 1) },
   uVerde: { value: new THREE.Color() }, uSeco: { value: new THREE.Color() }, uSolo: { value: new THREE.Color() },
   uNevoa: { value: new THREE.Color() }, uSolDir: { value: new THREE.Vector3(0, 1, 0) }, uSolCor: { value: new THREE.Color() }, uNoite: { value: 0 },
+  uAgua2: { value: new THREE.Color('#2f3f96') },
 };
 const GLSL_RUIDO = `
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
@@ -533,6 +656,9 @@ matPedra.onBeforeCompile = sh => {
       diffuseColor.rgb=mix(diffuseColor.rgb,uVerde*.8,m*.4); }`);
 };
 const matLiso = new THREE.MeshLambertMaterial({ vertexColors: true });
+
+// versão translúcida, usada no andar que não está em foco
+const matVeu = new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: .13, depthWrite: false });
 
 // CHÃO: mistura terra seca e grama conforme o mapa de vida; paredões em camadas de rocha
 const matChao = new THREE.MeshLambertMaterial();
@@ -584,14 +710,14 @@ const MP = {
 // ÁGUA: uma cor translúcida que corre da entrada para as saídas. uForma: 0 braços retos, 1 arco, 2 poça redonda
 const matAgua = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, fog: true,
-  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uForma: { value: 0 }, uCanto: { value: new THREE.Vector2() }, uEntrada: { value: new THREE.Vector2(0, -1) }, uCheio: { value: 0 }, uNivel: { value: 0 }, uRaio: { value: .2 } }]),
+  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uForma: { value: 0 }, uCanto: { value: new THREE.Vector2() }, uEntrada: { value: new THREE.Vector2(0, -1) }, uCheio: { value: 0 }, uNivel: { value: 0 }, uRaio: { value: .2 }, uCor: { value: 0 }, uVeu: { value: 1 }, uAgua2: { value: null } }]),
   vertexShader: `uniform float uNivel,uT;varying vec3 vL,vW;
   #include <fog_pars_vertex>
   void main(){ vL=position; vec3 p=position; p.y-=(1.-uNivel)*.09; vec4 w=modelMatrix*vec4(p,1.); w.y+=sin(w.x*9.+uT*2.1)*sin(w.z*8.-uT*1.7)*.004; vW=w.xyz;
     vec4 mvPosition=viewMatrix*w; gl_Position=projectionMatrix*mvPosition;
     #include <fog_vertex>
   }`,
-  fragmentShader: `uniform float uForma,uCheio,uNivel,uT,uRaio,uNoite;uniform vec2 uCanto,uEntrada;uniform vec3 uSolDir,uSolCor,uNevoa;varying vec3 vL,vW;
+  fragmentShader: `uniform float uForma,uCheio,uNivel,uT,uRaio,uNoite,uCor,uVeu;uniform vec3 uAgua2;uniform vec2 uCanto,uEntrada;uniform vec3 uSolDir,uSolCor,uNevoa;varying vec3 vL,vW;
   ${GLSL_RUIDO}
   #include <common>
   #include <fog_pars_fragment>
@@ -603,13 +729,13 @@ const matAgua = new THREE.ShaderMaterial({
     float frente=uCheio*1.2; if(d>frente) discard;
     float n=fbm(vec2(l*15.,d*5.5-uT*1.15)), n2=fbm(vec2(l*9.+4.,d*9.-uT*1.9));
     if(uForma>1.5){ n=fbm(vL.xz*11.+uT*.35); n2=.5+.5*sin(l*46.-uT*3.2+n*4.); n2=mix(.4,n2,.45); }
-    vec3 fundo=vec3(.0,.15,.24), claro=vec3(.05,.46,.55); vec3 c=mix(fundo,claro,n*.95);
+    vec3 fundo=vec3(.0,.15,.24), claro=vec3(.05,.46,.55); vec3 c=mix(fundo,claro,n*.95); c=mix(c,uAgua2*(.5+.75*n),uCor>.4&&uCor<.6?step(.5,fract(l*3.+n*1.4+.25)):uCor);
     vec3 N=normalize(vec3((n-.5)*.5,1.,(n2-.5)*.5)), V=normalize(cameraPosition-vW);
     float fr=pow(1.-max(dot(N,V),0.),3.); c=mix(c,uNevoa,fr*.3);
     float br=pow(max(dot(N,normalize(V+uSolDir)),0.),90.);
     float esp=smoothstep(.62,.82,n2)*.16+(uForma<1.5?smoothstep(.16,0.,frente-d)*step(uCheio,.995)*.6:0.);
     c*=mix(vec3(1.),vec3(.62,.72,.95),uNoite); c+=esp*mix(vec3(1.),vec3(.6,.7,.9),uNoite)+uSolCor*br*.35;
-    gl_FragColor=vec4(c,(.86+.1*fr+esp*.2)*smoothstep(0.,.35,uNivel));
+    gl_FragColor=vec4(c,(.86+.1*fr+esp*.2)*smoothstep(0.,.35,uNivel)*uVeu);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
     #include <fog_fragment>
@@ -618,21 +744,21 @@ const matAgua = new THREE.ShaderMaterial({
 // QUEDA: fita de água que cai na ponta de um canal (cascata entre degraus ou fio que escorre)
 const matQueda = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true,
-  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uAlto: { value: .5 }, uLonge: { value: .12 }, uLargo: { value: .2 }, uForca: { value: 0 }, uSome: { value: 1 } }]),
+  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uAlto: { value: .5 }, uLonge: { value: .12 }, uLargo: { value: .2 }, uForca: { value: 0 }, uSome: { value: 1 }, uCor: { value: 0 }, uVeu: { value: 1 }, uAgua2: { value: null } }]),
   vertexShader: `uniform float uAlto,uLonge,uLargo;varying vec2 vQ;
   #include <fog_pars_vertex>
   void main(){ float t=position.y; vQ=vec2(position.x,t); vec3 p=vec3(position.x*uLargo*(1.-t*.18),-uAlto*t*t,-uLonge*t*(1.+.15*(1.-t)));
     vec4 mvPosition=modelViewMatrix*vec4(p,1.); gl_Position=projectionMatrix*mvPosition;
     #include <fog_vertex>
   }`,
-  fragmentShader: `uniform float uForca,uSome,uT,uAlto,uNoite;varying vec2 vQ;
+  fragmentShader: `uniform float uForca,uSome,uT,uAlto,uNoite,uCor,uVeu;uniform vec3 uAgua2;varying vec2 vQ;
   ${GLSL_RUIDO}
   #include <common>
   #include <fog_pars_fragment>
-  void main(){ float n=fbm(vec2(vQ.x*7.,vQ.y*uAlto*5.-uT*2.4)); vec3 c=mix(vec3(.1,.5,.58),vec3(.86,.96,.95),smoothstep(.3,.75,n)*.8+vQ.y*.15);
+  void main(){ float n=fbm(vec2(vQ.x*7.,vQ.y*uAlto*5.-uT*2.4)); vec3 c=mix(mix(vec3(.1,.5,.58),uAgua2,uCor),vec3(.86,.96,.95),smoothstep(.3,.75,n)*.8+vQ.y*.15);
     c*=mix(vec3(1.),vec3(.62,.72,.95),uNoite);
     float a=(.5+.4*n)*smoothstep(.5,.36,abs(vQ.x))*mix(1.,smoothstep(1.,.45,vQ.y),uSome); if(vQ.y>uForca*1.05) discard;
-    gl_FragColor=vec4(c,a*smoothstep(0.,.3,uForca));
+    gl_FragColor=vec4(c,a*smoothstep(0.,.3,uForca)*uVeu);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
     #include <fog_fragment>
@@ -640,7 +766,7 @@ const matQueda = new THREE.ShaderMaterial({
 });
 function novaAgua(molde, extra) {
   const m = molde.clone();
-  for (const n of ['uT', 'uSolDir', 'uSolCor', 'uNevoa', 'uNoite']) m.uniforms[n] = U[n];
+  for (const n of ['uT', 'uSolDir', 'uSolCor', 'uNevoa', 'uNoite', 'uAgua2']) m.uniforms[n] = U[n];
   for (const k in extra) m.uniforms[k].value = extra[k];
   return m;
 }
@@ -693,35 +819,61 @@ const ARCO_CURVA = (() => { const L = Math.PI / 4, m = .335, r = []; const y = s
   for (let i = 0; i <= 8; i++) r.push([m * i / 8, y(m * i / 8), YB]); r.push([m, 0, YB]);
   for (let i = 1; i <= 6; i++) r.push([misturar(m, 1 - m, i / 6), 0, YB]); for (let i = 8; i >= 0; i--) r.push([1 - m * i / 8, y(m * i / 8), YB]); return r; })();
 
-function corpoArco(lado, c) {
+function corpoArco(lado, c, alta) {
   const a = arcoEm(lado), q = (y0, y1) => faixaS(0, 1, 14, y0, y1);
-  return [[varrer(a, ARCO_CURVA, -LO, LO), c.pedra], [varrer(a, q(.385, YB), -LO - .025, LO + .025), c.cornija], [varrer(a, q(YB, YP), -LO, -LI), c.pedra], [varrer(a, q(YB, YP), LI, LO), c.pedra]];
+  return [[varrer(a, alta ? q(.31, YB) : ARCO_CURVA, -LO, LO), c.pedra], [varrer(a, q(.385, YB), -LO - .025, LO + .025), c.cornija], [varrer(a, q(YB, YP), -LO, -LI), c.pedra], [varrer(a, q(YB, YP), LI, LO), c.pedra]];
 }
-function corpoBracos(lados, c, { deParede = LI, ate = .5, fechar = true } = {}) {
+function corpoBracos(lados, c, { deParede = LI, ate = .5, fechar = true, alta = false } = {}) {
   const l = [];
   for (const d of [0, 1, 2, 3]) {
     const b = bracoEm(d);
-    if (lados.includes(d)) l.push([varrer(b, ARCO_BRACO, -LO, LO), c.pedra], [varrer(b, [[0, .385, YB], [ate, .385, YB]], -LO - .025, LO + .025), c.cornija],
+    if (lados.includes(d)) l.push([varrer(b, alta ? [[0, .31, YB], [.5, .31, YB]] : ARCO_BRACO, -LO, LO), c.pedra], [varrer(b, [[0, .385, YB], [ate, .385, YB]], -LO - .025, LO + .025), c.cornija],
       [varrer(b, [[deParede, YB, YP], [ate, YB, YP]], -LO, -LI), c.pedra], [varrer(b, [[deParede, YB, YP], [ate, YB, YP]], LI, LO), c.pedra]);
     else if (fechar) l.push([varrer(b, [[LI, YB, YP], [LO, YB, YP]], -LO, LO), c.pedra]);
   }
   return l;
 }
-function formaPeca(tipo, fixa) {
-  return guardar(tipo + fixa, () => {
-    const c = fixa ? { pedra: COR.fixa, cornija: COR.fixaBase } : { pedra: COR.pedra, cornija: COR.cornija }, l = [];
-    if (fixa) {
-      l.push([caixa(-.42, .42, -.04, .05, -.42, .42), COR.fixaBase], [caixa(-.185, .185, .15, .19, -.185, .185), COR.bronze]);
-      for (const x of [-.35, .35]) for (const z of [-.35, .35]) l.push([new THREE.CylinderGeometry(.035, .045, .05, 8).translate(x, .07, z), COR.bronze]);
-    } else l.push([new THREE.CylinderGeometry(.425, .44, .09, 40).translate(0, .005, 0), COR.base], [new THREE.CylinderGeometry(.34, .355, .05, 36).translate(0, .06, 0), COR.baseClara]);
-    if (tipo === 'curva') l.push(...corpoArco(0, c));
-    else if (tipo === 'dupla') l.push(...corpoArco(0, c), ...corpoArco(2, c));
+// Cada grupo de irmãs ou comportas tem cor e número de contas próprios (dá para distinguir sem depender só da cor)
+const CORGRUPO = { a: '#b98f3a', b: '#7d4a63', c: '#3f6a72', d: '#a35438', A: '#b98f3a', B: '#7d4a63', C: '#3f6a72', D: '#a35438' };
+// Forma de uma peça. o: { tipo, fixa, vert, sobe, desce, andar, emperrada, grupo }
+function formaPeca(o) {
+  const { tipo, fixa, vert, andar, grupo } = o, alta = andar > 0;
+  return guardar(['peca', tipo, !!fixa, vert || 0, !!o.desce, alta, !!o.emperrada, grupo || ''].join(), () => {
+    const c = fixa ? { pedra: COR.fixa, cornija: COR.fixaBase } : { pedra: COR.pedra, cornija: COR.cornija }, l = [], y = alta ? .25 : 0;
+    const roda = (r, tubo, yy, cor) => l.push([new THREE.TorusGeometry(r, tubo, 6, 40).rotateX(Math.PI / 2).translate(0, yy, 0), cor]);
+    if (tipo === 'comporta') {                                                   // base quadrada: não gira
+      if (!alta) l.push([caixa(-.43, .43, -.04, .05, -.43, .43), COR.base], [caixa(-.36, .36, .05, .08, -.36, .36), COR.baseClara]); else for (const z of [-.4, .4]) l.push([caixa(-.42, .42, .22, .3, z - .04, z + .04), COR.base]);
+      for (const x of [-.215, .215]) l.push([caixa(x - .045, x + .045, alta ? .25 : .05, .98, -.05, .05), COR.madeira]);
+      l.push([caixa(-.29, .29, .95, 1.02, -.06, .06), COR.madeira], [caixa(-.2, .2, .96, 1.01, -.066, .066), CORGRUPO[grupo]]);
+      const n = 'ABCD'.indexOf(grupo) + 1; for (let k = 0; k < n; k++) l.push([new THREE.SphereGeometry(.036, 10, 8).translate((k - (n - 1) / 2) * .1, 1.05, 0), CORGRUPO[grupo]]);
+    } else if (fixa) {
+      if (!alta) l.push([caixa(-.42, .42, -.04, .05, -.42, .42), COR.fixaBase], [caixa(-.185, .185, .15, .19, -.185, .185), COR.bronze]);
+      else for (const z of [-.4, .4]) l.push([caixa(-.42, .42, .2, .29, z - .05, z + .05), COR.fixaBase], [caixa(z - .05, z + .05, .2, .29, -.42, .42), COR.fixaBase]);
+      for (const x of [-.35, .35]) for (const z of [-.35, .35]) l.push([new THREE.CylinderGeometry(.035, .045, .05, 8).translate(x, .07 + y * 1.0, z), COR.bronze]);
+    } else if (alta) { roda(.425, .035, .26, COR.base); roda(.425, .02, .3, COR.baseClara); }
+    else l.push([new THREE.CylinderGeometry(.425, .44, .09, 40).translate(0, .005, 0), COR.base], [new THREE.CylinderGeometry(.34, .355, .05, 36).translate(0, .06, 0), COR.baseClara]);
+    if (o.emperrada && !fixa) {                                                  // cinta de ferro com dois cravos
+      roda(.432, .03, .055 + y, '#4b4a49'); for (const s of [-1, 1]) l.push([caixa(-.09, .09, y, .12 + y, s * .435 - .04, s * .435 + .04), '#4b4a49'], [new THREE.SphereGeometry(.03, 8, 6).translate(0, .13 + y, s * .435), '#6d6a66']);
+    }
+    if (grupo && tipo !== 'comporta') {                                          // aro esmaltado e contas das irmãs
+      roda(.4, .026, .075 + y, CORGRUPO[grupo]); const n = 'abcd'.indexOf(grupo) + 1;
+      for (const q of [0, Math.PI]) for (let k = 0; k < n; k++) { const a = Math.PI / 4 + q + (k - (n - 1) / 2) * .26; l.push([new THREE.SphereGeometry(.042, 10, 8).translate(Math.sin(a) * .41, .105 + y, Math.cos(a) * .41), CORGRUPO[grupo]]); }
+    }
+    if (vert) {                                                                   // bacia no centro: liga um andar ao outro
+      l.push(...corpoBracos(TIPOS[tipo][0], c, { deParede: .2, fechar: false, alta }));
+      const anel = new THREE.Shape().absarc(0, 0, .27, 0, Math.PI * 2); anel.holes.push(new THREE.Path().absarc(0, 0, .2, 0, Math.PI * 2, true));
+      l.push([new THREE.ExtrudeGeometry(anel, { depth: .24, bevelEnabled: false, curveSegments: 20 }).rotateX(-Math.PI / 2).translate(0, YB - .06, 0), c.pedra], [new THREE.CylinderGeometry(.21, .21, .02, 20).translate(0, YB, 0), fixa ? '#5f5b52' : '#9a8460']);
+      if (o.desce) l.push([new THREE.CylinderGeometry(.19, .11, .26, 16).translate(0, .3, 0), c.cornija], [new THREE.CylinderGeometry(.11, .11, .012, 16).translate(0, YB + .012, 0), '#3d3830']);
+      else if (!alta) l.push([new THREE.CylinderGeometry(.2, .24, YB, 16).translate(0, YB / 2, 0), c.pedra]);
+    }
+    else if (tipo === 'curva') l.push(...corpoArco(0, c, alta));
+    else if (tipo === 'dupla') l.push(...corpoArco(0, c, alta), ...corpoArco(2, c, alta));
     else if (tipo === 'sifao') {
-      l.push(...corpoBracos([1, 3], c), ...corpoBracos([0, 2], c, { deParede: LO, fechar: false }));
+      l.push(...corpoBracos([1, 3], c, { alta }), ...corpoBracos([0, 2], c, { deParede: LO, fechar: false, alta }));
       for (const d of [0, 2]) l.push([varrer(bracoEm(d), [[LO - .01, YP - .03, YP + .05], [.3, YP - .03, YP + .02]], -LO - .012, LO + .012), c.cornija]);
-    } else l.push(...corpoBracos(TIPOS[tipo][0], c));
+    } else l.push(...corpoBracos(TIPOS[tipo][0], c, { alta }));
     // leito do canal, mais escuro que a borda: deixa o desenho da peça fácil de ler mesmo seca
-    TIPOS[tipo].forEach((_, k) => l.push([formaAgua(tipo, k).clone().translate(0, YB + .004 - YA, 0), fixa ? '#5f5b52' : '#9a8460']));
+    TIPOS[tipo].forEach((_, k) => l.push([formaAgua(tipo, k, vert).clone().translate(0, YB + .004 - YA, 0), fixa ? '#5f5b52' : '#9a8460']));
     return juntar(l);
   });
 }
@@ -730,21 +882,31 @@ function planoAgua(cam, a, b, n, L = LI) {
   const V = []; for (let i = 0; i < n; i++) { const p = [a + (b - a) * i / n, a + (b - a) * (i + 1) / n].map(cam); const v = p.map(q => [[q.x + q.tz * L, YA, q.z - q.tx * L], [q.x - q.tz * L, YA, q.z + q.tx * L]]); V.push(...v[0][0], ...v[0][1], ...v[1][1], ...v[0][0], ...v[1][1], ...v[1][0]); }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); g.computeVertexNormals(); return g;
 }
-function formaAgua(tipo, k) {
-  return guardar('agua' + tipo + k, () => {
+function formaAgua(tipo, k, vert) {
+  return guardar('agua' + tipo + k + (vert ? 'v' : ''), () => {
     const lados = TIPOS[tipo][k], l = [];
-    if (tipo === 'curva' || tipo === 'dupla') l.push([planoAgua(arcoEm(lados[0]), 0, 1, 14)]);
+    if (vert) { l.push([new THREE.CircleGeometry(.205, 22).rotateX(-Math.PI / 2).translate(0, YA, 0)]); for (const d of lados) l.push([planoAgua(bracoEm(d), .19, .5, 5)]); }
+    else if (tipo === 'curva' || tipo === 'dupla') l.push([planoAgua(arcoEm(lados[0]), 0, 1, 14)]);
     else if (tipo === 'sifao' && k === 1) for (const d of lados) l.push([planoAgua(bracoEm(d), LO - .01, .5, 4)]);
     else { l.push([planoAgua(bracoEm(0), -LI, LI, 2)]); for (const d of lados) l.push([planoAgua(bracoEm(d), LI, .5, 5)]); }
     return juntar(l);
   });
 }
-function malhaAgua(tipo, k) {
-  const arco = tipo === 'curva' || tipo === 'dupla', lado = TIPOS[tipo][k][0], canto = virar({ x: .5, z: -.5, tx: 0, tz: 0 }, lado);
-  const m = new THREE.Mesh(formaAgua(tipo, k), novaAgua(matAgua, { uForma: arco ? 1 : 0, uCanto: new THREE.Vector2(canto.x, canto.z) }));
+function malhaAgua(tipo, k, vert) {
+  const arco = !vert && (tipo === 'curva' || tipo === 'dupla'), lado = TIPOS[tipo][k][0], canto = virar({ x: .5, z: -.5, tx: 0, tz: 0 }, lado);
+  const m = new THREE.Mesh(formaAgua(tipo, k, vert), novaAgua(matAgua, { uForma: arco ? 1 : 0, uCanto: new THREE.Vector2(canto.x, canto.z) }));
   m.renderOrder = 2; m.visible = false; return m;
 }
-const geoQueda = new THREE.PlaneGeometry(1, 1, 3, 10).translate(0, .5, 0); geoQueda.userData.fixo = true;
+// portinhola da comporta (sobe e desce) e parafuso d'água (gira quando há água)
+const formaPortao = () => guardar('portao', () => juntar([[caixa(-.16, .16, 0, .34, -.022, .022), COR.madeira], ...[-.1, 0, .1].map(x => [caixa(x - .012, x + .012, 0, .34, -.03, .03), '#4b4a49']), [caixa(-.02, .02, .34, .5, -.015, .015), '#4b4a49']]));
+const formaParafuso = () => guardar('parafuso', () => {
+  const V = [], N = 64, A = 2 * DEGRAU + .04, ponto = (t, r) => { const a = t * Math.PI * 8; return [Math.cos(a) * r, YB + t * A, Math.sin(a) * r]; };
+  for (let i = 0; i < N; i++) { const a = i / N, b = (i + 1) / N, p = [ponto(a, .02), ponto(a, .155), ponto(b, .155), ponto(b, .02)]; V.push(...p[0], ...p[1], ...p[2], ...p[0], ...p[2], ...p[3], ...p[2], ...p[1], ...p[0], ...p[3], ...p[2], ...p[0]); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); g.computeVertexNormals();
+  return juntar([[g, '#a07a4a'], [new THREE.CylinderGeometry(.03, .03, A + .12, 8).translate(0, YB + A / 2, 0), COR.madeira]]);
+});
+const formaTorre = () => guardar('torre', () => { const l = []; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; l.push([caixa(-.013, .013, YB, YB + 2 * DEGRAU - .06, -.013, .013), COR.madeira, M4(Math.sin(a) * .185, 0, Math.cos(a) * .185, a)]); } for (const y of [.75, 1.12]) l.push([new THREE.TorusGeometry(.187, .016, 5, 24).rotateX(Math.PI / 2).translate(0, y, 0), '#4b4a49']); return juntar(l); });
+const geoQueda = new THREE.PlaneGeometry(1, 1, 3, 8).translate(0, .5, 0); geoQueda.userData.fixo = true;
 function malhaQueda(extra) { const m = new THREE.Mesh(geoQueda, novaAgua(matQueda, extra)); m.renderOrder = 3; m.visible = false; m.frustumCulled = false; return m; }
 function poca(raio, y, x = 0, z = 0) {
   const g = new THREE.CircleGeometry(raio, 28).rotateX(-Math.PI / 2);
@@ -793,7 +955,7 @@ const LUGAR = {
     const p = poca(.235, .57, 0, .02); p.material.uniforms.uNivel.value = 1; g.add(p);
     const veu = malhaQueda({ uAlto: .42, uLonge: .1, uLargo: .16, uForca: 1, uSome: 0 }); veu.position.set(0, .98, .22); veu.visible = true; g.add(veu);
     const agua = aguaBoca(.19); g.add(agua);
-    return { grupo: g, agua, vida() {} };
+    return { grupo: g, agua, pocas: [p, veu], vida() {} };
   },
   vila() {
     const g = new THREE.Group(), l = bocaLugar(.18), jan = [];
@@ -807,7 +969,7 @@ const LUGAR = {
     const m = new THREE.Mesh(juntar(l), matLiso); m.castShadow = m.receiveShadow = true; g.add(m);
     const escuras = new THREE.Mesh(juntar(jan), new THREE.MeshBasicMaterial({ color: '#5b5148' })), mj = luzJanela(), acesas = new THREE.Mesh(juntar(jan), mj); acesas.scale.setScalar(1.001); g.add(escuras, acesas);
     const p = poca(.13, .165, 0, -.02), q = malhaQueda({ uAlto: .36, uLonge: .1, uLargo: .18, uSome: 0 }), agua = aguaBoca(.17); q.position.set(0, YA, -.17); q.rotation.y = Math.PI; g.add(p, q, agua);
-    return { grupo: g, agua, queda: q, vida(k) { mj.opacity = k * (U.uNoite.value ? 1 : .75); p.material.uniforms.uNivel.value = suave(0, .4, k); } };
+    return { grupo: g, agua, queda: q, pocas: [p], vida(k) { mj.opacity = k * (U.uNoite.value ? 1 : .75); p.material.uniforms.uNivel.value = suave(0, .4, k); } };
   },
   horta() {
     const g = new THREE.Group(), l = bocaLugar(.26);
@@ -829,7 +991,7 @@ const LUGAR = {
     im.castShadow = true; g.add(im, fr);
     const p = poca(.1, .165, 0, -.13), q = malhaQueda({ uAlto: .36, uLonge: .09, uLargo: .18, uSome: 0 }), agua = aguaBoca(.25); q.position.set(0, YA, -.25); q.rotation.y = Math.PI; g.add(p, q, agua);
     let antes = -1;
-    return { grupo: g, agua, queda: q, vida(k) {
+    return { grupo: g, agua, queda: q, pocas: [p], vida(k) {
       p.material.uniforms.uNivel.value = suave(0, .3, k);
       if (Math.abs(k - antes) < .004 && k !== 0 && k !== 1 || k === antes) return; antes = k;
       pes.forEach(([x, z], i) => { const a = (i * .37) % 1, t = suave(a * .45, .5 + a * .45, k); im.setMatrixAt(i, M4(x, .09, z, i, misturar(.16, 1 + a * .3, t))); fr.setMatrixAt(i, M4(x + .03, .15, z + .02 - a * .04, 0, suave(.7, 1, k) * (i % 2 ? 1 : .001))); });
@@ -843,7 +1005,7 @@ const LUGAR = {
     const m = new THREE.Mesh(juntar(l), matPedra); m.castShadow = m.receiveShadow = true; g.add(m);
     const p = poca(.33, .05), q = malhaQueda({ uAlto: .42, uLonge: .14, uLargo: .18, uSome: 0 }), agua = aguaBoca(.29); q.position.set(0, YA, -.29); q.rotation.y = Math.PI; g.add(p, q, agua);
     const nenufar = new THREE.Mesh(juntar([0, 1, 2, 3].map(i => [new THREE.CircleGeometry(.05 + i % 2 * .015, 12, .3, 5.6).rotateX(-Math.PI / 2), '#6f9a5a', M4(Math.sin(i * 2.1 + .6) * .2, 0, Math.cos(i * 2.1 + .6) * .2 + .03, i)]).concat([0, 2].map(i => [bolota(.026, 1, i + 2, .3), '#f0c9d2', M4(Math.sin(i * 2.1 + .6) * .2, .015, Math.cos(i * 2.1 + .6) * .2 + .03)]))), matLiso); g.add(nenufar);
-    return { grupo: g, agua, queda: q, vida(k) { const y = misturar(.05, .3, suave(0, 1, k)); p.position.y = y; p.material.uniforms.uNivel.value = suave(0, .15, k); nenufar.position.y = y + .008; nenufar.scale.setScalar(Math.max(.001, suave(.55, 1, k))); q.material.uniforms.uAlto.value = YA - y; } };
+    return { grupo: g, agua, queda: q, pocas: [p], vida(k) { const y = misturar(.05, .3, suave(0, 1, k)); p.position.y = y; p.material.uniforms.uNivel.value = suave(0, .15, k); nenufar.position.y = y + .008; nenufar.scale.setScalar(Math.max(.001, suave(.55, 1, k))); q.material.uniforms.uAlto.value = YA - y; } };
   },
   poco() {
     const g = new THREE.Group(), l = bocaLugar(.24);
@@ -856,9 +1018,11 @@ const LUGAR = {
     const vasos = new THREE.Group(); g.add(vasos);
     for (let i = 0; i < 7; i++) { const a = .9 + i * .75, v = new THREE.Mesh(juntar([[bolota(.06, 1, i + 3, .3, .8).translate(0, .04, 0), '#7c9d5a'], [bolota(.026, 1, 2, .2).translate(.03, .09, .01), ['#e6b7c1', '#f3e6c8', '#c5b2de'][i % 3]], [bolota(.022, 1, 3, .2).translate(-.03, .085, .03), ['#f3e6c8', '#c5b2de', '#e6b7c1'][i % 3]]]), matLiso); v.position.set(Math.sin(a) * .37, .02, Math.cos(a) * .37 + .02); v.castShadow = true; vasos.add(v); }
     const p = poca(.165, .1, 0, .06), q = malhaQueda({ uAlto: .3, uLonge: .16, uLargo: .18, uSome: 0 }), agua = aguaBoca(.23); q.position.set(0, YA, -.23); q.rotation.y = Math.PI; g.add(p, q, agua);
-    return { grupo: g, agua, queda: q, vida(k) { p.position.y = misturar(.06, .22, suave(0, .8, k)); p.material.uniforms.uNivel.value = suave(0, .2, k); vasos.children.forEach((v, i) => v.scale.setScalar(Math.max(.001, suave(.2 + i * .07, .55 + i * .07, k)))); } };
+    return { grupo: g, agua, queda: q, pocas: [p], vida(k) { p.position.y = misturar(.06, .22, suave(0, .8, k)); p.material.uniforms.uNivel.value = suave(0, .2, k); vasos.children.forEach((v, i) => v.scale.setScalar(Math.max(.001, suave(.2 + i * .07, .55 + i * .07, k)))); } };
   },
 };
+
+LUGAR.marco = LUGAR.vila;
 
 // ============================================================ 8. ILHA
 const hash2 = (x, z) => { const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453; return s - Math.floor(s); };
@@ -993,34 +1157,36 @@ const Part = (() => {
 })();
 
 // ============================================================ 9. CÂMERA
-// Três modos: 'iso' (encaixa nas 4 diagonais), 'livre' (gira e inclina à vontade) e 'alto' (quase de cima).
+// Quatro modos: 'iso' (encaixa nas 4 diagonais), 'frente' (encaixa nos 4 lados, bom no celular em pé), 'livre' e 'alto' (quase de cima).
 const Cam = {
-  modo: 'iso', az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0, raio: 5, altoMedio: .5,
+  modo: 'iso', az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0, raio: 5, meioX: 4, meioZ: 4, altoMedio: .5, topo: .6,
   quer: { az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0 }, deriva: 0,
-  NOMES: { iso: 'Visão isométrica', livre: 'Visão livre: arraste para girar e inclinar', alto: 'Visão do alto' },
+  NOMES: { iso: 'Visão em diagonal', frente: 'Visão de frente', livre: 'Visão livre: arraste para girar e inclinar', alto: 'Visão do alto' },
   trocar(modo, avisar) {
     this.modo = modo; const q = this.quer; q.zoom = 1; q.px = q.pz = 0;
-    if (modo === 'iso') { q.el = .66; this.encaixar(); } else if (modo === 'alto') { q.el = 1.42; q.zoom = .84; q.az = Math.round(q.az / (Math.PI / 2)) * Math.PI / 2; } else { q.el = .5; q.az += .25; }
-    salvo.camera = modo; salvar(); if (avisar) aviso(this.NOMES[modo], 2);
+    if (modo === 'iso') { q.el = .7; this.encaixar(); } else if (modo === 'frente') { q.el = .92; this.encaixar(); } else if (modo === 'alto') { q.el = 1.42; this.encaixar(); } else { q.el = .5; q.az += .25; }
+    if (avisar) { salvo.camera = modo; salvar(); aviso(this.NOMES[modo], 2); }
   },
-  encaixar() { const q = Math.PI / 2; this.quer.az = Math.round((this.quer.az - q / 2) / q) * q + q / 2; },
+  encaixar() { const q = Math.PI / 2; this.quer.az = this.modo === 'iso' ? Math.round((this.quer.az - q / 2) / q) * q + q / 2 : Math.round(this.quer.az / q) * q; },
   arrastar(dx, dy) {
     const q = this.quer; q.az -= dx * .0062; this.deriva = 0;
     if (this.modo === 'livre') q.el = limitar(q.el + dy * .005, .24, 1.45);
   },
-  soltar() { if (this.modo === 'iso') this.encaixar(); else if (this.modo === 'alto') this.quer.az = Math.round(this.quer.az / (Math.PI / 2)) * Math.PI / 2; },
-  mover(dx, dy) { const q = this.quer, k = this.dist * .0011, s = Math.sin(q.az), c = Math.cos(q.az), m = this.raio * .7; q.px = limitar(q.px - (dx * c + dy * s) * k, -m, m); q.pz = limitar(q.pz - (-dx * s + dy * c) * k, -m, m); },
-  aproximar(f) { this.quer.zoom = limitar(this.quer.zoom * f, .5, 1.7); },
+  soltar() { if (this.modo !== 'livre') this.encaixar(); },
+  mover(dx, dy) { const q = this.quer, k = this.dist * .0011, s = Math.sin(q.az), c = Math.cos(q.az), m = this.raio * .9; q.px = limitar(q.px - (dx * c + dy * s) * k, -m, m); q.pz = limitar(q.pz - (-dx * s + dy * c) * k, -m, m); },
+  aproximar(f) { this.quer.zoom = limitar(this.quer.zoom * f, .35, 1.7); },
   quadro(dt) {
     const q = this.quer, k = 1 - Math.exp(-dt * 7); if (this.deriva) q.az += this.deriva * dt;
     for (const n of ['az', 'el', 'zoom', 'px', 'pz']) this[n] += (q[n] - this[n]) * k;
-    const t = Math.tan(camera.fov * Math.PI / 360), r = this.raio;
-    this.dist = Math.max(r * .82 / (t * camera.aspect), (r * Math.sin(this.el) * .95 + .85) / (t * .9)) * this.zoom;
-    const ch = Math.cos(this.el) * this.dist, y = this.altoMedio + .1;
-    camera.position.set(this.px + Math.sin(this.az) * ch, y + Math.sin(this.el) * this.dist, this.pz + Math.cos(this.az) * ch); camera.lookAt(this.px, y - this.dist * .012, this.pz);
+    // encaixa o retângulo do tabuleiro (visto deste ângulo) na tela, com folga para o cabeçalho e os botões
+    const t = Math.tan(camera.fov * Math.PI / 360), ca = Math.abs(Math.cos(this.az)), sa = Math.abs(Math.sin(this.az)), hx = this.meioX * ca + this.meioZ * sa, hz = this.meioX * sa + this.meioZ * ca, se = Math.sin(this.el), ce = Math.cos(this.el);
+    this.dist = Math.max((hx + .15) / (t * camera.aspect), (hz * se + this.topo * ce) / (t * (innerHeight < 430 ? .93 : .8))) * 1.0 + hz * ce * .55; this.dist *= this.zoom;
+    const ch = ce * this.dist, y = this.altoMedio + .1;
+    camera.position.set(this.px + Math.sin(this.az) * ch, y + se * this.dist, this.pz + Math.cos(this.az) * ch); camera.lookAt(this.px, y - this.dist * .03, this.pz);
     cena.fog.near = this.dist * 1.02; cena.fog.far = this.dist * 1.02 + 46;
   },
 };
+const cameraPadrao = () => salvo.camera in Cam.NOMES ? salvo.camera : innerHeight > innerWidth ? 'frente' : 'iso';
 
 // ============================================================ 10. JOGO
 const J = { F: null, ilha: null, passos: [], estado: 'carregando', onda: 0, surgir: 0, sobre: null, cursor: null, dica: null, relogio: 0, sombra: 0 };
@@ -1029,7 +1195,7 @@ const J = { F: null, ilha: null, passos: [], estado: 'carregando', onda: 0, surg
 const novoAnel = (cor, op) => { const m = new THREE.Mesh(new THREE.RingGeometry(.39, .475, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); m.userData.op = op; m.renderOrder = 4; m.visible = false; return m; };
 const anelSobre = novoAnel('#fffaf0', .75), anelDica = novoAnel('#ffdf94', .9);
 const fantasma = new THREE.Mesh(undefined, new THREE.MeshBasicMaterial({ color: '#ffedbd', transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false })); fantasma.renderOrder = 8; fantasma.visible = false;
-const geoToque = new THREE.CylinderGeometry(.47, .49, .68, 12).translate(0, .3, 0), matInvisivel = new THREE.MeshBasicMaterial({ visible: false });
+const geoToque = new THREE.CylinderGeometry(.47, .49, .62, 12).translate(0, .3, 0), matInvisivel = new THREE.MeshBasicMaterial({ visible: false });
 
 function descartar(g) {
   g.traverse(o => { if (o.geometry && !o.geometry.userData.fixo && o.geometry !== geoToque) o.geometry.dispose(); if (o.material && o.material.isShaderMaterial) o.material.dispose(); if (o.isInstancedMesh) o.dispose(); });
@@ -1047,56 +1213,103 @@ function aplicarTema(t) {
 function montar(indice) {
   if (J.ilha) { cena.remove(J.ilha.grupo); anelSobre.removeFromParent(); anelDica.removeFromParent(); fantasma.removeFromParent(); descartar(J.ilha.grupo); J.ilha.largar(); }
   Part.limpar();
-  const F = lerFase(indice), tema = TEMAS[F.def.tema]; aplicarTema(tema);
-  const ilha = criarIlha(F, tema); J.F = F; J.ilha = ilha; J.tema = tema; J.passos = []; J.onda = 0; J.dica = null; J.sobre = J.cursor = null; J.tGanhou = 0; J.toques = [];
+  const F = lerFase(indice, salvo.dif ?? 1), tema = temaDa(indice); aplicarTema(tema);
+  const ilha = criarIlha(F, tema); J.F = F; J.ilha = ilha; J.tema = tema; J.passos = []; J.onda = 0; J.dica = null; J.sobre = J.cursor = null; J.tGanhou = 0; J.toques = []; J.veus = []; J.andar = null; J.vazam = 0; J.avisouAgua = false;
   // andamento salvo desta fase
-  const s = salvo.andamento[indice];
-  if (s && s.mapa === F.def.mapa && s.giros.length === F.celulas.length) { F.celulas.forEach((c, i) => { if (!c.fixa) c.giro = s.giros[i]; }); J.passos = s.passos || []; correr(F); if (completa(F)) { for (const c of F.celulas) c.giro = c.inicio; J.passos = []; } }
+  const s = salvo.andamento[chaveAnd(indice)];
+  if (s && s.m === F.def.m && s.giros.length === F.celulas.length) { F.celulas.forEach((c, i) => { if (!c.fixa) c.giro = s.giros[i]; }); J.passos = s.passos || []; correr(F); if (venceu(F)) { for (const c of F.celulas) c.giro = c.inicio; J.passos = []; } }
   for (const c of F.celulas) {
     const raiz = new THREE.Group(); raiz.position.set(c.x - (F.larg - 1) / 2, c.h * DEGRAU, c.z - (F.prof - 1) / 2); c.raiz = raiz; ilha.grupo.add(raiz);
-    c.k = 0; c.vis = c.visAlvo = c.giro; c.tGiro = 1; c.ergue = 0;
+    c.k = 0; c.vis = c.visAlvo = c.tipo === 'comporta' ? c.eixo : c.giro; c.tGiro = 1; c.ergue = 0;
     const gira = c.gira = new THREE.Group(); raiz.add(gira);
     if (c.lugar) {
       const o = LUGAR[c.tipo](); gira.add(o.grupo); gira.rotation.y = -c.lado * Math.PI / 2; c.obj = o; o.vida(0);
       const n = c.nos[0]; n.malha = o.agua; n.malha.material.uniforms.uEntrada.value.set(0, c.destino ? -1 : 1);
-      if (!c.destino) { n.cheio = 1; n.nivel = 1; }
+      if (!c.destino) { n.cheio = 1; n.nivel = 1; n.cor = c.agua - 1; }
+      if (F.duas) { const anel = new THREE.Mesh(guardar('anel' + (c.destino ? c.pede : c.agua), () => juntar(formaAnel(c.destino ? c.pede : c.agua))), matAnel); gira.add(anel); }   // a cor do anel diz qual água
+      for (const p of o.pocas || []) p.material.uniforms.uCor.value = corDe(c.destino ? c.pede : c.agua);
+      c.obj.malhas = []; o.grupo.traverse(m => { if (m.isMesh) c.obj.malhas.push(m); });
       if (c.tipo === 'nascente') n.quedas = [criarQueda(gira, 0, c.lado)]; else n.quedas = [];
     } else {
-      const m = new THREE.Mesh(formaPeca(c.tipo, c.fixa), matPedra); m.castShadow = m.receiveShadow = true; gira.add(m); gira.rotation.y = -c.vis * Math.PI / 2;
-      c.nos.forEach((n, k) => { n.malha = malhaAgua(c.tipo, k); gira.add(n.malha); n.quedas = n.lados.map(l => criarQueda(gira, l, l)); });
+      const m = new THREE.Mesh(formaPeca(c), matPedra); m.castShadow = m.receiveShadow = true; gira.add(m); J.veus.push([m, c.andar]); gira.rotation.y = -c.vis * Math.PI / 2;
+      c.nos.forEach((n, k) => { n.malha = malhaAgua(c.tipo, k, c.vert); gira.add(n.malha); n.quedas = n.lados.filter(l => l !== 4).map(l => criarQueda(gira, l, l)); });
+      if (c.tipo === 'comporta') { c.portao = new THREE.Mesh(formaPortao(), matPedra); c.portao.castShadow = true; c.portao.position.y = c.giro ? YB : YP + .03; gira.add(c.portao); J.veus.push([c.portao, c.andar]); }
+      if (c.sobe) { c.parafuso = new THREE.Mesh(formaParafuso(), matLiso); const torre = new THREE.Mesh(formaTorre(), matLiso); c.parafuso.castShadow = torre.castShadow = true; raiz.add(c.parafuso, torre); J.veus.push([c.parafuso, 1], [torre, 1]); }
       const t = new THREE.Mesh(geoToque, matInvisivel); t.userData.c = c; raiz.add(t); J.toques.push(t);
     }
   }
+  if (F.andares > 1) { const e = estruturaAlta(F, ilha); ilha.grupo.add(e); J.veus.push([e, 1]); }
+  $('b-andar').hidden = F.andares < 2; focarAndar(null);
   ilha.grupo.add(anelSobre, anelDica, fantasma);
-  Cam.raio = .5 * Math.hypot(F.larg + 1.5, F.prof + 1.5); Cam.altoMedio = F.celulas.reduce((a, c) => a + c.h, 0) / F.celulas.length * DEGRAU + .2; Cam.deriva = 0;
+  Cam.raio = .5 * Math.hypot(F.larg + 1.5, F.prof + 1.5); Cam.meioX = F.larg / 2; Cam.meioZ = F.prof / 2; Cam.topo = .55 + (Math.max(...F.celulas.map(c => c.h)) - Math.min(...F.celulas.map(c => c.h))) * DEGRAU * .6; Cam.altoMedio = F.celulas.reduce((a, c) => a + c.h, 0) / F.celulas.length * DEGRAU + .2; Cam.deriva = 0;
   Cam.quer.px = Cam.quer.pz = 0; longe.scale.set(Cam.raio / 3.3, 1, Cam.raio / 3.3);
   const r = Cam.raio + 2.4; Object.assign(sol.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: 40 }); sol.shadow.camera.updateProjectionMatrix(); sol.position.copy(U.uSolDir.value).multiplyScalar(18);
   cena.add(ilha.grupo); correr(F); J.surgir = CALMO ? 1 : 0; J.sombra = 60;
 }
 // quedaLocal: lado dentro da peça; serve para cascata ou fio que escorre
-function criarQueda(pai, ladoLocal, lado) { const m = malhaQueda({}); m.position.set(DX[ladoLocal] * .495, YA, DZ[ladoLocal] * .495); m.rotation.y = -ladoLocal * Math.PI / 2; pai.add(m); return { lado, malha: m, forca: 0, quer: 0 }; }
+// As fitas de água só são criadas quando a água precisa delas pela primeira vez.
+function criarQueda(pai, ladoLocal, lado) { return { lado, pai, ladoLocal, malha: null, forca: 0, quer: 0 }; }
+function malhaDa(q) {
+  if (q.malha) return q.malha; const l = q.ladoLocal, m = q.malha = malhaQueda({});
+  if (l === 5) { m.position.set(0, .3, .05); const m2 = malhaQueda({}); m2.material = m.material; m2.rotation.y = Math.PI / 2; m2.visible = true; m2.position.set(-.05, 0, -.05); m.add(m2); }
+  else { m.position.set(DX[l] * .495, YA, DZ[l] * .495); m.rotation.y = -l * Math.PI / 2; }
+  m.material.uniforms.uVeu.value = q.veu ?? 1; q.pai.add(m); return m;
+}
+// anel no chão dos lugares, quando a fase tem duas águas
+const matAnel = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+const corDe = a => a === 3 ? .5 : a - 1;
+function formaAnel(a) { const c1 = '#2b8c9a', c2 = '#' + U.uAgua2.value.getHexString(), arco = (i, f) => new THREE.RingGeometry(.465, .51, 24, 1, i, f).rotateX(-Math.PI / 2).translate(0, .075, 0); return a === 3 ? [[arco(0, Math.PI / 2), c1], [arco(Math.PI / 2, Math.PI / 2), c2], [arco(Math.PI, Math.PI / 2), c1], [arco(Math.PI * 1.5, Math.PI / 2), c2]] : [[arco(0, Math.PI * 2), a === 1 ? c1 : c2]]; }
+// pilares e travessas que seguram o andar de cima
+function estruturaAlta(F, ilha) {
+  const l = [], cantos = new Map(), L = F.larg, P = F.prof;
+  for (const c of F.celulas) if (c.andar) {
+    const x = c.x - (L - 1) / 2, z = c.z - (P - 1) / 2, y = c.h * DEGRAU + .22;
+    for (const [dx, dz] of [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]]) { const k = (x + dx) + ',' + (z + dz), v = cantos.get(k); cantos.set(k, Math.max(v ?? -9, y)); }
+    for (const [dx, dz, w, d] of [[0, -.5, .5, .022], [0, .5, .5, .022], [-.5, 0, .022, .5], [.5, 0, .022, .5]]) l.push([caixa(x + dx - w, x + dx + w, y - .02, y + .05, z + dz - d, z + dz + d), COR.cornija]);
+    if (c.lugar) l.push([caixa(x - .5, x + .5, y - .26, y - .2, z - .5, z + .5), COR.base], [caixa(x - .47, x + .47, y - .4, y - .26, z - .47, z + .47), COR.pedra]);
+  }
+  for (const [k, y] of cantos) { const [x, z] = k.split(',').map(Number), y0 = Math.min(...[[-.1, -.1], [.1, .1], [.1, -.1], [-.1, .1]].map(([a, b]) => ilha.altura(x + a, z + b))) - .1; if (y - y0 < .25) continue; l.push([caixa(x - .045, x + .045, y0, y - .1, z - .045, z + .045), COR.pedra], [caixa(x - .07, x + .07, y - .1, y - .02, z - .07, z + .07), COR.cornija], [caixa(x - .065, x + .065, y0, y0 + .18, z - .065, z + .065), COR.cornija]); }
+  const m = new THREE.Mesh(juntar(l), matPedra); m.castShadow = m.receiveShadow = true; return m;
+}
+// null = os dois andares; 0 = só o de baixo; 1 = só o de cima. O outro fica translúcido e não recebe toque.
+function focarAndar(a) {
+  J.andar = a; const fora = k => a !== null && k !== a;
+  for (const [m, k] of J.veus) { m.userData.mat ||= m.material; m.material = fora(k) ? matVeu : m.userData.mat; m.castShadow = !fora(k) || k === 0; }
+  for (const c of J.F.celulas) {
+    const v = fora(c.andar) ? (c.andar ? .1 : .3) : 1;
+    for (const n of c.nos) { n.malha.material.uniforms.uVeu.value = v; for (const q of n.quedas) { q.veu = v; if (q.malha) q.malha.material.uniforms.uVeu.value = v; } }
+  }
+  J.sombra = 4; const b = $('b-andar'); b.dataset.andar = a ?? 'todos'; b.setAttribute('aria-label', a === null ? 'Vendo os dois andares' : a ? 'Vendo só o andar de cima' : 'Vendo só o andar de baixo');
+}
+function trocarAndar() { if (!J.F || J.F.andares < 2) return; const a = J.andar === null ? 0 : J.andar === 0 ? 1 : null; focarAndar(a); realcar(null); J.cursor = null; aviso(a === null ? 'Os dois andares' : a ? 'Andar de cima' : 'Andar de baixo', 2); }
 
 async function abrirFase(indice, { texto = '' } = {}) {
   J.estado = 'carregando'; $('veu-texto').textContent = texto; $('veu').style.opacity = 1; esconderFim(); aviso('');
   await new Promise(r => setTimeout(r, CALMO ? 30 : J.F ? 950 : 60));
   salvo.fase = indice; salvar();
-  montar(indice); $('nome').textContent = FASES[indice].nome; mostrarDestinos(true); atualizarBotoes(); document.title = `${FASES[indice].nome} · Nascente`;
-  $('barra').classList.remove('some'); Cam.encaixar(); Cam.trocar(salvo.camera in Cam.NOMES ? salvo.camera : 'iso');
+  montar(indice); $('nome').textContent = FASES[indice].n; $('onde').textContent = `${MUNDOS[J.F.mundo].nome}, fase ${indice % 10 + 1} de 10`; mostrarDestinos(true); atualizarBotoes(); document.title = `${FASES[indice].n} · Nascente`;
+  $('barra').classList.remove('some'); Cam.trocar(cameraPadrao());
   R.compile(cena, camera);
   await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));
   $('veu').style.opacity = 0; J.estado = 'jogando';
-  if (FASES[indice].dica && !J.passos.length) setTimeout(() => { if (J.F.indice === indice && J.estado === 'jogando') aviso(FASES[indice].dica, 7); }, 1300);
+  const dica = FASES[indice].d; if (dica && !J.passos.length) setTimeout(() => { if (J.F.indice === indice && J.estado === 'jogando') aviso(dica, 8); }, 1300);
 }
 
 const podeJogar = () => J.estado === 'jogando';
 function girar(c, passo = 1, registrar = true) {
   if (!podeJogar() || !c) return;
   if (c.fixa) { if (!c.lugar) { c.treme = 1; Som.fixa(); if (!J.avisouFixa) { J.avisouFixa = true; aviso('Esta pedra escura é fixa e não gira', 2.6); } } return; }
-  c.giro = giroDe(c.giro, passo); c.de = c.vis; c.visAlvo += passo; c.tGiro = 0; c.girando = true; Som.raspar();
+  const giros = c.emperrada ? passo * 2 : passo; J.vez = (J.vez || 0) + 1;
+  for (const m of c.unidade.membros) {
+    if (m.tipo === 'comporta') { m.giro ^= 1; m.tGiro = 0; m.girando = true; continue; }
+    m.giro = giroDe(m.giro, giros); m.de = m.vis; m.visAlvo += giros; m.tGiro = 0; m.girando = true;
+  }
+  if (c.tipo === 'comporta') Som.portao(); else Som.raspar();
   if (registrar) J.passos.push([c.i, passo]);
-  if (J.dica && J.dica.c === c && assinatura(c.tipo, c.giro) === assinatura(c.tipo, c.certo)) apagarDica();
+  if (J.dica && J.dica.c.unidade === c.unidade && (salvo.dif === 2 || unidadeCerta(c.unidade))) apagarDica();
   correr(J.F); salvarAndamento(); atualizarBotoes(); aviso('');
 }
+const unidadeCerta = u => u.membros.every(certa);
 function desfazer() {
   if (!podeJogar() || !J.passos.length) return;
   const [i, p] = J.passos.pop(); girar(J.F.grade[i], -p, false);
@@ -1106,22 +1319,26 @@ function reiniciar() {
   if (J.estado === 'florido') { salvo.fase = J.F.indice; J.estado = 'jogando'; esconderFim(); $('fim').style.bottom = ''; Cam.deriva = 0; J.onda = 0; $('barra').classList.remove('some'); Cam.soltar(); }
   let k = 0; apagarDica();
   for (const c of J.F.celulas) if (!c.fixa && c.giro !== c.inicio) {
+    if (c.tipo === 'comporta') { c.giro = c.inicio; c.tGiro = 0; c.girando = true; k++; continue; }
     const d = ((c.inicio - c.giro + 5) % 4) - 1; c.giro = c.inicio; c.de = c.vis; c.visAlvo += d; c.tGiro = -(k++) * .12; c.girando = true;
   }
   if (k) Som.raspar();
-  J.passos = []; correr(J.F); delete salvo.andamento[J.F.indice]; salvar(); atualizarBotoes();
+  J.passos = []; correr(J.F); delete salvo.andamento[chaveAnd(J.F.indice)]; salvar(); atualizarBotoes();
 }
-// DICA: 1º toque mostra a peça e a posição; 2º toque na mesma dica gira para o jogador
+// DICA: 1º toque mostra a peça e a posição; 2º toque na mesma dica gira para o jogador. No Difícil, mostra só o lugar.
 function pedirDica() {
   if (!podeJogar()) return;
-  if (J.dica && J.dica.c.tGiro >= 1) {
-    const c = J.dica.c; let d = 1; while (d < 4 && assinatura(c.tipo, giroDe(c.giro, d)) !== assinatura(c.tipo, c.certo)) d++;
-    girar(c, d === 3 ? -1 : d); return;
+  if (J.dica && J.dica.c.tGiro >= 1 && salvo.dif !== 2) {
+    const c = J.dica.c; if (c.tipo === 'comporta') { girar(c); return; }
+    let d = 1; while (d < 4 && !c.unidade.membros.every(m => assinatura(m.tipo, giroDe(m.giro, d)) === assinatura(m.tipo, m.certo))) d++;
+    girar(c, c.emperrada ? 1 : d === 3 ? -1 : d); return;
   }
-  const c = J.F.caminho.find(c => assinatura(c.tipo, c.giro) !== assinatura(c.tipo, c.certo)); if (!c) return;
-  J.dica = { c }; c.raiz.add(anelDica, fantasma); anelDica.position.y = .1; anelDica.visible = fantasma.visible = true;
-  fantasma.geometry = formaAgua(c.tipo, 0); fantasma.rotation.y = -c.certo * Math.PI / 2; fantasma.position.y = .09;
-  aviso('Esta peça fica assim. Toque de novo em Dica e eu giro por você', 6);
+  const c = J.F.caminho.find(c => !unidadeCerta(c.unidade)); if (!c) return;
+  const alvo = c.unidade.membros.find(m => !certa(m)); J.dica = { c: alvo }; alvo.raiz.add(anelDica, fantasma); anelDica.position.y = .1 + (alvo.andar ? .22 : 0); anelDica.visible = true;
+  if (J.F.andares > 1 && J.andar !== null && J.andar !== alvo.andar) focarAndar(alvo.andar);
+  fantasma.visible = salvo.dif !== 2 && alvo.tipo !== 'comporta';
+  if (fantasma.visible) { fantasma.geometry = formaAgua(alvo.tipo, 0, alvo.vert); fantasma.rotation.y = -alvo.certo * Math.PI / 2; fantasma.position.y = .09; }
+  aviso(salvo.dif === 2 ? 'Olhe de novo para esta peça' : alvo.tipo === 'comporta' ? (alvo.certo ? 'Esta comporta fica fechada.' : 'Esta comporta fica aberta.') + ' Toque de novo em Dica e eu mudo por você' : 'Esta peça fica assim. Toque de novo em Dica e eu giro por você', 6);
 }
 function apagarDica() { J.dica = null; anelDica.visible = fantasma.visible = false; }
 
@@ -1131,46 +1348,53 @@ function fluir(dt) {
   for (const c of F.celulas) for (const n of c.nos) {
     if (c.tipo === 'nascente') { n.cheio = n.nivel = 1; }
     else {
-      const p = n.pai; let viva = n.alcance && p && p.cheio >= 1 && p.nivel > .35 && !c.girando;
-      if (viva && p.c.h > c.h) { const q = p.quedas.find(q => giroDe(q.lado, p.c.giro) === giroDe(n.entradaNova + c.giro, 2)); if (q && q.forca < .85 && n.cheio === 0) viva = false; }
+      const p = n.pai; let viva = !!n.alcance && p && p.cheio >= 1 && p.nivel > .35 && !c.girando;
+      if (viva && p.c.h > c.h) { const e = mundoDe(c, n.entradaNova), sai = e > 3 ? 9 - e : (e + 2) % 4, q = p.quedas.find(q => mundoDe(p.c, q.lado) === sai); if (q && q.forca < .85 && n.cheio === 0) viva = false; }
+      if (n.alcance) n.cor += limitar(corDe(n.alcance) - n.cor, -dt * 2.5, dt * 2.5);
       if (viva) {
         n.entrada = n.entradaNova;                             // a água pode passar a vir por outro lado
         if (n.cheio === 0) { Som.gota(); n.cheio = .001; } else if (n.nivel < .25) n.cheio = Math.min(n.cheio, .001);
         n.nivel = Math.min(1, n.nivel + dt / .4); const antes = n.cheio; n.cheio = Math.min(1, n.cheio + dt / (c.destino ? .4 : .5));
-        if (c.destino && antes < 1 && n.cheio >= 1) { Som.chegou(F.celulas.filter(d => d.destino && d.nos[0].cheio >= 1).length); chuvisco(c); }
+        if (c.destino && antes < 1 && n.cheio >= 1 && n.alcance !== c.pede && !J.avisouAgua) { J.avisouAgua = true; aviso(n.alcance === 3 ? 'Aqui chegaram as duas águas misturadas' : c.pede === 3 ? 'Este destino quer as duas águas misturadas' : 'Este destino espera a outra água', 4); }
+        if (c.destino && antes < 1 && n.cheio >= 1 && n.alcance === c.pede) { Som.chegou(F.celulas.filter(atendido).length); chuvisco(c); }
       } else if (!(n.alcance && n.cheio === 0)) { n.nivel = Math.max(0, n.nivel - dt / .75); if (n.nivel === 0) n.cheio = 0; }
-      const u = n.malha.material.uniforms; u.uCheio.value = n.cheio; u.uNivel.value = n.nivel; n.malha.visible = n.nivel > 0;
+      const u = n.malha.material.uniforms; u.uCheio.value = n.cheio; u.uNivel.value = n.nivel; u.uCor.value = n.cor; n.malha.visible = n.nivel > 0;
       if (!c.lugar) u.uEntrada.value.set(DX[n.entrada], DZ[n.entrada]);
     }
-    if (c.tipo === 'nascente') { const u = n.malha.material.uniforms; u.uCheio.value = u.uNivel.value = 1; }
+    if (c.tipo === 'nascente') { const u = n.malha.material.uniforms; u.uCheio.value = u.uNivel.value = 1; u.uCor.value = n.cor; }
+    if (c.parafuso && n.cheio >= 1) { c.parafuso.rotation.y -= dt * 2.4 * n.nivel; }
     if (n.cheio >= 1) cheios++;
     quedas(c, n, dt);
     if (c.destino) {
-      const ligado = n.cheio >= 1 && n.nivel > .6, k = limitar(c.k + (ligado ? dt / 2.8 : -dt / 3.5)); if (k !== c.k) { c.k = k; c.obj.vida(k); J.sombra = Math.max(J.sombra, 3); }
-      const q = c.obj.queda, f = limitar((q.userData.f || 0) + (n.cheio >= 1 && n.nivel > .4 ? dt / .4 : -dt / .5)); q.userData.f = f; q.visible = f > 0; q.material.uniforms.uForca.value = f;
+      const ligado = atendido(c), k = limitar(c.k + (ligado ? dt / 2.8 : -dt / 3.5)); if (k !== c.k) { c.k = k; c.obj.vida(k); J.sombra = Math.max(J.sombra, 3); }
+      const q = c.obj.queda, f = limitar((q.userData.f || 0) + (n.cheio >= 1 && n.nivel > .4 ? dt / .4 : -dt / .5)); q.userData.f = f; q.visible = f > 0; q.material.uniforms.uForca.value = f; q.material.uniforms.uCor.value = n.cor; for (const p of c.obj.pocas || []) p.material.uniforms.uCor.value = n.cor;
     }
   }
   J.cheios = cheios;
 }
+const mundoDe = (c, l) => c.lugar ? l : giroDe(l, c.tipo === 'comporta' ? c.eixo : c.giro);
+const atendido = c => c.destino && c.nos[0].cheio >= 1 && c.nos[0].nivel > .6 && c.nos[0].alcance === c.pede;
 function quedas(c, n, dt) {
   if (c.destino) return;
   for (const q of n.quedas) {
     let quer = 0;
     const saida = c.tipo === 'nascente' || q.lado !== n.entrada;
-    if (saida && n.cheio >= 1 && n.nivel > .4 && !c.girando) {
-      const lado = c.lugar ? q.lado : giroDe(q.lado, c.giro), v = vizinho(J.F, n, lado), u = q.malha.material.uniforms;
-      if (v) { if (v.c.h < c.h) { quer = 1; u.uAlto.value = (c.h - v.c.h) * DEGRAU; u.uLonge.value = .13; u.uLargo.value = .2; u.uSome.value = 0; q.fio = false; } }
-      else {
-        const nx = c.x + DX[lado], nz = c.z + DZ[lado], viz = nx >= 0 && nz >= 0 && nx < J.F.larg && nz < J.F.prof && J.F.grade[nz * J.F.larg + nx];
-        if (!(viz && viz.girando)) {
-          quer = 1; const px = c.raiz.position.x + DX[lado] * .6, pz = c.raiz.position.z + DZ[lado] * .6, y = J.ilha.altura(px, pz);
-          u.uAlto.value = limitar(YA + c.raiz.position.y - y, .22, 1.9); u.uLonge.value = viz && viz.h > c.h ? .02 : .15; u.uLargo.value = .13; u.uSome.value = .9; q.fio = true;
+    if (saida && n.cheio >= 1 && n.nivel > .4 && !c.girando && !(c.tipo === 'comporta' && c.giro)) {
+      const lado = mundoDe(c, q.lado), v = vizinho(J.F, n, lado);
+      if (lado === 5) { quer = 1; const u = malhaDa(q).material.uniforms; u.uAlto.value = 2 * DEGRAU - .22; u.uLonge.value = 0; u.uLargo.value = .2; u.uSome.value = 0; q.fio = false; }
+      else if (v) { if (v.c.h < c.h) { quer = 1; const u = malhaDa(q).material.uniforms; u.uAlto.value = (c.h - v.c.h) * DEGRAU; u.uLonge.value = .13; u.uLargo.value = .2; u.uSome.value = 0; q.fio = false; } }
+      else if (!ligado(J.F, n, lado)) {
+        const nx = c.x + DX[lado], nz = c.z + DZ[lado], dentro = nx >= 0 && nz >= 0 && nx < J.F.larg && nz < J.F.prof, base = nz * J.F.larg + nx, viz = dentro && (J.F.grade[base + J.F.larg * J.F.prof] || J.F.grade[base]);
+        if (!(dentro && [J.F.grade[base], J.F.grade[base + J.F.larg * J.F.prof]].some(x => x && x.girando))) {
+          quer = 1; const px = c.raiz.position.x + DX[lado] * .6, pz = c.raiz.position.z + DZ[lado] * .6, y = J.ilha.altura(px, pz), u = malhaDa(q).material.uniforms;
+          u.uAlto.value = limitar(YA + c.raiz.position.y - y, .22, 2.2); u.uLonge.value = viz && viz.h > c.h ? .02 : .15; u.uLargo.value = .13; u.uSome.value = .9; q.fio = true;
         }
       }
     }
-    q.forca = limitar(q.forca + (quer ? dt / .55 : -dt / .3)); q.malha.visible = q.forca > 0; q.malha.material.uniforms.uForca.value = q.forca;
-    if (quer && q.forca > .95 && Math.random() < dt * (q.fio ? 5 : 11)) { // respingos no pé da queda
-      const lado = c.lugar ? q.lado : giroDe(q.lado, c.giro), r = .5 + q.malha.material.uniforms.uLonge.value, e = (Math.random() - .5) * .16;
+    q.forca = limitar(q.forca + (quer ? dt / .55 : -dt / .3)); if (!q.malha) continue;
+    q.malha.visible = q.forca > 0; q.malha.material.uniforms.uForca.value = q.forca; q.malha.material.uniforms.uCor.value = n.cor;
+    if (quer && q.forca > .95 && q.lado < 4 && Math.random() < dt * (q.fio ? 5 : 11)) { // respingos no pé da queda
+      const lado = mundoDe(c, q.lado), r = .5 + q.malha.material.uniforms.uLonge.value, e = (Math.random() - .5) * .16;
       Part.nova(c.raiz.position.x + DX[lado] * r + DZ[lado] * e, c.raiz.position.y + YA - q.malha.material.uniforms.uAlto.value + .02, c.raiz.position.z + DZ[lado] * r + DX[lado] * e, { dur: .5, vx: (Math.random() - .5) * .35, vz: (Math.random() - .5) * .35, vy: .5 + Math.random() * .35, g: 2.6, tam: .03 + Math.random() * .025, alfa: .6 });
     }
   }
@@ -1178,10 +1402,11 @@ function quedas(c, n, dt) {
 function chuvisco(c) { for (let i = 0; i < 16; i++) { const a = Math.random() * 6.28, r = Math.random() * .35; Part.nova(c.raiz.position.x + Math.cos(a) * r, c.raiz.position.y + .3, c.raiz.position.z + Math.sin(a) * r, { dur: 2 + Math.random(), vy: .22 + Math.random() * .2, bal: .14, tam: .045, alfa: .75, cor: i % 2 ? '#fff6dd' : J.tema.flores[i % 4] }); } }
 
 function verificarFim() {
-  if (J.estado !== 'jogando' || J.F.celulas.some(c => c.girando || (c.destino && (c.nos[0].cheio < 1 || c.nos[0].nivel < .9)))) return;
+  if (J.estado !== 'jogando' || J.F.celulas.some(c => c.girando || (c.destino && (!atendido(c) || c.nos[0].nivel < .9)))) return;
+  if (J.F.dif === 2 && vazamentos(J.F)) { if (!J.avisouVaza) { J.avisouVaza = true; aviso('Todos têm água. Falta fechar as pontas que vazam', 4); } return; }
   J.estado = 'florido'; J.tGanhou = 0; apagarDica(); aviso(''); realcar(null); $('barra').classList.add('some');
-  const i = J.F.indice; if (!salvo.concluidas.includes(i)) salvo.concluidas.push(i);
-  delete salvo.andamento[i]; salvo.fase = Math.min(i + 1, FASES.length - 1); salvar();
+  const i = J.F.indice; if (!jaFeita(i)) salvo.feitas[J.F.dif].push(i);
+  focarAndar(null); delete salvo.andamento[chaveAnd(i)]; salvo.fase = Math.min(i + 1, FASES.length - 1); salvar();
   setTimeout(() => Som.acorde(), 500); if (!CALMO) Cam.deriva = .045;
 }
 const FRASES = ['A água encontrou o caminho.', 'O verde volta devagar.', 'Dá para ouvir o vale respirar.', 'Tudo tem sua hora de florir.', 'Cada pedra no seu lugar.', 'A terra agradece.'];
@@ -1193,14 +1418,15 @@ function quadroJogo(dt) {
   let terminou = false;
   for (const c of F.celulas) {
     if (c.tGiro < 1) {
-      c.tGiro += dt / .36; const t = limitar(c.tGiro), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      c.vis = misturar(c.de, c.visAlvo, e); c.gira.rotation.y = -c.vis * Math.PI / 2; J.sombra = Math.max(J.sombra, 2);
+      c.tGiro += dt / (c.emperrada ? .6 : .36); const t = limitar(c.tGiro), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      if (c.portao) { const a = YB + .004, b = YP + .06; c.portao.position.y = misturar(c.giro ? b : a, c.giro ? a : b, e); } else c.vis = misturar(c.de, c.visAlvo, e);
+      c.gira.rotation.y = -c.vis * Math.PI / 2; J.sombra = Math.max(J.sombra, 2);
       c.saltoGiro = Math.sin(Math.PI * t) * .07;
       if (c.tGiro >= 1) { c.girando = false; c.saltoGiro = 0; terminou = true; Som.assentar(); }
     }
-    const alvo = (c === J.sobre || c === J.cursor) && !c.fixa && podeJogar() ? .035 : 0; if (Math.abs(c.ergue - alvo) > .0005) { c.ergue += (alvo - c.ergue) * (1 - Math.exp(-dt * 12)); J.sombra = Math.max(J.sombra, 1); }
+    const foco = J.sobre || J.cursor, alvo = foco && !c.lugar && foco.unidade === c.unidade && !c.fixa && podeJogar() ? (c.grupo ? .06 : .035) : 0; if (Math.abs(c.ergue - alvo) > .0005) { c.ergue += (alvo - c.ergue) * (1 - Math.exp(-dt * 12)); J.sombra = Math.max(J.sombra, 1); }
     if (c.treme > 0) { c.treme = Math.max(0, c.treme - dt * 2.6); c.gira.rotation.y = -c.vis * Math.PI / 2 + Math.sin(c.treme * 22) * .025 * c.treme; }
-    if (!c.lugar) c.gira.position.y = c.ergue + (c.saltoGiro || 0);
+    if (!c.lugar) c.gira.position.y = c.ergue + (c.portao ? 0 : c.saltoGiro || 0);
   }
   if (terminou) correr(F);
   fluir(dt); mostrarDestinos();
@@ -1234,7 +1460,7 @@ function quadroJogo(dt) {
 }
 function realcar(c) {
   if (c && c.fixa) c = null;
-  if (c === J.sobre) return; J.sobre = c; tela.classList.toggle('peca', !!c); const a = c || J.cursor; if (a) { a.raiz.add(anelSobre); anelSobre.position.y = .105; anelSobre.visible = true; } else anelSobre.visible = false;
+  if (c === J.sobre) return; J.sobre = c; tela.classList.toggle('peca', !!c); const a = c || J.cursor; if (a) { a.raiz.add(anelSobre); anelSobre.position.y = a.andar ? .34 : .105; anelSobre.visible = true; } else anelSobre.visible = false;
 }
 function quadroMundo(dt) {
   const ganhou = J.estado === 'florido' ? 1 : 0;
@@ -1246,15 +1472,18 @@ function quadroMundo(dt) {
 let tAviso;
 function aviso(texto, seg = 3) { const a = $('aviso'); clearTimeout(tAviso); if (!texto) { a.classList.remove('ver'); return; } a.textContent = texto; a.classList.add('ver'); tAviso = setTimeout(() => a.classList.remove('ver'), seg * 1000); }
 function mostrarDestinos(novo) {
-  const d = J.F.celulas.filter(c => c.destino), k = d.filter(c => c.nos[0].cheio >= 1 && c.nos[0].nivel > .5).length; if (!novo && k === J.mostrado) return; J.mostrado = k;
-  $('gotas').innerHTML = d.map((_, i) => `<i class="${i < k ? 'cheia' : ''}"></i>`).join(''); $('contagem').textContent = k === d.length ? (k > 1 ? 'todos com água' : 'com água') : `${k} de ${d.length} com água`;
+  const d = J.F.celulas.filter(c => c.destino), k = d.filter(atendido).length, vaz = J.F.dif === 2 ? vazamentos(J.F) : 0, marca = k + ',' + vaz; if (!novo && marca === J.mostrado) return; J.mostrado = marca;
+  const gota = d.slice().sort((a, b) => atendido(b) - atendido(a));
+  $('gotas').innerHTML = gota.map(c => `<i class="${atendido(c) ? 'cheia' : ''} ${J.F.duas ? 'a' + c.pede : ''}"></i>`).join('');
+  $('contagem').textContent = (k === d.length ? (k > 1 ? 'todos com água' : 'com água') : `${k} de ${d.length} com água`) + (vaz ? `, ${vaz} ${vaz > 1 ? 'vazamentos' : 'vazamento'}` : '');
 }
 function atualizarBotoes() { const f = J.estado === 'florido'; $('b-desfazer').disabled = f || !J.passos.length; $('b-dica').disabled = f; }
-const jaFeita = i => salvo.concluidas.includes(i);
+const jaFeita = (i, d = salvo.dif ?? 1) => salvo.feitas[d].includes(i);
 
 function mostrarFim() {
-  const i = J.F.indice, ultima = i === FASES.length - 1, todas = FASES.every((_, k) => jaFeita(k));
-  J.fim = true; $('fim-titulo').textContent = ultima && todas ? 'O vale inteiro floresceu' : 'O vale floresceu'; $('fim-texto').textContent = ultima ? (todas ? 'Você levou água a todos. Volte a qualquer fase quando quiser.' : 'Ainda há fases esperando por água.') : FRASES[(i + salvo.concluidas.length) % FRASES.length];
+  const i = J.F.indice, ultima = i === FASES.length - 1, todas = FASES.every((_, k) => jaFeita(k)), m = J.F.mundo, mundoTodo = Array.from({ length: 10 }, (_, k) => jaFeita(m * 10 + k)).every(Boolean);
+  J.fim = true; $('fim-titulo').textContent = todas ? 'O mundo inteiro floresceu' : mundoTodo && i % 10 === 9 ? MUNDOS[m].nome + ' floresceu' : 'A água chegou a todos';
+  $('fim-texto').textContent = todas ? 'Você levou água a todos. Volte a qualquer fase quando quiser.' : ultima ? 'Ainda há fases esperando por água.' : i % 10 === 9 ? 'A seguir: ' + MUNDOS[m + 1].nome + '.' : FRASES[(i + salvo.feitas[J.F.dif].length) % FRASES.length];
   const b = $('fim-seguir'); b.querySelector('span').textContent = ultima ? 'Escolher fase' : 'Próxima fase'; $('fim').classList.remove('quieto'); $('fim').classList.add('ver');
   const barra = b.querySelector('i'); if (J.anim) J.anim.cancel(); J.anim = null;
   if (!ultima) { J.anim = barra.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 11000 }); J.anim.onfinish = () => { J.anim = null; seguir(); }; }
@@ -1262,17 +1491,28 @@ function mostrarFim() {
 function esconderFim() { J.fim = false; if (J.anim) { J.anim.onfinish = null; J.anim.cancel(); J.anim = null; } $('fim').classList.remove('ver'); }
 function ficar() { if (!J.fim) return; if (J.anim) { J.anim.onfinish = null; J.anim.cancel(); J.anim = null; } $('fim').classList.add('quieto'); $('barra').classList.remove('some'); atualizarBotoes(); $('fim').style.bottom = 'calc(max(16px, env(safe-area-inset-bottom)) + 62px)'; }
 function seguir() { if (!J.fim) return; $('fim').style.bottom = ''; if (J.F.indice === FASES.length - 1) { ficar(); abrirLista(); } else abrirFase(J.F.indice + 1); }
-function abrirLista() {
-  const n = salvo.concluidas.length; $('resumo').textContent = n === 0 ? 'Todas abertas. Jogue na ordem que quiser.' : n === FASES.length ? 'Todas concluídas. Jogue de novo quando quiser.' : `${n} de ${FASES.length} concluídas. Jogue na ordem que quiser.`;
-  $('lista').innerHTML = FASES.map((f, i) => { const d = (f.mapa.match(/[VHRP][\^>v<]/g) || []).length, feita = jaFeita(i), meio = salvo.andamento[i] && salvo.andamento[i].passos.length; return `<li><button data-i="${i}" class="${J.F && J.F.indice === i ? 'aqui' : ''}"><b>${i + 1}</b><span>${f.nome}<small>${feita ? 'Concluída' : meio ? 'Em andamento' : d === 1 ? '1 destino' : d + ' destinos'}</small></span><span class="gotas" aria-hidden="true"><i class="${feita ? 'cheia' : ''}"></i></span></button></li>`; }).join('');
-  if (J.anim) J.anim.pause(); $('d-fases').showModal();
+// ---- escolha de fases: dez mundos em cima, as dez fases do mundo escolhido embaixo
+let mundoVisto = 0;
+function abrirLista() { mundoVisto = J.F ? J.F.mundo : 0; desenharLista(); if (J.anim) J.anim.pause(); $('d-fases').showModal(); const a = $('mundos').querySelector('.aqui'); if (a) a.scrollIntoView({ block: 'nearest', inline: 'center' }); $('lista').scrollTop = 0; }
+function desenharLista() {
+  const d = salvo.dif ?? 1, n = salvo.feitas[d].length;
+  $('resumo').textContent = n === FASES.length ? 'Todas concluídas. Jogue de novo quando quiser.' : `${n} de ${FASES.length} concluídas no ${DIFS[d]}. Todas abertas: jogue na ordem que quiser.`;
+  $('difs').innerHTML = DIFS.map((t, i) => `<button data-d="${i}" aria-pressed="${i === d}">${t}</button>`).join('');
+  $('mundos').innerHTML = MUNDOS.map((m, k) => { const q = Array.from({ length: 10 }, (_, f) => jaFeita(k * 10 + f)).filter(Boolean).length; return `<button data-m="${k}" class="${k === mundoVisto ? 'aqui' : ''}" aria-pressed="${k === mundoVisto}" style="--c1:${m.luz[0].verde};--c2:${m.luz[0].nevoa}"><span class="cor"></span><span>${m.nome}<small>${q === 10 ? 'Completo' : q + ' de 10'}</small></span></button>`; }).join('');
+  $('mundo-texto').textContent = MUNDOS[mundoVisto].texto;
+  $('lista').innerHTML = Array.from({ length: 10 }, (_, f) => { const i = mundoVisto * 10 + f, feita = jaFeita(i), a = salvo.andamento[chaveAnd(i)], outras = [0, 1, 2].filter(k => k !== d && jaFeita(i, k)).map(k => DIFS[k]); return `<li><button data-i="${i}" class="${J.F && J.F.indice === i ? 'aqui' : ''}"><b>${f + 1}</b><span>${FASES[i].n}<small>${feita ? 'Concluída' : a && a.passos.length ? 'Em andamento' : outras.length ? 'Concluída no ' + outras.join(' e no ') : 'A fazer'}</small></span><span class="gotas" aria-hidden="true"><i class="${feita ? 'cheia' : ''}"></i></span></button></li>`; }).join('');
 }
-$('lista').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('d-fases').close(); $('fim').style.bottom = ''; abrirFase(+b.dataset.i); };
+$('mundos').onclick = e => { const b = e.target.closest('button'); if (!b) return; mundoVisto = +b.dataset.m; desenharLista(); $('mundos').querySelector('.aqui').scrollIntoView({ block: 'nearest', inline: 'nearest' }); };
+$('difs').onclick = e => { const b = e.target.closest('button'); if (!b || +b.dataset.d === salvo.dif) return; salvo.dif = +b.dataset.d; salvar(); J.trocouDif = true; desenharLista(); };
+$('lista').onclick = e => { const b = e.target.closest('button'); if (!b) return; J.trocouDif = false; $('d-fases').close(); $('fim').style.bottom = ''; abrirFase(+b.dataset.i); };
+// ---- escolha da dificuldade na primeira vez
+function pedirDificuldade() { return new Promise(r => { const d = $('d-dif'); d.oncancel = e => e.preventDefault(); d.onclick = e => { const b = e.target.closest('button[data-d]'); if (!b) return; salvo.dif = +b.dataset.d; salvar(); Som.iniciar(); d.close(); r(); }; d.showModal(); }); }
 $('d-fases').onclick = e => { if (e.target === $('d-fases')) $('d-fases').close(); }; $('fecha-fases').onclick = () => $('d-fases').close();
-$('d-fases').addEventListener('close', () => { if (J.anim) J.anim.play(); });
+$('d-fases').addEventListener('close', () => { if (J.trocouDif) { J.trocouDif = false; $('fim').style.bottom = ''; abrirFase(J.F.indice); } else if (J.anim) J.anim.play(); });
 $('fim-ficar').onclick = ficar; $('fim-seguir').onclick = seguir;
 $('b-fases').onclick = abrirLista; $('b-desfazer').onclick = desfazer; $('b-dica').onclick = pedirDica; $('b-reiniciar').onclick = reiniciar;
-$('b-camera').onclick = () => { const m = ['iso', 'livre', 'alto']; Cam.deriva = 0; Cam.trocar(m[(m.indexOf(Cam.modo) + 1) % 3], true); };
+$('b-camera').onclick = () => { const m = ['iso', 'frente', 'alto', 'livre']; Cam.deriva = 0; Cam.trocar(m[(m.indexOf(Cam.modo) + 1) % 4], true); };
+$('b-andar').onclick = trocarAndar;
 
 function mostrarSom() { const s = salvo.mudo || salvo.volume === 0; $('mudo').innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 10v4h3l5 4V6L7 10z"/>${s ? '<path d="m16 10 4 4M20 10l-4 4"/>' : '<path d="M15 9a4 4 0 0 1 0 6M17 6a8 8 0 0 1 0 12"/>'}</svg>`; $('mudo').setAttribute('aria-pressed', s); $('volume').value = salvo.mudo ? 0 : salvo.volume; }
 $('volume').oninput = e => { salvo.volume = +e.target.value; salvo.mudo = salvo.volume === 0; Som.iniciar(); Som.volume(); $('mudo').setAttribute('aria-pressed', salvo.mudo); salvar(); mostrarSom(); };
@@ -1283,7 +1523,7 @@ document.addEventListener('visibilitychange', () => Som.dormir(document.hidden))
 
 // ---- mouse e toque: um dedo toca ou gira a câmera; dois dedos aproximam e movem
 const raio = new THREE.Raycaster(), pt = new THREE.Vector2(), dedos = new Map(); let arrasto = false, pinca = null, inicioToque = 0, moverMouse = null;
-function pecaEm(x, y) { if (!J.toques) return null; pt.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1); raio.setFromCamera(pt, camera); const h = raio.intersectObjects(J.toques, false)[0]; return h ? h.object.userData.c : null; }
+function pecaEm(x, y) { if (!J.toques) return null; pt.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1); raio.setFromCamera(pt, camera); const h = raio.intersectObjects(J.toques, false).find(h => J.andar === null || h.object.userData.c.andar === J.andar); return h ? h.object.userData.c : null; }
 tela.addEventListener('pointerdown', e => {
   tela.setPointerCapture(e.pointerId); dedos.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, b: e.button }); inicioToque = performance.now();
   if (dedos.size === 1) { arrasto = false; J.cursor = null; if (e.pointerType !== 'mouse' && podeJogar()) realcar(pecaEm(e.clientX, e.clientY)); }
@@ -1311,14 +1551,14 @@ tela.addEventListener('contextmenu', e => e.preventDefault());
 tela.addEventListener('wheel', e => { e.preventDefault(); Cam.aproximar(Math.exp(limitar(e.deltaY, -120, 120) * .0011)); }, { passive: false });
 // ---- teclado
 addEventListener('keydown', e => {
-  if ($('d-fases').open || e.ctrlKey && e.key !== 'z' || e.metaKey || e.altKey || e.target.id === 'volume') return;
+  if ($('d-fases').open || $('d-dif').open || e.ctrlKey && e.key !== 'z' || e.metaKey || e.altKey || e.target.id === 'volume') return;
   const t = e.key.toLowerCase(), setas = { arrowup: [0, -1], arrowdown: [0, 1], arrowleft: [-1, 0], arrowright: [1, 0] };
   if (setas[t]) {
-    e.preventDefault(); const [sx, sy] = setas[t], s = Math.sin(Cam.az), c = Math.cos(Cam.az), wx = sx * c + sy * s, wz = -sx * s + sy * c, livres = J.F.celulas.filter(q => !q.fixa); let m = null;
+    e.preventDefault(); const [sx, sy] = setas[t], s = Math.sin(Cam.az), c = Math.cos(Cam.az), wx = sx * c + sy * s, wz = -sx * s + sy * c, livres = J.F.celulas.filter(q => !q.fixa && (J.andar === null || q.andar === J.andar)); let m = null;
     if (!J.cursor) m = J.F.caminho[0]; else { let melhor = 1e9; for (const q of livres) { const dx = q.x - J.cursor.x, dz = q.z - J.cursor.z, f = dx * wx + dz * wz, l = Math.abs(dx * wz - dz * wx); if (f > .3 && f + l * 2.2 < melhor) { melhor = f + l * 2.2; m = q; } } }
-    if (m) { J.sobre = null; J.cursor = m; m.raiz.add(anelSobre); anelSobre.position.y = .105; anelSobre.visible = true; }
+    if (m) { J.sobre = null; J.cursor = m; m.raiz.add(anelSobre); anelSobre.position.y = m.andar ? .34 : .105; anelSobre.visible = true; }
   } else if ((t === ' ' || t === 'enter') && (document.activeElement === tela || document.activeElement === document.body)) { e.preventDefault(); if (J.estado === 'florido') seguir(); else girar(J.cursor, e.shiftKey ? -1 : 1); }
-  else if (t === 'z') desfazer(); else if (t === 'd') pedirDica(); else if (t === 'c') $('b-camera').click(); else if (t === 'm') $('mudo').click(); else if (t === 'r') reiniciar(); else if (t === 'f') abrirLista();
+  else if (t === 'z') desfazer(); else if (t === 'd') pedirDica(); else if (t === 'c') $('b-camera').click(); else if (t === 'a') trocarAndar(); else if (t === 'm') $('mudo').click(); else if (t === 'r') reiniciar(); else if (t === 'f') abrirLista();
 });
 function ajustar() { const w = innerWidth, h = innerHeight; R.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); Part.m.uniforms.uEsc.value = h * R.getPixelRatio() / (2 * Math.tan(camera.fov * Math.PI / 360)); }
 addEventListener('resize', ajustar);
@@ -1338,10 +1578,13 @@ function passo(dt) {
   if (J.sombra > 0) { R.shadowMap.needsUpdate = true; J.sombra--; }
   R.render(cena, camera);
 }
-mostrarSom(); ajustar(); abrirFase(salvo.fase, { texto: 'Nascente' }).then(() => requestAnimationFrame(quadro));
+mostrarSom(); ajustar();
+if (salvo.dif === null && !/semescolha/.test(location.hash)) { montar(salvo.fase); Cam.trocar(cameraPadrao()); for (const n in Cam.quer) Cam[n] = Cam.quer[n]; passo(.02); $('veu').style.opacity = .55; $('veu-texto').textContent = ''; await pedirDificuldade(); }
+if (salvo.dif === null) salvo.dif = 1;
+abrirFase(salvo.fase, { texto: 'Nascente' }).then(() => requestAnimationFrame(quadro));
 
 // ganchos de teste (só no computador do desenvolvedor)
-if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') window.__nascente = { THREE, FASES, TIPOS, J, Cam, Som, R, cena, camera, salvo, lerFase, correr, completa, assinatura, girar, desfazer, reiniciar, pedirDica, abrirFase, passo, resolver() { for (const c of J.F.celulas) if (!c.fixa) { let n = 0; while (assinatura(c.tipo, c.giro) !== assinatura(c.tipo, c.certo) && n++ < 4) girar(c); } } };
+if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') window.__nascente = { THREE, FASES, TIPOS, J, Cam, Som, R, cena, camera, salvo, MUNDOS, DIFS, lerFase, correr, completa, venceu, vazamentos, certa, unidadeCerta, atendido, focarAndar, U, assinatura, girar, desfazer, reiniciar, pedirDica, abrirFase, montar, passo, resolver() { for (const u of J.F.unidades) if (!u.membros[0].fixa) { let n = 0; while (!unidadeCerta(u) && n++ < 4) girar(u.membros[0]); } } };
 </script>
 </body>
 </html>
