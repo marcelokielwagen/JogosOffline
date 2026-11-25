@@ -304,6 +304,15 @@ O roteiro completo das etapas está em `PROMPT.md`.
   Testado com toque simulado no Chrome: partida inteira de FreeCell sem esperar animação, arrasto e toque na Paciência, completar sozinho (o botão não
   funcionava no toque, corrigido), cruzadas resolvidas pelo teclado da tela, 29 temas nos 3 níveis, 360x640 a 1440x900, jogos salvos antigos. Não
   testado num celular de verdade.
+- **Soldier Survivor, 10 fases, cenários próprios e dificuldades (24/11/2026)**, pedido do dono ("criar níveis, esse sendo fácil; mudar cenário além da
+  ponte, apocalipse, muito fogo, inverno que escorrega"): dificuldades Fácil (o jogo como estava), Médio e Difícil, com estrelas por fase
+  (`DIFICULDADES` em `dados/balanco.js`); lugar próprio por fase em `cena/lugares.js` (ponte, canteiro de obras, avenida à noite, ferro-velho, montanha
+  nevada, beira-mar, porto, cidade em ruínas pegando fogo, siderúrgica com lava, ponte no eclipse), com chão, chamas, lava, mar, neve, cinza e brasas;
+  fases novas Inverno (o chão escorrega, placas de gelo, bolas de neve, chefe Nevasca, meio-chefe Lenhador) e Apocalipse (meteoros que deixam entulho,
+  chefe Para-raios, meio-chefe Pregador); sons de gelo, raio, meteoro, ventania e fogo. `personagens.bin` com 2,7 MB. Cache `jogos-offline-v48`.
+  Testado: robô nas 10 fases e 3 dificuldades (médio vence cerca de 3 em 4 no Fácil, metade no Médio, 1 em 5 no Difícil), as 10 fases inteiras no navegador
+  em pé e deitado, modo celular até cerca de 250 mil triângulos, 10 aberturas (0 texturas presas). Não testado num celular de verdade; sons medidos, não ouvidos.
+  Faltam: chefe Siamês, mais fases, melhorias e modo infinito.
 - **Cruzadas e Caça-Palavras em 3D, com som e 10 fases por tema; Dobro guardado (24/11/2026)**, pedido do dono.
   Comum aos dois: `js/tabuleiro3d.js` (peças 3D com letra, câmera que se ajusta à tela, confete; 10 materiais, um por fase, de Madeira a Diamante),
   `js/cenarios3d.js` (25 cenários por tema, formas paradas juntadas: 10 a 20 chamadas por quadro, até 76 mil triângulos), `js/sons-palavras.js`

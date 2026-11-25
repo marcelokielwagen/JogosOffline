@@ -14,13 +14,14 @@ export const VAGAS = (() => {
 
 export const MAX_ZUMBIS = 320, MAX_TIROS = 640;
 
-export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.random, melhorias = {}, maxZumbis = 150, maxSoldados = MAX_SOLDADOS } = {}) {
+const NORMAL = { forca: 1, vida: 1, horda: 1, aviso: 1, perda: 1 };
+export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.random, melhorias = {}, dif = null, maxZumbis = 150, maxSoldados = MAX_SOLDADOS } = {}) {
   const S = {
     trecho, d: 0, frente: 0, x: 0, alvoX: 0, alvoFrente: 0, estado: 'jogando', tempo: 0, mortos: 0, arma: 0, cadenciaExtra: 1, n: 0, perdidos: 0, esp: 0, ritmo: 1, atordoado: 0, adr: 0, adrT: 0, aperto: 1, meioFeito: !trecho.meio,
-    soldados: [], caidos: [], zumbis: [], tiros: [], portoes: [], barris: [], marcas: [], buracos: [], vaos: [], blocos: [], chefe: null, luta: '', tLuta: 0,
+    soldados: [], caidos: [], zumbis: [], tiros: [], portoes: [], barris: [], marcas: [], buracos: [], vaos: [], gelos: (trecho.gelo || []).map(([d0, d1, x0, x1]) => ({ d0, d1, x0, x1, t: 9, dur: 1e9 })), vx: 0, blocos: [], chefe: null, luta: '', tLuta: 0,
     multDano: 1 + (melhorias.dano || 0), multCad: 1 + (melhorias.cadencia || 0),
   };
-  const livresZ = [], livresT = [], forcaFim = trecho.forca || 1, pressa = trecho.aviso || 1;
+  const livresZ = [], livresT = [], Q = dif || NORMAL, forcaFim = (trecho.forca || 1) * Q.forca, pressa = (trecho.aviso || 1) * Q.aviso, mais = q => Math.max(1, Math.round(q * Q.horda));
   for (let i = 0; i < MAX_ZUMBIS; i++) livresZ.push({ id: i });
   for (let i = 0; i < MAX_TIROS; i++) livresT.push({});
   let proximaHorda = 0; const fila = [], daFrente = trecho.hordas.filter(h => h[3] !== 'L'), daLado = trecho.hordas.filter(h => h[3] === 'L').map(h => ({ h, foi: false })), perigos = (trecho.perigos || []).map(([d, tipo, x]) => ({ d, tipo, x, foi: false }));
@@ -67,10 +68,10 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     S.zumbis.push(z); return z;
   }
   // sobe pela lateral da ponte, perto do pelotão
-  function nascerLado(tipo, d, atraso = 0) { const z = nascer(tipo, 8, d); if (z) { z.lado = sorte() < .5 ? -1 : 1; z.entra = 1.15 + atraso; z.x = z.lado * 8; z.y = -3; } return z; }
+  function nascerLado(tipo, d, atraso = 0) { const z = nascer(tipo, 8, d); if (z) { z.lado = sorte() < .5 ? -1 : 1; z.entra = 1.15 + atraso; z.x = z.lado * 8; z.y = trecho.entraY ?? -3; } return z; }
   // tropa do chefe: escudeiros ficam na frente dele, o resto vem de trás ou das laterais
   function chamar(grupo) {
-    const c = S.chefe; for (const [tipo, q] of grupo) for (let i = 0; i < q; i++) {
+    const c = S.chefe; for (const [tipo, q0] of grupo) for (let i = 0, q = mais(q0); i < q; i++) {
       if (trecho.lateral && (tipo === 'comum' || tipo === 'corredor') && i % 2) { nascerLado(tipo, S.d + 9 + sorte() * 12, i * .12); continue; }
       const z = nascer(tipo, limita((sorte() - .5) * 9.4, -PISTA, PISTA), c.d + 1 + sorte() * 6); if (!z) return;
       if (tipo === 'escudeiro') { z.guarda = true; z.gx = q > 1 ? (i / (q - 1) - .5) * Math.min(7.6, q * 1.7) : 0; z.x = z.gx; }
@@ -146,9 +147,11 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   function soltarPerigo(p) {
     if (p.tipo === 'desaba') { const [x0, x1] = p.x < 0 ? [-5.6, -.7] : p.x > 0 ? [.7, 5.6] : [-1.9, 1.9]; faixa((x0 + x1) / 2, x1 - x0, p.d, p.d + 8, 1.35, { som: 'desaba', perda: 1, vao: { x0, x1, d0: p.d, d1: p.d + 8, dur: 99 } }); }
     else if (p.tipo === 'carro') lancarCarro(p.x, p.d, 24, p.x, p.d, 2.3, true);
+    else if (p.tipo === 'meteoro') circulo(p.x, p.d, 2.1, 1.9, { som: 'fogo', cai: 'brasa', fogo: true, perda: .5, escombro: true });
+    else if (p.tipo === 'bola') faixa(p.x, 2.7, p.d - 7, p.d + 15, 1.75, { som: 'pedra', bola: true, perda: .5 });
     else if (p.tipo === 'fogo') faixa(p.x, 3, p.d - 4, p.d + 4, 1.55, { som: 'fogo', perda: .4, fogo: true });
   }
-  const ANTES = { desaba: 27, carro: 22, fogo: VELOCIDADE * 1.5 };
+  const ANTES = { desaba: 27, carro: 22, meteoro: 18, bola: 9.5, fogo: VELOCIDADE * 1.5 };
 
   // ---------- tiros ----------
   let distAlvo = 1e9, alvoAte = 0, porTiro = 1; const miras = [], caixasPerto = [];
@@ -197,7 +200,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   // ---------- chefe ----------
   let proxTropa = 10, proxHid = 2.5;
   function chegarChefe(meio) {
-    const M = meio ? trecho.meio : trecho, id = meio ? M.id : M.chefe, T = CHEFES[id], rel = S.n / M.tropa, vida = Math.round(M.vida * (meio ? limita(.35 + .65 * rel, .5, 2.2) : limita(.5 + .5 * rel, .7, 2.6)));
+    const M = meio ? trecho.meio : trecho, id = meio ? M.id : M.chefe, T = CHEFES[id], rel = S.n / M.tropa, vida = Math.round(M.vida * Q.vida * (meio ? limita(.35 + .65 * rel, .5, 2.2) : limita(.5 + .5 * rel, .7, 2.6)));
     S.luta = 'chega'; S.tLuta = 0; if (!meio) { fila.length = 0; proximaHorda = daFrente.length; } proxTropa = 10;
     S.chefe = { id, T, meio: !!meio, vida, max: vida, x: 0, d: S.d + (meio ? ARENA.meio : ARENA.comeca), alt: 16, estado: 'cai', t: 0, fase: 0, etapa: 0, dano: 0, passo: 0, vel: 0, golpe: null, ultimo: -1, gira: 0, placas: Array.from({ length: T.placas || 0 }, () => ({ vida: vida * .06, viva: true })), vai: 0, fora: false, frio: 0, lado: 1 };
     aoEvento('chefeEntra', S.chefe);
@@ -248,6 +251,10 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     else if (g === 'pente') [-3.7, 0, 3.7].forEach(x => faixa(x, 2, cen - 5, ate, av, { som: 'pancada', perda: .4 }));
     else if (g === 'desaba') { if (S.vaos.some(v => v.dur < 50)) { circulo(px, cen + .5, 2.6, av, { som: 'pancada' }); c.golpe = 'garra'; } else { const s = px < 0 ? -1 : 1, x0 = s < 0 ? -5.6 : .7, x1 = s < 0 ? -.7 : 5.6; faixa((x0 + x1) / 2, x1 - x0, cen - 4, cen + 6, av + .15, { som: 'desaba', perda: 1, vao: { x0, x1, d0: cen - 4, d1: cen + 6, dur: 9 } }); total = av + .15; } }
     else if (g === 'convoca') total = 1.2;
+    else if (g === 'gelo') { const q = 2 + c.fase; for (let i = 0; i < q; i++) circulo(i ? limita(px + (sorte() - .5) * 8, -4, 4) : px, cen + (i ? (sorte() - .4) * 6 : .2), 1.9, av + i * .3, { som: 'gelo', atordoa: .7, perda: .28, gelo: true }); total = av + .3; }
+    else if (g === 'bolas') { const L = [-3.3, 0, 3.3], a = L.reduce((m, x, i) => Math.abs(x - px) < Math.abs(L[m] - px) ? i : m, 0), b = (a + 1 + Math.floor(sorte() * 2)) % 3; [a, b].slice(0, c.fase ? 2 : 1).forEach((k, i) => faixa(L[k], 3.1, cen - 6, ate, av + i * .55, { som: 'pedra', bola: true })); total = av + .3; }
+    else if (g === 'raio') { const q = c.meio ? 3 : 4 + c.fase; for (let i = 0; i < q; i++) circulo(i ? limita(px + (sorte() - .5) * 8, -4.5, 4.5) : px, cen + (i ? (sorte() - .45) * 7 : .2), 1.6, av + i * .24, { som: 'raio', raio: true }); total = av + .35; }
+    else if (g === 'pocas') { const s = sorte() < .5 ? 1 : -1; for (const [x, d] of [[-3.1, -2.6], [2.9, -2.2], [-2.6 * s, 2.6], [3.1 * s, 3.2], [0, .4]]) circulo(x, cen + d, 1.95, av + .5, { som: 'raio', raio: true, poca: true }); total = av + .5; }
     muda('prepara', total);
   }
   function bater(m) {
@@ -255,8 +262,10 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     if (m.obj) { m.obj.vivo = false; const v = m.obj.voa; m.obj.voa = null; if (v?.fica) S.blocos.push({ d0: m.d - 2.2, d1: m.d + 2.2, x0: m.x - 1, x1: m.x + 1, x: m.x, d: m.d, tipo: 'carro', caiu: true, vida: 300, dano: 0, bate: 0 }); else aoEvento('explosao', { x: m.x, d: m.d, raio: 2.6, quem: 'carro' }); }
     for (let i = 0; i < S.soldados.length; i++) { const s = S.soldados[i]; if (m.forma === 'faixa' ? Math.abs(s.x - m.x) < m.larg / 2 && s.d > m.d0 && s.d < m.d1 : Math.hypot(s.x - m.x, s.d - m.d) < m.r) { dentro++; alvo.push(s); } }
     aoEvento('golpe', { m, dentro });
-    if (dentro) { const q = Math.min(m.max ?? 999, Math.ceil(dentro * (m.perda ?? c?.T.perda ?? .5) * (S.n / S.soldados.length))); for (let k = 0; k < q && S.n > 0; k++) { const s = alvo.length ? alvo.splice(Math.floor(sorte() * alvo.length), 1)[0] : null, i = s ? S.soldados.indexOf(s) : -1; derrubar(i >= 0 ? i : S.soldados.length - 1, true, !!m.vao); } if (m.atordoa && S.estado === 'jogando') { S.atordoado = m.atordoa; aoEvento('atordoado'); } }
+    if (dentro) { const q = Math.min(m.max ?? 999, Math.ceil(dentro * Math.min(1, (m.perda ?? c?.T.perda ?? .5) * (m.vao ? 1 : Q.perda)) * (S.n / S.soldados.length))); for (let k = 0; k < q && S.n > 0; k++) { const s = alvo.length ? alvo.splice(Math.floor(sorte() * alvo.length), 1)[0] : null, i = s ? S.soldados.indexOf(s) : -1; derrubar(i >= 0 ? i : S.soldados.length - 1, true, !!m.vao); } if (m.atordoa && S.estado === 'jogando') { S.atordoado = m.atordoa; aoEvento('atordoado'); } }
     for (const z of S.zumbis) if (!z.morto && (m.forma === 'faixa' ? Math.abs(z.x - m.x) < m.larg / 2 && z.d > m.d0 && z.d < m.d1 : Math.hypot(z.x - m.x, z.d - m.d) < m.r) && !m.atordoa) { if (m.vao) sumir(z); else if (m.som !== 'gosma') ferir(z, 60, 0, false, true); }
+    if (m.gelo) { S.gelos.push({ d0: m.d - 1.9, d1: m.d + 1.9, x0: m.x - 1.9, x1: m.x + 1.9, t: 0, dur: 9 }); if (S.gelos.length > 9) S.gelos.splice(S.gelos.findIndex(g => g.dur < 99), 1); }
+    if (m.escombro) S.blocos.push({ d0: m.d - 1, d1: m.d + 1, x0: m.x - 1, x1: m.x + 1, x: m.x, d: m.d, tipo: 'escombro', vida: 240, dano: 0, bate: 0 });
     if (m.vao) S.vaos.push({ ...m.vao, t: 0, espera: 0, x: (m.vao.x0 + m.vao.x1) / 2, d: (m.vao.d0 + m.vao.d1) / 2 });
     if (m.buraco) { if (S.buracos.length > 2) S.buracos.shift(); S.buracos.push({ x: m.x, d: m.d, r: 1.45, t: 0, dur: 11, espera: 0 }); }
     if (m.chama) for (let i = 0; i < m.chama; i++) nascer('corredor', limita((sorte() - .5) * 10, -PISTA, PISTA), c.d + 1 + sorte() * 7);
@@ -313,7 +322,12 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     const solto = lo < -PISTA && hi > PISTA, querAp = solto ? 1 : limita((hi - lo - .5) / 2 / Math.max(.6, meia), .3, 1); S.aperto += (querAp - S.aperto) * Math.min(1, dt * 6);
     const lim = Math.max(.9, PISTA + .5 - meia * S.aperto);
     S.alvoX = limita(limita(S.alvoX, -lim, lim), trE, Math.max(trE, trD)); S.alvoFrente = limita(S.alvoFrente, S.luta ? -5 : TRAS, S.luta ? 5 : FRENTE);
-    S.x += (S.alvoX - S.x) * Math.min(1, dt * 14); S.frente += (S.alvoFrente - S.frente) * Math.min(1, dt * (S.luta ? 7 : 10));
+    for (let i = S.gelos.length - 1; i >= 0; i--) { const g = S.gelos[i]; g.t += dt; if (g.t > g.dur || g.d1 < S.d - 24) S.gelos.splice(i, 1); }
+    S.noGelo = S.gelos.some(g => S.x > g.x0 && S.x < g.x1 && centro0 > g.d0 && centro0 < g.d1);
+    // chão que escorrega: o pelotão tem embalo e passa do ponto; na placa de gelo quase não freia
+    if (trecho.escorrega || S.noGelo) { const k = S.noGelo ? 15 : 44, f = S.noGelo ? 1.7 : 7.2; S.vx = limita(S.vx + ((S.alvoX - S.x) * k - S.vx * f) * dt, -8.5, 8.5); S.x += S.vx * dt; if (Math.abs(S.x) > lim) { S.x = limita(S.x, -lim, lim); S.vx *= -.25; } if (S.x < trE || S.x > Math.max(trE, trD)) { S.x = limita(S.x, trE, Math.max(trE, trD)); S.vx = 0; } }
+    else { S.vx = 0; S.x += (S.alvoX - S.x) * Math.min(1, dt * 14); }
+    S.frente += (S.alvoFrente - S.frente) * Math.min(1, dt * (S.luta ? 7 : 10));
     const centro = S.d + S.frente; let frenteMax = -1e9; verAlvos(); porTiro = (S.n - S.esp) / Math.max(1, nv - S.esp);
     for (let i = 0; i < S.soldados.length; i++) {
       const s = S.soldados[i], v = VAGAS[i], ax = solto ? S.x + v[0] * S.aperto : limita(S.x + v[0] * S.aperto, Math.min(lo + .3, S.x), Math.max(hi - .3, S.x)), ad = centro + v[1] * (1 + (1 - S.aperto) * .9), k = Math.min(1, dt * 11), x0 = s.x, d0 = s.d, arma = s.arma || S.arma, A = ARMAS[arma];
@@ -328,8 +342,8 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     }
     // hordas entram quando chegam perto
     const ateD = S.meioFeito ? 1e9 : trecho.meio.d - 3;
-    while (proximaHorda < daFrente.length && daFrente[proximaHorda][0] < S.d + 62 && daFrente[proximaHorda][0] < ateD) { const [d, t, q, l, p] = daFrente[proximaHorda++]; for (let i = 0; i < q; i++) fila.push([t, t === 'escudeiro' && q > 1 ? (i / (q - 1) - .5) * l : (sorte() - .5) * l, d + 8 + (sorte() - .5) * p]); }
-    if (!S.luta) for (const o of daLado) if (!o.foi && S.d >= o.h[0] - 6) { o.foi = true; const [, t, q, , p] = o.h; for (let i = 0; i < q; i++) nascerLado(t, S.d + 8 + sorte() * p, i * .09); aoEvento('lateral', { d: S.d + 12 }); }
+    while (proximaHorda < daFrente.length && daFrente[proximaHorda][0] < S.d + 62 && daFrente[proximaHorda][0] < ateD) { const [d, t, q, l, p] = daFrente[proximaHorda++]; for (let i = 0, n = mais(q); i < n; i++) fila.push([t, t === 'escudeiro' && q > 1 ? (i / (mais(q) - 1) - .5) * l : (sorte() - .5) * l, d + 8 + (sorte() - .5) * p]); }
+    if (!S.luta) for (const o of daLado) if (!o.foi && S.d >= o.h[0] - 6) { o.foi = true; const [, t, q0, , p] = o.h, q = mais(q0); for (let i = 0; i < q; i++) nascerLado(t, S.d + 8 + sorte() * p, i * .09); aoEvento('lateral', { d: S.d + 12 }); }
     if (!S.luta && S.estado === 'jogando') for (const p of perigos) if (!p.foi && centro >= p.d - ANTES[p.tipo]) { p.foi = true; if (p.d > centro + 3) soltarPerigo(p); }
     while (fila.length && S.zumbis.length < maxZumbis) { const [t, x, d] = fila.shift(); nascer(t, limita(x, -PISTA, PISTA), Math.max(d, S.d + 45)); }
     montarGrade();
@@ -338,7 +352,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     if (S.chefe) passoChefe(dt, frenteMax);
     if (S.estado === 'jogando') passoMarcas(dt);
     for (const p of S.portoes) { if (p.anda && p.usado < 0) p.ox = Math.sin(S.tempo * 1.35 + p.d) * p.anda; if (p.usado < 0 && centro >= p.d && S.estado === 'jogando') passar(p); }
-    for (let i = S.blocos.length - 1; i >= 0; i--) { const o = S.blocos[i]; o.dano = Math.max(0, o.dano - dt * 5); if (o.tipo === 'carro' && o.vida <= 0) { S.blocos.splice(i, 1); aoEvento('carroExplode', { x: o.x, d: o.d, alt: 0 }); explodir(o.x, o.d, 4, 150, 'carro'); } else if (o.d1 < S.d - 24) S.blocos.splice(i, 1); }
+    for (let i = S.blocos.length - 1; i >= 0; i--) { const o = S.blocos[i]; o.dano = Math.max(0, o.dano - dt * 5); if (o.tipo === 'escombro' && o.vida <= 0) { S.blocos.splice(i, 1); aoEvento('escombro', o); } else if (o.tipo === 'carro' && o.vida <= 0) { S.blocos.splice(i, 1); aoEvento('carroExplode', { x: o.x, d: o.d, alt: 0 }); explodir(o.x, o.d, 4, 150, 'carro'); } else if (o.d1 < S.d - 24) S.blocos.splice(i, 1); }
     for (const b of S.barris) { b.dano = Math.max(0, b.dano - dt * 5); if (b.voa) passoCarro(b, dt); else if (b.alt) b.alt = Math.max(0, b.alt - dt * 11); if (b.vivo && b.vida <= 0) estourar(b); if (b.tipo === 'carro' || b.tipo === 'hidrante') continue; if (b.vivo) for (let i = S.soldados.length - 1; i >= 0; i--) { const s = S.soldados[i]; if (Math.abs(s.x - b.x) < b.raio + .2 && Math.abs(s.d - b.d) < b.raio + .2) { if (b.tipo === 'reforco') b.vida = 0; else if (b.tipo === 'barril') { derrubar(i); b.vida -= 60; } else b.vida -= 6; break; } } }
     for (let i = S.caidos.length - 1; i >= 0; i--) { const c = S.caidos[i]; c.t += dt; if (c.vel) { c.d += c.vel * Math.max(0, .5 - c.t) * dt * (c.jeito ? -1 : 2); } if (c.t > 6 || c.d < S.d - 14) { S.caidos[i] = S.caidos[S.caidos.length - 1]; S.caidos.pop(); } }
   }
@@ -350,7 +364,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
       if (z.fogo > 0) { z.fogo -= dt; z.vida -= 14 * S.multDano * dt; if (S.luta === 'morre') { if (z.fogo <= 0) { matar(z, 0); continue; } } else if (z.vida <= 0) { matar(z, 0); continue; } }
       if (z.entra > 0) { // subindo pela lateral
         z.entra = Math.max(0, z.entra - dt); const k = limita((1.15 - z.entra) / 1.15, 0, 1);
-        if (k < .55) { z.x = z.lado * 7.9; z.y = -3 + 4 * k / .55; } else { const q = (k - .55) / .45; z.x = z.lado * (7.9 - 3.2 * q); z.y = 1 - q * q + Math.sin(q * Math.PI) * .8; }
+        const y0 = trecho.entraY; if (y0) { const q = k * k; z.x = z.lado * (9.4 - 4.7 * k); z.y = y0 * (1 - q) + Math.sin(k * Math.PI) * 1.2; } else if (k < .55) { z.x = z.lado * 7.9; z.y = -3 + 4 * k / .55; } else { const q = (k - .55) / .45; z.x = z.lado * (7.9 - 3.2 * q); z.y = 1 - q * q + Math.sin(q * Math.PI) * .8; }
         z.ang = -z.lado * Math.PI / 2; z.fase += dt * 1.4; if (!z.entra) z.y = 0; continue;
       }
       const dist = z.d - centro; let vx = 0, vd = -z.vel;
@@ -365,6 +379,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
       } else vx = Math.sin(S.tempo * .8 + z.semente * 40) * .25;
       if (S.estado === 'derrota') { vd = -z.vel * .6; }
       if (S.luta === 'morre') { vx = vd = 0; }
+      if (trecho.escorrega && z.tipo === 'corredor') vx += Math.sin(S.tempo * 2.4 + z.semente * 30) * 2.2; // corredor derrapa na neve
       z.recuo = Math.max(0, z.recuo - dt * 1.6); const fr = 1 - z.recuo;
       // afasta dos vizinhos
       let ex = 0, ed = 0; perto(z.x, z.d, o => { if (o === z || o.morto) return; const dx = z.x - o.x, dd = z.d - o.d, r = z.T.raio + o.T.raio, q = dx * dx + dd * dd; if (q < r * r && q > 1e-6) { const l = Math.sqrt(q), f = (r - l) / l; ex += dx * f; ed += dd * f; } });
@@ -405,7 +420,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     passo, somar, evoluir, bom, especialistas, borda, chamar,
     mover(dx, dd) { S.alvoX += dx; S.alvoFrente += dd; },
     // para testes: leva direto à luta com o chefe
-    pularParaChefe() { S.meioFeito = true; S.d = trecho.comprimento - .5; S.blocos.length = S.vaos.length = S.marcas.length = 0; for (const o of daLado) o.foi = true; for (const p of perigos) p.foi = true; for (const p of S.portoes) if (p.usado < 0) p.usado = 0; for (const b of S.barris) b.vivo = false; for (const z of S.zumbis) z.morto = true; fila.length = 0; proximaHorda = daFrente.length; },
+    pularParaChefe() { S.meioFeito = true; S.d = trecho.comprimento - .5; S.blocos.length = S.vaos.length = S.marcas.length = 0; S.gelos.length = 0; for (const o of daLado) o.foi = true; for (const p of perigos) p.foi = true; for (const p of S.portoes) if (p.usado < 0) p.usado = 0; for (const b of S.barris) b.vivo = false; for (const z of S.zumbis) z.morto = true; fila.length = 0; proximaHorda = daFrente.length; },
     pularParaMeio() { const D = trecho.meio.d; S.d = D - .5; for (const p of S.portoes) if (p.usado < 0 && p.d < D) p.usado = 0; for (const b of S.barris) if (b.d < D) b.vivo = false; for (const z of S.zumbis) z.morto = true; fila.length = 0; while (proximaHorda < daFrente.length && daFrente[proximaHorda][0] < D) proximaHorda++; for (const o of daLado) if (o.h[0] < D) o.foi = true; for (const p of perigos) if (p.d < D) p.foi = true; S.blocos = S.blocos.filter(b => b.d > D); },
   });
 }

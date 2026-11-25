@@ -86,6 +86,7 @@ export function criarPortoes(cena, S, ruido) {
   function obra(o) {
     const g = new THREE.Group(); cena.add(g); let L = null, s = null, n = obras.size;
     if (o.tipo === 'carro') { const m = carro(n + 1)(g); m.rotation.y = (o.caiu ? .35 : .12) * (n % 2 ? 1 : -1) + (n % 3 === 0 ? Math.PI : 0); g.position.set(o.x, 0, -o.d); ({ L, s } = rotulo()); s.position.y = 2; s.scale.set(1.3, .65, 1); g.add(s); }
+    else if (o.tipo === 'escombro') { const P = new Pecas(); for (const [x, y, z, r, c] of [[0, .5, 0, .85, '#6a5560'], [.55, .35, .3, .5, '#8a7078'], [-.55, .3, .2, .5, '#57444e'], [.1, 1.1, -.1, .45, '#8a7078'], [-.3, .9, .4, .34, '#ff7a1e']]) P.por(new THREE.DodecahedronGeometry(r, 0), c, { x, y, z, ry: x * 5 }); com(P)(g); g.position.set(o.x, 0, -o.d); ({ L, s } = rotulo()); s.position.y = 1.9; s.scale.set(1.3, .65, 1); g.add(s); }
     else { // canteiro: cavaletes listrados na frente e do lado, cones e material dentro
       const P = new Pecas(), w = o.x1 - o.x0, c = o.d1 - o.d0, dentro = o.x0 < -5 ? 1 : -1, xi = dentro > 0 ? o.x1 : o.x0, cava = (x, z, ry, l) => { P.por(caixaChanfro(l, .3, .1, .025), '#ff7a1f', { x, y: .95, z, ry }).por(caixaChanfro(l, .3, .1, .025), '#fbf6ea', { x, y: .5, z, ry }); for (let k = 0; k < 3; k++) { const q = (k - 1) * l * .32; P.por(caixaChanfro(l * .13, .31, .115, .025), '#fbf6ea', { x: x + Math.cos(ry) * q, y: .95, z: z - Math.sin(ry) * q, ry }).por(caixaChanfro(l * .13, .31, .115, .025), '#ff7a1f', { x: x + Math.cos(ry) * q, y: .5, z: z - Math.sin(ry) * q, ry }); } for (const q of [-.44, .44]) P.por(caixaChanfro(.1, 1.2, .3, .025), '#3a3550', { x: x + Math.cos(ry) * q * l, y: .6, z: z - Math.sin(ry) * q * l, ry }); };
       const nf = Math.max(1, Math.round(w / 2)); for (let k = 0; k < nf; k++) cava(o.x0 + w * (k + .5) / nf, c / 2 - .15, 0, w / nf * .92);
@@ -109,6 +110,12 @@ export function criarPortoes(cena, S, ruido) {
       \n#include <colorspace_fragment>\n }` }));
   const aV = new THREE.InstancedBufferAttribute(new Float32Array(NV * 4), 4).setUsage(THREE.DynamicDrawUsage); gV.setAttribute('aV', aV);
   const vaos = new THREE.InstancedMesh(gV, mV, NV); vaos.frustumCulled = false; vaos.renderOrder = 1; vaos.count = 0; cena.add(vaos); lixo.push(vaos); const Mx = new THREE.Matrix4();
+  // ---------- placas de gelo: azul liso com riscos claros ----------
+  const NG = 12, gG = D(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2)), mG = D(new THREE.ShaderMaterial({ fog: true, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, uniforms: { ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog), tRuido: { value: ruido } },
+    vertexShader: 'attribute vec4 aV; varying vec3 vP; varying vec4 vV;\n#include <fog_pars_vertex>\nvoid main(){ vec4 w = modelMatrix * instanceMatrix * vec4(position, 1.); vP = w.xyz; vV = aV; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;\n#include <fog_vertex>\n }',
+    fragmentShader: 'uniform sampler2D tRuido; varying vec3 vP; varying vec4 vV;\n#include <common>\n#include <fog_pars_fragment>\nvoid main(){ float n = texture2D(tRuido, vP.xz * .09).r; vec2 q = min(vP.xz - vV.xz, vV.yw - vP.xz); float b = min(q.x, q.y) - n * 1.3 + .25; if (b < 0.) discard; vec3 c = mix(vec3(.16, .52, .86), vec3(.3, .7, .97), step(.5, texture2D(tRuido, vP.xz * .03 + .3).r)); float ri = fract((vP.x * .8 + vP.z * .5) * .22 + n * .12); c = mix(c, vec3(.82, .96, 1.), step(.86, ri) * .75); float ra = abs(texture2D(tRuido, vP.xz * .05 + .6).r - .5); c = mix(c, vec3(.9, .98, 1.), (1. - smoothstep(.0, .012, ra)) * .8); if (b < .16) c = vec3(.96, .99, 1.); if (b < .05) c = vec3(.1, .3, .55); gl_FragColor = vec4(c, .94);\n#include <colorspace_fragment>\n#include <fog_fragment>\n }' }));
+  const aG = new THREE.InstancedBufferAttribute(new Float32Array(NG * 4), 4).setUsage(THREE.DynamicDrawUsage); gG.setAttribute('aV', aG);
+  const gelos = new THREE.InstancedMesh(gG, mG, NG); gelos.frustumCulled = false; gelos.renderOrder = 1; gelos.count = 0; cena.add(gelos); lixo.push(gelos);
   return {
     corAgua(c) { mV.uniforms.uAgua.value.set(c.agua); mV.uniforms.uConc.value.set(c.conc); },
     atualizar(dt, t, d) {
@@ -133,8 +140,9 @@ export function criarPortoes(cena, S, ruido) {
       }
       for (const o of S.blocos) { const r = obras.get(o) || obra(o), perto = o.d0 - d; r.vivo = t; r.g.visible = perto < 92; longe(r.g, perto); if (r.L) { const v = String(Math.max(1, Math.ceil(o.vida))); if (v !== r.ultimo) { r.ultimo = v; r.L.escrever(v); } r.g.scale.setScalar(1 + o.dano * .03); } }
       for (const r of obras.values()) if (r.vivo !== t) r.g.visible = false;
+      let kg = 0; for (const v of S.gelos) { if (kg >= NG || v.d0 > d + 110) continue; const q = Math.min(1, v.t * 4, Math.max(0, (v.dur - v.t) * 2)), w = (v.x1 - v.x0 + .8) * q, h = (v.d1 - v.d0 + .8) * q, x = (v.x0 + v.x1) / 2, dd = (v.d0 + v.d1) / 2; Mx.makeScale(w, 1, h).setPosition(x, .018, -dd); gelos.setMatrixAt(kg, Mx); aG.array.set([x - w / 2, x + w / 2, -dd - h / 2, -dd + h / 2], kg * 4); kg++; } gelos.count = kg; gelos.visible = kg > 0; gelos.instanceMatrix.needsUpdate = aG.needsUpdate = true;
       let k = 0; for (const v of S.vaos) { if (k >= NV) break; const q = Math.min(1, v.t * 4, Math.max(0, (v.dur - v.t) * 2)), w = (v.x1 - v.x0) * q, h = (v.d1 - v.d0) * q; Mx.makeScale(w, 1, h).setPosition(v.x, .025, -v.d); vaos.setMatrixAt(k, Mx); aV.array.set([v.x - w / 2, v.x + w / 2, -v.d - h / 2, -v.d + h / 2], k * 4); k++; } vaos.count = k; vaos.visible = k > 0; vaos.instanceMatrix.needsUpdate = aV.needsUpdate = true;
     },
-    dispose() { for (const o of lixo) o.dispose(); for (const o of [...grupos, ...barris, ...obras.values()]) o.g.removeFromParent(); vaos.removeFromParent(); },
+    dispose() { for (const o of lixo) o.dispose(); for (const o of [...grupos, ...barris, ...obras.values()]) o.g.removeFromParent(); vaos.removeFromParent(); gelos.removeFromParent(); },
   };
 }

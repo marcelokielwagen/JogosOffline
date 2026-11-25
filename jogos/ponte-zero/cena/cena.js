@@ -86,6 +86,7 @@ export class Cena {
       case 'reforco': case 'resgate': fx.confete(d.b.x, .8, -d.b.d, 26); fx.anel(d.b.x, -d.b.d, 2.4, [.3, .9, .3], .6); if (nome === 'resgate') fx.faisca(d.b.x, 1, -d.b.d, 14, [.8, .85, .95]); break;
       case 'caixa': fx.confete(d.b.x, .8, -d.b.d, 26); fx.anel(d.b.x, -d.b.d, 2.4, [1, .72, .12], .6); fx.nuvem(d.b.x, .5, -d.b.d, 5, [.6, .42, .2], .8, 1.4); break;
       case 'carroExplode': if (d.alt > 1) { fx.explosao(d.x, -d.d, 3.4, d.alt); fx.faisca(d.x, d.alt, -d.d, 20); } this.tremor = Math.max(this.tremor, .22); break;
+      case 'escombro': fx.nuvem(d.x, .5, -d.d, 6, [.5, .42, .36], .9, 1.8); fx.faisca(d.x, .8, -d.d, 10, [.6, .5, .55]); break;
       case 'batida': fx.faisca(d.x, .8, -d.d, 8); this.tremor = Math.min(.25, this.tremor + .06); break;
       case 'escudo': fx.faisca(d.x, 1, -d.d, 12, [.5, .8, 1]); break;
       case 'caiu': fx.nuvem(d.x, .1, -d.d, 2, [.5, .42, .36], .5, .8, .5); break;
@@ -100,7 +101,7 @@ export class Cena {
       case 'chefePousa': fx.pouso(d.x, -d.d, d.T.raio); this.tremor = .55; break;
       case 'passoChefe': fx.nuvem(d.x + (Math.floor(d.passo * 2) % 2 ? .9 : -.9), .2, -d.d + .6, 4, [.5, .42, .36], .7, 1.4); this.tremor = Math.max(this.tremor, .1); break;
       case 'fase': fx.anel(d.x, -d.d, 6, [1, .3, .1], .8); fx.anel(d.x, -d.d, 4, [1, .72, .12], .7, .12); this.tremor = .3; break;
-      case 'golpe': { const c = this.S.chefe; fx.golpe(d.m); if (d.m.som === 'grito') this.tremor = .2; else if (d.m.som === 'gosma') this.tremor = Math.max(this.tremor, .06); else if (d.m.som === 'fogo') this.tremor = Math.max(this.tremor, .14); else { this.tremor = Math.min(.5, (c?.meio ? .2 : .28) + (d.dentro ? .12 : 0)); if (c && d.m.som === 'pancada' && d.m.forma === 'faixa') fx.nuvem(c.x, .4, -(c.d - c.T.raio - 1.5), 8, [.5, .42, .36], 1.2, 3); } break; }
+      case 'golpe': { const c = this.S.chefe; fx.golpe(d.m); if (d.m.som === 'grito') this.tremor = .2; else if (d.m.som === 'gosma') this.tremor = Math.max(this.tremor, .06); else if (d.m.som === 'fogo' || d.m.som === 'raio' || d.m.som === 'gelo') this.tremor = Math.max(this.tremor, .14); else { this.tremor = Math.min(.5, (c?.meio ? .2 : .28) + (d.dentro ? .12 : 0)); if (c && d.m.som === 'pancada' && d.m.forma === 'faixa') fx.nuvem(c.x, .4, -(c.d - c.T.raio - 1.5), 8, [.5, .42, .36], 1.2, 3); } break; }
       case 'placaCaiu': { corpo.soltar(d.i); V.copy(corpo.ponto(2, 0, .95, .45)); fx.explosao(V.x, V.z + 1, 2.2, V.y); this.tremor = .25; break; }
       case 'chefeMorre': { const c = d, nE = c.meio ? 5 : 9, dt = c.meio ? .16 : .26; this.tremor = .5; for (let i = 0; i < nE; i++) this.espera.push([i * dt, () => { fx.explosao(c.x + (Math.random() - .5) * c.T.raio * 1.6, -c.d + 1 + Math.random() * 1.5, (c.meio ? 1.6 : 2.6) + Math.random() * 1.2, .8 + Math.random() * c.T.altura * .6); this.tremor = Math.min(.4, this.tremor + .14); }]); if (c.meio) { this.espera.push([.9, () => { fx.explosao(c.x, -c.d, 4, 1); fx.anel(c.x, -c.d, 5, [1, .72, .12], .8); this.tremor = .35; }]); break; }
         this.espera.push([2.5, () => { fx.explosao(c.x, -c.d, 6.5, 1.4); fx.pouso(c.x, -c.d, 2); this.tremor = .6; }], [2.9, () => fx.confete(this.S.x, 4, -(this.S.d + 3), 90)], [4.2, () => fx.confete(this.S.x, 4, -(this.S.d + 2), 90)]); break; }
@@ -114,7 +115,7 @@ export class Cena {
     this.menu += (+this.noMenu - this.menu) * Math.min(1, dt * 3); this.luta += ((S.luta ? S.chefe?.meio ? .5 : 1 : 0) - this.luta) * Math.min(1, dt * 1.6);
     const mn = this.menu, L = this.luta * (1 - mn), D = this.dist * this.zoom * (1 - mn * (pe ? .64 : .5)) * (1 + L * (pe ? .06 : .1)), ang = (pe ? .56 : .37) - mn * .3 - L * (pe ? .14 : .08), tr = this.tremor;
     cam.position.set(this.camX + Math.sin(this.t * 41) * tr * .25, Math.sin(ang) * D + 1 + Math.sin(this.t * 37) * tr * .25, -this.camD + Math.cos(ang) * D);
-    this.V.set(this.camX * .92, (pe ? .9 : 1.2) - mn * (pe ? .95 : .25) + L * (pe ? 1.6 : 2.5), -this.camD - (pe ? 6.5 : 5) + mn * (pe ? 4 : 2) - L * 2.5); const fp = this.fimP = (this.fimP || 0) + ((this.noMenu && this.noMenu !== true ? 1 : 0) - (this.fimP || 0)) * Math.min(1, dt * 3); const fov = pe ? 50 : 42 - L * 4; if (Math.abs(cam.fov - fov) > .05) { cam.fov = fov; cam.updateProjectionMatrix(); }
+    this.V.set(this.camX * .92, (pe ? .9 : 1.2) - mn * (pe ? 1.4 : .25) + L * (pe ? 1.6 : 2.5), -this.camD - (pe ? 6.5 : 5) + mn * (pe ? 4 : 2) - L * 2.5); const fp = this.fimP = (this.fimP || 0) + ((this.noMenu && this.noMenu !== true ? 1 : 0) - (this.fimP || 0)) * Math.min(1, dt * 3); const fov = pe ? 50 : 42 - L * 4; if (Math.abs(cam.fov - fov) > .05) { cam.fov = fov; cam.updateProjectionMatrix(); }
     const lado = !pe && this.h < 480 ? Math.max(mn, fp) : 0; this.V.x -= lado * D * .3; cam.position.x -= lado * D * .3; if (pe) { this.V.y -= fp * (3.4 + D * .27); } cam.lookAt(this.V);
     const foco = -this.camD - 9; this.sol.target.position.set(this.camX * .5, 0, foco); this.sol.position.copy(this.sol.target.position).addScaledVector(CHAVE, 42);
     this.cenario.atualizar(this.camD, this.t, cam);

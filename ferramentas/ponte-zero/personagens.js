@@ -422,6 +422,49 @@ function mae() {
   return { g, J };
 }
 
+// 9) Nevasca: gigante peludo da montanha, chifres e espinhos de gelo, com a lâmina de um limpa-neve na mão
+function nevasca() {
+  const J = juntas({ pelve: .54, coluna: .66, peito: .92, cabeca: [1.16, .16], ombro: [.44, 1.12, .0], cotovelo: [.68, .84, -.03], punho: [.8, .52, .06], coxa: [.19, .52, 0], joelho: [.22, .3, .02], tornozelo: [.23, .1, -.01], dedo: .15 });
+  const g = [], N = (mat, op) => { const x = new Grupo(mat, op); g.push(x); return x; };
+  cabecaMonstro(N, [0, 1.3, .24], .2, { dentes: 4, olhos: [.4, .4], testa: 1.3 });
+  // pelo em tufos
+  const pelo = N(M.branco, { k: .05, res: .0155, imp: 1.1 }); pelo.por(elip([0, 1.1, -.05], [.45, .28, .3]), 2).por(elip([0, .76, .02], [.36, .28, .3]), [[1, .7], [0, .3]]).por(elip([0, 1.36, .12], [.23, .2, .2]), 3).por(elip([0, .56, .0], [.3, .17, .25]), 0);
+  for (let k = 0; k < 10; k++) { const a = k / 10 * 6.283, x = Math.sin(a), z = Math.cos(a); pelo.por(caps([x * .32, .82, .02 + z * .26], [x * .4, .6, .02 + z * .33], .075, .012), [[1, .6], [0, .4]]); if (z < .6) pelo.por(caps([x * .4, 1.12, -.04 + z * .24], [x * .5, .92, -.04 + z * .3], .08, .014), 2); }
+  for (const s of [1, -1]) pelo.por(caps([s * .15, 1.2, .3], [s * .18, 1.02, .36], .07, .015), 3).por(caps([s * .06, 1.13, .34], [s * .06, .96, .4], .06, .012), 3).por(caps([s * .12, 1.5, .16], [s * .2, 1.62, .1], .06, .012), 3);
+  for (const s of [1, -1]) N(M.visor, { k: .015, res: .0125, imp: 1.4, sempre: true }).por(caps([s * .17, 1.42, .12], [s * .34, 1.5, .1], .07, .05), 3).por(caps([s * .34, 1.5, .1], [s * .4, 1.72, .18], .05, .008), 3);
+  const gelo = N(M.visor, { k: .008, res: .0135, imp: 1.2, sempre: true }); for (const [x, y, z, h, a] of [[0, 1.26, -.28, .46, 0], [.2, 1.2, -.28, .36, .25], [-.2, 1.2, -.28, .36, -.25], [.1, .98, -.33, .32, .1], [-.12, .98, -.33, .3, -.1]]) gelo.por(caps([x, y, z], [x + a * .5, y + h * .75, z - h * .75], .085, .008), 2);
+  // cachecol e cinto de corrente
+  N(M.vermelho, { k: .03, res: .0135, imp: 1.2 }).por(toro([0, 1.14, .16], .22, .075, { rot: [28, 0, 0] }), [[3, .4], [2, .6]]).por(caps([.16, 1.06, .34], [.2, .74, .4], .07, .06), [[2, .6], [1, .4]]);
+  const cor = N(M.metal, { k: .004, res: .0115 }); for (let i = 0; i < 9; i++) { const a = -1.2 + i * .3; cor.por(toro([Math.sin(a) * .33, .6 - Math.cos(a) * .03, .02 + Math.cos(a) * .3], .05, .017, { rot: [90 * (i % 2), 0, 40] }), 0); }
+  const antes = g.length; bracosPernas(N, J, { rb: [.16, .15, .13], rp: [.17, .14, .14], m: .21, fecha: 1 });
+  for (const [l, s, b, c] of LADOS) { const o = J['braco' + l], e = J['antebraco' + l], w = J['mao' + l], j = J['canela' + l], q = J['coxa' + l]; const f = N(M.branco, { k: .04, res: .0145 }); f.por(elip(o, [.22, .2, .2]), [[b, .6], [2, .4]]).por(caps(o, e, .185, .165), b).por(caps(e, lerp(e, w, .72), .175, .15), b + 1).por(caps(lerp(e, w, .5), add(lerp(e, w, .6), [s * .08, -.2, -.06]), .09, .012), b + 1).por(caps(q, j, .19, .16), c).por(caps(j, lerp(j, J['pe' + l], .55), .165, .16), c + 1); }
+  // lâmina do limpa-neve
+  N(M.metal, { k: .012, res: .0125, sempre: true }).por(caps([0, 0, -.35], [0, 0, .95], .05, .055), 16); N(M.amarelo, { k: .02, res: .0145, imp: 1.3, sempre: true, pinta: p => Math.abs(p[1]) > .12 && Math.floor((p[0] * 2 + p[2]) * 6) % 2 ? M.preto : M.amarelo }).por(bloco([0, 0, 1.06], [.52, .2, .05], .03, [18, 0, 0]), 16).por(bloco([0, .2, 1.0], [.52, .06, .05], .03, [-20, 0, 0]), 16); N(M.metal, { k: .01, res: .0125, sempre: true }).por(bloco([0, -.19, 1.14], [.53, .05, .04], .02, [18, 0, 0]), 16).por(bloco([.3, .02, .98], [.04, .2, .1], .02), 16).por(bloco([-.3, .02, .98], [.04, .2, .1], .02), 16);
+  return { g, J };
+}
+// 10) Para-raios: torre de energia que anda, isoladores nos ombros, bobina acesa no peito e uma lança de raio
+function pararaios() {
+  const J = juntas({ pelve: .8, coluna: .93, peito: 1.13, cabeca: [1.36, .06], ombro: [.3, 1.28, .0], cotovelo: [.54, 1.0, -.05], punho: [.68, .66, .06], coxa: [.13, .78, 0], joelho: [.16, .45, .03], tornozelo: [.17, .1, -.01], dedo: .16 });
+  const g = [], N = (mat, op) => { const x = new Grupo(mat, op); g.push(x); return x; };
+  cabecaMonstro(N, [0, 1.54, .1], .185, { dentes: 5, olhos: [.44, .36], testa: 1 });
+  // coroa de hastes e para-raios
+  N(M.metal, { k: .01, res: .0115, imp: 1.3 }).por(toro([0, 1.64, .07], .17, .035, { rot: [-8, 0, 0] }), 3); const has = N(M.cano, { k: .006, res: .0115, sempre: true, imp: 1.2 }); for (let k = 0; k < 5; k++) { const a = -1.2 + k * .6; has.por(caps([Math.sin(a) * .16, 1.66, .07 + Math.cos(a) * .12 - .06], [Math.sin(a) * .3, 1.95 + (k === 2 ? .22 : 0), .03 + Math.cos(a) * .12 - .06], .022, .01), 3); } const bl = N(M.brilho, { k: 0, res: .0105, sempre: true }); for (let k = 0; k < 5; k++) { const a = -1.2 + k * .6; bl.por(elip([Math.sin(a) * .3, 1.96 + (k === 2 ? .23 : 0), .03 + Math.cos(a) * .12 - .06], [.042, .042, .042]), 3); }
+  N(M.pele, { k: .07, res: .0135 }).por(caps([0, 1.24, .0], [0, 1.42, .05], .09), [[3, .5], [2, .5]]).por(elip([0, 1.2, -.01], [.28, .19, .18]), 2).por(elip([0, .98, .0], [.17, .18, .14]), 1);
+  // gaiola de treliça em volta do tronco
+  const tr = N(M.metal, { k: .004, res: .0125, imp: 1.2, sempre: true }); const P = (a, y, r) => [Math.sin(a) * r, y, Math.cos(a) * r * .8]; for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283 + .52, b = (k + 1) / 6 * 6.283 + .52; tr.por(caps(P(a, 1.36, .24), P(a, .84, .31), .026), [[2, .6], [1, .4]]).por(caps(P(a, 1.3, .25), P(b, .92, .3), .018), [[2, .6], [1, .4]]).por(caps(P(a, 1.12, .27), P(b, 1.12, .27), .022), 2).por(caps(P(a, .84, .31), P(b, .84, .31), .028), 1); }
+  N(M.brilho, { res: .0115, imp: 1.2, sempre: true }).por(elip([0, 1.16, .12], [.12, .15, .1]), 2); const bob = N(M.laranja, { k: 0, res: .0115, sempre: true }); for (let k = 0; k < 4; k++) bob.por(toro([0, 1.04 + k * .08, .1], .135, .02), 2);
+  // isoladores nos ombros
+  for (const [s, b] of [[1, 4], [-1, 7]]) { const o = [[b, .35], [2, .65]]; const iso = N(M.vermelho, { k: .006, res: .0115, imp: 1.2, sempre: true }); for (let k = 0; k < 4; k++) iso.por(cil([s * (.33 + k * .02), 1.4 + k * .085, -.02], .115 - k * .012, .085 - k * .012, .024, .012, [0, 0, s * -12]), o); N(M.branco, { k: 0, res: .0115, sempre: true }).por(caps([s * .32, 1.36, -.02], [s * .4, 1.74, -.02], .05, .04), o); N(M.brilho, { res: .0105, sempre: true }).por(elip([s * .405, 1.78, -.02], [.062, .062, .062]), o); }
+  // manto rasgado
+  N(M.roupa, { k: .06, res: .0145, corte: p => Math.max(.4 + .07 * Math.sin(Math.atan2(p[0], p[2]) * 6) - p[1], p[1] - .92) }).por(elip([0, .84, 0], [.22, .14, .18]), 0).por(cil([0, .6, 0], .33, .2, .24, .05), [[0, .5], [10, .25], [13, .25]]);
+  N(M.couro, { k: .01, res: .0125 }).por(toro([0, .88, 0], .2, .045, { sz: .85 }), 0); N(M.amarelo, { res: .0105, sempre: true, k: .004 }).por(caps([.04, .95, .2], [-.03, .88, .21], .022, .02), 0).por(caps([-.03, .88, .21], [.04, .88, .21], .02, .02), 0).por(caps([.04, .88, .21], [-.04, .78, .2], .02, .006), 0);
+  bracosPernas(N, J, { rb: [.09, .082, .075], rp: [.105, .09, .08], m: .18, fecha: 1, pelada: true });
+  for (const [l, s, b] of LADOS) { const e = J['antebraco' + l], w = J['mao' + l]; const a = N(M.cano, { k: 0, res: .0115, sempre: true }); for (let k = 0; k < 4; k++) a.por(toro(lerp(e, w, .15 + k * .2), .105, .02, { rot: [0, 0, s * 26] }), b + 1); }
+  // lança em forma de raio
+  N(M.couro, { k: .006, res: .0115, sempre: true }).por(caps([0, 0, -.5], [0, 0, .5], .042), 16); const ra = N(M.amarelo, { k: .006, res: .0125, imp: 1.5, sempre: true }); [[[0, 0, .5], [0, .13, .78]], [[0, .13, .78], [0, -.1, .84]], [[0, -.1, .84], [0, .1, 1.12]], [[0, .1, 1.12], [0, -.06, 1.16]], [[0, -.06, 1.16], [0, 0, 1.6]]].forEach(([a, b], k) => ra.por(caps(a, b, .085 - k * .008, k === 4 ? .008 : .078 - k * .008), 16)); N(M.brilho, { res: .0105, sempre: true }).por(elip([0, 0, .48], [.085, .085, .06]), 16);
+  return { g, J };
+}
+
 // ---------- MEIO-CHEFES: quatro corpos; chapéus, armas e enfeites de cada um ficam em cena/chefes.js ----------
 // guarda de farda comprida (Fiscal e Arauto)
 function guarda() {
@@ -536,7 +579,7 @@ function simplificar(Mh, alvo) {
 // ---------- gravação ----------
 const partes = [], cabecalho = { ossos: OSSOS, modelos: {} }; let pos = 0;
 const grava = arr => { const b = Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength), pad = (4 - b.length % 4) % 4, o = pos; partes.push(b, Buffer.alloc(pad)); pos += b.length + pad; return [o, arr.length]; };
-const LISTA = [['soldado', soldado, [3400, 1700, 760, 260]], ['zumbi', zumbi, [2800, 1350, 560, 200]], ['gordo', gordo, [3000, 1400, 600, 220]], ['cancela', cancela, [8000, 3600]], ['operario', operario, [8000, 3600]], ['sirene', sirene, [8000, 3600]], ['carcaca', carcaca, [8000, 3600]], ['afogada', afogada, [8000, 3600]], ['guindaste', guindaste, [8000, 3600]], ['fornalha', fornalha, [8000, 3600]], ['mae', mae, [8400, 3600]],
+const LISTA = [['soldado', soldado, [3400, 1700, 760, 260]], ['zumbi', zumbi, [2800, 1350, 560, 200]], ['gordo', gordo, [3000, 1400, 600, 220]], ['cancela', cancela, [8000, 3600]], ['operario', operario, [8000, 3600]], ['sirene', sirene, [8000, 3600]], ['carcaca', carcaca, [8000, 3600]], ['afogada', afogada, [8000, 3600]], ['guindaste', guindaste, [8000, 3600]], ['fornalha', fornalha, [8000, 3600]], ['mae', mae, [8400, 3600]], ['nevasca', nevasca, [8000, 3600]], ['pararaios', pararaios, [8000, 3600]],
   ['guarda', guarda, [5200, 2400]], ['bruto', bruto, [5200, 2400]], ['saltador', saltador, [5200, 2400]], ['casca', casca, [5200, 2400]]];
 for (const [nome, fn, alvos] of LISTA) {
   if (SO && !SO.split(',').includes(nome)) continue;

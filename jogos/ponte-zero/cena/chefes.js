@@ -14,6 +14,10 @@ const CORES = {
   guindaste: { pele: '#d8582e', calca: '#4a3a52', couro: '#3a3040', amarelo: '#ffc21f', visor: '#8fe0ff', unha: '#4a2a1c' },
   fornalha: { pele: '#c4382e', calca: '#3a2a3c', couro: '#5a3226', metal: '#56608a', cano: '#b0563a', brilho: '#ffb01e', osso: '#f0d9a8', amarelo: '#ffc62e' },
   mae: { pele: '#b45ad0', calca: '#9a8cb4', couro: '#3a2450', osso: '#cfc3dc', vermelho: '#e8452f', cabelo: '#3a1c5a', unha: '#5a2080', brilho: '#ffd23a', cano: '#3c3452', boca: '#8a1040', olho: '#fff6c0' },
+  nevasca: { pele: '#5f9fe0', branco: '#f4f9ff', calca: '#dfe9f6', couro: '#3f5f8a', unha: '#2a4a7a', visor: '#8fe0ff', vermelho: '#e8352b', metal: '#8d97a6', boca: '#2a3a7a' },
+  pararaios: { pele: '#5f74d8', roupa: '#2f2458', calca: '#2a2048', couro: '#4a3a24', unha: '#2a2a6a', brilho: '#ffe84a', metal: '#9aa6c0', cano: '#c98a3a', vermelho: '#c4382e', amarelo: '#ffd21f', laranja: '#e8762a', olho: '#fff6a8' },
+  lenhador: { pele: '#c98a6a', calca: '#5a3a2a', couro: '#a82a2a', unha: '#5a3424', madeira: '#3a2a20' },
+  pregador: { pele: '#9ab88a', roupa: '#3a2a4a', calca: '#241a30', couro: '#1a1420', unha: '#4a5a3a', cabelo: '#d8d0c0', amarelo: '#c9a44a', vermelho: '#a82040', branco: '#e8e0d0' },
   fiscal: { pele: '#b9c44e', roupa: '#2f5fc4', calca: '#26345e', couro: '#2a2030', unha: '#5a6a2a', cabelo: '#4a2a18' },
   arauto: { pele: '#c98ae0', roupa: '#c4283e', calca: '#3a1a4a', couro: '#2a1830', unha: '#5a2a7a', cabelo: '#f2e6c8', amarelo: '#ffcf3a' },
   britadeira: { pele: '#e0a05a', calca: '#3f5f8a', couro: '#7a4424', unha: '#6a4a20', madeira: '#5a3a20' },
@@ -60,6 +64,22 @@ const POSES = {
   guindaste(c, f, t, k) {
     const A = { pos: [-.74, .84, .3], rot: [-58, -6, 8], bate: 26 }, b = POSES.comArma(c, f, t, k, A);
     if ((c.golpe === 'carro' || c.golpe === 'carros') && (c.estado === 'prepara' || c.estado === 'bate')) { const q = c.estado === 'prepara'; return { ...b, pelve: [q ? -8 : 12, q ? -20 : 18, 0], coluna: [q ? -6 : 10, q ? -12 : 12, 0], peito: [q ? -8 : 12, q ? -22 : 24, 0], cabeca: [q ? -4 : -22, q ? 40 : -34, 0], pernas: { E: [26, 30, 0, 12], D: [-8, 30, 0, 16] }, arma: { pos: q ? [-.72, 1.5, -.1] : [-.3, 1.1, .7], rot: [q ? -150 : -20, 0, 0] } }; }
+    return b;
+  },
+  nevasca(c, f, t, k) {
+    const A = { pos: [-.72, .84, .3], rot: [-74, -6, 8], bate: 24 }, b = POSES.comArma(c, f, t, k, A);
+    if (c.golpe === 'bolas' && (c.estado === 'prepara' || c.estado === 'bate')) { const q = c.estado === 'prepara'; return { ...b, pelve: [q ? 26 : 10, q ? -10 : 14, 0], coluna: [q ? 20 : 8, 0, 0], peito: [q ? 16 : 6, q ? -14 : 18, 0], cabeca: [-34, 0, 0], pernas: { E: [40, 52, 6, 14], D: [4, 44, 0, 16] }, arma: { pos: [-.7, .9, -.1], rot: [-130, 0, 10] }, bracos: { D: DIR, E: { ref: 'peito', mao: q ? [.5, .36, .4] : [.2, .9, .8], polo: [1, -.4, -.3] } } }; }
+    return b;
+  },
+  pararaios(c, f, t, k) {
+    const b = POSES.comArma(c, f, t, k, { pos: [-.64, .96, .26], rot: [-76, -6, 8], bate: 22 });
+    if ((c.golpe === 'raio' || c.golpe === 'pocas') && (c.estado === 'prepara' || c.estado === 'bate')) { const q = c.estado === 'prepara'; return { ...b, pelve: [q ? -6 : 14, 0, 0], coluna: [q ? -8 : 14, 0, 0], peito: [q ? -12 + sen(t, 4) : 12, 0, 0], cabeca: [q ? -22 : -26, 0, 0], arma: { pos: q ? [-.4, 1.66, .05] : [-.4, 1.0, .5], rot: [q ? -92 : 62, 0, 0] }, bracos: { D: DIR, E: { ref: 'peito', mao: q ? [.6, 1.72, .05] : [.5, .8, .5], polo: [1, -.3, -.2] } } }; }
+    return b;
+  },
+  lenhador(c, f, t, k) { return POSES.comArma(c, f, t, k, { pos: [-.7, .7, .34], rot: [-90, -6, 10], bate: 24 }); },
+  pregador(c, f, t, k) {
+    const b = POSES.comArma(c, f, t, k, { pos: [-.62, .92, .26], rot: [-84, -6, 8], bate: 20 });
+    if (c.golpe === 'raio' && c.estado === 'prepara') return { ...b, pelve: [-6, 0, 0], peito: [-12, 0, 0], cabeca: [-26, 0, 0], arma: { pos: [-.5, 1.4, .1], rot: [-92, 0, 0] }, bracos: { D: DIR, E: { ref: 'peito', mao: [.6, 1.6, .1], polo: [1, -.3, -.2] } } };
     return b;
   },
   fiscal(c, f, t, k) { return POSES.comArma(c, f, t, k, { pos: [-.62, .92, .26], rot: [-76, -6, 8], bate: 20 }); },
@@ -168,6 +188,16 @@ const ENFEITES = {
   fundidor: () => [
     [3, new Pecas().por(cx(.34, .38, .16, .07, 1), '#3f4658', { y: 1.2, z: .4 }).por(cx(.24, .09, .05, .02, 1), '#ffb03a', { y: 1.25, z: .48 }).por(new THREE.TorusGeometry(.19, .03, 8, 18).rotateX(LAT), '#2a2030', { y: 1.22, z: .26 }).por(new THREE.ConeGeometry(.05, .2, 8), '#e8d8b0', { x: .2, y: 1.36, z: .26, rz: -.5 }).por(new THREE.ConeGeometry(.05, .2, 8), '#e8d8b0', { x: -.2, y: 1.36, z: .26, rz: .5 })],
     [16, new Pecas().por(cilX(.055, 1.3), '#5a3a2a', { z: .28 }).por(cx(.36, .66, .36, .06, 1), '#4a5164', { z: 1.0 }).por(cx(.39, .16, .39, .05, 1), '#ff8a1e', { y: .25, z: 1.0 }).por(cx(.39, .16, .39, .05, 1), '#ff8a1e', { y: -.25, z: 1.0 }).por(cx(.32, .68, .32, .04, 1), '#ffd24a', { z: 1.0 })],
+  ],
+  lenhador: () => [
+    [3, new Pecas().por(esf(.19, 16, 8), '#5a3a24', { y: 1.26, z: .25, s: [1.05, .72, 1.05] }).por(new THREE.TorusGeometry(.18, .055, 8, 18).rotateX(LAT), '#f4f0e6', { y: 1.22, z: .26 }).por(esf(.08, 10, 8), '#5a3a24', { x: .19, y: 1.12, z: .24, s: [.6, 1.4, .8] }).por(esf(.08, 10, 8), '#5a3a24', { x: -.19, y: 1.12, z: .24, s: [.6, 1.4, .8] }).por(esf(.16, 12, 8), '#e0762a', { y: .97, z: .33, s: [1, .8, .6] }).por(esf(.07, 10, 8), '#e0762a', { x: .13, y: 1.06, z: .32, s: [.6, 1.3, .6] }).por(esf(.07, 10, 8), '#e0762a', { x: -.13, y: 1.06, z: .32, s: [.6, 1.3, .6] })],
+    [2, new Pecas().por(cx(.1, .5, .05, .02, 1), '#1c1620', { x: .2, y: .86, z: .28, rx: -.1 }).por(cx(.1, .5, .05, .02, 1), '#1c1620', { x: -.2, y: .86, z: .28, rx: -.1 }).por(cilX(.14, .7, 10), '#8a5a30', { y: 1.12, z: -.34, ry: LAT }).por(cilX(.11, .72, 10), '#e8c48a', { y: 1.12, z: -.34, ry: LAT }).por(cilX(.13, .66, 10), '#8a5a30', { y: 1.34, z: -.32, ry: LAT })],
+    [16, new Pecas().por(cilX(.05, 1.5), '#a8703c', { z: .32 }).por(cx(.1, .22, .3, .03, 1), '#5d6675', { z: 1.0 }).por(new THREE.CylinderGeometry(.36, .36, .07, 18, 1, false, 0, 2.4).rotateX(LAT).rotateY(LAT), '#d8dfe8', { z: 1.0, y: -.14, rx: 1.55 }).por(new THREE.CylinderGeometry(.36, .36, .07, 18, 1, false, 0, 2.4).rotateX(LAT).rotateY(LAT), '#d8dfe8', { z: 1.0, y: .14, rx: -1.55 })],
+  ],
+  pregador: () => [
+    [3, new Pecas().por(new THREE.ConeGeometry(.26, .5, 14), '#2a1c38', { y: 1.66, z: .02, rx: -.2 }).por(new THREE.CylinderGeometry(.3, .33, .04, 18), '#2a1c38', { y: 1.5, z: .08, rx: -.06 }).por(new THREE.TorusGeometry(.205, .03, 8, 18).rotateX(LAT), '#c9a44a', { y: 1.54, z: .07 }).por(esf(.13, 12, 8), '#d8d0c0', { y: 1.26, z: .22, s: [.9, 1.5, .6] })],
+    [2, new Pecas().por(cx(.46, .4, .05, .03, 1), '#e8d8a8', { y: .92, z: .25, rx: -.08 }).por(cx(.36, .07, .06, .02, 1), '#a82040', { y: 1.0, z: .26 }).por(cx(.3, .05, .06, .02, 1), '#3a2a20', { y: .9, z: .265 }).por(cx(.34, .05, .06, .02, 1), '#3a2a20', { y: .81, z: .27 })],
+    [16, new Pecas().por(cilX(.04, 1.6), '#5a3a24', { z: .3 }).por(new THREE.CylinderGeometry(.14, .25, .36, 14).rotateX(-LAT), '#c9a44a', { z: 1.16 }).por(new THREE.TorusGeometry(.25, .035, 8, 18), '#a8862a', { z: .99 }).por(esf(.07, 10, 8), '#8a6a1a', { z: .96 }).por(new THREE.TorusGeometry(.1, .03, 8, 14).rotateY(LAT), '#5a3a24', { z: 1.4 })],
   ],
   motoqueiro: () => {
     const m = new Pecas(); for (let i = 0; i < 5; i++) { const a = -.5 + i * .42; m.por(new THREE.ConeGeometry(.06, .26, 8), '#ffd21f', { y: 1.45 + Math.cos(a) * .3, z: .06 - Math.sin(a) * .3, rx: -a }); }

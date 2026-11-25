@@ -1,6 +1,6 @@
-// Robô que joga a simulação sem tela, para conferir o equilíbrio. Uso: node ferramentas/ponte-zero/robo.mjs [partidas por caso] [nível 1..4]
+// Robô que joga a simulação sem tela, para conferir o equilíbrio. Uso: node ferramentas/ponte-zero/robo.mjs [partidas] [nível ou 0] [1 = detalhe] [modos, com vírgula] [dificuldade 0..2]
 import { criarSimulacao } from '../../jogos/ponte-zero/nucleo/simulacao.js';
-import { NIVEIS } from '../../jogos/ponte-zero/dados/balanco.js';
+import { NIVEIS, DIFICULDADES } from '../../jogos/ponte-zero/dados/balanco.js';
 
 // desvia das marcas, dos vãos e dos obstáculos: procura o lugar menos perigoso
 function fugir(S, correndo) {
@@ -30,16 +30,16 @@ export function piloto(S, modo, rnd, q) {
   }
   const v = modo === 'medio' ? .09 : .14; S.alvoX += Math.max(-v, Math.min(v, alvo - S.alvoX)); if (S.luta) S.alvoFrente += Math.max(-v, Math.min(v, frente - S.alvoFrente));
 }
-export function jogar(nivel, modo, seed, melhorias = {}) {
+export function jogar(nivel, modo, seed, melhorias = {}, dif = 0) {
   let s = seed; const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-  const ev = {}; const S = criarSimulacao(NIVEIS[nivel], { sorte: rnd, melhorias, aoEvento: n => { ev[n] = (ev[n] || 0) + 1; } }); let q = 0, maxZ = 0, maxT = 0, pior = 0, nC = 0, tC = 0, nM = 0, tM = 0, tMf = 0, nMf = 0, log = [];
+  const ev = {}; const S = criarSimulacao(NIVEIS[nivel], { sorte: rnd, melhorias, dif: DIFICULDADES[dif], aoEvento: n => { ev[n] = (ev[n] || 0) + 1; } }); let q = 0, maxZ = 0, maxT = 0, pior = 0, nC = 0, tC = 0, nM = 0, tM = 0, tMf = 0, nMf = 0, log = [];
   while (S.estado === 'jogando' && q < 60 * 260) { q++; piloto(S, modo, rnd, q); const a = performance.now(); S.passo(1 / 60); pior = Math.max(pior, performance.now() - a); maxZ = Math.max(maxZ, S.zumbis.length); maxT = Math.max(maxT, S.tiros.length); if (S.chefe?.meio && !tM) { tM = S.tempo; nM = S.n; } if (S.meioFeito && tM && !tMf) { tMf = S.tempo; nMf = S.n; } if (S.luta && !S.chefe.meio && !tC) { tC = S.tempo; nC = S.n; } if (q % 600 === 0) log.push(S.n); }
   return { nivel: nivel + 1, modo, estado: S.estado, d: S.d | 0, nChefe: nC, nM, nMf, tMeio: tMf ? +(tMf - tM).toFixed(1) : 0, ev, n: S.n, esp: S.esp, arma: S.arma, tLuta: tC ? +(S.tempo - tC).toFixed(1) : 0, vida: S.chefe ? +(S.chefe.vida / S.chefe.max).toFixed(2) : 1, dist: S.chefe ? +(S.chefe.d - S.d).toFixed(1) : 0, mortos: S.mortos, perd: S.perdidos, tempo: S.tempo | 0, maxZ, maxT, pior: pior.toFixed(1), log: log.join() };
 }
 if (process.argv[1]?.endsWith('robo.mjs')) {
   const N = +(process.argv[2] || 3), so = +(process.argv[3] || 0), modos = process.argv[5] ? process.argv[5].split(',') : ['bom', 'medio', 'acaso', 'ruim', 'parado'];
   // prêmios que o jogador já teria ao chegar em cada nível
-  const PR = [{ soldados: 2 }, { dano: .1 }, { cadencia: .1 }, { bazuca: 1 }, { chamas: 1 }, { soldados: 3 }, { dano: .1 }];
+  const PR = [{ soldados: 2 }, { dano: .1 }, { cadencia: .1 }, { bazuca: 1 }, { cadencia: .1 }, { chamas: 1 }, { soldados: 3 }, { bazuca: 1 }, { dano: .1 }];
   for (let k = 0; k < NIVEIS.length; k++) { if (so && so !== k + 1) continue; const mel = {}; PR.slice(0, k).forEach(p => { for (const n in p) mel[n] = (mel[n] || 0) + p[n]; });
-    for (const m of modos) { const R = []; for (let i = 1; i <= N; i++) R.push(jogar(k, m, i * 77 + k, mel)); if (process.argv[4] === '1') R.forEach(r => console.log(JSON.stringify(r))); const v = R.filter(r => r.estado === 'vitoria'), md = (f, l = v) => l.length ? (l.reduce((a, r) => a + r[f], 0) / l.length).toFixed(1) : '-', ch = R.filter(r => r.nChefe), me = R.filter(r => r.tMeio); console.log(`nível ${k + 1} ${m.padEnd(6)} venceu ${v.length}/${N} | meio ${me.length}: ${md('nM', me)}→${md('nMf', me)} em ${md('tMeio', me)}s | chefe ${ch.length} com ${md('nChefe', ch)} | fim ${md('n')} | luta ${md('tLuta')}s a ${md('dist')}m | perdas ${md('perd')} | parou ${R.filter(r => r.estado !== 'vitoria').map(r => r.d).join(' ')}`); } }
+    for (const m of modos) { const R = []; for (let i = 1; i <= N; i++) R.push(jogar(k, m, i * 77 + k, mel, +(process.argv[6] || 0))); if (process.argv[4] === '1') R.forEach(r => console.log(JSON.stringify(r))); const v = R.filter(r => r.estado === 'vitoria'), md = (f, l = v) => l.length ? (l.reduce((a, r) => a + r[f], 0) / l.length).toFixed(1) : '-', ch = R.filter(r => r.nChefe), me = R.filter(r => r.tMeio); console.log(`nível ${k + 1} ${m.padEnd(6)} venceu ${v.length}/${N} | meio ${me.length}: ${md('nM', me)}→${md('nMf', me)} em ${md('tMeio', me)}s | chefe ${ch.length} com ${md('nChefe', ch)} | fim ${md('n')} | luta ${md('tLuta')}s a ${md('dist')}m | perdas ${md('perd')} | parou ${R.filter(r => r.estado !== 'vitoria').map(r => r.d).join(' ')}`); } }
 }

@@ -5,7 +5,7 @@
 import { criarSimulacao } from './nucleo/simulacao.js';
 import { carregarRecursos, Cena } from './cena/cena.js';
 import { criarSom } from './audio/som.js';
-import { ARMAS, NIVEIS, CHEFES } from './dados/balanco.js';
+import { ARMAS, NIVEIS, CHEFES, DIFICULDADES } from './dados/balanco.js';
 
 const BASE = new URL('./', import.meta.url);
 const HTML = `
@@ -29,7 +29,7 @@ const HTML = `
     <p class="pz-premio" data-premio hidden></p>
     <div class="pz-niveis" data-niveis role="group" aria-label="Escolha o nível" hidden></div>
     <button class="btn principal" data-jogar hidden>Jogar</button>
-    <button class="pz-sangue" data-sangue hidden aria-pressed="true">Sangue: <b>ligado</b></button>
+    <div class="pz-linha"><div class="pz-dif" data-dif role="group" aria-label="Dificuldade" hidden></div><button class="pz-sangue" data-sangue hidden aria-pressed="true">Sangue: <b>ligado</b></button></div>
   </div>`;
 // nomes dos veteranos (inventados)
 const NOMES = ['Cabo Lima', 'Sgt. Rocha', 'Nina', 'Tadeu', 'Cida', 'Bento', 'Dora', 'Raul', 'Jade', 'Ivo', 'Lola', 'Caco'], MAX_VET = 4;
@@ -45,7 +45,7 @@ export class ZombieBridgeGame {
   async init(container) {
     if (this.#vivo) throw new Error('jogo já iniciado'); this.#vivo = true;
     this.#css = document.createElement('link'); this.#css.rel = 'stylesheet'; this.#css.href = new URL('jogo.css', BASE).href; const cssPronto = new Promise(ok => { this.#css.onload = this.#css.onerror = ok; }); document.head.append(this.#css); await cssPronto; if (!this.#vivo) return;
-    this.#dados = { melhor: 0, jogos: 0, vitorias: 0, sangue: true, aberto: 0, medalhas: {}, veteranos: [], ...this.#p.carregar('ponteZero', {}) };
+    this.#dados = { melhor: 0, jogos: 0, vitorias: 0, sangue: true, aberto: 0, medalhas: {}, estrelas: {}, dif: 0, veteranos: [], ...this.#p.carregar('ponteZero', {}) };
     NIVEIS.forEach((n, i) => { if (this.#dados.medalhas[n.chefe]) this.#dados.aberto = Math.max(this.#dados.aberto, Math.min(NIVEIS.length - 1, i + 1)); });
     this.#nivel = Math.min(this.#dados.nivel ?? this.#dados.aberto, this.#dados.aberto, NIVEIS.length - 1);
     const r = this.#raiz = document.createElement('div'); r.className = 'pz'; r.innerHTML = HTML; container.append(r);
@@ -60,6 +60,7 @@ export class ZombieBridgeGame {
     this.#q('carga').parentElement.hidden = true; this.#mostrar('jogar', true); this.#mostrar('sangue', true); this.#sangue(this.#dados.sangue !== false); this.#menu();
     this.#ouvir(this.#q('jogar'), 'click', () => this.#comecar());
     this.#ouvir(this.#q('niveis'), 'click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; this.#nivel = +b.dataset.n; this.#som.acordar(); this.#nova(); this.#cena.noMenu = true; this.#menu(); });
+    this.#ouvir(this.#q('dif'), 'click', e => { const b = e.target.closest('button'); if (!b) return; this.#dados.dif = +b.dataset.n; this.#salvar(); this.#difs(); });
     this.#ouvir(this.#q('sangue'), 'click', () => { this.#dados.sangue = this.#dados.sangue === false; this.#salvar(); this.#sangue(this.#dados.sangue); });
     this.#controles();
     this.#obs = new ResizeObserver(() => { if (this.#cena) { this.#cena.medir(); this.#cena.quadro(0, this.#S); } }); this.#obs.observe(r);
@@ -92,12 +93,14 @@ export class ZombieBridgeGame {
 
   // prêmios dos chefes já vencidos valem em toda partida
   #melhorias() { const r = { soldados: 0, dano: 0, cadencia: 0, bazuca: 0, chamas: 0, metralhadora: 0 }; for (const id in this.#dados.medalhas) { const p = CHEFES[id]?.premio || {}; for (const k in r) r[k] += p[k] || 0; } r.vets = this.#dados.veteranos.filter(v => !v.fora).map(v => v.nome); return r; }
-  #nova() { this.#vetCaidos.clear(); this.#avisou.clear(); this.#S = criarSimulacao(NIVEIS[this.#nivel], { aoEvento: (n, d) => this.#evento(n, d), melhorias: this.#melhorias(), maxZumbis: this.#qual > 1 ? 220 : this.#qual ? 150 : 100, maxSoldados: this.#qual > 1 ? 100 : 52 }); this.#cena.novaPartida(this.#S); this.#fim = 0; this.#resto = 0; }
+  #nova() { this.#vetCaidos.clear(); this.#avisou.clear(); this.#S = criarSimulacao(NIVEIS[this.#nivel], { aoEvento: (n, d) => this.#evento(n, d), melhorias: this.#melhorias(), dif: DIFICULDADES[this.#dados.dif] || DIFICULDADES[0], maxZumbis: this.#qual > 1 ? 220 : this.#qual ? 150 : 100, maxSoldados: this.#qual > 1 ? 100 : 52 }); this.#cena.novaPartida(this.#S); this.#fim = 0; this.#resto = 0; }
   #menu() {
     const N = NIVEIS[this.#nivel], C = CHEFES[N.chefe], d = this.#dados; this.#q('selo').textContent = `Nível ${this.#nivel + 1} · ${N.nome}`; this.#q('titulo').textContent = 'Soldier Survivor'; this.#texto(N, C); this.#q('jogar').textContent = 'Jogar'; this.#q('painel').classList.remove('fim'); this.#mostrar('placar', false); this.#mostrar('premio', false); this.#niveis();
   }
-  #texto(N, C) { const f = this.#dados.veteranos.filter(v => !v.fora).length; this.#q('texto').innerHTML = `<b class="pz-novo">${N.novo}</b>${CHEFES[N.meio.id].nome} no meio e ${C.nome} no fim da ponte.${f ? ` ${f > 1 ? f + ' veteranos vão' : 'Um veterano vai'} com você.` : ''}`; }
-  #niveis() { const d = this.#dados; this.#mostrar('niveis', true); this.#q('niveis').innerHTML = NIVEIS.map((n, i) => { const ab = i <= d.aberto, me = d.medalhas[n.chefe]; return `<button data-n="${i}" ${ab ? '' : 'disabled'} aria-pressed="${i === this.#nivel}" aria-label="Nível ${i + 1}, ${n.nome}${ab ? me ? ', vencido' : '' : ', bloqueado'}"><b>${ab ? i + 1 : CADEADO}</b><span>${n.nome}</span>${me ? '<i>★</i>' : ''}</button>`; }).join(''); }
+  #difs() { const d = this.#dados; this.#mostrar('dif', true); this.#q('dif').innerHTML = DIFICULDADES.map((x, i) => `<button data-n="${i}" aria-pressed="${i === d.dif}">${x.nome}</button>`).join(''); }
+  #estrela(id) { const d = this.#dados; return d.estrelas[id] || (d.medalhas[id] ? 1 : 0); }
+  #texto(N, C) { const f = this.#dados.veteranos.filter(v => !v.fora).length; this.#q('texto').innerHTML = `<b class="pz-novo">${N.novo}</b>${CHEFES[N.meio.id].nome} no meio e ${C.nome} no fim.${f ? ` ${f > 1 ? f + ' veteranos vão' : 'Um veterano vai'} com você.` : ''}`; }
+  #niveis() { const d = this.#dados; this.#difs(); this.#mostrar('niveis', true); this.#q('niveis').innerHTML = NIVEIS.map((n, i) => { const ab = i <= d.aberto, me = this.#estrela(n.chefe); return `<button data-n="${i}" ${ab ? '' : 'disabled'} aria-pressed="${i === this.#nivel}" aria-label="Nível ${i + 1}, ${n.nome}${ab ? me ? `, vencido no ${DIFICULDADES[me - 1].nome}` : '' : ', bloqueado'}"><b>${ab ? i + 1 : CADEADO}</b><span>${n.nome}</span>${me ? `<i>${'★'.repeat(me)}</i>` : ''}</button>`; }).join(''); }
   #comecar() {
     for (const n of ['entrada', 'aviso']) this.#q(n).getAnimations().forEach(a => a.cancel()); this.#som.acordar(); this.#nova(); this.#som.musica('acao');
     this.#parado = false; this.#cena.noMenu = false; this.#dados.jogos++; this.#dados.nivel = this.#nivel; this.#salvar(); this.#mostrar('painel', false); this.#raiz.querySelector('.pz-hud').hidden = false; this.#mostrar('trilho', true); this.#mostrar('chefe', false); this.#q('marco').style.left = `${this.#S.trecho.meio.d / this.#S.trecho.comprimento * 100}%`; this.#mostrar('adr', !!this.#S.trecho.adrenalina); this.#mostrar('conta', true); this.#mostrar('dica', true); this.#raiz.classList.add('jogando'); this.#q('jogar').blur();
@@ -182,7 +185,7 @@ export class ZombieBridgeGame {
   #conferirFim(dt) {
     const S = this.#S, d = this.#dados; if (S.estado === 'jogando') return; const venceu = S.estado === 'vitoria';
     if (!this.#fim) {
-      this.#fim = .001; d.melhor = Math.max(d.melhor || 0, S.mortos); this.premioNovo = false; if (venceu) { d.vitorias = (d.vitorias || 0) + 1; const id = S.trecho.chefe; this.premioNovo = !d.medalhas[id]; d.medalhas = { ...d.medalhas, [id]: true }; d.aberto = Math.max(d.aberto, Math.min(NIVEIS.length - 1, this.#nivel + 1)); }
+      this.#fim = .001; d.melhor = Math.max(d.melhor || 0, S.mortos); this.premioNovo = false; if (venceu) { d.vitorias = (d.vitorias || 0) + 1; const id = S.trecho.chefe; this.premioNovo = !d.medalhas[id]; d.medalhas = { ...d.medalhas, [id]: true }; d.estrelas = { ...d.estrelas, [id]: Math.max(d.estrelas[id] || 0, d.dif + 1) }; d.aberto = Math.max(d.aberto, Math.min(NIVEIS.length - 1, this.#nivel + 1)); }
       // veteranos: quem caiu descansa uma partida; a cada vitória um sobrevivente ganha nome
       this.vetNovo = ''; for (const v of d.veteranos) { if (v.fora) v.fora--; else if (venceu) { if (this.#vetCaidos.has(v.nome)) v.fora = 1; else v.vitorias++; } }
       if (venceu && d.veteranos.length < MAX_VET) { const livres = NOMES.filter(n => !d.veteranos.some(v => v.nome === n)), nome = livres[Math.floor(Math.random() * livres.length)]; d.veteranos = [...d.veteranos, { nome, vitorias: 1, fora: 0 }]; this.vetNovo = nome; }
@@ -191,8 +194,8 @@ export class ZombieBridgeGame {
     this.#fim += dt; if (this.#fim < (venceu ? 2.6 : 1.9) || this.#parado) return;
     const N = S.trecho, C = CHEFES[N.chefe], ultimo = this.#nivel === NIVEIS.length - 1;
     this.#parado = true; this.#soltar(); this.#cena.noMenu = venceu ? .4 : .15; this.#raiz.querySelector('.pz-hud').hidden = true; this.#raiz.classList.remove('jogando'); this.#mostrar('conta', false); this.#mostrar('dica', false); const A = S.chefe ? S.chefe.T : C;
-    this.#q('selo').textContent = venceu ? `Nível ${this.#nivel + 1} concluído` : S.luta ? `${A.nome} ainda tinha ${Math.max(1, Math.round(S.chefe.vida / S.chefe.max * 100))}% de vida` : `Parou em ${Math.floor(S.d)} m de ${N.comprimento} m`;
-    this.#q('titulo').textContent = venceu ? `${C.nome} caiu!` : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? ultimo ? 'Você venceu todos os chefes. A cidade está salva.' : `Próxima parada: ${NIVEIS[this.#nivel + 1].nome}. ${NIVEIS[this.#nivel + 1].novo}.` : S.luta ? 'Saia das marcas no chão e pegue as caixas verdes de reforço.' : 'Some soldados antes das hordas grandes e use os barris.';
+    this.#q('selo').textContent = venceu ? `Nível ${this.#nivel + 1} concluído · ${DIFICULDADES[d.dif].nome}` : S.luta ? `${A.nome} ainda tinha ${Math.max(1, Math.round(S.chefe.vida / S.chefe.max * 100))}% de vida` : `Parou em ${Math.floor(S.d)} m de ${N.comprimento} m`;
+    this.#q('titulo').textContent = venceu ? `${C.nome} caiu!` : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? ultimo ? 'Você venceu todos os chefes. Tente uma dificuldade maior.' : `Próxima parada: ${NIVEIS[this.#nivel + 1].nome}. ${NIVEIS[this.#nivel + 1].novo}.` : S.luta ? 'Saia das marcas no chão e pegue as caixas verdes de reforço.' : 'Some soldados antes das hordas grandes e use os barris.';
     this.#q('placar').innerHTML = `<div><b>${S.n}</b><span>soldados</span></div><div><b>${S.mortos}</b><span>eliminações</span></div><div><b>${d.melhor}</b><span>recorde</span></div>`; this.#mostrar('placar', true);
     this.#q('premio').textContent = [venceu && this.premioNovo && `Prêmio: ${C.premio.texto}`, this.vetNovo && `${this.vetNovo} virou veterano`].filter(Boolean).join(' · '); this.#mostrar('premio', venceu && (this.premioNovo || !!this.vetNovo));
     this.#q('painel').classList.add('fim'); if (venceu && !ultimo) this.#nivel++; this.#niveis(); this.#q('jogar').textContent = venceu ? ultimo ? 'Jogar de novo' : 'Próximo nível' : 'Tentar de novo'; this.#mostrar('painel', true);
