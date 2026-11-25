@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/inicio.css">
 <script src="js/comum.js"></script>
+<script src="js/suite.js"></script>
 </head>
 <body>
 <div class="pagina larga">
@@ -22,76 +23,115 @@
   </header>
   <p class="saudacao">Clássicos para jogar em qualquer lugar, mesmo sem internet.</p>
 
-  <main class="grade">
-    <a class="cartao" href="jogos/velha/index.html">
-      <div class="arte"><img src="capas/velha.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Jogo da Velha</h2><p>Em dupla ou contra o computador</p>
-    </a>
+  <nav class="categorias" aria-label="Categorias">
+    <button type="button" data-vai="relaxar">Para relaxar</button>
+    <button type="button" data-vai="achar">Combinar e achar</button>
+    <button type="button" data-vai="acao">Ação</button>
+    <button type="button" data-vai="cartas">Cartas</button>
+    <button type="button" data-vai="palavras">Palavras</button>
+    <button type="button" data-vai="tabuleiro">Tabuleiro</button>
+  </nav>
 
-    <a class="cartao" href="jogos/resta-um/index.html">
-      <div class="arte"><img src="capas/resta-um.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Resta Um</h2><p>Deixe só uma peça no tabuleiro</p>
-    </a>
-
-    <a class="cartao" href="jogos/paciencia/index.html">
-      <div class="arte"><img src="capas/paciencia.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Paciência</h2><p>O clássico das cartas</p>
-    </a>
-
-    <a class="cartao" href="jogos/freecell/index.html">
-      <div class="arte"><img src="capas/freecell.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>FreeCell</h2><p>Paciência com células livres</p>
-    </a>
-
-    <a class="cartao" href="jogos/cruzadas/index.html">
-      <div class="arte"><img src="capas/cruzadas.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Palavras Cruzadas</h2><p>Dicas e grades em português</p>
-    </a>
-
-    <a class="cartao" href="jogos/caca-palavras/index.html">
-      <div class="arte"><img src="capas/caca-palavras.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Caça-Palavras</h2><p>Em 3D, com 10 fases por tema</p>
-    </a>
-
-    <a class="cartao" href="jogos/pinball-show/index.html">
-      <div class="arte"><img src="capas/pinball-show.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Galatic Pinball</h2><p>Astronauta, nave, loopings e missões no espaço</p>
-    </a>
-
-    <a class="cartao" href="jogos/ponte-zero/index.html">
-      <div class="arte"><img src="capas/ponte-zero.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Soldier Survivor</h2><p>Pelotão contra zumbis e chefes gigantes (em construção)</p>
-    </a>
-
+  <main class="secoes">
+    <section class="categoria" id="cat-relaxar" aria-labelledby="t-relaxar">
+    <h2 id="t-relaxar" class="titulo-cat">Para relaxar</h2>
+    <div class="grade">
     <a class="cartao" href="jogos/nascente/index.html">
       <div class="arte"><img src="capas/nascente.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Nascente</h2><p>Gire os canais e leve a água: 100 fases em 10 mundos, sem pressa</p>
+      <h3>Nascente</h3><p>Gire os canais e leve a água: 100 fases em 10 mundos, sem pressa</p>
     </a>
 
     <a class="cartao" href="jogos/candeia/index.html">
       <div class="arte"><img src="capas/candeia.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Candeia</h2><p>Gire os fios e acenda as lanternas: 100 fases com sons calmos</p>
-    </a>
-
-    <a class="cartao" href="jogos/gem-shatter/index.html">
-      <div class="arte"><img src="capas/gem-shatter.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Gem Shatter</h2><p>Quebre grupos de minerais: 50 fases, especiais e reações em cadeia</p>
-    </a>
-
-    <a class="cartao" href="jogos/keepsake-hunt/index.html">
-      <div class="arte"><img src="capas/keepsake-hunt.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Keepsake Hunt</h2><p>Remexa a mesa e ache os objetos escondidos: 50 fases em 5 cômodos</p>
+      <h3>Candeia</h3><p>Gire os fios e acenda as lanternas: 100 fases com sons calmos</p>
     </a>
 
     <a class="cartao" href="jogos/zen/index.html?jogo=loop">
       <div class="arte"><img src="capas/zen-loop.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Loop Zen</h2><p>Gire as peças e feche o circuito: 150 fases com música calma</p>
+      <h3>Loop Zen</h3><p>Gire as peças e feche o circuito: 150 fases com música calma</p>
     </a>
 
     <a class="cartao" href="jogos/zen/index.html?jogo=okay">
       <div class="arte"><img src="capas/zen-ricochet.webp" width="720" height="900" alt="" decoding="async"></div>
-      <h2>Ricochet Zen</h2><p>Estilingue: apague todas as formas em um lançamento. 150 fases</p>
+      <h3>Ricochet Zen</h3><p>Estilingue: apague todas as formas em um lançamento. 150 fases</p>
     </a>
+    </div>
+    </section>
+
+    <section class="categoria" id="cat-achar" aria-labelledby="t-achar">
+    <h2 id="t-achar" class="titulo-cat">Combinar e achar</h2>
+    <div class="grade">
+    <a class="cartao" href="jogos/gem-shatter/index.html">
+      <div class="arte"><img src="capas/gem-shatter.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Gem Shatter</h3><p>Quebre grupos de minerais: 50 fases, especiais e reações em cadeia</p>
+    </a>
+
+    <a class="cartao" href="jogos/keepsake-hunt/index.html">
+      <div class="arte"><img src="capas/keepsake-hunt.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Keepsake Hunt</h3><p>Remexa a mesa e ache os objetos escondidos: 50 fases em 5 cômodos</p>
+    </a>
+    </div>
+    </section>
+
+    <section class="categoria" id="cat-acao" aria-labelledby="t-acao">
+    <h2 id="t-acao" class="titulo-cat">Ação</h2>
+    <div class="grade">
+    <a class="cartao" href="jogos/pinball-show/index.html">
+      <div class="arte"><img src="capas/pinball-show.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Galatic Pinball</h3><p>Astronauta, nave, loopings e missões no espaço</p>
+    </a>
+
+    <a class="cartao" href="jogos/ponte-zero/index.html">
+      <div class="arte"><img src="capas/ponte-zero.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Soldier Survivor</h3><p>Pelotão contra zumbis e chefes gigantes (em construção)</p>
+    </a>
+    </div>
+    </section>
+
+    <section class="categoria" id="cat-cartas" aria-labelledby="t-cartas">
+    <h2 id="t-cartas" class="titulo-cat">Cartas</h2>
+    <div class="grade">
+    <a class="cartao" href="jogos/paciencia/index.html">
+      <div class="arte"><img src="capas/paciencia.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Paciência</h3><p>O clássico das cartas</p>
+    </a>
+
+    <a class="cartao" href="jogos/freecell/index.html">
+      <div class="arte"><img src="capas/freecell.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>FreeCell</h3><p>Paciência com células livres</p>
+    </a>
+    </div>
+    </section>
+
+    <section class="categoria" id="cat-palavras" aria-labelledby="t-palavras">
+    <h2 id="t-palavras" class="titulo-cat">Palavras</h2>
+    <div class="grade">
+    <a class="cartao" href="jogos/cruzadas/index.html">
+      <div class="arte"><img src="capas/cruzadas.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Palavras Cruzadas</h3><p>Dicas e grades em português</p>
+    </a>
+
+    <a class="cartao" href="jogos/caca-palavras/index.html">
+      <div class="arte"><img src="capas/caca-palavras.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Caça-Palavras</h3><p>Em 3D, com 10 fases por tema</p>
+    </a>
+    </div>
+    </section>
+
+    <section class="categoria" id="cat-tabuleiro" aria-labelledby="t-tabuleiro">
+    <h2 id="t-tabuleiro" class="titulo-cat">Tabuleiro</h2>
+    <div class="grade">
+    <a class="cartao" href="jogos/velha/index.html">
+      <div class="arte"><img src="capas/velha.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Jogo da Velha</h3><p>Em dupla ou contra o computador</p>
+    </a>
+
+    <a class="cartao" href="jogos/resta-um/index.html">
+      <div class="arte"><img src="capas/resta-um.webp" width="720" height="900" alt="" decoding="async"></div>
+      <h3>Resta Um</h3><p>Deixe só uma peça no tabuleiro</p>
+    </a>
+    </div>
+    </section>
   </main>
 
   <p id="status-offline">Preparando para funcionar sem internet…</p>
@@ -111,5 +151,9 @@
   <button class="chave" data-ajuste="letraGrande" data-padrao="0"><span>🔎 Letra grande</span><b></b></button>
   <button class="btn principal" data-fecha>Fechar</button>
 </dialog>
+<script>
+document.querySelectorAll('[data-vai]').forEach(b => b.addEventListener('click', () =>
+  document.getElementById('cat-' + b.dataset.vai).scrollIntoView({ block: 'start', behavior: 'smooth' })));
+</script>
 </body>
 </html>

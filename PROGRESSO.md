@@ -371,3 +371,6 @@ O roteiro completo das etapas está em `PROMPT.md`.
   6 cartas, acervo de 118 objetos com molduras, 15 marcos, mesa do dia, dicas guardadas e ficha segura (`keepsake.v2`, migra da v1, cópia e código). Cache `jogos-offline-v63`. Detalhes
   em `jogos/keepsake-hunt/PLANO.md`. Testado: 175 mil conferências da progressão, 134 de telas com toque simulado, ficha estragada, sem internet. Não testado num celular de verdade.
   Publicado com autorização do dono.
+- **Menu por categorias e voltar só pela suíte (25/11/2026)**, pedido do dono: 6 categorias com atalhos no topo. `js/suite.js` (uma linha no `<head>` de cada jogo, inclusive os novos) esconde todo link
+  `../../index.html` de quem entra direto pelo link do jogo; pela suíte os botões aparecem. Cache `jogos-offline-v64`. Testado por `ferramentas/suite/testes.mjs`: 14 cartões, direto, pela suíte, recarregar,
+  sem internet. Não testado num celular de verdade. Falta o dono autorizar a publicação.

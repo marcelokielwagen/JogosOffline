@@ -1,5 +1,18 @@
 /* Tela inicial */
 .saudacao { margin: 6px 0 18px; color: var(--texto2); }
+.categorias {
+  position: sticky; top: 0; z-index: 2; display: flex; gap: 8px; margin: 0 -16px 8px; padding: 8px 16px;
+  overflow-x: auto; scrollbar-width: none; background: var(--fundo);
+}
+.categorias::-webkit-scrollbar { display: none; }
+.categorias button {
+  flex: none; min-height: 44px; padding: 0 16px; border-radius: 99px; white-space: nowrap; font-size: .9rem; font-weight: 600;
+  background: var(--superficie); border: 1px solid var(--borda); transition: transform .12s;
+}
+.categorias button:active { transform: scale(.94); }
+.secoes { display: grid; gap: 28px 22px; }
+.categoria { scroll-margin-top: 66px; min-width: 0; }
+.titulo-cat { margin: 0 0 12px; font-size: 1.15rem; }
 .grade { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .cartao {
   position: relative; display: flex; flex-direction: column; gap: 10px; padding: 16px;
@@ -14,7 +27,7 @@ a.cartao:active { transform: scale(.96); }
 .cartao .arte img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease-out; }
 .cartao .arte::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(0,0,0,.3); background: linear-gradient(125deg, rgba(255,255,255,.1), rgba(255,255,255,0) 34%); pointer-events: none; }
 @media (hover: hover) { .cartao:hover { transform: perspective(700px) rotateX(3deg) translateY(-5px); } .cartao:hover .arte img { transform: scale(1.06); } }
-.cartao h2 { margin: 0; font-size: 1.05rem; }
+.cartao h3 { margin: 0; font-size: 1.05rem; }
 .cartao p { margin: 0; font-size: .85rem; color: var(--texto2); }
 .cartao.breve { box-shadow: none; }
 .cartao.breve .arte { opacity: .45; }
@@ -26,7 +39,7 @@ a.cartao:active { transform: scale(.96); }
 #status-offline.ok { color: var(--o); }
 .atualizar { margin: 10px 0 0; text-align: center; }
 .atualizar .btn { min-height: 44px; font-size: .9rem; }
-@media (min-width: 700px) { .pagina.larga { max-width: 1040px; } .pagina.larga .grade { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 700px) { .pagina.larga { max-width: 1040px; } .secoes { grid-template-columns: repeat(2, 1fr); } #cat-relaxar { grid-column: 1 / -1; } #cat-relaxar .grade { grid-template-columns: repeat(4, 1fr); } .grade { gap: 22px; } }
 
 /* Estatísticas e ajustes */
 .stat { padding: 10px 0; border-bottom: 1px solid var(--borda); }

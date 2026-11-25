@@ -1,6 +1,6 @@
 import {abrir,dorme} from './nav.mjs'; const p=await abrir({w:390,h:844,movel:true,dpr:2,url:'/manifest.webmanifest'}); const base=p.base;
 await p.cmd('Network.enable'); await p.cmd('Page.navigate',{url:base+'/index.html'}); await dorme(6000);
-console.log('menu:',await p.av(`[...document.querySelectorAll('.cartao h2')].map(e=>e.textContent).join(', ')+' | '+document.getElementById('status-offline').textContent`));
+console.log('menu:',await p.av(`[...document.querySelectorAll('.cartao h3')].map(e=>e.textContent).join(', ')+' | '+document.getElementById('status-offline').textContent`));
 await p.av(`[...document.querySelectorAll('.cartao')].pop().scrollIntoView({block:'center'})`); await dorme(800); await p.foto('menu.png');
 await p.cmd('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
 await p.av(`document.querySelector('.cartao[href*=nascente]').click()`); await dorme(7000);

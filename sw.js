@@ -1,9 +1,9 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v63';
+const VERSAO = 'jogos-offline-v64';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
-  './css/base.css', './css/inicio.css', './js/comum.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',
+  './css/base.css', './css/inicio.css', './js/comum.js', './js/suite.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',
   './icones/icone-192.png', './icones/icone-512.png',
   './capas/velha.webp', './capas/resta-um.webp', './capas/paciencia.webp', './capas/freecell.webp', './capas/cruzadas.webp', './capas/caca-palavras.webp',
   './capas/pinball-show.webp', './capas/ponte-zero.webp', './capas/nascente.webp', './capas/candeia.webp', './capas/gem-shatter.webp', './capas/keepsake-hunt.webp', './capas/zen-loop.webp', './capas/zen-ricochet.webp',
