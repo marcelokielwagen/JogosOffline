@@ -1,10 +1,9 @@
 body { overflow-x: hidden; }
-.pagina { max-width: 760px; padding-left: 8px; padding-right: 8px; padding-bottom: 0; }
+.pagina { max-width: 1040px; padding-left: 8px; padding-right: 8px; padding-bottom: 0; }
 
-@media (max-width: 600px) { .pagina { padding-left: 3px; padding-right: 3px; } }
 
-.modos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
-.modos button { min-height: 40px; border-radius: 12px; font-weight: 600; font-size: .92rem; color: var(--texto2); transition: background .2s, color .2s; }
+.modos { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 3px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 40px; border-radius: 12px; font-weight: 600; font-size: .88rem; padding: 0 2px; white-space: nowrap; color: var(--texto2); transition: background .2s, color .2s; }
 .modos button.ativo { background: var(--destaque); color: #fff; }
 
 .barra { display: flex; gap: 5px; align-items: stretch; margin: 8px 0 10px; }
@@ -28,17 +27,18 @@ button.chip:active { transform: scale(.95); }
 .carta {
   background: #fdfdfb; color: #1d2136; border: 1px solid rgba(0,0,0,.22);
   box-shadow: 0 1px 2px rgba(0,0,0,.35); cursor: pointer;
-  transition: transform .2s ease-out; will-change: transform;
+  transition: transform .17s cubic-bezier(.2,.75,.3,1); will-change: transform;
 }
 .carta.r { color: #d6324a; }
 .carta > * { pointer-events: none; }
-.carta .v { position: absolute; left: 6%; top: 0; font-weight: 800; font-size: calc(var(--cw) * .54); line-height: 1.1; letter-spacing: -.06em; }
-.carta .v.dez { letter-spacing: -.14em; transform: scaleX(.82); transform-origin: left center; }
+.carta .v { position: absolute; left: 5%; top: 0; font-weight: 800; font-size: calc(var(--cw) * var(--v, .6)); line-height: 1.05; letter-spacing: -.06em; }
+.carta .v.dez { letter-spacing: -.14em; transform: scaleX(.8); transform-origin: left center; }
 .carta svg { position: absolute; fill: currentColor; }
-.carta .n { right: 5%; top: 5%; width: 34%; height: auto; aspect-ratio: 1; }
-.carta .g { left: 25%; bottom: 6%; width: 50%; height: auto; aspect-ratio: 1; }
-.carta.sel { outline: 3px solid var(--ouro); outline-offset: -1px; filter: brightness(1.04); box-shadow: 0 0 14px color-mix(in srgb, var(--ouro) 60%, transparent); }
-.carta.arrasta { transition: none; box-shadow: 0 8px 18px rgba(0,0,0,.45); }
+.carta .n { right: 4%; top: 4%; width: 37%; height: auto; aspect-ratio: 1; }
+.carta .g { left: 22%; bottom: 5%; width: 56%; height: auto; aspect-ratio: 1; }
+.carta.pega { filter: brightness(.95); }
+.carta.arrasta { transition: none; filter: none; box-shadow: 0 10px 20px rgba(0,0,0,.45); }
+.carta.mira, .vaga.mira { outline: 3px solid var(--ouro); outline-offset: -1px; box-shadow: 0 0 14px color-mix(in srgb, var(--ouro) 60%, transparent); }
 .carta.dica, .vaga.dica { animation: piscaDica .5s ease-in-out 4 alternate; }
 @keyframes piscaDica { to { outline: 3px solid var(--o); outline-offset: 1px; box-shadow: 0 0 16px var(--o); } }
 
@@ -50,3 +50,23 @@ dialog .btn + .btn { margin-top: 6px; }
 .linha-num input { flex: 1; min-width: 0; min-height: 48px; border-radius: 14px; border: 1px solid var(--borda); background: var(--fundo); color: var(--texto); font: inherit; font-size: 1.1rem; padding: 0 14px; }
 .linha-num .btn { width: auto; }
 .nota { font-size: .85rem; min-height: 1.2em; }
+
+/* No celular as cartas vão de ponta a ponta; só os botões têm margem. */
+@media (max-width: 600px) { .pagina { padding-left: 1px; padding-right: 1px; } .topo, .barra { margin-left: 6px; margin-right: 6px; } .modos { margin: 0 5px; } .topo { padding: 8px 0 6px; } .barra { margin-top: 6px; margin-bottom: 8px; } }
+
+/* Celular deitado: botões na lateral, cartas na altura toda */
+@media (orientation: landscape) and (max-height: 520px) {
+  .topo, .modos, .barra { margin-left: 0; margin-right: 0; }
+  .pagina { max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) 184px; grid-template-rows: auto auto 1fr; column-gap: 8px; padding: 0 6px 0 4px; }
+  .tab { grid-column: 1; grid-row: 1 / span 3; margin-top: 4px; }
+  .topo, .modos, .barra { grid-column: 2; }
+  .topo { flex-wrap: wrap; padding: 4px 0; gap: 5px; }
+  .topo h1 { display: none; }
+  .topo .icone-btn { height: 38px; }
+  .topo .icone-btn:not(.jo-sair) { flex: 1; width: auto; }
+  .modos { grid-template-columns: 1fr 1fr; }
+  .modos button { min-height: 34px; font-size: .8rem; }
+  .barra { flex-wrap: wrap; margin: 6px 0; align-content: start; }
+  .chip { min-width: 40%; min-height: 40px; }
+  .barra .btn { flex: 1; }
+}

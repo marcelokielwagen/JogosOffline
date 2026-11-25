@@ -66,9 +66,9 @@ const JO = (() => {
     return [
       ['Jogo da Velha', [['Fácil', pc('facil')], ['Difícil', pc('dificil')], ['2 jogadores', `X ${pl(2).X} · O ${pl(2).O} · empates ${pl(2).E}`]]],
       ['Resta Um', [['Vitórias', r && r.stats ? r.stats.vitorias : 0], ['Melhor resultado', r && r.stats && r.stats.melhor != null ? (r.stats.melhor === 1 ? '1 peça' : r.stats.melhor + ' peças') : '–']]],
-      ['Paciência', [['Vitórias', p && p.stats ? p.stats.v : 0], ['Melhor tempo', p && p.stats && p.stats.melhor != null ? relogio(p.stats.melhor) : '–'], pn('facil', 'Fácil'), pn('medio', 'Médio'), pn('dificil', 'Difícil')]],
-      ['FreeCell (vitórias)', [fcn('facil', 'Fácil'), fcn('medio', 'Médio'), fcn('dificil', 'Difícil')]],
-      ['Palavras Cruzadas', [['Grades completas', feitas + ' de ' + ((c && c.total) || 26)]]],
+      ['Paciência', [['Vitórias', p && p.stats ? p.stats.v : 0], ['Melhor tempo', p && p.stats && p.stats.melhor != null ? relogio(p.stats.melhor) : '–'], pn('mfacil', 'Muito fácil'), pn('facil', 'Fácil'), pn('medio', 'Médio'), pn('dificil', 'Difícil')]],
+      ['FreeCell (vitórias)', [fcn('mfacil', 'Muito fácil'), fcn('facil', 'Fácil'), fcn('medio', 'Médio'), fcn('dificil', 'Difícil')]],
+      ['Palavras Cruzadas', [['Partidas rápidas', c && c.qn ? Object.values(c.qn).reduce((a, b) => a + b, 0) : 0], ['Grades grandes completas', feitas + ' de ' + ((c && c.total) || 26)]]],
       ['Caça-Palavras', [['Jogos completos', k && k.stats ? k.stats.v : 0], ['Melhor tempo', temposCaca.length ? relogio(Math.min(...temposCaca)) : '–']]],
       ['Dobro', [['Recorde de pontos', d && d.stats ? d.stats.melhor : 0], ['Maior peça', d && d.stats && d.stats.maior ? d.stats.maior : '–']]],
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],

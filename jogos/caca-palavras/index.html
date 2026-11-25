@@ -27,7 +27,7 @@
   </div>
 
   <div class="barra">
-    <div class="chip"><span>Tema</span><b id="tema-nome">–</b></div>
+    <button id="tema-btn" class="chip tema-chip" aria-label="Escolher o tema"><span>Tema ▾</span><b id="tema-nome">–</b></button>
     <div class="chip"><span>Achadas</span><b id="achadas">0/8</b></div>
     <div class="chip"><span>Tempo</span><b id="tempo">00:00</b></div>
     <button id="novo" class="btn principal">Novo</button>
@@ -49,9 +49,15 @@
     <li>Ou <b>toque</b> na primeira letra e depois na última.</li>
     <li><b>Fácil:</b> palavras deitadas e em pé. <b>Médio:</b> também na diagonal. <b>Difícil:</b> também de trás para frente.</li>
     <li>As palavras não têm acento (LEÃO aparece como LEAO).</li>
-    <li>Cada jogo novo sorteia um tema e um quadro diferentes.</li>
+    <li>Toque em <b>Tema</b> para escolher o assunto (TI, segurança, infraestrutura…) ou deixar sorteado.</li>
   </ul>
   <button class="btn principal" data-fecha>Entendi</button>
+</dialog>
+
+<dialog id="temas">
+  <h2>Escolha o tema</h2>
+  <div id="temas-lista" class="temas-lista"></div>
+  <button class="btn discreto" data-fecha>Fechar</button>
 </dialog>
 
 <dialog id="vitoria">
@@ -61,6 +67,7 @@
   <button class="btn discreto" data-fecha>Fechar</button>
 </dialog>
 
+<script src="temas.js"></script>
 <script src="jogo.js"></script>
 </body>
 </html>

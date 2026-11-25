@@ -28,6 +28,7 @@
   </header>
 
   <div class="modos" role="group" aria-label="Dificuldade">
+    <button data-nivel="mfacil">Muito fácil</button>
     <button data-nivel="facil">Fácil</button>
     <button data-nivel="medio">Médio</button>
     <button data-nivel="dificil">Difícil</button>
@@ -51,15 +52,17 @@
   <ul>
     <li><b>Objetivo:</b> levar todas as cartas para os 4 montes de cima, por naipe, do Ás ao Rei.</li>
     <li>Nas colunas, as cartas descem alternando as cores (vermelha sobre preta) e diminuindo: 9 sobre 10, 8 sobre 9…</li>
-    <li>Só o <b>Rei</b> pode ir para uma coluna vazia.</li>
-    <li><b>Mover:</b> arraste a carta, ou toque nela e depois no destino.</li>
-    <li><b>Dois toques</b> rápidos mandam a carta direto para o monte de cima.</li>
+    <li>Só o <b>Rei</b> pode ir para uma coluna vazia (menos no Muito fácil).</li>
+    <li><b>Um toque</b> na carta manda ela sozinha para o melhor lugar. Se não der, ela balança.</li>
+    <li>Ou <b>arraste</b> para escolher o lugar: o destino certo acende.</li>
     <li>Toque no baralho (canto de cima, à esquerda) para virar cartas novas.</li>
   </ul>
   <h2>Níveis</h2>
   <ul>
-    <li><b>Fácil:</b> vira 1 carta por vez, baralho sem limite de voltas, e os Ases e os 2 ficam fáceis de achar.</li>
-    <li><b>Médio:</b> vira 3 cartas por vez (só a de cima pode ser usada), sem limite de voltas.</li>
+    <li><b>Muito fácil:</b> todas as cartas viradas para cima, vira 1 por vez, e <b>qualquer carta</b> pode ir para a coluna vazia. Ases, 2 e 3 ficam à mão.</li>
+    <li><b>Fácil:</b> vira 1 carta por vez, baralho sem limite de voltas, Ases e 2 à mão.</li>
+    <li><b>Médio:</b> vira 3 cartas por vez (só a de cima pode ser usada), sem limite de voltas, Ases à mão.</li>
+    <li>Nos três, o jogo sorteado sempre tem como vencer.</li>
     <li><b>Difícil:</b> vira 3 cartas e o baralho só pode ser passado <b>3 vezes</b>.</li>
   </ul>
   <button class="btn principal" data-fecha>Entendi</button>
@@ -79,6 +82,8 @@
   <button class="btn discreto" data-fecha>Fechar</button>
 </dialog>
 
+<script src="../../js/cartas.js"></script>
+<script src="sorteio.js"></script>
 <script src="jogo.js"></script>
 </body>
 </html>

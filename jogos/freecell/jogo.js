@@ -1,5 +1,5 @@
 // FreeCell. Carta = número 0..51: naipe = c/13 (0 ♠, 1 ♥, 2 ♣, 3 ♦), valor = c%13 (0 = Ás).
-// Pilhas: 'l0'..'l3' células livres, 'f0'..'f3' montes, 'c0'..'c7' colunas.
+// Pilhas: 'l0'.. células livres (5 no Muito fácil, 4, ou 3 no Difícil), 'f0'..'f3' montes, 'c0'..'c7' colunas.
 // Os jogos numerados usam a mesma distribuição clássica do FreeCell (jogos 1 a 32.000).
 (() => {
   const $ = id => document.getElementById(id);
@@ -7,6 +7,7 @@
   const naipe = c => Math.floor(c / 13), valor = c => c % 13, vermelha = c => naipe(c) % 2 === 1;
   const ROT = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   const NIVEIS = {
+    mfacil: { cel: 5, dica: true, nome: 'Muito fácil' },
     facil: { cel: 4, dica: true, nome: 'Fácil' },
     medio: { cel: 4, dica: true, nome: 'Médio' },
     dificil: { cel: 3, dica: false, nome: 'Difícil' },
@@ -32,7 +33,11 @@
   }
 
   // ---------- Estado ----------
-  const statsVazias = () => ({ facil: { j: 0, v: 0, seq: 0, max: 0, melhor: null }, medio: { j: 0, v: 0, seq: 0, max: 0, melhor: null }, dificil: { j: 0, v: 0, seq: 0, max: 0, melhor: null } });
+  function ajustarStats(s) {
+    s = s || {};
+    for (const k in NIVEIS) s[k] = s[k] || { j: 0, v: 0, seq: 0, max: 0, melhor: null };
+    return s;
+  }
   function nova(nivel, n, stats) {
     if (n == null) n = sortear(nivel);
     return { nivel, n, c: distribuir(n), l: Array(NIVEIS[nivel].cel).fill(null), f: [[], [], [], []], m: 0, t: 0, hist: [], ganhou: false, contou: false, stats };
@@ -41,15 +46,17 @@
     try {
       const todas = [...x.l.filter(c => c != null), ...x.f.flat(), ...x.c.flat()];
       return NIVEIS[x.nivel] && x.l.length === NIVEIS[x.nivel].cel && x.f.length === 4 && x.c.length === 8 &&
-        todas.length === 52 && new Set(todas).size === 52 && Array.isArray(x.hist) && x.stats && x.stats.dificil;
+        todas.length === 52 && new Set(todas).size === 52 && Array.isArray(x.hist);
     } catch (err) { return false; }
   }
   let e = JO.carregar('freecell', null);
-  if (!valida(e)) e = nova((e && NIVEIS[e.nivel]) ? e.nivel : 'facil', null, (e && e.stats && e.stats.dificil) ? e.stats : statsVazias());
-  const salvar = () => { e.stats.v = ['facil', 'medio', 'dificil'].reduce((s, k) => s + e.stats[k].v, 0); JO.salvar('freecell', e); };
+  if (!valida(e)) e = nova((e && NIVEIS[e.nivel]) ? e.nivel : 'facil', null, e && e.stats);
+  e.stats = ajustarStats(e.stats);
+  const salvar = Cartas.gravador(() => { e.stats.v = Object.keys(NIVEIS).reduce((s, k) => s + e.stats[k].v, 0); JO.salvar('freecell', e); });
 
-  let sel = null, toque = null, ultimoToque = { id: -1, t: 0 }, ocupado = null, festaId = 0, voa = new Set(), avisoT = null;
-  let G = {}, onde = {}, xy = {};
+  let ocupado = null, festaId = 0, voa = new Set(), avisoT = null;
+  let G = {}, onde = {};
+  const xy = {};
 
   // ---------- Regras ----------
   const topo = a => a[a.length - 1];
@@ -109,20 +116,26 @@
     const d = destino(g, p);
     if (!d) return false;
     foto(); tirar(g); por(g.ids, d);
-    e.m++; sel = null; limparDica();
+    e.m++; limparDica();
     if (!e.contou) { e.contou = true; e.stats[e.nivel].j++; }
     JO.som('carta'); salvar(); desenhar(g.ids);
     autoSubir();
     return true;
   }
-  function duploToque(id) {
-    const g = pegavel(id);
-    if (!g || g.ids.length !== 1) return false;
-    return tentar(g, 'f0') || tentar(g, 'l0');
+  // Melhor lugar para o toque simples: monte, coluna que encaixa, célula livre, coluna vazia.
+  function melhorLugar(g) {
+    if (g.p[0] === 'f') return null;
+    if (g.ids.length === 1 && acharFund(g.ids[0]) >= 0) return 'f0';
+    const cs = [0, 1, 2, 3, 4, 5, 6, 7].map(j => 'c' + j).filter(p => destino(g, p));
+    const cheia = cs.find(p => e.c[+p[1]].length), vazia = cs.find(p => !e.c[+p[1]].length);
+    if (cheia) return cheia;
+    if (g.ids.length === 1 && destino(g, 'l0')) return 'l0';
+    return vazia && !(g.p[0] === 'c' && g.i === 0) ? vazia : null;
   }
   function desfazer() {
-    if (!e.hist.length || e.ganhou || ocupado) return;
-    Object.assign(e, JSON.parse(e.hist.pop())); sel = null; limparDica(); salvar(); desenhar();
+    terminar(); mao.cancelar();
+    if (!e.hist.length || e.ganhou) return;
+    Object.assign(e, JSON.parse(e.hist.pop())); limparDica(); salvar(); desenhar();
   }
 
   // ---------- Subir sozinho para os montes (só cartas que não fazem mais falta) ----------
@@ -133,22 +146,35 @@
     for (let n = 0; n < 4; n++) if ((n % 2 === 1) !== vermelha(c) && nivelNaipe(n) < v - 1) return false;
     return true;
   }
+  function subirUma() {
+    const cand = [...e.l.map((c, i) => c == null ? null : { p: 'l' + i, i: 0, ids: [c] }),
+      ...e.c.map((col, j) => col.length ? { p: 'c' + j, i: col.length - 1, ids: [topo(col)] } : null)].filter(Boolean);
+    const g = cand.find(x => segura(x.ids[0]));
+    if (g) { tirar(g); por(g.ids, 'f' + acharFund(g.ids[0])); }
+    return g;
+  }
   function autoSubir() {
     clearTimeout(ocupado);
     ocupado = setTimeout(function passo() {
-      const cand = [...e.l.map((c, i) => c == null ? null : { p: 'l' + i, i: 0, ids: [c] }),
-        ...e.c.map((col, j) => col.length ? { p: 'c' + j, i: col.length - 1, ids: [topo(col)] } : null)].filter(Boolean);
-      const g = cand.find(x => segura(x.ids[0]));
-      if (g) {
-        tirar(g); por(g.ids, 'f' + acharFund(g.ids[0]));
-        JO.som('carta'); desenhar(g.ids);
-        ocupado = setTimeout(passo, 120);
-        return;
-      }
-      ocupado = null; salvar(); desenhar();
-      if (e.f.every(x => x.length === 13)) vitoria();
-      else if (travado()) setTimeout(() => { if (!ocupado && travado() && !$('travou').open) { JO.som('derrota'); $('travou').showModal(); } }, 300);
-    }, 160);
+      const g = subirUma();
+      if (g) { JO.som('carta'); desenhar(g.ids); ocupado = setTimeout(passo, 100); return; }
+      fimAuto();
+    }, 140);
+  }
+  // Se o jogador toca antes de terminar, sobe tudo de uma vez: ninguém precisa esperar.
+  function terminar() {
+    if (!ocupado) return;
+    clearTimeout(ocupado); ocupado = null;
+    const ids = []; let g; while ((g = subirUma())) ids.push(...g.ids);
+    if (ids.length) desenhar(ids);
+    fimAuto();
+  }
+  function fimAuto() {
+    ocupado = null; salvar();
+    if (!mao.arrastando()) desenhar();
+    if (e.ganhou) return;
+    if (e.f.every(x => x.length === 13)) vitoria();
+    else if (travado()) setTimeout(() => { if (!ocupado && travado() && !$('travou').open) { JO.som('derrota'); $('travou').showModal(); } }, 300);
   }
   function travado() {
     if (celulaLivre() >= 0 || e.c.some(c => !c.length)) return false;
@@ -212,8 +238,9 @@
     avisoT = setTimeout(() => $('aviso').hidden = true, ms || 2200);
   }
   function dica() {
-    if (e.ganhou || ocupado || !NIVEIS[e.nivel].dica) return;
-    sel = null; limparDica(); desenhar();
+    terminar(); mao.cancelar();
+    if (e.ganhou || !NIVEIS[e.nivel].dica) return;
+    limparDica(); desenhar();
     aviso('Pensando…', 10000);
     setTimeout(() => {
       const r = resolver(25000);
@@ -269,14 +296,14 @@
       if (ficha !== festaId) return;
       if (quadro++ % 6 === 0 && prox < fila.length) {
         const id = fila[prox++], el = cartas[id];
-        el.classList.add('arrasta'); el.style.zIndex = 3000 + prox;
+        el.classList.add('arrasta'); Cartas.pos(el, xy[id].x, xy[id].y, 3000 + prox);
         ativos.push({ el, x: xy[id].x, y: xy[id].y, vx: (Math.random() < .5 ? -1 : 1) * (1.5 + Math.random() * 3), vy: -Math.random() * 5 });
       }
       for (const a of ativos) {
         if (a.fora) continue;
         a.vy += .45; a.x += a.vx; a.y += a.vy;
         if (a.y > chao) { a.y = chao; a.vy *= -.78; }
-        a.el.style.transform = `translate(${a.x}px,${a.y}px)`;
+        Cartas.pos(a.el, a.x, a.y);
         if (a.x < -G.cw * 1.3 || a.x > W + G.cw * .3) { a.fora = true; a.el.style.visibility = 'hidden'; }
       }
       if (prox < fila.length || ativos.some(a => !a.fora)) requestAnimationFrame(passo);
@@ -286,12 +313,12 @@
   // ---------- Novo jogo / recomeçar / nível ----------
   function abandonar() { if (e.m > 0 && !e.ganhou) e.stats[e.nivel].seq = 0; }
   function comecar(nivel, n, mesmo) {
-    festaId++; clearTimeout(ocupado); ocupado = null; sel = null; limparDica();
+    mao.cancelar(); festaId++; clearTimeout(ocupado); ocupado = null; limparDica();
     const contou = mesmo ? e.contou : false;
     if (!mesmo) abandonar();
     e = nova(nivel, n, e.stats); e.contou = contou; salvar();
     medir();
-    cartas.forEach(el => { el.classList.add('arrasta'); el.style.transform = `translate(${G.W / 2 - G.cw / 2}px,${G.y0}px)`; el.style.visibility = ''; });
+    cartas.forEach(el => { el.classList.add('arrasta'); Cartas.pos(el, G.W / 2 - G.cw / 2, G.y0); el.style.visibility = ''; });
     void tab.offsetWidth;
     desenhar();
     if (!mesmo) aviso(`${NIVEIS[nivel].nome} · Jogo nº ${e.n}`, 1600);
@@ -304,7 +331,7 @@
 
   // ---------- Tela ----------
   const vagas = {}, cartas = [];
-  for (const p of ['l0', 'l1', 'l2', 'l3', 'f0', 'f1', 'f2', 'f3', 'c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) {
+  for (const p of ['l0', 'l1', 'l2', 'l3', 'l4', 'f0', 'f1', 'f2', 'f3', 'c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) {
     const v = document.createElement('div'); v.className = 'vaga'; v.dataset.p = p; tab.appendChild(v); vagas[p] = v;
   }
   for (let id = 0; id < 52; id++) {
@@ -315,15 +342,20 @@
   }
 
   function medir() {
-    const W = tab.clientWidth, gap = Math.max(2, W * .007), livre = window.innerHeight - tab.getBoundingClientRect().top - 8;
-    const cw = Math.max(30, Math.min((W - 7 * gap) / 8, livre / (1.4 * 4.4), 86)), ch = cw * 1.4, y0 = ch + gap * 3.5;
-    const H = Math.max(livre, y0 + ch * 3), x0 = (W - 8 * cw - 7 * gap) / 2;
+    // Cartas na largura toda da tela; em tela deitada ou no computador, o limite passa a ser a altura.
+    const W = tab.clientWidth, livre = window.innerHeight - tab.getBoundingClientRect().top - 10, baixa = livre < 480;
+    const gap = Math.max(1, Math.min(8, W * .005)), prop = baixa ? 1.32 : 1.68;
+    const cw = Math.max(30, Math.min((W - 7 * gap) / 8, livre / (prop * (baixa ? 4 : 4.1)), 130)), ch = cw * prop, y0 = ch + Math.max(6, gap * 2.5);
+    const H = Math.max(livre, y0 + ch * 2.4), x0 = (W - 8 * cw - 7 * gap) / 2;
     G = { W, gap, cw, ch, y0, H, x0, x: j => x0 + j * (cw + gap) };
-    tab.style.height = H + 'px';
+    tab.style.height = H + 'px'; tab.style.setProperty('--v', baixa ? .4 : .6);
     tab.style.setProperty('--cw', cw + 'px'); tab.style.setProperty('--ch', ch + 'px');
     const pv = (p, x, y) => vagas[p].style.transform = `translate(${x}px,${y}px)`;
+    // Com 5 células, os 4 montes ficam um pouco sobrepostos para caber na mesma linha.
     const cel = NIVEIS[e.nivel].cel;
-    for (let n = 0; n < 4; n++) { pv('l' + n, G.x(n), 0); vagas['l' + n].hidden = n >= cel; pv('f' + n, G.x(4 + n), 0); }
+    G.fx = n => cel > 4 ? G.x(5) + n * (G.x(7) - G.x(5)) / 3 : G.x(4 + n);
+    for (let n = 0; n < 5; n++) { pv('l' + n, G.x(n), 0); vagas['l' + n].hidden = n >= cel; }
+    for (let n = 0; n < 4; n++) pv('f' + n, G.fx(n), 0);
     for (let j = 0; j < 8; j++) pv('c' + j, G.x(j), y0);
   }
 
@@ -332,22 +364,20 @@
   function desenhar(movidas) {
     if (movidas && movidas.length) {
       voa = new Set(movidas);
-      setTimeout(() => { voa = new Set(); if (!(toque && toque.arrastando) && !e.ganhou) desenhar(); }, 240);
+      setTimeout(() => { voa = new Set(); if (!mao.arrastando() && !e.ganhou) desenhar(); }, 220);
     }
     onde = {};
     const poe = (id, x, y, z, p, i) => {
       const el = cartas[id];
-      el.style.transform = `translate(${x}px,${y}px)`;
-      el.style.zIndex = z + (voa.has(id) ? 1000 : 0);
-      el.style.visibility = '';
-      el.classList.toggle('sel', !!sel && sel.ids.includes(id));
-      el.classList.remove('arrasta');
+      el.classList.remove('arrasta', 'pega', 'mira');
+      if (el.style.visibility) el.style.visibility = '';
+      Cartas.pos(el, x, y, z + (voa.has(id) ? 1000 : 0));
       xy[id] = { x, y }; onde[id] = { p, i };
     };
     e.l.forEach((id, n) => { if (id != null) poe(id, G.x(n), 0, 100, 'l' + n, 0); });
-    e.f.forEach((pl, n) => pl.forEach((id, i) => poe(id, G.x(4 + n), 0, 200 + i, 'f' + n, i)));
+    e.f.forEach((pl, n) => pl.forEach((id, i) => poe(id, G.fx(n), 0, 200 + n * 20 + i, 'f' + n, i)));
     e.c.forEach((col, j) => {
-      let ou = G.ch * .42;
+      let ou = G.ch * .46;
       const total = Math.max(0, col.length - 1) * ou + G.ch, cabe = G.H - G.y0 - 4;
       if (total > cabe) ou = (cabe - G.ch) / Math.max(1, col.length - 1);
       col.forEach((id, i) => poe(id, G.x(j), G.y0 + i * ou, 300 + i, 'c' + j, i));
@@ -355,64 +385,59 @@
     $('jogadas').textContent = e.m;
     $('tempo').textContent = relogio(e.t);
     $('numero-txt').textContent = e.n;
-    $('desfazer').disabled = !e.hist.length || e.ganhou || !!ocupado;
+    $('desfazer').disabled = !e.hist.length || e.ganhou;
     $('dica').hidden = !NIVEIS[e.nivel].dica;
     $('dica').disabled = e.ganhou;
     document.querySelectorAll('.modos button').forEach(b => b.classList.toggle('ativo', b.dataset.nivel === e.nivel));
   }
 
-  // ---------- Toque e arrasto ----------
+  // ---------- Toque e arrasto (o dedo é lido em js/cartas.js) ----------
+  // O que está neste ponto do tabuleiro. Um pouco abaixo da última carta da coluna ainda vale.
+  function achar(x, y) {
+    if (x < G.x0 - G.cw * .5 || x > G.x(7) + G.cw * 1.5) return null;
+    const j = Math.max(0, Math.min(7, Math.floor((x - G.x0 + G.gap / 2) / (G.cw + G.gap))));
+    if (y < G.y0 - 2) {
+      const cel = NIVEIS[e.nivel].cel;
+      if (j < cel) return { p: 'l' + j, id: e.l[j] };
+      if (x < G.fx(0)) return null;
+      return { p: 'f0' };
+    }
+    const k = e.c[j];
+    if (!k.length) return y < G.y0 + G.ch * 1.4 ? { p: 'c' + j } : null;
+    if (y > xy[topo(k)].y + G.ch * 1.4) return null;
+    let i = k.length - 1; while (i > 0 && xy[k[i]].y > y) i--;
+    return { p: 'c' + j, id: k[i] };
+  }
   function tocar(alvo) {
-    if (e.ganhou || ocupado) return;
-    if (alvo.classList.contains('vaga')) {
-      if (sel && !tentar(sel, alvo.dataset.p)) { sel = null; desenhar(); }
-      return;
+    if (e.ganhou || alvo.id == null) return false;
+    let g = pegavel(alvo.id);
+    if (!g) {
+      const col = alvo.p[0] === 'c' ? e.c[+alvo.p[1]] : [];
+      JO.som('erro'); Cartas.tremer(col.slice(col.indexOf(alvo.id)).map(id => cartas[id]));
+      return false;
     }
-    const id = +alvo.dataset.id, o = onde[id];
-    const agora = Date.now(), duplo = ultimoToque.id === id && agora - ultimoToque.t < 400;
-    ultimoToque = { id, t: agora };
-    if (duplo) { sel = null; if (!duploToque(id)) desenhar(); return; }
-    if (sel && sel.ids[0] !== id && tentar(sel, o.p)) return;
-    const g = pegavel(id);
-    sel = g && !(sel && sel.ids[0] === id) ? g : null;
-    if (!g && o.p[0] === 'c') JO.som('erro');
-    desenhar();
+    const p = melhorLugar(g);
+    if (p && tentar(g, p)) return true;
+    JO.som('erro'); Cartas.tremer(g.ids.map(id => cartas[id]));
+    return false;
   }
-
-  tab.addEventListener('touchstart', ev => ev.preventDefault(), { passive: false });
-  tab.addEventListener('touchend', ev => ev.preventDefault(), { passive: false });
-  tab.addEventListener('dblclick', ev => ev.preventDefault());
-  tab.addEventListener('pointerdown', ev => {
-    const alvo = ev.target.closest('.carta,.vaga');
-    if (!alvo || toque) return;
-    ev.preventDefault();
-    toque = { alvo, x: ev.clientX, y: ev.clientY, arrastando: false, id: ev.pointerId, g: null };
-    if (alvo.classList.contains('carta') && !e.ganhou && !ocupado) toque.g = pegavel(+alvo.dataset.id);
-    try { tab.setPointerCapture(ev.pointerId); } catch (err) {}
-  });
-  tab.addEventListener('pointermove', ev => {
-    if (!toque || ev.pointerId !== toque.id || !toque.g) return;
-    const dx = ev.clientX - toque.x, dy = ev.clientY - toque.y;
-    if (!toque.arrastando) {
-      if (Math.hypot(dx, dy) < 8) return;
-      toque.arrastando = true; limparDica();
-      if (sel) { sel = null; cartas.forEach(el => el.classList.remove('sel')); }
-      toque.g.ids.forEach((id, k) => { cartas[id].classList.add('arrasta'); cartas[id].style.zIndex = 2000 + k; });
-    }
-    toque.g.ids.forEach(id => cartas[id].style.transform = `translate(${xy[id].x + dx}px,${xy[id].y + dy}px)`);
-  });
-  function soltar(ev) {
-    if (!toque || ev.pointerId !== toque.id) return;
-    const t = toque; toque = null;
-    if (!t.arrastando) return tocar(t.alvo);
-    const lider = t.g.ids[0];
-    const cx = xy[lider].x + ev.clientX - t.x + G.cw / 2, cy = xy[lider].y + ev.clientY - t.y + G.ch / 2;
-    const col = Math.max(0, Math.min(7, Math.round((cx - G.x0 - G.cw / 2) / (G.cw + G.gap))));
-    const p = cy < G.y0 - G.gap ? (col >= 4 ? 'f' + (col - 4) : 'l' + Math.min(col, NIVEIS[e.nivel].cel - 1)) : 'c' + col;
-    if (!tentar(t.g, p)) { if (t.g.ids.length > maxMover(false) && p[0] === 'c') aviso(`Dá para mover só ${maxMover(!e.c[+p.slice(1)].length)} cartas de uma vez agora`); desenhar(); }
+  function alvos(g) {
+    const r = [];
+    if (destino(g, 'f0')) { const n = acharFund(g.ids[0]); r.push({ p: 'f0', x: G.fx(0), y: 0, w: G.fx(3) + G.cw - G.fx(0), h: G.ch, el: e.f[n].length ? cartas[topo(e.f[n])] : vagas['f' + n] }); }
+    for (let n = 0; n < NIVEIS[e.nivel].cel; n++) { const d = destino(g, 'l' + n); if (d) r.push({ p: d, x: G.x(n), y: 0, w: G.cw, h: G.ch, el: vagas[d] }); }
+    for (let j = 0; j < 8; j++) if (destino(g, 'c' + j)) { const k = e.c[j]; r.push({ p: 'c' + j, x: G.x(j), y: G.y0, w: G.cw, h: G.H - G.y0, el: k.length ? cartas[topo(k)] : vagas['c' + j] }); }
+    return r;
   }
-  tab.addEventListener('pointerup', soltar);
-  tab.addEventListener('pointercancel', ev => { if (toque && ev.pointerId === toque.id) { toque = null; desenhar(); } });
+  function falhou(g, x, y) {
+    if (g.ids.length < 2 || y < G.y0) return;
+    const col = e.c[Math.max(0, Math.min(7, Math.floor((x - G.x0) / (G.cw + G.gap))))], max = maxMover(!col.length);
+    if (g.ids.length > max && (!col.length || encaixa(topo(col), g.ids[0]))) aviso(max === 1 ? 'Dá para mover só 1 carta de uma vez agora' : `Dá para mover só ${max} cartas de uma vez agora`);
+  }
+  const mao = Cartas.ligar({
+    tab, cartas, xy, medidas: () => G, antes: terminar, achar, alvos, tocar, mover: tentar, falhou,
+    pegar: id => e.ganhou ? null : pegavel(id),
+    repete: () => false, voltou: () => desenhar(), aoArrastar: limparDica,
+  });
 
   // ---------- Botões e relógio ----------
   $('novo').addEventListener('click', () => pedir('Começar um novo jogo?', () => comecar(e.nivel)));
@@ -427,7 +452,7 @@
   $('numero').addEventListener('click', () => {
     $('escolher-atual').textContent = e.n; $('num-campo').value = '';
     $('num-nota').textContent = e.nivel === 'dificil' ? 'No Difícil (3 células), nem todo número escolhido tem solução.' :
-      e.nivel === 'facil' ? 'Um número escolhido pode não ser um jogo fácil.' : '';
+      e.nivel !== 'medio' ? 'Um número escolhido pode não ser um jogo fácil.' : '';
     $('recomecar').disabled = e.m === 0;
     $('escolher').showModal();
   });
@@ -450,7 +475,7 @@
       if (e.t % 5 === 0) salvar();
     }
   }, 1000);
-  window.addEventListener('resize', () => { medir(); desenhar(); });
+  window.addEventListener('resize', () => { mao.cancelar(); medir(); if (!e.ganhou) desenhar(); });
 
   medir(); desenhar();
   if (!e.ganhou) autoSubir();

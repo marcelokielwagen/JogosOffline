@@ -21,6 +21,14 @@
 .palavras { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
 .palavra { padding: 6px 11px; border-radius: 99px; background: var(--superficie); border: 1px solid var(--borda); font-weight: 600; font-size: .86rem; letter-spacing: .03em; }
 .palavra.ok { text-decoration: line-through; color: var(--texto2); border-color: var(--cor); background: color-mix(in srgb, var(--cor) 22%, var(--superficie)); }
+.tema-chip { flex: 1.5; border-color: color-mix(in srgb, var(--destaque) 55%, var(--borda)); }
+.tema-chip:active { transform: scale(.95); }
+.temas-lista { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 60dvh; overflow-y: auto; margin-bottom: 8px; }
+.temas-lista h3 { grid-column: 1 / -1; margin: 8px 2px 0; font-size: .82rem; color: var(--destaque); }
+.tema { min-height: 46px; padding: 6px 8px; border-radius: 12px; background: var(--superficie2); border: 1px solid var(--borda); font-weight: 600; font-size: .9rem; line-height: 1.15; }
+.tema.largo { grid-column: 1 / -1; }
+.tema.ativo { background: var(--destaque); color: #fff; }
+.barra .btn { padding: 0 12px; }
 dialog .btn + .btn { margin-top: 6px; }
 
 @media (orientation: landscape) and (max-height: 520px) {

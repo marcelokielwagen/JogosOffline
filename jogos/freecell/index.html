@@ -28,6 +28,7 @@
   </header>
 
   <div class="modos" role="group" aria-label="Dificuldade">
+    <button data-nivel="mfacil">Muito fácil</button>
     <button data-nivel="facil">Fácil</button>
     <button data-nivel="medio">Médio</button>
     <button data-nivel="dificil">Difícil</button>
@@ -56,14 +57,16 @@
     <li>As <b>células livres</b> (à esquerda, em cima) guardam uma carta cada, para abrir caminho.</li>
     <li>Qualquer carta pode ir para uma coluna vazia.</li>
     <li>Dá para mover uma sequência inteira de uma vez, desde que haja células e colunas livres suficientes.</li>
-    <li><b>Mover:</b> arraste, ou toque na carta e depois no destino. <b>Dois toques</b> mandam a carta para o monte ou para uma célula livre.</li>
+    <li><b>Um toque</b> na carta manda ela sozinha para o melhor lugar (monte, coluna que encaixa ou célula livre). Se não der, ela balança.</li>
+    <li>Ou <b>arraste</b> para escolher o lugar: o destino certo acende.</li>
     <li>Cartas que não servem mais nas colunas sobem sozinhas para os montes.</li>
     <li>Toque em <b>Jogo nº</b> para escolher um número de jogo ou recomeçar o mesmo.</li>
   </ul>
   <h2>Níveis</h2>
   <ul>
-    <li><b>Fácil:</b> 4 células livres e só jogos tranquilos. Tem dica 💡.</li>
-    <li><b>Médio:</b> 4 células livres e qualquer jogo de 1 a 32.000, como no FreeCell clássico. Tem dica 💡.</li>
+    <li><b>Muito fácil:</b> <b>5 células livres</b> e os jogos mais tranquilos, com Ases, 2 e 3 à mão. Tem dica 💡.</li>
+    <li><b>Fácil:</b> 4 células livres e jogos tranquilos. Tem dica 💡.</li>
+    <li><b>Médio:</b> 4 células livres e jogos um pouco mais trabalhosos. Tem dica 💡.</li>
     <li><b>Difícil:</b> só 3 células livres e sem dica. Todo jogo sorteado tem solução.</li>
   </ul>
   <button class="btn principal" data-fecha>Entendi</button>
@@ -103,6 +106,7 @@
   <button class="btn discreto" data-fecha>Fechar</button>
 </dialog>
 
+<script src="../../js/cartas.js"></script>
 <script src="jogos.js"></script>
 <script src="jogo.js"></script>
 </body>

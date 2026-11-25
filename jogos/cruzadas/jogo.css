@@ -16,13 +16,35 @@
 .item.feita .barrinha i { background: var(--o); }
 .item.feita span { color: var(--o); }
 
+.item.larga { grid-column: span 1; }
+.item.destaque { background: var(--destaque); color: #fff; border-color: transparent; }
+.item.destaque span { color: rgba(255,255,255,.85); }
+.rapida { grid-column: 1 / -1; }
+.rapida .cat { margin: 0 2px 8px; }
+.modos { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); }
+.modos button { min-height: 44px; border-radius: 12px; font-weight: 600; font-size: .9rem; color: var(--texto2); }
+.modos button.ativo { background: var(--destaque); color: #fff; }
+.grandes { grid-column: 1 / -1; margin-top: 8px; }
+.grandes summary { padding: 14px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borda); font-weight: 600; cursor: pointer; }
+.grandes summary small { color: var(--texto2); font-weight: 500; }
+.grandes .lista { margin-top: 12px; }
+
+/* Placar da partida rápida */
+.info { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: .85rem; color: var(--texto2); }
+.info .barrinha { flex: 1; height: 8px; border-radius: 99px; background: var(--superficie2); overflow: hidden; }
+.info .barrinha i { display: block; height: 100%; width: 0; background: var(--o); border-radius: 99px; transition: width .35s; }
+.info b { font-variant-numeric: tabular-nums; color: var(--texto); }
+
 /* Grade */
 .grade-caixa { width: min(100%, calc(100dvh - 400px)); min-width: 230px; margin: 0 auto; container-type: inline-size; }
-.grade { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; aspect-ratio: 1; }
+.grade { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); grid-template-rows: repeat(var(--n), minmax(0, 1fr)); gap: 2px; aspect-ratio: 1; }
 .cel { position: relative; padding: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(20,25,60,.22); background: #fdfdfb; color: #1b1e30; font-weight: 700; font-size: calc(100cqw / var(--n) * .56); line-height: 1; display: grid; place-items: center; text-transform: uppercase; min-width: 0; min-height: 0; }
 .cel i { position: absolute; left: 6%; top: 4%; font-style: normal; font-weight: 600; font-size: calc(100cqw / var(--n) * .3); color: #555a78; }
 .cel.pal { background: #d6dcff; }
 .cel.atual { background: var(--ouro); box-shadow: 0 0 0 2px var(--texto); z-index: 1; }
+.cel.certa { background: #c9f5dd; }
+.cel.certa.pal { background: #a9ecc8; }
+.cel.certa.atual { background: var(--ouro); }
 .cel.ok { color: #0d8a55; }
 .cel.erro { color: #d6324a; background-image: linear-gradient(135deg, transparent 46%, #d6324a 46% 54%, transparent 54%); }
 .cel.rev { color: #3d4bd1; }
@@ -34,6 +56,8 @@
 .dica-barra .icone-btn { height: auto; font-size: 1.5rem; }
 
 .acoes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+#jogo.e-rapida #aviso { min-height: 0; margin: 0; }
+.e-rapida .acoes { grid-template-columns: repeat(3, 1fr); }
 .acoes .btn { min-height: 44px; padding: 0 4px; font-size: .85rem; border-radius: 12px; }
 #aviso { margin: 4px 0 0; min-height: 1.3em; text-align: center; font-size: .85rem; font-weight: 600; color: var(--aviso); }
 
@@ -59,7 +83,7 @@ dialog .btn + .btn { margin-top: 6px; }
   .pagina { max-width: 940px; }
   .topo { padding: 6px 0; }
   #jogo { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: start; }
-  .grade-caixa { width: calc(100dvh - 76px); grid-row: 1 / span 5; }
+  .grade-caixa { width: calc(100dvh - 76px); grid-row: 1 / span 6; }
   .dica-barra { margin-top: 0; }
   .tecla { min-height: 38px; }
 }

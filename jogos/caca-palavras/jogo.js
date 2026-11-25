@@ -1,19 +1,8 @@
-// Caça-Palavras: cada jogo sorteia um tema, 8 palavras e monta um quadro 10x10.
+// Caça-Palavras: cada jogo usa um tema (escolhido ou sorteado), 8 palavras e monta um quadro 10x10.
 (() => {
   const $ = id => document.getElementById(id);
   const N = 10, QTD = 8;
-  const TEMAS = {
-    'Animais': 'GATO CACHORRO CAVALO MACACO GIRAFA ELEFANTE TIGRE LEAO ZEBRA COELHO PATO GALINHA OVELHA URSO LOBO RAPOSA JACARE TUCANO ARARA BALEIA GOLFINHO TARTARUGA FORMIGA ABELHA COBRA SAPO',
-    'Frutas': 'BANANA LARANJA ABACAXI MORANGO MELANCIA UVA MANGA GOIABA LIMAO PERA CAJU COCO MAMAO AMEIXA KIWI FIGO JABUTICABA ACEROLA PESSEGO CEREJA MELAO TANGERINA AMORA PITANGA',
-    'Cores': 'AZUL VERDE AMARELO VERMELHO ROXO ROSA LARANJA PRETO BRANCO CINZA MARROM DOURADO PRATA BEGE LILAS VIOLETA TURQUESA ANIL',
-    'Comida': 'ARROZ FEIJAO MACARRAO PIZZA SALADA SOPA QUEIJO PRESUNTO BOLO PUDIM FAROFA CUSCUZ TAPIOCA PASTEL COXINHA LASANHA OMELETE BISCOITO SORVETE PIPOCA BRIGADEIRO',
-    'Corpo': 'OLHO NARIZ BOCA ORELHA OMBRO PERNA JOELHO DEDO UNHA CABELO BARRIGA COSTAS LINGUA DENTE COTOVELO TORNOZELO PEITO QUEIXO TESTA PULSO CINTURA',
-    'Casa': 'SALA QUARTO COZINHA BANHEIRO JANELA PORTA TELHADO GARAGEM JARDIM QUINTAL SOFA CAMA MESA CADEIRA ARMARIO ESPELHO TAPETE CORTINA FOGAO VARANDA ESCADA',
-    'Natureza': 'MONTANHA FLORESTA RIO LAGO MAR PRAIA CACHOEIRA DESERTO ILHA VULCAO CAVERNA NUVEM CHUVA VENTO TROVAO ARVORE FLOR PEDRA AREIA ESTRELA LUA SOL',
-    'Brasil': 'BAHIA CEARA PARANA GOIAS AMAZONAS ACRE PIAUI SERGIPE ALAGOAS RORAIMA TOCANTINS AMAPA MARANHAO PARAIBA RONDONIA RECIFE NATAL MANAUS BELEM CURITIBA SALVADOR FORTALEZA BRASILIA',
-    'Profissões': 'MEDICO PROFESSOR PADEIRO BOMBEIRO PILOTO DENTISTA PINTOR PEDREIRO MOTORISTA COZINHEIRO ADVOGADO ENGENHEIRO CARTEIRO PESCADOR MUSICO JORNALISTA GARI ATOR JUIZ VENDEDOR',
-    'Esportes': 'FUTEBOL VOLEI BASQUETE TENIS NATACAO JUDO SURFE SKATE CORRIDA CICLISMO BOXE GINASTICA HANDEBOL XADREZ CAPOEIRA KARATE REMO VELA GOLFE ESGRIMA',
-  };
+  const TEMAS = Object.assign({}, ...Object.values(TEMAS_CACA));
   const DIRS = {
     facil: [[0, 1], [1, 0]],
     medio: [[0, 1], [1, 0], [1, 1], [-1, 1]],
@@ -26,11 +15,22 @@
   const relogio = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 
   // ---------- Montar um quadro ----------
-  function novo(nivel, stats, temaAnterior) {
-    const nomes = Object.keys(TEMAS).filter(t => t !== temaAnterior);
+  // Sorteia as palavras do tema, deixando as da partida anterior por último e sem "irmãs" (REDE e REDES).
+  function sortear(tema, usadas) {
+    const todas = TEMAS[tema].split(' ').filter(w => w.length <= N);
+    for (let i = todas.length - 1; i > 0; i--) { const j = sorte(i + 1); [todas[i], todas[j]] = [todas[j], todas[i]]; }
+    todas.sort((a, b) => usadas.includes(a) - usadas.includes(b));
+    const r = [];
+    for (const w of todas) if (r.length < QTD && !r.some(x => x.includes(w) || w.includes(x))) r.push(w);
+    return r.sort((a, b) => b.length - a.length);
+  }
+  // escolha: tema fixo, ou vazio para sortear um diferente do anterior.
+  function novo(nivel, stats, escolha, antes) {
+    if (!TEMAS[escolha]) escolha = null;
+    const nomes = Object.keys(TEMAS).filter(t => !antes || t !== antes.tema);
     for (;;) {
-      const tema = nomes[sorte(nomes.length)];
-      const lista = TEMAS[tema].split(' ').filter(w => w.length <= N).sort(() => Math.random() - .5).slice(0, QTD).sort((a, b) => b.length - a.length);
+      const tema = escolha || nomes[sorte(nomes.length)];
+      const lista = sortear(tema, antes && antes.tema === tema ? antes.p.map(x => x.w) : []);
       const g = Array(N * N).fill(''), p = [];
       let deu = true;
       for (const w of lista) {
@@ -50,7 +50,7 @@
       if (!deu) continue;
       for (let i = 0; i < N * N; i++) if (!g[i]) g[i] = ENCHE[sorte(ENCHE.length)];
       p.sort((a, b) => a.w.localeCompare(b.w));
-      return { nivel, tema, g, p, t: 0, fim: false, stats: stats || { v: 0, melhor: {} } };
+      return { nivel, tema, escolha, g, p, t: 0, fim: false, stats: stats || { v: 0, melhor: {} } };
     }
   }
   const valido = x => x && Array.isArray(x.g) && x.g.length === N * N && Array.isArray(x.p) && x.stats && DIRS[x.nivel];
@@ -138,7 +138,23 @@
   caixa.addEventListener('pointercancel', () => { arrastando = false; ancora = null; desenhar(); });
 
   // ---------- Botões e relógio ----------
-  function recomecar(nivel) { ancora = null; arrastando = false; e = novo(nivel, e.stats, e.tema); salvar(); desenhar(); }
+  function recomecar(nivel) { ancora = null; arrastando = false; e = novo(nivel, e.stats, e.escolha, e); salvar(); desenhar(); }
+  // ---------- Escolha do tema ----------
+  const trocarTema = t => { $('temas').close(); e.escolha = t; recomecar(e.nivel); };
+  $('tema-btn').addEventListener('click', () => {
+    const cx = $('temas-lista'); cx.innerHTML = '';
+    const botao = (t, rotulo) => {
+      const b = document.createElement('button');
+      b.className = 'tema' + ((e.escolha || null) === t ? ' ativo' : ''); b.textContent = rotulo;
+      b.addEventListener('click', () => trocarTema(t)); return b;
+    };
+    const s = botao(null, '🎲 Sortear a cada jogo'); s.classList.add('largo'); cx.appendChild(s);
+    for (const grupo in TEMAS_CACA) {
+      const h = document.createElement('h3'); h.textContent = grupo; cx.appendChild(h);
+      for (const t in TEMAS_CACA[grupo]) cx.appendChild(botao(t, t));
+    }
+    $('temas').showModal();
+  });
   $('novo').addEventListener('click', () => recomecar(e.nivel));
   $('vitoria-novo').addEventListener('click', () => { $('vitoria').close(); recomecar(e.nivel); });
   document.querySelectorAll('.modos button').forEach(b => b.addEventListener('click', () => { if (b.dataset.nivel !== e.nivel) recomecar(b.dataset.nivel); }));

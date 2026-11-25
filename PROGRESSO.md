@@ -292,3 +292,15 @@ O roteiro completo das etapas está em `PROMPT.md`.
   Testado: robô nos 8 níveis (bom vence quase sempre, médio cerca de metade a dois terços nos altos, parado nunca), os 8 níveis inteiros no navegador em
   pé e deitado, modo celular até cerca de 250 mil triângulos, 8 aberturas (0 texturas presas), offline com servidor desligado, áudio sem estourar
   (pico .96). Não testado num celular de verdade; sons medidos, não ouvidos. Faltam: níveis 9 a 20, chefes Para-raios e Siamês, melhorias e modo infinito.
+- **Cartas, Cruzadas e Caça-Palavras (24/11/2026)**, pedido do dono (mais temas de TI, toque fluido, níveis mais fáceis, cartas maiores, cruzadas
+  menores e mais rápidas).
+  Cartas: toque e arrasto comuns em `js/cartas.js` (um toque manda a carta sozinha; arrasto com destino aceso; toque fora da carta ainda vale; salvar
+  adiado para não engasgar; no FreeCell o toque não espera mais as cartas que sobem). Cartas de ponta a ponta no celular, mais altas e com número maior;
+  deitado, botões na lateral. Nível novo Muito fácil nos dois. Paciência: `jogos/paciencia/sorteio.js` só aceita baralho que um jogador automático vence
+  (menos no Difícil). FreeCell: 5 células no Muito fácil; listas novas por `ferramentas/freecell/listas.mjs` (solução com 1 célula).
+  Cruzadas: partidas rápidas sorteadas na hora (`gerador.js`, Mini 6 e Média 9 palavras), 15 temas, 6 deles de tecnologia (`banco.js`, 319 palavras); palavra
+  certa trava e pula sozinha. As 26 grades antigas ficaram em "Grades grandes", com o progresso salvo. Caça-Palavras: 29 temas em `temas.js` (8 de
+  tecnologia) e escolha do tema. Cache `jogos-offline-v45`.
+  Testado com toque simulado no Chrome: partida inteira de FreeCell sem esperar animação, arrasto e toque na Paciência, completar sozinho (o botão não
+  funcionava no toque, corrigido), cruzadas resolvidas pelo teclado da tela, 29 temas nos 3 níveis, 360x640 a 1440x900, jogos salvos antigos. Não
+  testado num celular de verdade.
