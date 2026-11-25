@@ -5,7 +5,7 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
 | Fase | O que é | Estado |
 |---|---|---|
 | 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v59) em 25/11/2026 |
-| 2 | Progressão e retenção | falta |
+| 2 | Casa, álbum, acervo, marcos, mesa do dia e ficha segura | pronta e publicada (v63) em 25/11/2026 |
 | 3 | Economia, boosters, dificuldade, ganchos de anúncio e compra | falta |
 | 4 | Preparação para as lojas | falta |
 
@@ -23,13 +23,27 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
 - `index.html` sem dependências + `arte/` (1,4 MB): 119 objetos 3D modelados por código e pré-fotografados em três folhas: `cor` (cor e recorte), `nor` (inclinação e material) e
   `sombra`; `m0` a `m4` são as mesas. O celular só junta os recortes e calcula a luz (WebGL 2), por isso o brilho acompanha o objeto quando gira.
 - Blocos: `nucleo` (catálogo, fases, mesa, remexer, `Partida`; sem tela), depois Eventos e Ganchos, Progresso, Som, Tela, Jogo, Telas.
-- **Salvo:** `keepsake.v1` = {v, fase, estrelas, recordes, lembrancas, tentativas, op, soma}. A Fase 2 deve migrar sem perder.
+- **Salvo:** ver Fase 2. `keepsake.v1` (Fase 1) fica intocada.
 - Eventos: `fase:inicio, achou, lembranca, dica, fase:vitoria, fase:derrota, salvou`. Ganchos: `antesDaFase, oferecerContinuar, entreFases, premio`.
+
+## Fase 2
+- **Casa:** 5 cômodos x 5 obras em ordem (2, 3, 4, 5 e 6 estrelas; 100 de 150). Começa com lençóis, teias e janela tapada. Cômodo pronto: 10% mais tempo nas 10 fases dele
+  (`Meta.bonus`; as estrelas da fase continuam pelo tempo normal).
+- **Álbum:** as 50 lembranças contam a história de Aurora, Bento, Clara e Téo (`Meta.LEMBRANCAS`); 10 do cômodo abrem uma carta, as 50 abrem a última.
+- **Acervo:** os 118 objetos entram quando são achados; cômodo completo dá uma moldura para a mesa. Objeto de perto gira com o dedo (`Tela.girado`).
+- **Marcos:** 15 x 3 degraus, pagam dicas guardadas (1, 1, 2). Na fase gasta primeiro a dica da fase, depois a guardada (`Partida.guardadas`, `d.dicas`).
+- **Mesa do dia:** abre na fase 6; `n = 1000 + número do dia`, 35 combinações de modo e cômodo; 1 dica por dia, +3 a cada 7 mesas; faltar não zera nada.
+- **Salvo:** `keepsake.v2` = {v, soma, d} com conferência, cópia em `keepsake.v2.copia`, migração da v1, código `KH2-`. Tudo passa por `Meta.validar`; duas fichas se juntam por
+  `Meta.mesclar` (o que se gasta vem da mais nova). Campo novo na Fase 3: pôr em `Meta.nova`, `validar` e `mesclar`.
+- **Ritmo medido:** 1ª obra na fase 1; médio termina as 50 com a casa toda, 30 lembranças e 112 objetos.
+- Eventos novos: `obra, comodo:pronto, carta, marco`; `fase:vitoria` traz ganhas, novos, lembNova, cartas.
 
 ## Ferramentas (`ferramentas/keepsake-hunt`)
 - `node gerar-arte.mjs --k=26` refaz as folhas (objetos em `objetos3d.js`) e o `atlas.json`; depois `node montar.mjs` põe a lista no jogo. `--prova=pasta` só mostra os objetos.
 - `node gerar-fundos.mjs` mesas; `node capa.mjs` capa; `node fotos.mjs pasta 1,20` fotografa fases.
 - `node jogar.mjs 1-50 [--lento|--pc|--deitado]` robô com toque simulado; `node telas.mjs pasta` telas e gestos; `node som.mjs [--pc]` mede os sons.
+- `node gerar-comodos.mjs` refaz os 30 retratos dos cômodos (`comodos3d.js`; 1 a 2 min; `--prova=pasta --estados=0,5`); `node meta.mjs` confere a progressão; `node telas2.mjs pasta`
+  testa as telas da Fase 2; `node registrar2.mjs` põe os cômodos no offline e as Estatísticas na ficha nova (já rodado, v63).
 - `node registrar.mjs` liga o jogo ao menu, às estatísticas e ao modo offline (sobe a versão do `sw.js`). Já rodado (v59).
 
 ## Testado (25/11/2026)

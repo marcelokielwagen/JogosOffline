@@ -40,7 +40,7 @@ for (const [w, h] of [[320, 568], [360, 740], [412, 915], [768, 1024], [667, 375
 // derrota
 await fase(2); await E('@Jogo.P.tempo=.2'); await dorme(900); await p.foto(`${pasta}/t-fim.png`); await dorme(1500); ok(await E("@Jogo.aberto") === 'derrota', 'mostra a derrota'); await p.foto(`${pasta}/t-derrota.png`); await c('#dDeNovo'); await dorme(1000); ok(await E("@Jogo.aberto") === '' && !(await E("@Jogo.P.fim")), 'tenta de novo na hora');
 // mudo, salvar e recarregar
-await c('#bSom'); ok(await E("@Progresso.d.op.som") === false, 'mudo'); await c('#bSom'); const sv = await E("localStorage.getItem('keepsake.v1')"); await p.recarregar(); for (let i = 0; i < 40; i++) { await dorme(200); if (await E("!!window.__keepsake").catch(() => 0)) break; } await dorme(500); ok(await E("@Progresso.d.fase") === 7 && await E("@Progresso.d.lembrancas[6]") === 1, 'salva e volta igual'); ok(sv.length > 50, 'ficha gravada');
+await c('#bSom'); ok(await E("@Progresso.d.op.som") === false, 'mudo'); await c('#bSom'); const sv = await E("localStorage.getItem('keepsake.v2')"); await p.recarregar(); for (let i = 0; i < 40; i++) { await dorme(200); if (await E("!!window.__keepsake").catch(() => 0)) break; } await dorme(500); ok(await E("@Progresso.d.fase") === 7 && await E("@Progresso.d.lembrancas[6]") === 1, 'salva e volta igual'); ok(sv.length > 50, 'ficha gravada');
 // ficha estragada não trava
-await E("localStorage.setItem('keepsake.v1','{quebrado')"); await p.recarregar(); await dorme(2500); ok(await E("@Progresso.d.fase") === 1, 'ficha estragada recomeça sem travar');
+await E("localStorage.clear();localStorage.setItem('keepsake.v2','{quebrado')"); await p.recarregar(); await dorme(2500); ok(await E("@Progresso.d.fase") === 1, 'ficha estragada recomeça sem travar');
 console.log('certos', bons, 'falhas', ruins, 'erros de código', p.erros.slice(0, 4)); p.fim();

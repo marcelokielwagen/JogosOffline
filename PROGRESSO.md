@@ -367,3 +367,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   com toque simulado (`app-testes.mjs`), sons medidos, regras do iPhone simuladas. Não testado num celular de verdade. Publicado com autorização do dono.
   Depois, a pedido do dono, virou dois cartões no menu (`?jogo=loop` e `?jogo=okay`), cada um com sua capa, só com o seu jogo na tela. Cache `jogos-offline-v61`.
   O dono não gostou do azul-escuro: cores refeitas em tons naturais (areia, musgo, chá, argila, pedra), claro como padrão. Cache `jogos-offline-v62`.
+- **Keepsake Hunt, Fase 2 (25/11/2026)**: casa de 5 cômodos em 3D para restaurar com estrelas (25 obras, `arte/c*-*.webp`), álbum das 50 lembranças com a história da família e
+  6 cartas, acervo de 118 objetos com molduras, 15 marcos, mesa do dia, dicas guardadas e ficha segura (`keepsake.v2`, migra da v1, cópia e código). Cache `jogos-offline-v63`. Detalhes
+  em `jogos/keepsake-hunt/PLANO.md`. Testado: 175 mil conferências da progressão, 134 de telas com toque simulado, ficha estragada, sem internet. Não testado num celular de verdade.
+  Publicado com autorização do dono.

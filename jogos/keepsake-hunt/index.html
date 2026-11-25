@@ -72,12 +72,27 @@ html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; ba
 .op { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:50px; margin-top:8px; padding:0 16px; border-radius:13px; border:1px solid var(--linha); background:var(--painel2); color:var(--osso); font:500 17px var(--corpo); cursor:pointer; }
 .op b { width:46px; height:26px; border-radius:20px; background:#3c4a44; position:relative; transition:.15s; } .op b::after { content:""; position:absolute; width:20px; height:20px; border-radius:50%; background:var(--osso); left:3px; top:3px; transition:.15s; } .op[aria-pressed=true] b { background:#b98835; } .op[aria-pressed=true] b::after { left:23px; }
 .lem { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; padding:8px; border-radius:13px; background:rgba(224,180,92,.12); border:1px solid rgba(224,180,92,.4); font-size:15.5px; } .lem svg { width:26px; height:26px; flex:none; fill:var(--ouro); } .lem.falta { opacity:.65; background:none; border-color:var(--linha); } .lem.falta svg { fill:#4b5a53; }
-#abertura { background:linear-gradient(rgba(8,13,11,.15),rgba(8,13,11,.5) 45%,rgba(8,13,11,.92)); }
-.capa { margin:auto auto 0; width:100%; max-width:400px; text-align:center; padding-bottom:8px; } .capa h2 { margin:0; font:700 clamp(52px,16vw,82px)/.95 var(--serifa); text-shadow:0 4px 26px #000,0 1px 4px #000; } .capa p { margin:12px 0 10px; font-size:18px; line-height:1.4; text-shadow:0 1px 6px #000,0 0 14px #000; } .capa a { display:inline-block; margin-top:14px; padding:10px; color:var(--osso2); font-size:15px; }
+#abertura { background:linear-gradient(rgba(8,13,11,.72),rgba(8,13,11,.86)); }
+.capa { margin:auto; width:100%; max-width:400px; text-align:center; padding-bottom:8px; } .capa h2 { margin:0; font:700 clamp(40px,12.500vw,60px)/1 var(--serifa); text-shadow:0 4px 26px #000,0 1px 4px #000; } .capa p { margin:12px 0 10px; font-size:18px; line-height:1.4; text-shadow:0 1px 6px #000,0 0 14px #000; } .capa a { display:inline-block; margin-top:8px; padding:10px; color:var(--osso2); font-size:15px; }
 #mapa { background:rgba(8,13,11,.95); }
 .mapa { margin:0 auto; width:100%; max-width:460px; } .mapa h3 { margin:22px 0 10px; font:600 21px var(--serifa); display:flex; justify-content:space-between; align-items:baseline; } .mapa h3 small { font:400 14px var(--corpo); color:var(--osso2); }
 .grade { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
 .fs { aspect-ratio:1; border-radius:14px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); font:700 21px var(--serifa); cursor:pointer; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; position:relative; } .fs small { font-size:12px; letter-spacing:1px; color:var(--ouro); height:14px; } .fs.atual { border-color:var(--ouro); box-shadow:0 0 0 2px var(--ouro) inset; } .fs:disabled { opacity:.38; cursor:default; } .fs svg { position:absolute; right:5px; top:5px; width:13px; height:13px; fill:var(--ouro); }
+.cheia { background:#0f1714; } .solta { z-index:8; background:rgba(6,10,9,.78); }
+.topo { display:flex; align-items:center; gap:8px; margin-bottom:6px; } .chip { margin-left:auto; min-height:44px; padding:0 14px; border-radius:22px; background:var(--painel); border:1px solid var(--linha); display:grid; place-items:center; font:600 16px var(--corpo); } .chip.ouro { margin-left:0; color:var(--ouro); }
+.qd { display:block; position:relative; width:100%; margin:12px 0 0; padding:0; border-radius:18px; overflow:hidden; border:1px solid var(--linha); background:#16211c; cursor:pointer; } .qd img { display:block; width:100%; height:auto; max-height:32vh; object-fit:cover; } .qd:active { transform:scale(.985); } .qd .leg { position:absolute; left:0; right:0; bottom:0; padding:26px 14px 10px; text-align:left; background:linear-gradient(transparent,rgba(8,13,11,.92)); color:var(--osso); } .leg b { display:block; font:600 20px var(--serifa); } .leg small { font-size:14px; color:var(--osso2); } .pts { position:absolute; right:14px; bottom:44px; display:flex; gap:6px; } .pts i { width:10px; height:10px; border-radius:50%; background:rgba(240,233,217,.25); } .pts i.on { background:var(--ouro); }
+.bt small { display:block; font:500 13px var(--corpo); opacity:.75; } .g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:10px; } .g3 .bt { margin:0; font-size:16px; position:relative; padding:0 4px; } .bt:disabled { opacity:.42; cursor:default; } .selo { position:absolute; right:-5px; top:-7px; min-width:24px; height:24px; padding:0 5px; border-radius:13px; background:#c8452f; color:#fff; font:700 13px/24px var(--corpo); text-decoration:none; } .bt.ouro { border-color:var(--ouro); color:var(--ouro); } .bt.mini { width:auto; min-height:46px; margin:0; padding:0 16px; font-size:16px; flex:none; }
+.abas { display:flex; gap:8px; overflow-x:auto; margin:12px 0; padding-bottom:4px; scrollbar-width:none; touch-action:pan-x; } .abas::-webkit-scrollbar { display:none; } .aba { flex:none; min-height:44px; padding:0 15px; border-radius:22px; border:1px solid var(--linha); background:var(--painel); color:var(--osso2); font:600 15.5px var(--corpo); cursor:pointer; position:relative; } .aba.on { background:#e0b45c; color:#241803; border-color:#f0cf88; } .aba u { position:absolute; right:2px; top:2px; width:10px; height:10px; border-radius:50%; background:#c8452f; }
+.palco { position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--linha); background:#16211c; } .palco img { display:block; width:100%; height:auto; } #cImg2 { position:absolute; inset:0; opacity:0; pointer-events:none; } .palco .fechado { filter:brightness(.4) saturate(.4); }
+.obra { display:flex; align-items:center; gap:12px; min-height:58px; padding:6px 6px 6px 16px; margin-top:8px; border-radius:14px; background:var(--painel); border:1px solid var(--linha); font-size:17px; } .obra span { flex:1; } .obra b { padding:0 14px; color:var(--osso2); font-weight:600; } .obra.feita { opacity:.75; } .obra.feita b { color:#8fd0a8; } .obra:not(.feita):not(.vez) { opacity:.5; } .vazio { margin:14px 4px 6px; color:var(--osso2); font-size:15.5px; line-height:1.4; text-align:center; } .vazio.bom { color:#8fd0a8; }
+.lbs { display:grid; grid-template-columns:1fr 1fr; gap:9px; } .lbs.um { grid-template-columns:1fr; margin:12px 0 20px; } .lbs>* { min-width:0; } .lb span { min-width:0; overflow-wrap:anywhere; hyphens:auto; } .lb { display:flex; align-items:center; gap:8px; min-height:76px; padding:8px; border-radius:14px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); font:500 14.5px/1.25 var(--corpo); text-align:left; cursor:pointer; position:relative; } .lb .ft { width:50px; height:50px; flex:none; border-radius:10px; background:linear-gradient(#efe6cf,#cfc1a0); } .lb em { width:50px; height:50px; flex:none; border-radius:10px; background:#0d1412; display:grid; place-items:center; font:700 24px var(--serifa); color:#48574f; } .lb.falta { color:var(--osso2); } .lb:disabled { opacity:.5; cursor:default; } .lb.nova { border-color:var(--ouro); } .lb.nova::after { content:""; position:absolute; right:8px; top:8px; width:10px; height:10px; border-radius:50%; background:#c8452f; } .lb.carta { min-height:62px; } .lb.carta svg { width:34px; height:34px; flex:none; fill:var(--ouro); margin:0 6px; } .lb.carta.falta svg { fill:#48574f; }
+.acs { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:8px; margin:12px 0 20px; } .ac { padding:8px 4px; border-radius:14px; border:1px solid rgba(80,55,20,.5); background:linear-gradient(#efe6cf,#cfc1a0); color:#2c2012; font:500 13px/1.2 var(--corpo); text-align:center; cursor:pointer; min-height:108px; display:flex; flex-direction:column; align-items:center; gap:4px; } .ac .ft { width:64px; height:64px; } .ac.falta { background:#1b2622; border-color:var(--linha); color:#5b6b63; cursor:default; } .ac.falta .ft { opacity:.55; } #eMold .bt { width:100%; }
+.mc { display:flex; align-items:center; gap:12px; padding:10px 12px 12px 16px; margin-top:8px; border-radius:14px; background:var(--painel); border:1px solid var(--linha); } .mc>div { flex:1; min-width:0; } .mc b { font:600 18px var(--serifa); } .mc small { display:block; font-size:14px; color:var(--osso2); margin:1px 0 7px; } .mc.fim { opacity:.7; } .pts3 { color:var(--ouro); letter-spacing:2px; } .pts3 s { color:#3c4a44; text-decoration:none; }
+.sub { color:var(--ouro); font-size:14px; } #oTela { display:block; width:min(240px,62vw); height:min(240px,62vw); margin:8px auto 4px; border-radius:20px; background:radial-gradient(circle at 40% 35%,#f1e8d2,#c5b691); touch-action:none; cursor:grab; } .papel { background:#efe5cc; color:#33261a; border-color:#c9b68c; } .papel h2 { font-style:italic; } .papel p { color:#3c2d1e; font:400 18px/1.55 var(--serifa); text-align:left; } .papel .bt { background:#5b3a22; color:#f5ead2; } #aviso img { width:100%; height:auto; border-radius:14px; margin-bottom:12px; } textarea { width:100%; margin-top:10px; border-radius:12px; border:1px solid var(--linha); background:#0d1412; color:var(--osso); font:13px/1.4 Consolas,monospace; padding:10px; resize:none; user-select:text; -webkit-user-select:text; }
+button.lem { width:100%; color:var(--osso); font-family:var(--corpo); text-align:left; cursor:pointer; line-height:1.35; } .lem .ft { width:54px; height:54px; border-radius:10px; background:linear-gradient(#efe6cf,#cfc1a0); flex:none; } .nv { display:flex; align-items:center; flex-wrap:wrap; justify-content:center; gap:4px 6px; margin-top:10px; font-size:14.5px; color:var(--osso2); } .nv .ft { width:38px; height:38px; border-radius:8px; background:linear-gradient(#efe6cf,#cfc1a0); } .nv span { flex-basis:100%; } .sem { display:flex; justify-content:center; align-items:center; gap:7px; margin-top:12px; font-size:14px; color:var(--osso2); } .sem i { width:18px; height:18px; border-radius:50%; background:#2a3832; } .sem i.on { background:var(--ouro); }
+#moldura[data-m="1"] { border-color:#2c5743 #1b3a2c #142c21 #234a38; } #moldura[data-m="2"] { border-color:#bcd4cf #86aaa5 #6f948f #a3c2bd; } #moldura[data-m="3"] { border-color:#7d2c3c #561a28 #431420 #6b2433; } #moldura[data-m="4"] { border-color:#a3adb3 #737d84 #5d666c #8f999f; } #moldura[data-m="5"] { border-color:#c98656 #93542f #7a4424 #b27143; }
+@media (max-height:700px) { .capa h2 { font-size:44px !important; } .qd img { max-height:24vh; } .g3 .bt { min-height:48px; } }
+@media (orientation:landscape) and (max-height:640px) { .capa { max-width:640px; } .qd img { max-height:34vh; } .g3 { grid-template-columns:repeat(6,1fr); } .g3 .bt { font-size:14px; } .mapa { max-width:640px; } .palco { max-width:420px; margin:0 auto; } }
 .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 #carga { position:absolute; inset:0; z-index:9; display:grid; place-items:center; background:var(--tinta); font:400 18px var(--corpo); color:var(--osso2); text-align:center; padding:24px; }
 :focus-visible { outline:3px solid var(--ouro); outline-offset:2px; }
@@ -101,12 +116,20 @@ html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; ba
 </div>
 <canvas id="gl"></canvas><canvas id="fx"></canvas>
 
-<section class="tela" id="abertura"><div class="capa"><h2>Keepsake Hunt</h2><p>A velha casa guarda 50 lembranças.<br>Remexa, procure e ache.</p><button class="bt pri" id="bJogar">Jogar</button><div class="linha2"><button class="bt" id="bMapa">Fases</button><button class="bt" id="bAjustes">Ajustes</button></div><a href="../../index.html">Todos os jogos</a></div></section>
+<section class="tela" id="abertura"><div class="capa"><div class="topo"><button class="ic" id="bAjustes" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><span class="chip" id="hDicas"></span><span class="chip ouro" id="hEst"></span></div><h2>Keepsake Hunt</h2><button class="qd" id="hCasa"><img id="hImg" alt="" width="1000" height="711"><span class="leg"><b id="hNome"></b><small id="hObra"></small></span><span class="pts" id="hPts"></span></button><button class="bt pri" id="bJogar">Jogar</button><div class="g3"><button class="bt" id="bMapa">Fases</button><button class="bt" id="bCasa">Casa<u class="selo" hidden></u></button><button class="bt" id="bAlbum">Álbum<u class="selo" hidden></u></button><button class="bt" id="bAcervo">Acervo</button><button class="bt" id="bMarcos">Marcos<u class="selo" hidden></u></button><button class="bt" id="bDia">Mesa do dia<u class="selo" hidden></u></button></div><a href="../../index.html">Todos os jogos</a></div></section>
 <section class="tela" id="mapa"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Fases<small id="mResumo"></small></h1><span style="width:44px"></span></div><div id="mLista"></div></div></section>
-<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><button class="bt" id="pSair">Todos os jogos</button></div></section>
-<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Achou tudo!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><div class="lem" id="vLem"></div><button class="bt pri" id="vProx">Próxima</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Fases</button></div></div></section>
-<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">O tempo acabou</h2><p id="dTxt"></p><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt" id="dFases">Fases</button></div></section>
-<section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" data-volta>Voltar</button></div></section>
+<section class="tela cheia" id="casa"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Casa<small id="cLivres"></small></h1><span style="width:44px"></span></div><div class="abas" id="cAbas"></div><div class="palco"><img id="cImg" alt="" width="1000" height="711"><img id="cImg2" alt="" width="1000" height="711"></div><div id="cLista"></div></div></section>
+<section class="tela cheia" id="album"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Álbum<small id="aResumo"></small></h1><span style="width:44px"></span></div><div class="abas" id="aAbas"></div><div class="lbs" id="aLista"></div><div class="lbs um" id="aCartas"></div></div></section>
+<section class="tela cheia" id="acervo"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Acervo<small id="eResumo"></small></h1><span style="width:44px"></span></div><div class="abas" id="eAbas"></div><div id="eMold"></div><div class="acs" id="eLista"></div></div></section>
+<section class="tela cheia" id="marcos"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Marcos<small id="rResumo"></small></h1><span style="width:44px"></span></div><div id="rLista"></div></div></section>
+<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><button class="bt" id="pSair">Início</button></div></section>
+<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Achou tudo!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><div id="vAch"></div><button class="bt pri" id="vProx">Próxima</button><button class="bt ouro" id="vCasa">Restaurar a casa</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Início</button></div></div></section>
+<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">O tempo acabou</h2><p id="dTxt"></p><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt" id="dFases">Início</button></div></section>
+<section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" id="bCodigo">Levar para outro aparelho</button><button class="bt" data-volta>Voltar</button></div></section>
+<section class="tela solta" id="objeto"><div class="caixa"><small class="sub" id="oSub"></small><h2 id="oTit"></h2><canvas id="oTela"></canvas><p id="oTxt"></p><button class="bt pri" data-fecha>Fechar</button></div></section>
+<section class="tela solta" id="carta"><div class="caixa papel"><h2 id="kTit"></h2><p id="kTxt"></p><button class="bt" data-fecha>Guardar a carta</button></div></section>
+<section class="tela solta" id="aviso"><div class="caixa"><img id="vsImg" alt="" width="1000" height="711"><h2 id="vsTit"></h2><p id="vsTxt"></p><button class="bt pri" data-fecha>Certo</button></div></section>
+<section class="tela solta" id="codigo"><div class="caixa"><h2>Outro aparelho</h2><p id="xMsg"></p><textarea id="xTxt" rows="4" spellcheck="false" aria-label="Código do progresso"></textarea><button class="bt pri" id="xCopia">Copiar o meu código</button><button class="bt" id="xCola">Usar o código colado</button><button class="bt" data-fecha>Fechar</button></div></section>
 <div id="carga">Abrindo as gavetas…</div>
 
 <script id="nucleo">
@@ -136,7 +159,10 @@ const Nucleo = (() => {
   const SEM_SOMBRA = new Set('borracha memoria regua livro envelope placa carta disquete disqueteAzul domino cartao rolha moeda botao botaoOsso dado tecla teclaEsc chip cd ovo queijo cracha almofada biscoito novelo tinteiro grampeador mapa pilha'.split(' '));
   const semente = s => { let a = s >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 
+  // mesa do dia: n = 1000 + número do dia; muda de cômodo e de modo todo dia e é igual para todo mundo
+  function faseDoDia(n) { const q = n - 1000, modo = 'LSNRVIE'[q % 7], lugar = q % 5, d = .5, alvos = Math.round(CONTA[modo][0] + CONTA[modo][1] * d) + 1, total = Math.round(24 + 68 * d) + (modo === 'R' ? 12 : 0); return { n, dia: true, lugar, pos: 5, modo, d, alvos, total, tempo: Math.round((alvos * SEG[modo] * 1.1 + 14) / 5) * 5, fundo: modo === 'R' ? .8 : modo === 'E' ? 0 : .28, aviso: '', dica: TXT[modo] || 'Uma mesa nova a cada dia' }; }
   function fase(n) {
+    if (n >= 1000) return faseDoDia(n);
     const lugar = Math.floor((n - 1) / 10), pos = (n - 1) % 10, modo = MODOS[lugar][pos], d = Math.min(1, (n - 1) / 49 * .78 + SERRA[pos]);
     let alvos = Math.round(CONTA[modo][0] + CONTA[modo][1] * d) + (pos === 9 ? 3 : 0), total = Math.round(24 + 68 * d);
     if (n === 1) { alvos = 4; total = 22; } if (n === 2) { alvos = 5; total = 28; }
@@ -190,7 +216,7 @@ const Nucleo = (() => {
     // ordem de baixo para cima: grandes embaixo, alvos enterrados embaixo
     const nAlvo = itens.filter(q => q.alvo).length, nFundo = Math.round(nAlvo * F.fundo); let f = 0; mist(itens);
     for (const q of itens) { q.fundo = q.alvo && f++ < nFundo; q.z = q.alvo ? (q.fundo ? al(.02, .3) : al(.62, 1)) : Math.max(0, Math.min(1, 1 - CAT[q.k].massa / 90)) * .55 + rnd() * .45; }
-    itens.push({ k: MED, alvo: false, lembranca: true, fundo: true, z: -1 + rnd() * .5 }); itens.sort((a, b) => a.z - b.z);
+    if (n < 1000) itens.push({ k: MED, alvo: false, lembranca: true, fundo: true, z: -1 + rnd() * .5 }); itens.sort((a, b) => a.z - b.z);
     const objs = [], pos = q => { let m = null; for (let t = 0; t < 9; t++) { const o = { k: q.k, x: al(-W / 2, W / 2), y: al(-H / 2, H / 2), r: al(0, 6.283), vivo: true, alvo: q.alvo, fundo: !!q.fundo, lembranca: !!q.lembranca, vx: 0, vy: 0, vr: 0 }; prende(o, W, H); let d = 1e9; for (const p of objs) d = Math.min(d, Math.hypot(p.x - o.x, p.y - o.y) - (CAT[p.k].raio + CAT[q.k].raio) * .7); if (!m || d > m.d) m = { o, d }; } return m.o; };
     for (const q of itens) objs.push(pos(q));
     // ajusta o quanto cada alvo aparece
@@ -243,8 +269,8 @@ const Nucleo = (() => {
   // ---------- regras de uma partida
   const VAGAS = 5, ERRO = 4, JANELA = 6, RECARGA = 45;
   class Partida {
-    constructor(n, tent, asp, masc) {
-      Object.assign(this, gerar(n, tent, asp, masc)); this.masc = masc; this.tempo = this.F.tempo; this.pontos = 0; this.combo = 0; this.maiorCombo = 0; this.erros = 0; this.achados = 0; this.dicas = 1; this.recarga = 0; this.ult = -99; this.relogio = 0; this.lembranca = false; this.usouDica = 0; this.fim = ''; this.marcado = null;
+    constructor(n, tent, asp, masc, bonus = 0) {
+      Object.assign(this, gerar(n, tent, asp, masc)); this.masc = masc; this.tempoTotal = Math.round(this.F.tempo * (1 + bonus)); this.tempo = this.tempoTotal; this.ids = []; this.enterrados = 0; this.guardadas = 0; this.pontos = 0; this.combo = 0; this.maiorCombo = 0; this.erros = 0; this.achados = 0; this.dicas = 1; this.recarga = 0; this.ult = -99; this.relogio = 0; this.lembranca = false; this.usouDica = 0; this.fim = ''; this.marcado = null;
       this.meta = this.F.alvos; const L = this.F.modo;
       this.vagas = L === 'I' ? [{ k: this.alvosK[0], feita: false }] : L === 'P' ? this.alvosK.map(() => ({ k: -1, feita: false })) : this.alvosK.slice(0, L === 'V' ? 1 : VAGAS).map(k => ({ k, feita: false })); this.fila = L === 'I' || L === 'P' ? [] : this.alvosK.slice(this.vagas.length);
     }
@@ -271,7 +297,7 @@ const Nucleo = (() => {
     }
     errar(o) { this.erros++; this.combo = 0; this.tempo = Math.max(0, this.tempo - ERRO); return { e: 'erro', o, perde: ERRO }; }
     acertar(x) {
-      const rapido = this.relogio - this.ult < JANELA; this.combo = rapido ? this.combo + 1 : 1; this.maiorCombo = Math.max(this.maiorCombo, this.combo); const ganho = this.relogio - this.ult; this.ult = this.relogio; this.achados++;
+      const rapido = this.relogio - this.ult < JANELA; this.combo = rapido ? this.combo + 1 : 1; this.maiorCombo = Math.max(this.maiorCombo, this.combo); const ganho = this.relogio - this.ult; this.ult = this.relogio; this.achados++; for (const q of [x.o, x.par]) if (q) { this.ids.push(CAT[q.k].id); if (q.fundo) this.enterrados++; }
       const pts = 100 * this.mult + (rapido ? Math.round((JANELA - ganho) * 10) : 0); this.pontos += pts; const extra = this.combo >= 3 ? 1 : 0; this.tempo += extra; this.recarga += 4;
       if (this.achados >= this.meta) { this.fim = 'vitoria'; this.pontos += Math.round(this.tempo) * 10; } return { e: 'achou', ...x, pts, combo: this.combo, mult: this.mult, extra, fim: this.fim };
     }
@@ -284,15 +310,160 @@ const Nucleo = (() => {
     }
     get carga() { return this.dicas > 0 ? 1 : this.recarga / RECARGA; }
     dica() {
-      if (this.fim || this.dicas < 1) return null; const c = this.objs.map((o, i) => [o, i]).filter(([o]) => o.alvo && this.vale(o)); if (!c.length) return null; const M = mapa(this.objs, this.W, this.H, this.masc);
+      if (this.fim || (this.dicas < 1 && this.guardadas < 1)) return null; const c = this.objs.map((o, i) => [o, i]).filter(([o]) => o.alvo && this.vale(o)); if (!c.length) return null; const M = mapa(this.objs, this.W, this.H, this.masc);
       let l = c; if (this.F.modo === 'P' && this.marcado && this.marcado.alvo) l = c.filter(([o]) => o.k === this.marcado.k && o !== this.marcado); l.sort((a, b) => M.fracao(a[1]) - M.fracao(b[1])); const [o, i] = l[0];
-      this.dicas--; this.usouDica++; this.recarga = 0; return { o, i, visivel: M.fracao(i), par: this.F.modo === 'P' ? c.map(q => q[0]).find(q => q !== o && q.k === o.k) : null };
+      let guardada = false; if (this.dicas > 0) { this.dicas--; this.recarga = 0; } else { this.guardadas--; guardada = true; } this.usouDica++; return { o, i, guardada, visivel: M.fracao(i), par: this.F.modo === 'P' ? c.map(q => q[0]).find(q => q !== o && q.k === o.k) : null };
     }
     get estrelas() { const r = this.tempo / this.F.tempo; return r >= .4 ? 3 : r >= .18 ? 2 : 1; }
     // a tela girou: leva os objetos para as novas medidas
     remodelar(asp) { const { W, H } = medidas(asp); if (Math.abs(W - this.W) < .05) return; for (const o of this.objs) { o.x *= W / this.W; o.y *= H / this.H; } this.W = W; this.H = H; for (const o of this.objs) prende(o, W, H); }
   }
-  return { K, MARGEM, RES, CAT, POR, MED, LUGARES, TOTAL, VAGAS, JANELA, fase, medidas, gerar, mapa, topo, remexer, anda, sopra, prende, Partida };
+  const FICHA = { total: TOTAL, ids: CAT.filter(c => c.tema < 5).map(c => c.id), porTema: [0, 1, 2, 3, 4].map(g => CAT.filter(c => c.tema === g).map(c => c.id)) };
+  return { FICHA, K, MARGEM, RES, CAT, POR, MED, LUGARES, TOTAL, VAGAS, JANELA, fase, medidas, gerar, mapa, topo, remexer, anda, sopra, prende, Partida };
+})();
+</script>
+
+<script id="meta">
+'use strict';
+// ============================================================ PROGRESSÃO: casa, álbum, acervo, marcos, mesa do dia e a ficha do jogador. Sem tela: dá para testar no Node.
+const Meta = (() => {
+  const CUSTO = [2, 3, 4, 5, 6], BONUS_TEMPO = .1, LIBERA_DIA = 6;      // estrelas por obra; cômodo pronto: 10% mais tempo nas fases dele; mesa do dia abre ao chegar à fase 6
+  const OBRAS = [
+    ['Assoalho e papel de parede', 'Estante de livros', 'Escrivaninha', 'Lareira', 'Janela e quadros'],
+    ['Piso e azulejos', 'Fogão a lenha', 'Armários e pia', 'Mesa da família', 'Janela e ervas'],
+    ['Assoalho e papel florido', 'Máquina de costura', 'Vestido azul', 'Estante de linhas', 'Penteadeira e lustre'],
+    ['Piso e pintura', 'Servidores', 'Computadores', 'Bancada de montagem', 'Luzes e vista da cidade'],
+    ['Tábuas e vigas', 'Baús e malas', 'Luneta grande', 'Navio em miniatura', 'Janela redonda e rede']
+  ];
+  // as 50 lembranças contam a história da casa: [objeto, título, texto]
+  const L = `chave|A chave da frente|Veio num envelope sem remetente. Colado nela, um papel: "a casa agora é sua. Abra as gavetas."
+envelope|Carta nunca enviada|Bento escreveu "Aurora," e parou. O resto da folha ficou em branco por onze anos.
+relogio|Relógio parado|Marca dez e nove. Foi a hora em que Clara nasceu, e ele nunca mais quis dar corda.
+caneta|A caneta do cartório|Com ela Bento assinou a compra da casa. Faltava dinheiro e sobrava coragem.
+lacre|Selo com a letra K|K de Keller, o sobrenome que Aurora trouxe do sul e se recusou a trocar.
+oculos|Óculos remendados|Um aro preso com linha de costura. Ela consertava tudo do mesmo jeito.
+livro|Diário de capa vinho|Primeira página: "Hoje choveu e ela riu." Foi tudo o que ele escreveu naquele ano.
+cadeado|Cadeado do baú|Fechava o baú do sótão. Ninguém lembra quem o abriu por último.
+carimbo|Carimbo de PAGO|Bateu na última prestação da casa. Depois Clara carimbou também as paredes.
+lupa|Lupa do avô|Servia para os selos raros e para tirar farpa do dedo das crianças.
+xicara|A xícara de sempre|Lascada e só dela. Dizia que o café gostava do defeito.
+rolo|Rolo de massa|Domingo era dia de macarrão. A mesa ficava branca até quarta-feira.
+cortador|Forminha de estrela|Dez biscoitos por fornada. O décimo primeiro era de quem ajudasse.
+bule|Bule azul|Presente de casamento. Sobreviveu a duas mudanças e a um papagaio.
+colher|A última colher de prata|As outras onze pagaram o médico de Clara. Esta ninguém teve coragem de vender.
+limao|Limonada para quem volta|Ela só fazia quando o navio estava para chegar. Nunca errou o dia.
+sacarolha|Saca-rolhas do brinde|Usado quatro vezes: dois nascimentos, uma formatura e um pedido de desculpas.
+funil|Funil de cobre|Bento engarrafava vinagre e dizia que era vinho. Ninguém o corrigia.
+biscoito|O biscoito guardado|Téo escondeu um numa lata para a avó nunca ficar sem. Tinha cinco anos.
+concha|A concha grande|Sopa para doze numa casa de quatro. Sempre aparecia mais alguém.
+carretel|Linha vermelha|A primeira que comprou com dinheiro próprio. Nunca usou até o fim.
+tesoura|Tesoura de corte|"Só para tecido", dizia a etiqueta. Quem usou em papel ouviu por uma semana.
+dedal|Dedal de prata|Gasto de um lado só. Ela costurava de madrugada, no escuro, para não acordar ninguém.
+botaoOsso|O botão do casaco|Caiu do casaco de Bento no cais. Ela achou e correu para devolver. Foi assim.
+fita|Fita métrica riscada|Os riscos a lápis são a altura de Clara em cada aniversário.
+broche|Broche azul|Pagamento de um vestido de noiva. Aurora o usou na festa da própria freguesa.
+camafeu|O camafeu da bisavó|O único retrato dela. De perfil, para ninguém ver que estava rindo.
+bastidor|Flor por terminar|Ela parou de propósito na última pétala: "deixo para quem vier depois".
+colar|Colar de pérolas|São falsas, e ela sabia. Verdadeiro foi o dia em que ganhou.
+luva|Luva sem par|A outra ficou com a irmã, do outro lado do mar. Trocaram na despedida.
+disquete|Disquete com as cartas|Aos setenta anos, pediu ao neto: "me ensina a guardar as cartas aí dentro".
+tecla|A tecla Enter|Ela apertava com força e anunciava para a casa toda: "Enviado!"
+cabo|O cabo azul|Téo passou vinte metros pelo corredor. Ela cobriu tudo com um tapete bordado.
+cassete|Fita, lado A|Bento conta uma história do mar. No lado B, a mesma história com outro fim.
+chip|O processador queimado|Téo o queimou aos catorze. A avó mandou guardar: "foi assim que você aprendeu".
+celular|Mensagem das 12:30|Todo dia, na mesma hora: "Almoçou?" São mil quatrocentas e doze.
+pendrive|As fotos da família|Trezentas fotos passadas para o computador, uma por noite, cada uma com legenda.
+cracha|Crachá de visitante|No primeiro emprego de Téo ela quis conhecer os servidores. Levou bolo.
+lampada|A luz da bancada|Ficava acesa até tarde. Da cozinha ela via e deixava o prato coberto.
+cd|Gravação sem título|A receita da limonada na voz dela, lida bem devagar. É a última.
+bussola|Bússola do porto|Aponta três graus errado. Bento descontava de cabeça e sempre chegava.
+garrafa|Bilhete na garrafa|"Se achar, me escreva." A resposta veio nove anos depois, em outra língua.
+conchinha|Uma concha por viagem|São vinte e três. A última não tem data.
+luneta|Luneta de latão|Da janela redonda ela via o navio duas horas antes de ele chegar.
+timao|O leme de brinquedo|Daqui Téo pilotou a casa inteira em todos os dias de chuva.
+sino|O sino de bordo|Uma batida na partida, duas na chegada. Aurora só contava as duas.
+ampulheta|Ampulheta|Quatro minutos: o tempo do ovo, do chá e de fazer as pazes.
+rei|O rei branco|Partida por carta, um lance a cada porto. Faltou um. Era a vez dela.
+mapa|Mapa da casa|Feito por Aurora. Cinquenta marcas, uma para cada gaveta que você abriu.
+medalhao|O medalhão|Dentro há dois retratos e um espaço vazio. No espaço, o seu nome.`;
+  const LEMBRANCAS = L.split('\n').map((l, i) => { const [obj, titulo, txt] = l.split('|'); return { n: i + 1, g: i / 10 | 0, obj, titulo, txt }; });
+  // uma carta por cômodo com as 10 lembranças achadas, e a última com todas
+  const CARTAS = [
+    ['A folha em branco', 'Aurora,<br>levei onze anos para terminar esta folha. Não foi falta de assunto. É que toda vez que eu pegava a caneta você entrava na sala, e eu preferia conversar.<br>Bento'],
+    ['Atrás do armário', 'Para quem achar: a mesa desta cozinha nunca ficou vazia num domingo. Se ficar, é só pôr água no fogo. Alguém chega. Sempre chegou.<br>Aurora'],
+    ['No bolso do vestido', 'Clara,<br>costurei este vestido três vezes. Desmanchei duas porque você cresceu antes. Um dia vai servir certinho, e eu vou fingir que não chorei.<br>Mãe'],
+    ['Arquivo carta_final.txt', 'Téo,<br>digitei esta sozinha. Demorei uma tarde. Guardei em três lugares, como você ensinou. Se um dia der saudade, não precisa procurar muito: é só fazer o backup de mim.<br>Vó'],
+    ['Último lance', 'Bento,<br>achei o seu lance na última carta. Você deixou o rei desprotegido de propósito. Então não jogo. Assim a partida não acaba.<br>Aurora'],
+    ['Para você', 'Você abriu cinquenta gavetas e não jogou nada fora. Era isso que eu precisava saber.<br>Os móveis são da casa. A casa é sua. As lembranças, agora, são suas também. Cuide delas como quem guarda lugar à mesa.<br>Aurora Keller']
+  ];
+  const NOMES_MOLDURA = ['Nogueira', 'Couro verde', 'Azulejo', 'Veludo', 'Aço', 'Cobre de bordo'];
+
+  // ---------- ficha ----------
+  const nova = () => ({ v: 2, rev: 0, fase: 1, estrelas: {}, recordes: {}, lembrancas: {}, tentativas: {}, obras: [0, 0, 0, 0, 0], acervo: {}, lidas: {}, cartas: {}, marcos: {}, dicas: 0, moldura: 0, diaria: {}, semana: 0,
+    op: { som: true, ambiente: true, vibra: true }, soma: { achados: 0, erros: 0, vitorias: 0, derrotas: 0, combo: 0, limpas: 0, enterrados: 0, pares: 0, dias: 0, ultimoDia: '', dicasUsadas: 0 } });
+  const num = (v, a, b, p) => Number.isFinite(v) ? Math.min(b, Math.max(a, Math.floor(v))) : p, ob = x => x && typeof x === 'object' && !Array.isArray(x) ? x : {}, DIA = /^\d{4}-\d\d-\d\d$/;
+  // aceita qualquer coisa e devolve uma ficha sempre válida
+  function validar(s, cat) {
+    const d = nova(); if (!s || typeof s !== 'object') return d; const T = cat.total, ids = cat.ids; const mapa = (o, a, b, max) => { const r = {}; for (const k in ob(o)) { const n = +k, v = num(o[k], 0, max, 0); if (Number.isInteger(n) && n >= a && n <= b && v) r[n] = v; } return r; };
+    d.estrelas = mapa(s.estrelas, 1, T, 3); d.recordes = mapa(s.recordes, 1, T, 1e7); d.lembrancas = mapa(s.lembrancas, 1, T, 1); d.tentativas = mapa(s.tentativas, 1, T, 1e6); d.lidas = mapa(s.lidas, 1, T, 1); for (const k in d.lidas) if (!d.lembrancas[k]) delete d.lidas[k];
+    d.fase = num(s.fase, 1, T + 1, 1); for (const k in d.estrelas) d.fase = Math.max(d.fase, Math.min(T + 1, +k + 1)); d.obras = OBRAS.map((l, g) => num(Array.isArray(s.obras) ? s.obras[g] : 0, 0, l.length, 0));
+    for (const id of ids) { const v = num(ob(s.acervo)[id], 0, 1e7, 0); if (v) d.acervo[id] = v; } CARTAS.forEach((_, i) => { if (ob(s.cartas)[i] && cartaLiberada(d, i)) d.cartas[i] = 1; }); for (const m of MARCOS) { const v = num(ob(s.marcos)[m.id], 0, 3, 0); if (v) d.marcos[m.id] = v; }
+    for (const k in ob(s.diaria)) if (DIA.test(k)) { const v = num(s.diaria[k], 1, 1e7, 0); if (v) d.diaria[k] = v; } d.semana = num(s.semana, 0, 1e5, 0); d.dicas = num(s.dicas, 0, 999, 0); d.moldura = num(s.moldura, 0, 5, 0); if (d.moldura && !acervoCompleto(d, d.moldura - 1, cat)) d.moldura = 0;
+    for (const k in d.op) if (typeof ob(s.op)[k] === 'boolean') d.op[k] = s.op[k]; for (const k in d.soma) if (k !== 'ultimoDia') d.soma[k] = num(ob(s.soma)[k], 0, 1e9, 0); if (DIA.test(ob(s.soma).ultimoDia)) d.soma.ultimoDia = s.soma.ultimoDia; d.rev = num(s.rev, 0, 1e12, 0); return d;
+  }
+  // traz o salvo da Fase 1 inteiro
+  const migrar = (v1, cat) => { const d = validar(v1, cat); d.soma.dias = Math.max(d.soma.dias, d.soma.vitorias ? 1 : 0); return d; };
+  // junta duas fichas sem perder nada; o que se gasta (dicas) vem da mais nova, para não multiplicar
+  function mesclar(a, b, cat) {
+    const x = validar(a, cat), y = validar(b, cat), n = x.rev >= y.rev ? x : y, r = validar(n, cat), mx = (p, q) => { const s = { ...p }; for (const k in q) s[k] = Math.max(s[k] || 0, q[k]); return s; };
+    for (const k of ['estrelas', 'recordes', 'lembrancas', 'tentativas', 'acervo', 'lidas', 'cartas', 'marcos', 'diaria']) r[k] = mx(x[k], y[k]); r.fase = Math.max(x.fase, y.fase); r.obras = x.obras.map((v, g) => Math.max(v, y.obras[g])); r.semana = Math.max(x.semana, y.semana); for (const k in r.soma) r.soma[k] = k === 'ultimoDia' ? (x.soma[k] > y.soma[k] ? x.soma[k] : y.soma[k]) : Math.max(x.soma[k], y.soma[k]); r.rev = Math.max(x.rev, y.rev); return r;
+  }
+  const soma = t => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+
+  // ---------- casa ----------
+  const total = d => Object.values(d.estrelas).reduce((a, b) => a + b, 0), gastas = d => d.obras.reduce((t, n) => t + CUSTO.slice(0, n).reduce((a, b) => a + b, 0), 0), livres = d => Math.max(0, total(d) - gastas(d));
+  const aberto = (d, g) => d.fase > g * 10, pronto = (d, g) => d.obras[g] >= 5, podeObra = (d, g) => aberto(d, g) && !pronto(d, g) && livres(d) >= CUSTO[d.obras[g]];
+  const fazerObra = (d, g) => { if (!podeObra(d, g)) return false; d.obras[g]++; return true; }, comodosComObra = d => OBRAS.map((_, g) => g).filter(g => podeObra(d, g));
+  function daVez(d) { const a = Math.min(4, Math.floor((Math.min(50, d.fase) - 1) / 10)); if (!pronto(d, a)) return a; for (let g = 0; g < 5; g++) if (aberto(d, g) && !pronto(d, g)) return g; return a; }
+  const proxima = d => { const g = daVez(d), k = d.obras[g]; return k >= 5 ? null : { g, k, nome: OBRAS[g][k], custo: CUSTO[k], falta: Math.max(0, CUSTO[k] - livres(d)) }; };
+  const bonus = (d, n) => n <= 50 && pronto(d, Math.floor((n - 1) / 10)) ? BONUS_TEMPO : 0;
+  // ---------- álbum e cartas ----------
+  const nLemb = (d, g) => LEMBRANCAS.filter(l => (g === undefined || l.g === g) && d.lembrancas[l.n]).length, cartaLiberada = (d, i) => i < 5 ? nLemb(d, i) === 10 : nLemb(d) === 50, cartasNovas = d => CARTAS.map((_, i) => i).filter(i => cartaLiberada(d, i) && !d.cartas[i]), naoLidas = d => LEMBRANCAS.filter(l => d.lembrancas[l.n] && !d.lidas[l.n]).length;
+  // ---------- acervo: cada objeto achado entra na coleção ----------
+  const acervoCompleto = (d, t, cat) => cat.porTema[t].every(id => d.acervo[id]), nAcervo = d => Object.keys(d.acervo).length;
+  function catalogar(d, lista) { const novos = []; for (const id of lista) { if (!d.acervo[id]) novos.push(id); d.acervo[id] = (d.acervo[id] || 0) + 1; } return novos; }
+  // ---------- mesa do dia ----------
+  const nDiaria = d => Object.keys(d.diaria).length, diaNum = dia => Math.floor(Date.UTC(+dia.slice(0, 4), +dia.slice(5, 7) - 1, +dia.slice(8, 10)) / 864e5);
+  // devolve o prêmio em dicas: 1 por mesa nova, +3 a cada 7 mesas. Faltar um dia não zera nada
+  function fecharDia(d, dia, pts) { const novo = !d.diaria[dia]; d.diaria[dia] = Math.max(d.diaria[dia] || 0, pts, 1); if (!novo) return { novo: false, dicas: 0, semana: false }; let q = 1; const s = nDiaria(d) % 7 === 0; if (s) { q += 3; d.semana++; } d.dicas = Math.min(999, d.dicas + q); return { novo, dicas: q, semana: s }; }
+  // ---------- marcos ----------
+  const MARCOS = [
+    ['fases', 'Da casa', 'Vença fases', [10, 30, 50], d => Object.keys(d.estrelas).length],
+    ['estrelas', 'Brilho', 'Junte estrelas', [20, 70, 130], d => total(d)],
+    ['perfeitas', 'Olho de lince', 'Vença com 3 estrelas', [5, 20, 40], d => Object.values(d.estrelas).filter(e => e === 3).length],
+    ['lembrancas', 'Guardião', 'Ache lembranças', [5, 25, 50], d => nLemb(d)],
+    ['cartas', 'Correspondência', 'Leia cartas', [1, 3, 6], d => Object.keys(d.cartas).length],
+    ['obras', 'Restaurador', 'Faça obras na casa', [3, 12, 25], d => d.obras.reduce((a, b) => a + b, 0)],
+    ['acervo', 'Catálogo', 'Complete o acervo', [30, 80, 118], d => nAcervo(d)],
+    ['achados', 'Mão cheia', 'Ache objetos', [50, 300, 1000], d => d.soma.achados],
+    ['combo', 'Embalo', 'Chegue ao combo', [5, 9, 13], d => d.soma.combo],
+    ['limpas', 'Sem tropeço', 'Vença sem errar', [5, 20, 40], d => d.soma.limpas],
+    ['enterrados', 'Arqueologia', 'Ache objetos enterrados', [10, 50, 150], d => d.soma.enterrados],
+    ['pares', 'Pares', 'Junte pares', [5, 20, 60], d => d.soma.pares],
+    ['pontos', 'Recordista', 'Pontos em uma fase', [3000, 5500, 8000], d => Math.max(0, ...Object.values(d.recordes))],
+    ['diarias', 'Todo dia', 'Faça mesas do dia', [1, 7, 30], d => nDiaria(d)],
+    ['dias', 'Visita', 'Jogue em dias diferentes', [3, 10, 30], d => d.soma.dias]
+  ].map(([id, nome, txt, alvos, valor]) => ({ id, nome, txt, alvos, valor }));
+  const PREMIO = [1, 1, 2];             // dicas por degrau
+  const marco = (d, m) => { const v = m.valor(d), feito = m.alvos.filter(a => v >= a).length, recebido = d.marcos[m.id] || 0; return { v, feito, recebido, pronto: feito > recebido, alvo: m.alvos[Math.min(2, recebido)], fim: recebido >= 3 }; }, marcosProntos = d => MARCOS.filter(m => marco(d, m).pronto).length;
+  function receber(d, id) { const m = MARCOS.find(x => x.id === id); if (!m || !marco(d, m).pronto) return 0; const k = d.marcos[id] || 0; d.marcos[id] = k + 1; d.dicas = Math.min(999, d.dicas + PREMIO[k]); return PREMIO[k]; }
+  function marcarDia(d, hoje) { if (d.soma.ultimoDia === hoje) return; d.soma.ultimoDia = hoje; d.soma.dias++; }
+  // fecha uma vitória: devolve tudo o que mudou, para a tela mostrar
+  function venceu(d, n, r, hoje) {
+    const antes = d.estrelas[n] || 0, obrasAntes = comodosComObra(d).length, novoRec = r.pontos > (d.recordes[n] || 0), lembNova = r.lembranca && !d.lembrancas[n]; d.estrelas[n] = Math.max(antes, r.estrelas); if (novoRec) d.recordes[n] = r.pontos; if (r.lembranca) d.lembrancas[n] = 1; d.fase = Math.max(d.fase, Math.min(51, n + 1));
+    d.soma.vitorias++; if (!r.erros) d.soma.limpas++; marcarDia(d, hoje); const novos = catalogar(d, r.ids); return { ganhas: Math.max(0, r.estrelas - antes), novoRec, lembNova, novos, obraNova: comodosComObra(d).length > 0 && (comodosComObra(d).length > obrasAntes || antes === 0), cartas: cartasNovas(d) };
+  }
+  return { CUSTO, OBRAS, LEMBRANCAS, CARTAS, MARCOS, PREMIO, NOMES_MOLDURA, LIBERA_DIA, nova, validar, migrar, mesclar, soma, total, gastas, livres, aberto, pronto, podeObra, fazerObra, comodosComObra, daVez, proxima, bonus, nLemb, cartaLiberada, cartasNovas, naoLidas, acervoCompleto, nAcervo, catalogar, nDiaria, diaNum, fecharDia, marco, marcosProntos, receber, marcarDia, venceu };
 })();
 </script>
 
@@ -311,13 +482,31 @@ const Ganchos = {
   premio: (tipo, dados) => {}                     // estrela nova, lembrança achada, recorde
 };
 
+const Hoje = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
 // ============================================================ PROGRESSO (guardado no aparelho)
 const Progresso = (() => {
-  const CHAVE = 'keepsake.v1', novo = () => ({ v: 1, fase: 1, estrelas: {}, recordes: {}, lembrancas: {}, tentativas: {}, op: { som: true, ambiente: true, vibra: true }, soma: { achados: 0, erros: 0, vitorias: 0, derrotas: 0, combo: 0 } });
-  let d = novo();
-  try { const x = JSON.parse(localStorage.getItem(CHAVE)); if (x && x.v === 1) { const b = novo(); d = { ...b, ...x, op: { ...b.op, ...x.op }, soma: { ...b.soma, ...x.soma } }; d.fase = Math.max(1, Math.min(Nucleo.TOTAL + 1, d.fase | 0)); } } catch (e) { /* ficha ilegível: começa do zero */ }
-  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(d)); Eventos.emite('salvou', d); } catch (e) { /* sem espaço ou modo anônimo */ } };
-  return { d, salvar, get totalEstrelas() { return Object.values(d.estrelas).reduce((a, b) => a + b, 0); }, get totalLembrancas() { return Object.keys(d.lembrancas).length; } };
+  // ficha nova (v2) com conferência e cópia de segurança; a da Fase 1 (v1) é trazida inteira e fica intocada
+  const CHAVE = 'keepsake.v2', COPIA = 'keepsake.v2.copia', V1 = 'keepsake.v1', F = Nucleo.FICHA, le = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  function abrir(txt) { try { const s = JSON.parse(txt); if (!s || !s.d) return null; return { d: Meta.validar(s.d, F), ok: s.soma === Meta.soma(JSON.stringify(s.d)) }; } catch (e) { return null; } }
+  let origem = 'nova', d;
+  (function carregar() {
+    const a = abrir(le(CHAVE)), b = abrir(le(COPIA));
+    if (a && a.ok) { d = a.d; origem = 'v2'; } else if (b && b.ok) { d = a ? Meta.mesclar(b.d, a.d, F) : b.d; origem = 'copia'; } else if (a) { d = a.d; origem = 'remendada'; }
+    else { let v1 = null; try { v1 = JSON.parse(le(V1)); } catch (e) { /* estragada */ } if (v1 && typeof v1 === 'object' && v1.estrelas) { d = Meta.migrar(v1, F); origem = 'v1'; } else d = Meta.nova(); }
+  })();
+  const empacota = x => { const t = JSON.stringify(x); return `{"v":2,"soma":"${Meta.soma(t)}","d":${t}}`; };
+  function salvar() {
+    try {
+      const antes = le(CHAVE), g = abrir(antes); if (g && g.ok && g.d.rev > d.rev) { const op = d.op; Object.assign(d, Meta.mesclar(d, g.d, F)); d.op = op; }      // outra aba salvou depois: junta as duas
+      if (g && g.ok) localStorage.setItem(COPIA, antes); d.rev++; localStorage.setItem(CHAVE, empacota(d)); Eventos.emite('salvou', d);
+    } catch (e) { /* sem espaço ou modo anônimo */ }
+  }
+  if (origem !== 'v2') salvar();
+  const codigo = () => 'KH2-' + btoa(unescape(encodeURIComponent(empacota(d))));
+  // junta o código com o que já existe aqui; nunca apaga progresso
+  function importar(txt) { try { const t = String(txt).replace(/\s+/g, ''); if (!t.startsWith('KH2-')) return false; const r = abrir(decodeURIComponent(escape(atob(t.slice(4))))); if (!r || !r.ok) return false; const op = d.op; Object.assign(d, Meta.mesclar(d, r.d, F)); d.op = op; salvar(); return true; } catch (e) { return false; } }
+  addEventListener('storage', e => { if (e.key === CHAVE && e.newValue) { const r = abrir(e.newValue); if (r && r.ok && r.d.rev > d.rev) { const op = d.op; Object.assign(d, Meta.mesclar(d, r.d, F)); d.op = op; } } });
+  return { d, salvar, codigo, importar, get origem() { return origem; } };
 })();
 
 // ============================================================ SOM (tudo por código, Web Audio)
@@ -396,7 +585,8 @@ const Som = (() => {
       else { proxE = ag + ALEA(4, 9); chiado(t, .5, .03, 260, { q: 6, ate: 420, ataque: .15, pan, saida: musica, molhado: .4 }); }                                                                                              // madeira rangendo
     }
   }, 120);
-  let ultR = 0, ultP = 0;
+  const feltroFx = (f, t) => { tom(f, t, 1.6, .13, { ataque: .012, molhado: .5 }); tom(f * 2, t, .8, .04, { ataque: .01, molhado: .4 }); };
+  let ultR = 0;
   return {
     iniciar, volume, get estado() { return ctx ? ctx.state : 'parado'; }, get contexto() { return ctx; }, get final() { return final; }, pequeno: PEQUENO,
     lugar(l) { if (l === lugar && fundo) return; lugar = l; if (ctx) arFundo(); }, aperto(v) { aperto = v; }, ligar(v) { tocando = v; volume(); },
@@ -419,6 +609,8 @@ const Som = (() => {
     segundo(u) { if (!pronto()) return; const t = ctx.currentTime; tom(u ? 1180 : 980, t, .05, .13, { tipo: 'triangle', molhado: .05 }); tom(2400, t, .015, .06, { molhado: 0 }); },
     estrela(i) { if (!pronto()) return; const t = ctx.currentTime; sino(grau(i * 2 + 2) * 2, t, .2, 1.1); tom(grau(i * 2) , t, .4, .1); },
     vitoria() { if (!pronto()) return; const t = ctx.currentTime, b = BASE[lugar]; [[0, 0], [2, .12], [4, .24], [5, .36], [7, .52]].forEach(([g, d]) => { sino(grau(g, b * 2), t + d, .17, 1.3); tom(grau(g, b), t + d, .5, .09); }); for (const g of [0, 2, 4]) tom(grau(g, b), t + .55, 1.8, .08, { ataque: .08, molhado: .5 }); chiado(t + .5, .8, .05, 3000, { ate: 7500, q: .6, ataque: .2, molhado: .5 }); },
+    obra() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .5, .14, 900, { ate: 2600, q: .6, ataque: .12 }); for (let i = 0; i < 4; i++) bate(i % 2 ? 'madeira' : 'metal', t + .3 + i * .13, .26, i % 2 ? .2 : -.2); [0, 2, 4, 5].forEach((g, i) => sino(grau(g) * 2, t + .75 + i * .09, .15, 1.2)); },
+    carta() { if (!pronto()) return; const t = ctx.currentTime; chiado(t, .18, .16, 2600, { ate: 4200, q: .6 }); chiado(t + .16, .22, .12, 3200, { ate: 1800, q: .6 }); feltroFx(grau(2), t + .25); feltroFx(grau(4), t + .5); feltroFx(grau(7), t + .8); },
     derrota() { if (!pronto()) return; const t = ctx.currentTime, b = BASE[lugar]; [[4, 0], [2, .2], [1, .4], [-1, .64]].forEach(([g, d]) => { tom(grau(g, b), t + d, .6, .16, { molhado: .4, tipo: 'triangle' }); tom(grau(g, b) / 2, t + d, .6, .1); }); }
   };
 })();
@@ -503,9 +695,17 @@ void main(){if(uLente.w>.5&&distance(vPx,uLente.xy)>uLente.z)discard;float tipo=
     if (extra.lupa) { const { x, y, px, py, r, z } = extra.lupa, e2 = e * z, [mx, my] = paraMesa(P, x, y); gl.uniform4f(uni.uCena, (px - (mx + P.W / 2) * e2) * dpr, (py - (my + P.H / 2) * e2) * dpr, P.W * e2 * dpr, P.H * e2 * dpr); mesaCheia(P, e2, px - mx * e2, py - my * e2, t); lote({ x: px - r, y: py - r, w: r * 2, h: r * 2 }, { x: px, y: py, r }); }
   }
   // objeto dentro de uma vaga da bandeja: deita na diagonal o que for comprido
-  function encaixe(k, w, h) { const c = CAT[k], fino = Math.max(c.cu, c.ch) / Math.min(c.cu, c.ch) > 1.9, r = fino ? (c.deita ? -.5 : .85) : 0, co = Math.abs(Math.cos(r)), si = Math.abs(Math.sin(r)), bw = c.cu * co + c.ch * si, bh = c.cu * si + c.ch * co; return { r, e: Math.min((w - 8) / bw, (h - 8) / bh, 13) }; }
+  function encaixe(k, w, h, teto = 13) { const c = CAT[k], fino = Math.max(c.cu, c.ch) / Math.min(c.cu, c.ch) > 1.9, r = fino ? (c.deita ? -.5 : .85) : 0, co = Math.abs(Math.cos(r)), si = Math.abs(Math.sin(r)), bw = c.cu * co + c.ch * si, bh = c.cu * si + c.ch * co; return { r, e: Math.min((w - 8) / bw, (h - 8) / bh, teto) }; }
   function icone({ k, x, y, w, h, esc = 1, tipo = 0, alfa = 1 }) { const q = encaixe(k, w, h); if (esc > .02) objeto(k, x, y, q.r, q.e * esc, { dentro: 0, tipo, sombra: tipo === 2 ? 0 : 1, alfa }); }
 
+  // fotografa um objeto sozinho (álbum, acervo, vitória). Fica guardado para não desenhar de novo
+  const fotos = {};
+  function soObjeto(c2, lado, k, r, e, tipo) {
+    const px = Math.round(lado * dpr); if (c2.width !== px) c2.width = c2.height = px; if (!gl || gl.isContextLost()) return false; gl.viewport(0, 0, glc.width, glc.height); gl.disable(gl.SCISSOR_TEST); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(prog); gl.bindVertexArray(vao); gl.bindBuffer(gl.ARRAY_BUFFER, buf);[tex.cor, tex.nor, tex.sombra].forEach((x, i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, x); }); gl.uniform2f(uni.uT, glc.width, glc.height); gl.uniform4f(uni.uLuz, 0, 0, 1, 0);
+    objeto(k, lado / 2, lado / 2, r, e, { dentro: 0, tipo, sombra: tipo === 2 ? 0 : 1 }); lote(null); const q = c2.getContext('2d'); q.clearRect(0, 0, px, px); q.drawImage(glc, 0, 0, px, px, 0, 0, px, px); sujo = true; return true;
+  }
+  function retrato(k, lado, { tipo = 0 } = {}) { const ch = k + '/' + lado + '/' + tipo + '/' + dpr; if (fotos[ch]) return fotos[ch]; const c = document.createElement('canvas'), m = encaixe(k, lado, lado, 40); return soObjeto(c, lado, k, m.r, m.e * .92, tipo) ? fotos[ch] = c.toDataURL() : ''; }
+  function girado(k, r, c2) { const c = CAT[k], lado = Math.min(c2.clientWidth || 220, L - 4, A - 4), e = Math.min(30, (lado - 26) / Math.hypot(c.cu, c.ch)); soObjeto(c2, lado, k, r, e, 0); }
   // ---------- efeitos por cima: partículas, números, anéis
   let part = [], textos = [], aneis = [], fxLimpo = true; const ALEA = (a, b) => a + Math.random() * (b - a);
   function faiscas(x, y, n, cor = ['#f3d38a', '#fff3d0', '#d9a84a'], v = 190) { if (calmo) n = Math.ceil(n / 4); for (let i = 0; i < n && part.length < 220; i++) { const a = ALEA(0, 6.28), s = ALEA(.25, 1) * v; part.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, t: 0, d: ALEA(.45, .95), r: ALEA(1.6, 4.2), c: cor[i % cor.length], g: ALEA(0, 6.28), w: ALEA(-8, 8) }); } }
@@ -520,7 +720,7 @@ void main(){if(uLente.w>.5&&distance(vPx,uLente.xy)>uLente.z)discard;float tipo=
     textos = textos.filter(q => (q.t += dt) < q.d); fx.textAlign = 'center'; fx.textBaseline = 'middle'; for (const q of textos) { const k = q.t / q.d, s = k < .18 ? .5 + k / .18 * .65 : 1.15 - Math.min(1, (k - .18) / .15) * .15; fx.globalAlpha = k > .65 ? (1 - k) / .35 : 1; fx.font = `700 ${q.tam * s}px Georgia,serif`; fx.lineWidth = 5; fx.strokeStyle = 'rgba(12,16,14,.85)'; fx.lineJoin = 'round'; const y = q.y - 46 * (1 - Math.pow(1 - k, 2)), mw = fx.measureText(q.s).width / 2 + 8; q.x = Math.max(mw, Math.min(L - mw, q.x)); fx.strokeText(q.s, q.x, y); fx.fillStyle = q.cor; fx.fillText(q.s, q.x, y); }
     fx.globalAlpha = 1;
   }
-  return { carregar, mesa, medir, desenhar, efeitos, faiscas, poeira, texto, anel, paraTela, paraMesa, escala, encaixe, cam, prendeCam, get cena() { return cena; }, get masc() { return masc; }, get largura() { return L; }, get altura() { return A; }, calmo, sujar() { sujo = true; }, get sujo() { return sujo; }, limpo() { sujo = false; } };
+  return { carregar, retrato, girado, mesa, medir, desenhar, efeitos, faiscas, poeira, texto, anel, paraTela, paraMesa, escala, encaixe, cam, prendeCam, get cena() { return cena; }, get masc() { return masc; }, get largura() { return L; }, get altura() { return A; }, calmo, sujar() { sujo = true; }, get sujo() { return sujo; }, limpo() { sujo = false; } };
 })();
 
 // ============================================================ JOGO: liga o núcleo, a tela, o som e o dedo
@@ -528,9 +728,10 @@ const Jogo = (() => {
   const N = Nucleo, D = Progresso.d; let P = null, n = 0, aberto = '', voltaPara = '', antes = 0, voando = [], tremor = 0, pausado = true, entrada = 0, lupa = null, luz = null, ultSeg = 99, encerrando = 0, dicaAtiva = null, aces = 0, vagaAnim = {}, retVagas = [], brilhoMed = 0;
   const sai = k => 1 - Math.pow(1 - k, 3), quica = k => { const c = 1.70158 * 1.2, q = k - 1; return 1 + (c + 1) * q * q * q + c * q * q; };
   // ---------- começar
+  const comecarDia = () => comecar(1000 + Meta.diaNum(Hoje()));
   async function comecar(f, novaTent = true) {
-    n = Math.max(1, Math.min(N.TOTAL, f)); const F = N.fase(n); D.tentativas[n] = (D.tentativas[n] || 0) + (novaTent ? 1 : 0); Progresso.salvar();
-    await Ganchos.antesDaFase(n); await Tela.mesa(F.lugar); Telas.fechar(); $('app').classList.remove('vitrine'); Tela.cam.z = 1; Tela.cam.x = Tela.cam.y = 0; Telas.hud(F); const asp = Tela.medir(); P = new N.Partida(n, D.tentativas[n], asp, Tela.masc); voando = []; lupa = null; dicaAtiva = null; tremor = 0; encerrando = 0; ultSeg = 99; vagaAnim = {}; brilhoMed = 3;
+    n = f >= 1000 ? f : Math.max(1, Math.min(N.TOTAL, f)); vitrineOn = false; const F = N.fase(n); if (n < 1000) { D.tentativas[n] = (D.tentativas[n] || 0) + (novaTent ? 1 : 0); Progresso.salvar(); }
+    await Ganchos.antesDaFase(n); await Tela.mesa(F.lugar); Telas.fechar(); $('app').classList.remove('vitrine'); Tela.cam.z = 1; Tela.cam.x = Tela.cam.y = 0; Telas.hud(F); const asp = Tela.medir(); P = new N.Partida(n, n < 1000 ? D.tentativas[n] : 1, asp, Tela.masc, Meta.bonus(D, n)); P.guardadas = D.dicas; voando = []; lupa = null; dicaAtiva = null; tremor = 0; encerrando = 0; ultSeg = 99; vagaAnim = {}; brilhoMed = 3;
     if (F.modo === 'E') { const c = Tela.cena; luz = { x: c.x + c.w / 2, y: c.y + c.h / 2, r: Math.min(c.w, c.h) * .34 }; } else luz = null;
     montarVagas(); Tela.medir(); P.remodelar(Tela.cena.w / Tela.cena.h); medirVagas(); entrada = .001; pausado = false; P.objs.forEach((o, i) => { o.esc = 0; o.ent = i / P.objs.length * .42 + Math.random() * .06; });
     Som.lugar(F.lugar); Som.ligar(true); Som.aperto(0); Som.derrama(); $('dica').textContent = F.aviso ? `${F.aviso}${F.dica ? ' · ' + F.dica : ''}` : F.dica; placar(); Tela.sujar(); Eventos.emite('fase:inicio', { n, modo: F.modo });
@@ -550,8 +751,8 @@ const Jogo = (() => {
     const m = P.F.modo, l = []; P.vagas.forEach((q, i) => { const r = retVagas[i]; if (!r || q.k < 0) return; const a = vagaAnim[i], chegando = voando.some(v => v.vaga === i && v.final), esc = a ? quica(Math.min(1, (t - a) / .3)) : 1; if (q.feita && chegando) { if (m === 'P') return; } const mostra = m === 'N' && !q.feita ? false : true; if (mostra) l.push({ k: q.k, ...r, esc, tipo: m === 'S' && !q.feita ? 2 : 0, alfa: m !== 'I' && !q.feita ? 1 : 1 }); }); return l;
   }
   function placar() {
-    const s = Math.ceil(P.tempo); $('tempo').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; $('tempo').classList.toggle('pouco', s <= 12); $('barra').style.width = P.achados / P.meta * 100 + '%'; $('gasto').style.transform = `scaleX(${Math.max(0, Math.min(1, P.tempo / P.F.tempo))})`;
-    const c = $('combo'), tx = P.combo > 1 ? `×${P.mult}<small>combo ${P.combo}</small>` : `${P.pontos}<small>pontos</small>`; if (c.dataset.t !== tx) { c.innerHTML = c.dataset.t = tx; c.classList.toggle('on', P.combo > 1); } $('bDica').style.setProperty('--c', P.carga * 100 + '%'); $('bDica').classList.toggle('ok', P.dicas > 0); $('nDica').textContent = P.dicas; $('nDica').hidden = !P.dicas;
+    const s = Math.ceil(P.tempo); $('tempo').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; $('tempo').classList.toggle('pouco', s <= 12); $('barra').style.width = P.achados / P.meta * 100 + '%'; $('gasto').style.transform = `scaleX(${Math.max(0, Math.min(1, P.tempo / P.tempoTotal))})`;
+    const c = $('combo'), tx = P.combo > 1 ? `×${P.mult}<small>combo ${P.combo}</small>` : `${P.pontos}<small>pontos</small>`; if (c.dataset.t !== tx) { c.innerHTML = c.dataset.t = tx; c.classList.toggle('on', P.combo > 1); } $('bDica').style.setProperty('--c', P.carga * 100 + '%'); const nd = P.dicas + P.guardadas; $('bDica').classList.toggle('ok', nd > 0); $('nDica').textContent = nd; $('nDica').hidden = !nd;
   }
   // ---------- toque num ponto da tela
   function tocar(px, py, suave) {
@@ -562,7 +763,7 @@ const Jogo = (() => {
     else if (r.e === 'lembranca') { o.saindo = true; voar(o, null); Som.lembranca(); vibra([15, 40, 15, 40, 30]); Tela.faiscas(ox, oy, 46, undefined, 260); Tela.anel(ox, oy, 10, 120, .8); Tela.texto('Lembrança! +500', ox, oy - 20, '#f8dd8f', 26, 1.5); Eventos.emite('lembranca', { n }); }
     else { // achou
       D.soma.achados++; D.soma.combo = Math.max(D.soma.combo, r.combo); dicaAtiva = null; for (const q of P.objs) q.halo = 0; for (const q of [o, r.par]) if (q) { q.saindo = true; voar(q, r.vaga, q === o); const [a, b] = Tela.paraTela(P, q.x, q.y); Tela.faiscas(a, b, 14 + Math.min(r.combo, 6) * 4, undefined, 150 + r.combo * 22); Tela.anel(a, b, 8, 46 + r.combo * 8, .45); }
-      Som.achou(mat, r.combo, pan); vibra(r.combo > 2 ? [12, 20, 18] : 14); if (r.combo >= 3) tremor = Math.max(tremor, Math.min(7, 1.5 + r.combo)); Tela.texto(`+${r.pts}`, ox, oy - 6, r.combo > 1 ? '#f8dd8f' : '#ffffff', 22 + Math.min(r.combo, 6) * 2.5); if (r.combo >= 3) Tela.texto(`Combo ${r.combo}${r.extra ? '  +1 s' : ''}`, ox, oy + 24, '#a9dcc4', 18); const c = $('combo'); c.classList.remove('pula'); void c.offsetWidth; c.classList.add('pula'); Eventos.emite('achou', { n, k: o.k, combo: r.combo }); if (r.fim) vencer();
+      Som.achou(mat, r.combo, pan); vibra(r.combo > 2 ? [12, 20, 18] : 14); if (r.combo >= 3) tremor = Math.max(tremor, Math.min(7, 1.5 + r.combo)); Tela.texto(`+${r.pts}`, ox, oy - 6, r.combo > 1 ? '#f8dd8f' : '#ffffff', 22 + Math.min(r.combo, 6) * 2.5); if (r.combo >= 3) Tela.texto(`Combo ${r.combo}${r.extra ? '  +1 s' : ''}`, ox, oy + 24, '#a9dcc4', 18); const c = $('combo'); c.classList.remove('pula'); void c.offsetWidth; c.classList.add('pula'); Eventos.emite('achou', { n, k: o.k, combo: r.combo }); if (P.F.modo === 'P') D.soma.pares++; if (r.fim) vencer();
     }
     placar();
   }
@@ -577,15 +778,18 @@ const Jogo = (() => {
     for (const v of chegou) { if (v.especial || !v.final) continue; const d = $('vagas').children[v.vaga]; if (!d) continue; d.classList.remove('pula'); void d.offsetWidth; d.classList.add('pula'); Som.encaixa(P.achados); textoVaga(v.vaga); const r = retVagas[v.vaga]; if (r) Tela.faiscas(r.x, r.y, 8, undefined, 90); if (P.F.modo !== 'I' && P.F.modo !== 'P' && !P.fim) { const vg = v.vaga; setTimeout(() => { if (P && P.vagas[vg] && P.vagas[vg].feita && P.repor(vg)) { vagaAnim[vg] = performance.now() / 1000; textoVaga(vg); Som.vagaNova(); Tela.sujar(); } }, P.F.modo === 'V' ? 120 : 260); } }
   }
   // ---------- dica
-  function pedirDica() { if (!P || pausado || P.fim || entrada) return; const r = P.dica(); if (!r) { Som.solta(); return; } Som.dica(); vibra(12); const [x, y] = Tela.paraTela(P, r.o.x, r.o.y); if (r.visivel < .5) N.sopra(P.objs, r.o.x, r.o.y, 7, 26, r.o); dicaAtiva = { o: r.o, par: r.par, t: 0 }; Tela.anel(x, y, Math.max(Tela.cena.w, Tela.cena.h) * .7, 26, .9, '#f3d38a', 5); if (luz) { luz.x = x; luz.y = y; } $('dica').textContent = ''; Eventos.emite('dica', { n }); placar(); }
+  function pedirDica() { if (!P || pausado || P.fim || entrada) return; const r = P.dica(); if (!r) { Som.solta(); return; } if (r.guardada) D.dicas = Math.max(0, D.dicas - 1); D.soma.dicasUsadas++; Progresso.salvar(); Som.dica(); vibra(12); const [x, y] = Tela.paraTela(P, r.o.x, r.o.y); if (r.visivel < .5) N.sopra(P.objs, r.o.x, r.o.y, 7, 26, r.o); dicaAtiva = { o: r.o, par: r.par, t: 0 }; Tela.anel(x, y, Math.max(Tela.cena.w, Tela.cena.h) * .7, 26, .9, '#f3d38a', 5); if (luz) { luz.x = x; luz.y = y; } $('dica').textContent = ''; Eventos.emite('dica', { n }); placar(); }
   // ---------- fim da fase
   function vencer() {
-    encerrando = 1; Som.aperto(0); const e = P.estrelas, antes = D.estrelas[n] || 0; D.estrelas[n] = Math.max(antes, e); D.recordes[n] = Math.max(D.recordes[n] || 0, P.pontos); if (P.lembranca) D.lembrancas[n] = 1; D.fase = Math.max(D.fase, Math.min(N.TOTAL + 1, n + 1)); D.soma.vitorias++; Progresso.salvar(); if (e > antes) Ganchos.premio('estrelas', { n, e }); if (P.lembranca) Ganchos.premio('lembranca', { n });
+    encerrando = 1; Som.aperto(0); const e = P.estrelas, dia = n >= 1000, antes = D.estrelas[n] || 0; D.soma.enterrados += P.enterrados; let r;
+    if (dia) { const h = Hoje(); D.soma.vitorias++; Meta.marcarDia(D, h); const x = Meta.fecharDia(D, h, P.pontos); r = { ...x, dia: h, lembNova: false, cartas: [], novos: Meta.catalogar(D, P.ids) }; }
+    else { r = Meta.venceu(D, n, { estrelas: e, pontos: P.pontos, lembranca: P.lembranca, erros: P.erros, ids: P.ids }, Hoje()); if (e > antes) Ganchos.premio('estrelas', { n, e }); if (r.lembNova) Ganchos.premio('lembranca', { n }); }
+    Progresso.salvar(); if (D.soma.vitorias === 3 && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
     const p = P; setTimeout(() => { if (P !== p) return; Som.vitoria(); N.sopra(P.objs, 0, 0, 60, Tela.calmo ? 4 : 22); tremor = 5; vibra([20, 50, 20, 50, 60]); const c = Tela.cena; for (let i = 0; i < 5; i++) setTimeout(() => Tela.faiscas(c.x + c.w * (.15 + .7 * Math.random()), c.y + c.h * (.2 + .5 * Math.random()), 22, undefined, 220), i * 120); Tela.anel(c.x + c.w / 2, c.y + c.h / 2, 20, c.w * .7, .9); }, 620);
-    setTimeout(() => { if (P === p) { Eventos.emite('fase:vitoria', { n, estrelas: e, pontos: p.pontos }); Telas.vitoria(n, p, e); } }, 1650);
+    setTimeout(() => { if (P === p) { Eventos.emite('fase:vitoria', { n, estrelas: e, pontos: p.pontos, ...r }); Telas.vitoria(n, p, e, r); } }, 1650);
   }
   async function perder() {
-    encerrando = 1; D.soma.derrotas++; Progresso.salvar(); Som.aperto(0); Som.derrota(); vibra(120); const p = P, faltou = P.meta - P.achados; for (const o of P.objs) if (P.F.modo === 'P' || P.F.modo === 'I' ? o.alvo && o.vivo : o.vivo && o.alvo) o.halo = 1; luz = null; Tela.sujar(); Eventos.emite('fase:derrota', { n, faltou });
+    encerrando = 1; D.soma.derrotas++; Meta.marcarDia(D, Hoje()); Progresso.salvar(); Som.aperto(0); Som.derrota(); vibra(120); const p = P, faltou = P.meta - P.achados; for (const o of P.objs) if (P.F.modo === 'P' || P.F.modo === 'I' ? o.alvo && o.vivo : o.vivo && o.alvo) o.halo = 1; luz = null; Tela.sujar(); Eventos.emite('fase:derrota', { n, faltou });
     const extra = await Ganchos.oferecerContinuar({ n, faltou }); if (extra) { P.fim = ''; P.tempo = extra; encerrando = 0; for (const o of P.objs) o.halo = 0; return; } setTimeout(() => { if (P === p) Telas.derrota(n, p, faltou); }, 1500);
   }
   // ---------- dedo e mouse
@@ -637,48 +841,99 @@ const Jogo = (() => {
   addEventListener('resize', () => { refazer(); setTimeout(refazer, 250); });
   document.addEventListener('visibilitychange', () => { Som.dormir(document.hidden); if (document.hidden) { dedos.clear(); gesto = null; lupa = null; if (P && !P.fim && !pausado && aberto === '') Telas.abrir('pausa'); } });
   // mesa de vitrine atrás da abertura
-  async function vitrine() { const l = Math.min(4, Math.floor((Math.min(N.TOTAL, D.fase) - 1) / 10)); await Tela.mesa(l); $('app').classList.toggle('vitrine', aberto === 'abertura'); Tela.medir(); P = new N.Partida(l * 10 + 10, 1, Tela.cena.w / Tela.cena.h, Tela.masc); P.objs.forEach(o => { o.esc = 1; }); entrada = 0; luz = null; pausado = true; Telas.hud(P.F); $('vagas').innerHTML = ''; Tela.sujar(); }
-  return { comecar, vitrine, pedirDica, refazer, get P() { return P; }, get n() { return n; }, get pausado() { return pausado; }, pausar(v) { pausado = v; if (v) { lupa = null; gesto = null; dedos.clear(); } Tela.sujar(); }, set aberto(v) { aberto = v; }, get aberto() { return aberto; }, tocar, get voando() { return voando; }, get entrada() { return entrada; }, get luz() { return luz; }, get lupa() { return lupa; } };
+  let vitrineOn = false;
+  async function vitrine() { vitrineOn = true; const l = Math.min(4, Math.floor((Math.min(N.TOTAL, D.fase) - 1) / 10)); await Tela.mesa(l); $('app').classList.toggle('vitrine', aberto === 'abertura'); Tela.medir(); P = new N.Partida(l * 10 + 10, 1, Tela.cena.w / Tela.cena.h, Tela.masc); P.objs.forEach(o => { o.esc = 1; }); entrada = 0; luz = null; pausado = true; Telas.hud(P.F); $('vagas').innerHTML = ''; Tela.sujar(); }
+  return { comecar, comecarDia, vitrine, get naVitrine() { return vitrineOn; }, pedirDica, refazer, get P() { return P; }, get n() { return n; }, get pausado() { return pausado; }, pausar(v) { pausado = v; if (v) { lupa = null; gesto = null; dedos.clear(); } Tela.sujar(); }, set aberto(v) { aberto = v; }, get aberto() { return aberto; }, tocar, get voando() { return voando; }, get entrada() { return entrada; }, get luz() { return luz; }, get lupa() { return lupa; } };
 })();
 
 // ============================================================ TELAS
 const Telas = (() => {
-  const D = Progresso.d, N = Nucleo, EST = '<svg viewBox="0 0 24 24"><path d="M12 2.600l2.900 6 6.500.9-4.700 4.600 1.100 6.500-5.800-3.100-5.800 3.100 1.100-6.500L2.600 9.500l6.500-.9z"/></svg>', MED = '<svg viewBox="0 0 24 24"><path d="M12 1.500a3 3 0 012.200 5A8 8 0 1112 6.200a8 8 0 01-2.200.3 3 3 0 012.200-5zm0 2a1 1 0 100 2 1 1 0 000-2z"/></svg>';
-  let pilha = [];
-  function mostra(id) { document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === id)); Jogo.aberto = id; $('app').classList.toggle('vitrine', id === 'abertura'); if (id) Jogo.pausar(true); }
-  const abrir = id => { pilha.push(id); mostra(id); if (id === 'mapa') mapa(); if (id === 'ajustes') ajustes(); if (id === 'abertura') Som.ligar(false); }, fechar = () => { pilha = []; mostra(''); }, trocar = id => { pilha = []; abrir(id); };
-  function voltar() { pilha.pop(); const id = pilha[pilha.length - 1] || ''; if (!id) inicio(); else { mostra(id); if (id === 'mapa') mapa(); } }
-  function inicio() { trocar('abertura'); Jogo.vitrine(); }
-  function hud(F) { $('tFase').textContent = 'Fase ' + F.n; $('tLugar').textContent = N.LUGARES[F.lugar]; $('dica').textContent = ''; somIcone(); }
+  const D = Progresso.d, N = Nucleo, M = Meta, F = N.FICHA, EST = '<svg viewBox="0 0 24 24"><path d="M12 2.600l2.900 6 6.500.9-4.700 4.600 1.100 6.500-5.800-3.100-5.800 3.100 1.100-6.500L2.600 9.500l6.500-.9z"/></svg>', MED = '<svg viewBox="0 0 24 24"><path d="M12 1.500a3 3 0 012.200 5A8 8 0 1112 6.200a8 8 0 01-2.200.3 3 3 0 012.200-5zm0 2a1 1 0 100 2 1 1 0 000-2z"/></svg>', CARTA = '<svg viewBox="0 0 24 24"><path d="M2.500 5h19v14h-19zm2 2.200L12 13l7.500-5.800v-.2h-15z"/></svg>';
+  let pilha = [], aba = { casa: 0, album: 0, acervo: 0 }, aoFechar = null;
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;'), arte = (g, k) => `arte/c${g}-${k}.webp`, obj = id => N.CAT[N.POR[id]];
+  function mostra(id) { document.querySelectorAll('.tela:not(.solta)').forEach(t => t.classList.toggle('on', t.id === id)); Jogo.aberto = id; $('app').classList.toggle('vitrine', id === 'abertura'); if (id) Jogo.pausar(true); const f = { mapa, ajustes, abertura: casaInicio, casa, album, acervo, marcos }[id]; if (f) f(); if (id === 'abertura') Som.ligar(false); }
+  const abrir = id => { pilha.push(id); mostra(id); const t = $(id); if (t) t.scrollTop = 0; }, fechar = () => { pilha = []; soltas(); mostra(''); }, trocar = id => { pilha = []; abrir(id); }, soltas = () => document.querySelectorAll('.solta').forEach(t => t.classList.remove('on'));
+  function voltar() { pilha.pop(); const id = pilha[pilha.length - 1] || ''; if (!id) inicio(); else mostra(id); }
+  function inicio() { trocar('abertura'); Jogo.vitrine(); } const daBase = id => { pilha = ['abertura']; abrir(id); if (!Jogo.naVitrine) Jogo.vitrine(); };
+  function hud(f) { $('tFase').textContent = f.dia ? 'Mesa do dia' : 'Fase ' + f.n; $('tLugar').textContent = N.LUGARES[f.lugar]; $('dica').textContent = ''; $('moldura').dataset.m = D.moldura; somIcone(); }
   function somIcone() { const b = $('bSom'), s = D.op.som; b.querySelector('.ligado').style.display = s ? '' : 'none'; b.querySelector('.mudo').style.display = s ? 'none' : ''; b.setAttribute('aria-label', s ? 'Desligar som' : 'Ligar som'); b.setAttribute('aria-pressed', s); }
+  // ---------- começo
+  function selo(id, n) { const e = $(id).querySelector('.selo'); e.textContent = n > 9 ? '9+' : n; e.hidden = !n; }
+  function casaInicio() {
+    const g = M.daVez(D), p = M.proxima(D), k = D.obras[g]; $('hImg').src = arte(g, k); $('hNome').textContent = N.LUGARES[g]; $('hObra').textContent = p ? (p.falta ? `${p.nome}: ${p.falta === 1 ? 'falta' : 'faltam'} ${p.falta} ★` : `${p.nome}: dá para restaurar`) : 'A casa inteira está de pé'; $('hPts').innerHTML = [0, 1, 2, 3, 4].map(i => `<i class="${i < k ? 'on' : ''}"></i>`).join(''); $('hEst').innerHTML = `${M.livres(D)} ★`; $('hDicas').innerHTML = `${D.dicas} ${D.dicas === 1 ? 'dica' : 'dicas'}`;
+    $('bJogar').innerHTML = D.fase > N.TOTAL ? 'Jogar' : `Jogar<small>fase ${D.fase}</small>`; selo('bCasa', M.comodosComObra(D).length); selo('bAlbum', M.naoLidas(D) + M.cartasNovas(D).length); selo('bMarcos', M.marcosProntos(D)); const dl = D.fase >= M.LIBERA_DIA, feita = D.diaria[Hoje()]; selo('bDia', dl && !feita ? 1 : 0); $('bDia').disabled = !dl; $('bDia').firstChild.textContent = feita ? 'Mesa do dia ✓' : 'Mesa do dia'; $('bDia').title = dl ? '' : `Abre na fase ${M.LIBERA_DIA}`;
+  }
   function mapa() {
-    $('mResumo').textContent = `${Progresso.totalEstrelas} de ${N.TOTAL * 3} estrelas · ${Progresso.totalLembrancas} de ${N.TOTAL} lembranças`; let h = '';
+    $('mResumo').textContent = `${M.total(D)} de ${N.TOTAL * 3} estrelas · ${M.nLemb(D)} de ${N.TOTAL} lembranças`; let h = '';
     N.LUGARES.forEach((l, g) => { let e = 0, m = 0, b = ''; for (let i = 1; i <= 10; i++) { const f = g * 10 + i, q = D.estrelas[f] || 0; e += q; m += D.lembrancas[f] ? 1 : 0; b += `<button class="fs${f === D.fase ? ' atual' : ''}" data-f="${f}" ${f > D.fase ? 'disabled' : ''} aria-label="Fase ${f}, ${q} estrelas${D.lembrancas[f] ? ', lembrança achada' : ''}">${D.lembrancas[f] ? MED : ''}${f}<small>${'★'.repeat(q)}</small></button>`; } h += `<h3>${l}<small>${e} de 30 ★ · ${m} de 10 lembranças</small></h3><div class="grade">${b}</div>`; });
     $('mLista').innerHTML = h; setTimeout(() => { const a = document.querySelector('.fs.atual'); if (a) a.scrollIntoView({ block: 'center' }); }, 20);
   }
   function ajustes() { document.querySelectorAll('.op').forEach(b => b.setAttribute('aria-pressed', D.op[b.dataset.op])); }
-  function vitoria(n, p, e) {
-    $('vTit').textContent = n === N.TOTAL ? 'A casa está em ordem!' : p.erros === 0 && e === 3 ? 'Impecável!' : 'Achou tudo!'; $('vEst').innerHTML = EST.repeat(3); [...$('vEst').children].forEach((s, i) => { if (i < e) setTimeout(() => { s.classList.add('on'); Som.estrela(i); vibra(12); }, 250 + i * 260); });
-    $('vTxt').innerHTML = `<b>${p.pontos}</b> pontos · recorde ${D.recordes[n]}<br>Sobraram ${Math.round(p.tempo)} s · maior combo ${p.maiorCombo}${e < 3 ? `<br>3 estrelas: sobrar ${Math.ceil(p.F.tempo * .4)} s` : ''}`; const tem = D.lembrancas[n]; $('vLem').className = 'lem' + (tem ? '' : ' falta'); $('vLem').innerHTML = MED + `<span>${p.lembranca ? 'Você achou a lembrança desta fase!' : tem ? 'Lembrança já achada' : 'A lembrança continua escondida'}</span>`;
-    $('vProx').textContent = n === N.TOTAL ? 'Ver as fases' : 'Próxima'; trocar('vitoria');
+  const abas = (id, at, f, extra = []) => { $(id).innerHTML = [...N.LUGARES, ...extra].map((l, i) => `<button class="aba${i === at ? ' on' : ''}" data-i="${i}">${l}${f && f(i) ? '<u></u>' : ''}</button>`).join(''); const a = $(id).children[at]; if (a) a.scrollIntoView({ inline: 'center', block: 'nearest' }); };
+  // ---------- casa
+  function casa() {
+    const g = aba.casa, k = D.obras[g], ab = M.aberto(D, g); abas('cAbas', g, i => M.podeObra(D, i)); $('cLivres').textContent = `${M.livres(D)} estrelas para usar`; const im = $('cImg'); if (im.dataset.q !== arte(g, k)) { im.src = im.dataset.q = arte(g, k); $('cImg2').style.opacity = 0; } im.classList.toggle('fechado', !ab);
+    $('cLista').innerHTML = !ab ? `<p class="vazio">Este cômodo abre quando você chegar à fase ${g * 10 + 1}.</p>` : M.OBRAS[g].map((o, i) => `<div class="obra${i < k ? ' feita' : i === k ? ' vez' : ''}"><span>${o}</span>${i < k ? '<b>✓</b>' : i === k ? `<button class="bt mini${M.podeObra(D, g) ? ' pri' : ''}" data-obra ${M.podeObra(D, g) ? '' : 'disabled'}>${M.podeObra(D, g) ? 'Restaurar' : 'Custa'} ${M.CUSTO[i]} ★</button>` : `<b>${M.CUSTO[i]} ★</b>`}</div>`).join('') + (M.pronto(D, g) ? '<p class="vazio bom">Cômodo pronto: 10% mais tempo nas fases dele.</p>' : '');
+  }
+  function obra() {
+    const g = aba.casa, antes = D.obras[g]; if (!M.fazerObra(D, g)) return; Progresso.salvar(); Som.obra(); vibra([15, 40, 25]); const a = $('cImg2'); a.src = arte(g, antes); a.style.transition = 'none'; a.style.opacity = 1; const im = $('cImg'); im.src = im.dataset.q = arte(g, antes + 1);
+    const solta = () => requestAnimationFrame(() => { a.style.transition = 'opacity 1.1s'; a.style.opacity = 0; }); im.decode ? im.decode().then(solta, solta) : solta(); casaLista(); Eventos.emite('obra', { g, k: antes }); if (M.pronto(D, g)) { Eventos.emite('comodo:pronto', { g }); setTimeout(() => { Som.vitoria(); aviso(`${N.LUGARES[g]} de pé!`, 'O cômodo está restaurado. Agora você tem <b>10% mais tempo</b> nas fases dele.', arte(g, 5)); }, 1200); }
+  }
+  const casaLista = () => { const im = $('cImg').dataset.q; casa(); $('cImg').dataset.q = im; };
+  // ---------- álbum
+  const foto = (id, s, tipo = 0) => `<img class="ft" width="${s}" height="${s}" alt="" src="${Tela.retrato(N.POR[id], s, { tipo })}">`;
+  function album() {
+    const g = aba.album; abas('aAbas', g, i => M.LEMBRANCAS.some(l => l.g === i && D.lembrancas[l.n] && !D.lidas[l.n]) || (M.cartaLiberada(D, i) && !D.cartas[i])); $('aResumo').textContent = `${M.nLemb(D)} de 50 lembranças`;
+    $('aLista').innerHTML = M.LEMBRANCAS.filter(l => l.g === g).map(l => D.lembrancas[l.n] ? `<button class="lb${D.lidas[l.n] ? '' : ' nova'}" data-l="${l.n}">${foto(l.obj, 64)}<span>${esc(l.titulo)}</span></button>` : `<button class="lb falta" data-f="${l.n}" ${l.n > D.fase ? 'disabled' : ''}><em>?</em><span>${l.n > D.fase ? 'Fase ' + l.n : 'Escondida na fase ' + l.n}</span></button>`).join('');
+    const c = i => { const lib = M.cartaLiberada(D, i), n = i < 5 ? M.nLemb(D, i) : M.nLemb(D), t = i < 5 ? 10 : 50; return `<button class="lb carta${lib ? (D.cartas[i] ? '' : ' nova') : ' falta'}" data-c="${i}" ${lib ? '' : 'disabled'}>${CARTA}<span>${lib ? esc(M.CARTAS[i][0]) : i < 5 ? `Carta do ${['escritório', 'cozinha', 'ateliê', 'sala de TI', 'sótão'][i]}`.replace('do cozinha', 'da cozinha').replace('do sala', 'da sala') + `: ${n} de ${t} lembranças` : `A última carta: ${n} de ${t} lembranças`}</span></button>`; }; $('aCartas').innerHTML = c(g) + c(5);
+  }
+  function lembranca(n) { const l = M.LEMBRANCAS[n - 1]; if (!D.lembrancas[n]) return; D.lidas[n] = 1; Progresso.salvar(); ver(N.POR[l.obj], l.titulo, esc(l.txt), `Lembrança ${n} de 50`); Som.carta(); }
+  function carta(i) { if (!M.cartaLiberada(D, i)) return; D.cartas[i] = 1; Progresso.salvar(); Som.carta(); const [t, x] = M.CARTAS[i]; $('kTit').textContent = t; $('kTxt').innerHTML = x; $('carta').classList.add('on'); Eventos.emite('carta', { i }); aoFechar = () => { if (Jogo.aberto === 'album') album(); }; }
+  // ---------- objeto de perto: gira com o dedo e a luz acompanha
+  let verK = -1, verA = 0, verV = .5, verQ = 0, verD = null;
+  function ver(k, tit, txt, sub) { verK = k; verA = -.3; verV = .5; $('oTit').textContent = tit; $('oSub').textContent = sub; $('oTxt').innerHTML = txt; $('objeto').classList.add('on'); cancelAnimationFrame(verQ); let u = 0; const q = t => { if (!$('objeto').classList.contains('on')) return; const dt = Math.min(.05, (t - u) / 1000 || 0); u = t; if (!verD) { verA += verV * dt; verV += ((verV < 0 ? -.4 : .4) - verV) * Math.min(1, dt * 1.5); } Tela.girado(verK, verA, $('oTela')); verQ = requestAnimationFrame(q); }; verQ = requestAnimationFrame(q); aoFechar = () => { if (Jogo.aberto === 'album') album(); }; }
+  const ot = $('oTela'); ot.addEventListener('pointerdown', e => { e.preventDefault(); ot.setPointerCapture && ot.setPointerCapture(e.pointerId); const r = ot.getBoundingClientRect(); verD = { x: r.left + r.width / 2, y: r.top + r.height / 2, a: 0, t: performance.now() }; verD.a = Math.atan2(e.clientY - verD.y, e.clientX - verD.x); }); ot.addEventListener('pointermove', e => { if (!verD) return; const a = Math.atan2(e.clientY - verD.y, e.clientX - verD.x); let d = a - verD.a; d = Math.atan2(Math.sin(d), Math.cos(d)); verA += d; const t = performance.now(); verV = Math.max(-9, Math.min(9, d / Math.max(.008, (t - verD.t) / 1000))); verD.a = a; verD.t = t; }); for (const t of ['pointerup', 'pointercancel']) ot.addEventListener(t, () => { verD = null; });
+  // ---------- acervo
+  function acervo() {
+    const g = aba.acervo, ids = F.porTema[g], n = ids.filter(i => D.acervo[i]).length, ok = M.acervoCompleto(D, g, F); abas('eAbas', g, i => M.acervoCompleto(D, i, F) && D.moldura !== i + 1 && false); $('eResumo').textContent = `${M.nAcervo(D)} de ${F.ids.length} objetos`;
+    $('eMold').innerHTML = ok ? `<button class="bt mini${D.moldura === g + 1 ? '' : ' pri'}" data-m="${D.moldura === g + 1 ? 0 : g + 1}">${D.moldura === g + 1 ? 'Voltar à moldura de nogueira' : `Usar a moldura: ${M.NOMES_MOLDURA[g + 1].toLowerCase()}`}</button>` : `<p class="vazio">${n} de ${ids.length}. Completo, dá a moldura de ${M.NOMES_MOLDURA[g + 1].toLowerCase()}.</p>`;
+    $('eLista').innerHTML = ids.map(id => D.acervo[id] ? `<button class="ac" data-o="${id}">${foto(id, 64)}<span>${obj(id).nome}</span></button>` : `<div class="ac falta">${foto(id, 64, 2)}<span>?</span></div>`).join('');
+  }
+  // ---------- marcos
+  function marcos() { $('rResumo').textContent = `${D.dicas} ${D.dicas === 1 ? 'dica guardada' : 'dicas guardadas'}`; $('rLista').innerHTML = M.MARCOS.map(m => { const x = M.marco(D, m); return `<div class="mc${x.fim ? ' fim' : ''}"><div><b>${m.nome}</b><small>${m.txt}: ${Math.min(x.v, x.alvo)} de ${x.alvo}</small><div class="prog"><i style="width:${Math.min(100, x.v / x.alvo * 100)}%"></i></div></div>${x.fim ? '<span class="pts3">★★★</span>' : x.pronto ? `<button class="bt mini pri" data-mc="${m.id}">+${M.PREMIO[x.recebido]} ${M.PREMIO[x.recebido] > 1 ? 'dicas' : 'dica'}</button>` : `<span class="pts3">${'★'.repeat(x.recebido)}<s>${'★'.repeat(3 - x.recebido)}</s></span>`}</div>`; }).join(''); }
+  // ---------- avisos
+  function aviso(t, x, img) { $('vsTit').textContent = t; $('vsTxt').innerHTML = x; $('vsImg').hidden = !img; if (img) $('vsImg').src = img; $('aviso').classList.add('on'); aoFechar = null; }
+  function vitoria(n, p, e, r) {
+    const dia = n >= 1000; $('vTit').textContent = dia ? 'Mesa do dia feita!' : n === N.TOTAL ? 'Achou tudo na casa!' : p.erros === 0 && e === 3 ? 'Impecável!' : 'Achou tudo!'; $('vEst').innerHTML = EST.repeat(3); [...$('vEst').children].forEach((s, i) => { if (i < e) setTimeout(() => { s.classList.add('on'); Som.estrela(i); vibra(12); }, 250 + i * 260); });
+    $('vTxt').innerHTML = dia ? `<b>${p.pontos}</b> pontos · melhor de hoje ${D.diaria[r.dia]}<br>${r.dicas ? `Você ganhou <b>${r.dicas} ${r.dicas > 1 ? 'dicas' : 'dica'}</b>${r.semana ? ': sete mesas completas!' : ''}` : 'O prêmio de hoje já era seu'}` : `<b>${p.pontos}</b> pontos${r.novoRec ? ' · recorde novo' : ` · recorde ${D.recordes[n]}`}<br>Sobraram ${Math.round(p.tempo)} s · maior combo ${p.maiorCombo}${e < 3 ? `<br>3 estrelas: sobrar ${Math.ceil(p.F.tempo * .4)} s` : ''}`;
+    let h = ''; if (dia) h += `<div class="sem">${[0, 1, 2, 3, 4, 5, 6].map(i => `<i class="${i < ((M.nDiaria(D) - 1) % 7) + 1 ? 'on' : ''}"></i>`).join('')}<span>mesa ${((M.nDiaria(D) - 1) % 7) + 1} de 7</span></div>`;
+    else { const l = M.LEMBRANCAS[n - 1]; h += r.lembNova ? `<button class="lem" data-l="${n}">${foto(l.obj, 54)}<span><b>${esc(l.titulo)}</b><br>Lembrança nova: toque para ler</span></button>` : `<div class="lem${D.lembrancas[n] ? '' : ' falta'}">${MED}<span>${D.lembrancas[n] ? 'A lembrança desta fase já é sua' : 'A lembrança continua escondida'}</span></div>`; }
+    if (r.cartas && r.cartas.length) h += `<button class="lem" data-c="${r.cartas[0]}">${CARTA}<span><b>Carta nova:</b> ${esc(M.CARTAS[r.cartas[0]][0])}</span></button>`; if (r.novos.length) h += `<div class="nv">${r.novos.slice(0, 6).map(i => foto(i, 40)).join('')}<span>${r.novos.length} ${r.novos.length > 1 ? 'objetos novos' : 'objeto novo'} no acervo</span></div>`; $('vAch').innerHTML = h;
+    $('vCasa').hidden = dia || !M.comodosComObra(D).length; $('vProx').textContent = dia ? 'Voltar' : n === N.TOTAL ? 'Ver as fases' : 'Próxima'; trocar('vitoria');
   }
   function derrota(n, p, f) { $('dTit').textContent = f <= 2 ? 'Foi por pouco!' : 'O tempo acabou'; $('dTxt').innerHTML = `Faltou achar <b>${f}</b> de ${p.meta}.<br>O que faltava ficou marcado na mesa.`; trocar('derrota'); }
+  // ---------- botões
   const b = (id, f) => $(id).addEventListener('click', () => { Som.iniciar(); Som.botao(); f(); });
-  b('bJogar', () => Jogo.comecar(Math.min(N.TOTAL, D.fase))); b('bMapa', () => abrir('mapa')); b('bAjustes', () => abrir('ajustes')); b('bPausa', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); }); b('bVolta', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); });
-  const continua = () => { fechar(); Jogo.pausar(false); Jogo.refazer(); }; b('pContinua', continua); b('pRecomeca', () => Jogo.comecar(Jogo.n)); b('pFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); }); b('pAjustes', () => abrir('ajustes')); b('pSair', () => { location.href = '../../index.html'; });
-  b('vProx', async () => { const n = Jogo.n; await Ganchos.entreFases(n); if (n >= N.TOTAL) { pilha = ['abertura']; abrir('mapa'); } else Jogo.comecar(n + 1); }); b('vDeNovo', () => Jogo.comecar(Jogo.n)); b('vFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); }); b('dDeNovo', () => Jogo.comecar(Jogo.n)); b('dFases', () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); });
+  b('bJogar', () => Jogo.comecar(Math.min(N.TOTAL, D.fase))); b('bMapa', () => abrir('mapa')); b('bAjustes', () => abrir('ajustes')); b('bCasa', () => { aba.casa = M.comodosComObra(D)[0] ?? M.daVez(D); abrir('casa'); }); b('hCasa', () => { aba.casa = M.daVez(D); abrir('casa'); }); b('bAlbum', () => { const l = M.LEMBRANCAS.find(x => D.lembrancas[x.n] && !D.lidas[x.n]), c = M.cartasNovas(D)[0]; aba.album = l ? l.g : c !== undefined && c < 5 ? c : Math.min(4, Math.floor((Math.min(50, D.fase) - 1) / 10)); abrir('album'); }); b('bAcervo', () => { aba.acervo = Math.min(4, Math.floor((Math.min(50, D.fase) - 1) / 10)); abrir('acervo'); }); b('bMarcos', () => abrir('marcos')); b('bDia', () => Jogo.comecarDia()); b('bPausa', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); }); b('bVolta', () => { if (Jogo.P && !Jogo.P.fim) abrir('pausa'); });
+  const continua = () => { fechar(); Jogo.pausar(false); Jogo.refazer(); }; b('pContinua', continua); b('pRecomeca', () => Jogo.comecar(Jogo.n)); b('pFases', () => Jogo.n >= 1000 ? inicio() : daBase('mapa')); b('pAjustes', () => abrir('ajustes')); b('pSair', inicio);
+  b('vProx', async () => { const n = Jogo.n; if (n >= 1000) return inicio(); await Ganchos.entreFases(n); if (n >= N.TOTAL) daBase('mapa'); else Jogo.comecar(n + 1); }); b('vDeNovo', () => Jogo.comecar(Jogo.n)); b('vFases', () => inicio()); b('vCasa', () => { aba.casa = M.comodosComObra(D)[0] ?? M.daVez(D); daBase('casa'); }); b('dDeNovo', () => Jogo.comecar(Jogo.n)); b('dFases', inicio);
   b('bSom', () => { D.op.som = !D.op.som; Progresso.salvar(); Som.volume(); somIcone(); if (D.op.som) Som.botao(); }); b('bDica', () => Jogo.pedirDica());
   document.querySelectorAll('[data-volta]').forEach(x => x.addEventListener('click', () => { Som.botao(); voltar(); })); document.querySelectorAll('.op').forEach(x => x.addEventListener('click', () => { D.op[x.dataset.op] = !D.op[x.dataset.op]; Progresso.salvar(); Som.iniciar(); Som.volume(); ajustes(); somIcone(); Som.botao(); if (x.dataset.op === 'vibra') vibra(30); }));
-  $('mLista').addEventListener('click', e => { const q = e.target.closest('.fs'); if (q && !q.disabled) { Som.iniciar(); Som.botao(); Jogo.comecar(+q.dataset.f); } });
-  addEventListener('keydown', e => { if (e.key === 'Escape') { if (Jogo.aberto === 'pausa') continua(); else if (!Jogo.aberto && Jogo.P && !Jogo.P.fim) abrir('pausa'); else if (Jogo.aberto && Jogo.aberto !== 'abertura' && Jogo.aberto !== 'vitoria' && Jogo.aberto !== 'derrota') voltar(); } if ((e.key === 'd' || e.key === 'D') && !Jogo.aberto) Jogo.pedirDica(); });
+  document.querySelectorAll('[data-fecha]').forEach(x => x.addEventListener('click', () => { Som.botao(); soltas(); const f = aoFechar; aoFechar = null; if (f) f(); if (Jogo.aberto === 'abertura') casaInicio(); }));
+  for (const [id, k] of [['cAbas', 'casa'], ['aAbas', 'album'], ['eAbas', 'acervo']]) $(id).addEventListener('click', e => { const q = e.target.closest('.aba'); if (!q) return; Som.botao(); aba[k] = +q.dataset.i; ({ casa, album, acervo })[k](); });
+  const del = (id, sel, f) => $(id).addEventListener('click', e => { const q = e.target.closest(sel); if (q && !q.disabled) { Som.iniciar(); f(q); } });
+  del('mLista', '.fs', q => { Som.botao(); Jogo.comecar(+q.dataset.f); }); del('cLista', '[data-obra]', obra); del('aLista', '[data-l]', q => lembranca(+q.dataset.l)); del('aLista', '[data-f]', q => { Som.botao(); Jogo.comecar(+q.dataset.f); }); del('aCartas', '[data-c]', q => carta(+q.dataset.c)); del('vAch', '[data-l]', q => lembranca(+q.dataset.l)); del('vAch', '[data-c]', q => carta(+q.dataset.c)); del('eLista', '[data-o]', q => { const o = obj(q.dataset.o); Som.toque(o.som, 0); ver(o.i, o.nome, `Achado ${D.acervo[o.id]} ${D.acervo[o.id] > 1 ? 'vezes' : 'vez'}`, N.LUGARES[o.tema]); }); del('eMold', '[data-m]', q => { D.moldura = +q.dataset.m; Progresso.salvar(); Som.encaixa(2); $('moldura').dataset.m = D.moldura; acervo(); }); del('rLista', '[data-mc]', q => { const r = M.receber(D, q.dataset.mc); if (r) { Progresso.salvar(); Som.estrela(r); vibra(15); Eventos.emite('marco', { id: q.dataset.mc, dicas: r }); marcos(); } });
+  // levar o progresso para outro aparelho
+  b('bCodigo', () => { $('xTxt').value = Progresso.codigo(); $('xMsg').textContent = 'Copie este código e cole no outro aparelho.'; $('codigo').classList.add('on'); aoFechar = null; }); b('xCopia', async () => { const t = $('xTxt'); t.value = Progresso.codigo(); try { await navigator.clipboard.writeText(t.value); $('xMsg').textContent = 'Copiado.'; } catch (e) { t.select(); $('xMsg').textContent = 'Selecionado: copie pelo menu do aparelho.'; } }); b('xCola', async () => { const t = $('xTxt'); let v = t.value; if (v === Progresso.codigo()) try { v = await navigator.clipboard.readText(); } catch (e) { /* sem permissão: usa o que estiver no campo */ } const ok = Progresso.importar(v); $('xMsg').textContent = ok ? 'Pronto: os dois progressos foram juntados.' : 'Este código não serve. Confira se copiou inteiro.'; if (ok) Som.lembranca(); });
+  addEventListener('keydown', e => { if (e.target.tagName === 'TEXTAREA') return; if (e.key === 'Escape') { const s = document.querySelector('.solta.on [data-fecha]'); if (s) return s.click(); if (Jogo.aberto === 'pausa') continua(); else if (!Jogo.aberto && Jogo.P && !Jogo.P.fim) abrir('pausa'); else if (Jogo.aberto && !['abertura', 'vitoria', 'derrota'].includes(Jogo.aberto)) voltar(); } if ((e.key === 'd' || e.key === 'D') && !Jogo.aberto) Jogo.pedirDica(); });
   // o navegador só libera som depois de um toque de verdade
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) document.addEventListener(t, () => Som.iniciar(), { passive: true, capture: true });
-  return { abrir, fechar, trocar, voltar, inicio, hud, vitoria, derrota, somIcone };
+  return { abrir, fechar, trocar, voltar, inicio, hud, vitoria, derrota, somIcone, aviso, lembranca, carta, get aba() { return aba; } };
 })();
 
 // ============================================================ ABRIR
 (async () => {
-  try { await Tela.carregar(); Telas.somIcone(); Telas.trocar('abertura'); await Jogo.vitrine(); $('carga').remove(); if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__keepsake = { Nucleo, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos }; }
+  try { await Tela.carregar(); Telas.somIcone(); Telas.trocar('abertura'); await Jogo.vitrine(); $('carga').remove(); if (Progresso.origem === 'v1' && Progresso.d.soma.vitorias) Telas.aviso('A casa acordou', `Suas estrelas agora restauram os cômodos: você tem <b>${Meta.livres(Progresso.d)} ★</b>.<br>E cada lembrança que você já achou tem uma história no álbum.`, 'arte/c0-0.webp'); if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__keepsake = { Nucleo, Meta, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos }; }
   catch (e) { console.error(e); $('carga').textContent = e.message === 'sem-webgl' ? 'Este navegador não consegue desenhar o jogo. Atualize o navegador e tente de novo.' : 'Não deu para abrir as imagens do jogo. Confira a internet e recarregue a página.'; }
 })();
 </script>
