@@ -282,3 +282,13 @@ O roteiro completo das etapas está em `PROMPT.md`.
   níveis inteiros no navegador, em pé e deitado, 8 aberturas (0 texturas presas), offline com servidor desligado, máximo de 266 mil triângulos no
   modo celular. Não testado num celular de verdade; sons medidos, não ouvidos. Faltam: 6 chefes, níveis 5 a 20, melhorias, infinito, ponte que
   desaba, adrenalina e veteranos.
+- **Soldier Survivor, 8 níveis e meio-chefes (24/11/2026)**, pedido do dono depois de jogar: 4 níveis novos (Maré, Porto, Siderúrgica, Última Ponte) com
+  4 climas e chefes novos (Afogada, Guindaste, Fornalha, Mãe da Ponte em 3 etapas); meio-chefe com prêmio na hora nos 8 níveis (4 corpos, 8 figuras);
+  chefe final com escolta e reforços (escudeiro e cuspidor novos); uma novidade por nível (gaiolas, pista que estreita e caixas de arma, portões que
+  correm e adrenalina, carros e portões triplos, laterais, carros que caem, jatos de fogo e hidrantes, ponte que desaba); veteranos com nome.
+  Dificuldade crescente (`forca` e `aviso` por nível em `dados/balanco.js`). Sons de tiro, portões, troca de arma e tropa refeitos por conta física em
+  `audio/realista.js` (camadas, ferrolho, cápsula, cama de rajada, eco da ponte por convolução); sons dos bonecos idênticos aos anteriores (conferido
+  amostra por amostra). `personagens.bin` com 2,4 MB. Cache `jogos-offline-v44`.
+  Testado: robô nos 8 níveis (bom vence quase sempre, médio cerca de metade a dois terços nos altos, parado nunca), os 8 níveis inteiros no navegador em
+  pé e deitado, modo celular até cerca de 250 mil triângulos, 8 aberturas (0 texturas presas), offline com servidor desligado, áudio sem estourar
+  (pico .96). Não testado num celular de verdade; sons medidos, não ouvidos. Faltam: níveis 9 a 20, chefes Para-raios e Siamês, melhorias e modo infinito.

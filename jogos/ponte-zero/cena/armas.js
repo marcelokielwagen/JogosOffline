@@ -51,6 +51,10 @@ const lancaChamas = () => {
 };
 // na mesma ordem de ARMAS em dados/balanco.js
 export const MODELOS = [pistola, submetralhadora, fuzil, metralhadora, bazuca, lancaChamas];
+// acessórios dos zumbis com papel: porta de carro como escudo e bolsa de gosma
+const escudo = () => new Arma().caixa(0, .86, .52, .86, .5, .07, T.azul, { osso: 2, r: .03 }).caixa(0, 1.2, .5, .72, .28, .05, T.visor, { osso: 2, r: .02 }).caixa(0, 1.36, .5, .8, .07, .07, T.azul, { osso: 2, r: .02 }).caixa(-.39, 1.22, .5, .07, .32, .07, T.azul, { osso: 2, r: .02 }).caixa(.39, 1.22, .5, .07, .32, .07, T.azul, { osso: 2, r: .02 }).caixa(0, .66, .54, .88, .09, .09, T.preto, { osso: 2, r: .02 }).caixa(.24, .95, .57, .2, .05, .04, T.branco, { osso: 2, r: .015 }).caixa(0, .95, .42, .05, .3, .16, T.metal, { osso: 2 }).pronta();
+const gosma = () => new Arma().bola(0, .98, -.28, .24, T.brilho, { sy: 1.2, osso: 2 }).tubo(0, 1.22, 1.3, -.28, .1, T.metal, .1, { osso: 2 }).tubo(0, .66, .74, -.28, .14, T.metal, .18, { osso: 2 }).caixa(0, 1.02, -.1, .4, .07, .34, T.preto, { osso: 2 }).bola(0, 1.22, .18, .1, T.metal, { osso: 3 }).bola(0, 1.22, .25, .075, T.brilho, { osso: 3 }).pronta();
+export const ACESSORIOS_Z = [escudo, gosma];
 // ponta do cano (z, y) no sistema da arma, para o brilho e os projéteis
 export const BOCA = { pistola: [.26, .04], curta: [.44, .035], longa: [.8, .045], quadril: [.68, .02], ombro: [.72, 0], jato: [.6, .02] };
 

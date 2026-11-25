@@ -1,16 +1,18 @@
-// Fábrica de sons: contas puras que devolvem as ondas prontas (nenhum arquivo de áudio).
+// Fábrica de sons: contas puras que devolvem as ondas prontas (nenhum arquivo de áudio). Tiros, portões, armas e tropa ficam em realista.js.
 // Roda numa tarefa à parte (Worker) para não travar o jogo, e também no Node, para medir volume e duração.
+import { REAIS, acabar, ecoPonte } from './realista.js';
 export const TAXA = 44100, TAXA_MUSICA = 32000;
-const PI2 = Math.PI * 2, sat = (x, k = 1) => Math.tanh(x * k) / Math.tanh(k), lim = (v, a, b) => v < a ? a : v > b ? b : v;
+const PI2 = Math.PI * 2, lim = (v, a, b) => v < a ? a : v > b ? b : v;
+export const sat = (x, k = 1) => Math.tanh(x * k) / Math.tanh(k);
 function dado(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-let SR = TAXA, rnd = dado(1);
-const novo = seg => new Float32Array(Math.ceil(seg * SR)), branco = () => rnd() * 2 - 1;
-const gerar = (seg, fn) => { const o = novo(seg); for (let i = 0; i < o.length; i++) o[i] = fn(i / SR, i); return o; };
+export let SR = TAXA, rnd = dado(1);
+export const novo = seg => new Float32Array(Math.ceil(seg * SR)), branco = () => rnd() * 2 - 1;
+export const gerar = (seg, fn) => { const o = novo(seg); for (let i = 0; i < o.length; i++) o[i] = fn(i / SR, i); return o; };
 // envoltórias
-const cai = (t, tau, at = .001) => t < 0 ? 0 : (1 - Math.exp(-t / at)) * Math.exp(-t / tau);
-const sobeDesce = (t, dur, a, r) => t < 0 || t > dur ? 0 : Math.min(1, t / a, (dur - t) / r);
+export const cai = (t, tau, at = .001) => t < 0 ? 0 : (1 - Math.exp(-t / at)) * Math.exp(-t / tau);
+export const sobeDesce = (t, dur, a, r) => t < 0 || t > dur ? 0 : Math.min(1, t / a, (dur - t) / r);
 // filtro de 2 polos com frequência que pode mudar no tempo. tipo: lp, hp, bp
-function filtro(x, tipo, freq, q = .7) {
+export function filtro(x, tipo, freq, q = .7) {
   const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, b0, b1, b2, a1, a2; const f = typeof freq === 'function' ? freq : () => freq;
   for (let i = 0; i < x.length; i++) {
     if (i % 24 === 0) { const w = PI2 * lim(f(i / SR), 15, SR * .46) / SR, s = Math.sin(w), c = Math.cos(w), al = s / (2 * q), a0 = 1 + al; if (tipo === 'lp') { b0 = b2 = (1 - c) / 2; b1 = 1 - c; } else if (tipo === 'hp') { b0 = b2 = (1 + c) / 2; b1 = -1 - c; } else { b0 = al; b1 = 0; b2 = -al; } b0 /= a0; b1 /= a0; b2 /= a0; a1 = -2 * c / a0; a2 = (1 - al) / a0; }
@@ -18,11 +20,11 @@ function filtro(x, tipo, freq, q = .7) {
   }
   return o;
 }
-const somar = (o, x, ini = 0, g = 1) => { const k = Math.round(ini * SR); for (let i = 0; i < x.length && i + k < o.length; i++) if (i + k >= 0) o[i + k] += x[i] * g; return o; };
-const mapa = (x, fn) => { for (let i = 0; i < x.length; i++) x[i] = fn(x[i], i / SR); return x; };
+export const somar = (o, x, ini = 0, g = 1) => { const k = Math.round(ini * SR); for (let i = 0; i < x.length && i + k < o.length; i++) if (i + k >= 0) o[i + k] += x[i] * g; return o; };
+export const mapa = (x, fn) => { for (let i = 0; i < x.length; i++) x[i] = fn(x[i], i / SR); return x; };
 // seno que escorrega de f0 a f1
-const escorrega = (seg, f0, f1, tau, amp) => { let p = 0; return gerar(seg, t => { p += PI2 * (f1 + (f0 - f1) * Math.exp(-t / tau)) / SR; return Math.sin(p) * amp(t); }); };
-const sopro = (seg, amp) => gerar(seg, t => branco() * amp(t));
+export const escorrega = (seg, f0, f1, tau, amp) => { let p = 0; return gerar(seg, t => { p += PI2 * (f1 + (f0 - f1) * Math.exp(-t / tau)) / SR; return Math.sin(p) * amp(t); }); };
+export const sopro = (seg, amp) => gerar(seg, t => branco() * amp(t));
 // sala: ecos curtos que se misturam
 function sala(x, seg, tam = 1, abafa = .45) {
   const o = novo(x.length / SR + seg), g = t => Math.pow(.001, t / seg);
@@ -46,24 +48,7 @@ function voz(seg, f, vogal, { amp, rouco = .2, ar = .15, esc = 1, q = 7, rosna =
   const o = novo(seg); for (const [fr, g] of VOGAL[vogal]) somar(o, filtro(fonte, 'bp', fr * esc, q), 0, g); somar(o, filtro(fonte, 'lp', 260 * esc), 0, .14); return mapa(filtro(o, 'hp', 75), (v, t) => v * amp(t));
 }
 
-// ---------- armas ----------
-function tiro({ seg, f0, f1, tau, corpo, dCorpo, estalo, cauda, tCauda, brilho, sub = 1 }) {
-  const o = novo(seg);
-  somar(o, escorrega(seg, f0, f1, tau, t => cai(t, dCorpo * 1.1)), 0, 1.15 * sub);                              // soco grave
-  somar(o, filtro(sopro(seg, t => cai(t, dCorpo)), 'lp', t => corpo * (.25 + .75 * Math.exp(-t / dCorpo))), 0, 1.25);   // corpo
-  somar(o, filtro(sopro(seg, t => cai(t, .0035, .0002)), 'hp', estalo), 0, 1.1);                                 // estalo
-  somar(o, filtro(sopro(seg, t => cai(t, .018)), 'bp', brilho, 1.4), 0, .9);
-  somar(o, filtro(sopro(seg, t => cai(t - .012, tCauda, .006)), 'bp', t => 900 * Math.exp(-t * 4) + 260, .6), 0, cauda); // cauda
-  return mapa(o, v => sat(v, 2.1));
-}
-const ARMAS = {
-  pistola: () => tiro({ seg: .34, f0: 230 + rnd() * 20, f1: 62, tau: .02, corpo: 4200, dCorpo: .042, estalo: 3200, cauda: .5, tCauda: .075, brilho: 2100 }),
-  sub: () => tiro({ seg: .2, f0: 290 + rnd() * 25, f1: 95, tau: .013, corpo: 5600, dCorpo: .024, estalo: 4200, cauda: .35, tCauda: .04, brilho: 3000, sub: .8 }),
-  fuzil: () => tiro({ seg: .42, f0: 190 + rnd() * 15, f1: 48, tau: .024, corpo: 3600, dCorpo: .05, estalo: 2600, cauda: .7, tCauda: .1, brilho: 1600, sub: 1.25 }),
-};
-function metralhadora() { const passo = 1 / 15, n = 12, o = novo(passo * n + .2); for (let k = 0; k < n; k++) somar(o, tiro({ seg: .16, f0: 170 + rnd() * 30, f1: 60, tau: .014, corpo: 4600, dCorpo: .02, estalo: 3000, cauda: .4, tCauda: .035, brilho: 2300, sub: 1.1 }), k * passo, .8 + rnd() * .2); somar(o, filtro(gerar(passo * n + .2, t => ((t * 210) % 1 - .5) * .35 + Math.sin(PI2 * 420 * t) * .12), 'bp', 900, .8), 0, .5); const fim = novo(passo * n); for (let i = 0; i < o.length; i++) fim[i % fim.length] += o[i]; return mapa(fim, v => sat(v, 1.6)); }
-function bazuca() { const o = novo(.95); somar(o, escorrega(.6, 150, 36, .05, t => cai(t, .13)), 0, 1.4); somar(o, filtro(sopro(.2, t => cai(t, .03)), 'lp', 2600), 0, 1.3); somar(o, filtro(sopro(.95, t => cai(t - .03, .26, .03)), 'bp', t => 500 + 2600 * Math.min(1, t * 3), 1.1), 0, 1.3); return comSala(mapa(o, v => sat(v, 1.7)), .5, .3); }
-function chamas() { const n = 2.4, base = filtro(sopro(n, t => .75 + .25 * Math.sin(PI2 * 5.1 * t + 2 * Math.sin(PI2 * 1.7 * t))), 'lp', 520, .6), o = novo(n); somar(o, base, 0, 1.6); somar(o, filtro(sopro(n, t => .5 + .5 * Math.sin(PI2 * 9 * t + 3 * Math.sin(PI2 * 2.3 * t))), 'bp', 1400, .8), 0, .55); for (let k = 0; k < 46; k++) somar(o, filtro(sopro(.03, t => cai(t, .006, .0004)), 'bp', 1800 + rnd() * 2600, 2), rnd() * (n - .05), .25 + rnd() * .5); return laco(mapa(o, v => sat(v, 1.2)), .25, .8); }
+// ---------- explosões ----------
 function explosao(g = 1) {
   const n = 1.5 + .5 * g, o = novo(n);
   somar(o, escorrega(1.1, 105, 27 / g ** .3, .11, t => cai(t, .3 * g)), 0, 1.15); somar(o, filtro(sopro(.09, t => cai(t, .016, .0003)), 'hp', 1500), 0, 1);
@@ -87,13 +72,6 @@ const sino = (seg, f, tau, idx = 2.2, r = 2.01) => gerar(seg, t => Math.sin(PI2 
 const midi = n => 440 * 2 ** ((n - 69) / 12);
 const arpejo = (notas, passo, tau, extra = .5, idx) => { const o = novo(notas.length * passo + extra); notas.forEach((n, i) => somar(o, sino(extra + .2, midi(n), tau, idx), i * passo, .6 + i * .06)); return o; };
 const varre = (seg, f0, f1, q = 1.2) => filtro(sopro(seg, t => Math.sin(Math.PI * Math.min(1, t / seg)) ** 2), 'bp', t => f0 * (f1 / f0) ** (t / seg), q);
-const portaoBom = () => { const o = novo(.95); somar(o, varre(.4, 500, 5200), 0, .9); somar(o, arpejo([74, 78, 81, 86], .05, .2, .5), .03, .7); somar(o, escorrega(.3, 120, 60, .05, t => cai(t, .1)), 0, .8); return comSala(o, .4, .25); };
-const portaoRuim = () => { const o = novo(.7); [49, 48, 43].forEach((n, i) => somar(o, mapa(gerar(.3, t => ((t * midi(n)) % 1 - .5) + ((t * midi(n) * 1.012) % 1 - .5)), (v, t) => v * cai(t, .12, .004)), i * .11, .6)); return filtro(mapa(o, v => sat(v, 2)), 'lp', 1500); };
-const engatilha = () => { const o = novo(.5); for (const [t0, f] of [[0, 1500], [.07, 900], [.17, 2100]]) { somar(o, filtro(sopro(.06, t => cai(t, .007, .0004)), 'bp', f, 1.6), t0, 1.6); somar(o, metal(.16, f * .6, .03), t0, .7); } somar(o, escorrega(.12, 160, 90, .02, t => cai(t, .03)), .17, .8); return o; };
-const armaNova = () => { const o = novo(1.3); somar(o, engatilha(), 0, .9); [50, 57, 62, 66].forEach(n => somar(o, filtro(gerar(1, t => ((t * midi(n)) % 1 - .5) * cai(t, .4, .01)), 'lp', t => 600 + 3200 * Math.exp(-t * 3)), .2, .4)); somar(o, arpejo([74, 78, 81, 86], .06, .25, .4), .2, .35); return comSala(mapa(o, v => sat(v, 1.2)), .5, .25); };
-const reforco = () => { const o = novo(.9); somar(o, filtro(sopro(.12, t => cai(t, .02)), 'lp', 1800), 0, 1); somar(o, arpejo([67, 71, 74, 79, 83], .055, .2, .4, 1.4), .04, .8); return comSala(o, .35, .2); };
-const viraPortao = () => arpejo([69, 76, 81], .06, .18, .35, 1.6);
-
 // ---------- chefes ----------
 function rugido(f0, esc, n = 1.9, voc = 'a', fR = 27) { const o = novo(n); somar(o, voz(n, t => f0 * (1 + .5 * Math.sin(Math.PI * Math.min(1, t / n)) ** 2), voc, { amp: t => sobeDesce(t, n, .12, .7), rouco: .6, ar: .5, rosna: .75, fRosna: fR, esc, q: 5 }), 0, 1.6); somar(o, voz(n, t => f0 * .5 * (1 + .4 * Math.sin(Math.PI * Math.min(1, t / n))), 'o', { amp: t => sobeDesce(t, n, .1, .7), rouco: .5, rosna: .6, fRosna: fR * .7, esc: esc * .9, q: 5 }), 0, 1.1); somar(o, filtro(sopro(n, t => sobeDesce(t, n, .15, .8) * (.5 + .5 * Math.sin(PI2 * fR * t))), 'bp', 900 * esc, .6), 0, 1.3); return comSala(mapa(o, v => sat(v, 2.4)), 1.1, .35, 1.6); }
 function pancada(g = 1) { const n = 1.3, o = novo(n); somar(o, escorrega(n, 88, 26, .09, t => cai(t, .22 * g)), 0, 1.25); somar(o, filtro(sopro(.6, t => cai(t, .085)), 'lp', t => 3600 * Math.exp(-t * 7) + 240), 0, 2.4); for (let k = 0; k < 14; k++) somar(o, filtro(sopro(.07, t => cai(t, .014)), 'bp', 600 + rnd() * 2200, 1.6), .03 + rnd() * .55, .8 * rnd()); return comSala(mapa(o, v => sat(v, 1.8)), .8, .35, 1.4); }
@@ -113,14 +91,13 @@ const derrota = () => { const o = novo(3); for (const [t, d, ac] of [[0, .5, [50
 
 // volume de pico de cada som (o que manda no equilíbrio entre eles)
 export const SONS = {
-  pistola0: [ARMAS.pistola, .62], pistola1: [ARMAS.pistola, .62], pistola2: [ARMAS.pistola, .62], sub0: [ARMAS.sub, .52], sub1: [ARMAS.sub, .52], sub2: [ARMAS.sub, .52], fuzil0: [ARMAS.fuzil, .62], fuzil1: [ARMAS.fuzil, .62], fuzil2: [ARMAS.fuzil, .62],
-  metralhadora: [metralhadora, .6, 1], bazuca: [bazuca, .85], chamas: [chamas, .6, 1], explosao0: [() => explosao(1), .95], explosao1: [() => explosao(.85), .92], explosao2: [() => explosao(1.15), .95], barril: [barril, .97],
+  ...REAIS, explosao0: [() => explosao(1), .95], explosao1: [() => explosao(.85), .92], explosao2: [() => explosao(1.15), .95], barril: [barril, .97],
   gemido0: [() => gemido(0), .5], gemido1: [() => gemido(1), .5], gemido2: [() => gemido(2), .5], gemido3: [() => gemido(3), .5], morte0: [() => morteZ(0), .52], morte1: [() => morteZ(1), .52], morte2: [() => morteZ(2), .52], morte3: [() => morteZ(3), .52], acerto0: [() => acerto(0), .34], acerto1: [() => acerto(1), .34], acerto2: [() => acerto(2), .34], queda0: [() => queda(0), .6], queda1: [() => queda(1), .6],
-  passos: [passos, .16, 1], vento: [vento, .16, 1], portaoBom: [portaoBom, .62], portaoRuim: [portaoRuim, .6], armaNova: [armaNova, .68], reforco: [reforco, .62], virou: [viraPortao, .5],
-  rugidoCancela: [() => rugido(74, .82), .9], rugidoOperario: [() => rugido(66, .74, 1.9, 'o', 22), .9], rugidoSirene: [() => rugido(150, 1.15, 1.8, 'e', 38), .85], rugidoCarcaca: [() => rugido(54, .66, 2.1, 'ar', 19), .92],
+  passos: [passos, .16, 1], vento: [vento, .16, 1],
+  rugidoCancela: [() => rugido(74, .82), .9], rugidoOperario: [() => rugido(66, .74, 1.9, 'o', 22), .9], rugidoSirene: [() => rugido(150, 1.15, 1.8, 'e', 38), .85], rugidoCarcaca: [() => rugido(54, .66, 2.1, 'ar', 19), .92], rugidoAfogada: [() => rugido(112, .98, 2, 'o', 31), .88], rugidoGuindaste: [() => rugido(60, .7, 2, 'a', 34), .92], rugidoFornalha: [() => rugido(50, .62, 2.1, 'o', 24), .92], rugidoMae: [() => rugido(88, .86, 2.4, 'a', 21), .95],
   pancada: [() => pancada(1), .97], varrida: [varrida, .92], placa: [placa, .9], pedra: [pedra, .75], onda: [onda, .8], grito: [grito, .66], pisada: [pisada, .6], aviso: [aviso, .4], morteChefe: [() => morteChefe(80), .92], vitoria: [vitoria, .7], derrota: [derrota, .66],
 };
-export function fazerSom(nome) { SR = TAXA; rnd = dado([...nome].reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7)); const [fn, pico, laco] = SONS[nome], x = encorpa(presenca(fn(), .55, .95)); return laco ? (() => { let m = 0; for (const v of x) m = Math.max(m, Math.abs(v)); for (let i = 0; i < x.length; i++) x[i] *= pico / m; return x; })() : fechar(x, pico); }
+export function fazerSom(nome) { SR = TAXA; rnd = dado([...nome].reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7)); const [fn, pico, laco, par, k] = SONS[nome]; if (par) { const { E, D } = fn(); return [acabar(E, pico, laco, k), acabar(D, pico, laco, k)]; } if (REAIS[nome]) return acabar(fn(), pico, laco, k); const x = encorpa(presenca(fn(), .55, .95)); return laco ? (() => { let m = 0; for (const v of x) m = Math.max(m, Math.abs(v)); for (let i = 0; i < x.length; i++) x[i] *= pico / m; return x; })() : fechar(x, pico); }
 
 // ---------- música ----------
 // Duas trilhas originais de ação em laço. Cada instrumento é tocado nota a nota em dois canais.
@@ -165,11 +142,12 @@ function musicaChefe() {
   for (const b of [4, 8, 12]) for (const [k, n, d] of MEL) { m.por(metais(dur * d * .96 + .05, n + (b === 12 ? 12 : 0), .9), b * 16 + k, b === 12 ? .34 : .4, -.15); if (b >= 8) m.por(cordas(dur * d, n + 12), b * 16 + k, .24, .35); }
   return mestre(m);
 }
+export const fazerEco = () => { SR = TAXA; rnd = dado(77); return ecoPonte(); };
 export const MUSICAS = { acao: musicaAcao, chefe: musicaChefe };
 
 // dentro do Worker: fabrica e devolve um a um
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) self.onmessage = () => {
-  for (const n in SONS) { const x = fazerSom(n); self.postMessage({ som: n, x }, [x.buffer]); }
+  { const c = fazerEco(); self.postMessage({ eco: c }, c.map(x => x.buffer)); } for (const n in SONS) { const x = [fazerSom(n)].flat(); self.postMessage({ som: n, x }, x.map(c => c.buffer)); }
   for (const n in MUSICAS) { const { E, D, seg } = MUSICAS[n](); self.postMessage({ musica: n, E, D, seg }, [E.buffer, D.buffer]); }
   self.postMessage({ fim: true });
 };

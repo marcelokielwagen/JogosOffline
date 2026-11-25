@@ -65,7 +65,7 @@ const CORES = /* glsl */`
   float s1 = fract(vAn.y * 13.17), s2 = fract(vAn.y * 37.71), s3 = fract(vAn.y * 91.3);
   int mt = int(vMat + .5); vec3 c = uPal[mt]; int va = int(vAn.w + .05); float luz = 0.;
   #if TIPO == 0
-    vec3 K = va == 1 ? vec3(.9, .52, .03) : va == 2 ? vec3(.72, .05, .035) : va == 3 ? vec3(.2, .07, .33) : uPal[5];
+    vec3 K = va == 1 ? vec3(.9, .52, .03) : va == 2 ? vec3(.72, .05, .035) : va == 3 ? vec3(.2, .07, .33) : va == 4 ? vec3(.86, .83, .74) : uPal[5];
     if (mt == 0) c = s1 < .34 ? uPal[0] : s1 < .62 ? vec3(.62, .33, .17) : s1 < .84 ? vec3(.3, .14, .07) : vec3(.9, .56, .4);
     else if (mt == 6) c = s2 < .4 ? uPal[6] : s2 < .65 ? vec3(.02, .015, .02) : s2 < .85 ? vec3(.45, .2, .05) : vec3(.5, .1, .03);
     else if (mt == 5) { c = K; float fx = abs(vRep.x); c = mix(c, vec3(1., .93, .78), step(fx, .034) * step(1.2, vRep.y) * (1. - step(.0455, fx))); if (fx > .034 && fx < .046) c *= .55; }
@@ -75,8 +75,8 @@ const CORES = /* glsl */`
     else if (mt == 11 && va > 0) c = vec3(1., .93, .78);
   #elif TIPO == 1
     bool corre = va == 1, fogo = fract(vAn.w + .1) > .4;
-    if (mt == 0) { c = s1 < .4 ? vec3(.24, .46, .13) : s1 < .72 ? vec3(.13, .4, .24) : vec3(.38, .44, .1); if (corre) c = vec3(.55, .33, .1); c = mix(c, c * .72, step(.56, n1.r)); }
-    else if (mt == 1) { c = s2 < .22 ? vec3(.33, .1, .42) : s2 < .45 ? vec3(.5, .09, .16) : s2 < .68 ? vec3(.12, .17, .42) : s2 < .86 ? vec3(.5, .42, .28) : vec3(.07, .3, .34); if (corre) c = vec3(.62, .07, .04); if (s3 > .6 && !corre) c *= .62 + .38 * step(.5, fract(vRep.y * 9.)); }
+    if (mt == 0) { c = s1 < .4 ? vec3(.24, .46, .13) : s1 < .72 ? vec3(.13, .4, .24) : vec3(.38, .44, .1); if (corre) c = vec3(.55, .33, .1); if (va == 2) c = vec3(.5, .12, .5); if (va == 3) c = vec3(.1, .3, .5); c = mix(c, c * .72, step(.56, n1.r)); }
+    else if (mt == 1) { c = s2 < .22 ? vec3(.33, .1, .42) : s2 < .45 ? vec3(.5, .09, .16) : s2 < .68 ? vec3(.12, .17, .42) : s2 < .86 ? vec3(.5, .42, .28) : vec3(.07, .3, .34); if (corre) c = vec3(.62, .07, .04); if (va == 2) c = vec3(.5, .62, .04); if (va == 3) c = vec3(.1, .1, .22); if (s3 > .6 && !corre) c *= .62 + .38 * step(.5, fract(vRep.y * 9.)); }
     else if (mt == 2) c = s3 < .4 ? vec3(.07, .09, .2) : s3 < .7 ? vec3(.2, .13, .08) : vec3(.1, .08, .12);
     else if (mt == 6) c = s2 < .3 ? vec3(.02, .015, .02) : s2 < .6 ? vec3(.25, .1, .03) : s2 < .85 ? vec3(.42, .4, .4) : vec3(.5, .12, .02);
     else if (mt == 8) { c = vec3(1., .93, .4); luz = .25; }
@@ -156,7 +156,7 @@ export class Multidao {
   fechar() {
     const envia = (m, n) => { m.count = n; m.visible = n > 0; if (!n) return; for (const [at, t] of [[m.instanceMatrix, 16], [m.geometry.attributes.aAnim, 4]]) { at.clearUpdateRanges(); at.addUpdateRange(0, n * t); at.needsUpdate = true; } };
     this.malhas.forEach((m, i) => envia(m, this.n[i])); envia(this.sombra, this.ns);
-    for (const a of this.acessorios) { envia(a.m, a.n); if (a.b) { a.b.count = a.n; a.b.visible = a.n > 0; } }
+    for (const a of this.acessorios) { envia(a.m, a.n); if (a.b) { a.b.count = a.n; a.b.visible = a.n > 0 && a.n <= (this.maxBordaArma ?? 1e9); } }
     for (const b of this.bordas) { b.count = b.userData.base.count; b.visible = b.count > 0; }
   }
   dispose() {

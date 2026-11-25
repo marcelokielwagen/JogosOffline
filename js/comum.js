@@ -72,7 +72,7 @@ const JO = (() => {
       ['Caça-Palavras', [['Jogos completos', k && k.stats ? k.stats.v : 0], ['Melhor tempo', temposCaca.length ? relogio(Math.min(...temposCaca)) : '–']]],
       ['Dobro', [['Recorde de pontos', d && d.stats ? d.stats.melhor : 0], ['Maior peça', d && d.stats && d.stats.maior ? d.stats.maior : '–']]],
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
-      ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 4` : '0 de 4']]],
+      ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 8` : '0 de 8']]],
     ];
   }
   function preencherEstatisticas(cx) {

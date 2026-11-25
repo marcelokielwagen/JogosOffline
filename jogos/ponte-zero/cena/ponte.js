@@ -10,6 +10,10 @@ export const CLIMAS = {
   tarde: { alto: '#2f6fd0', meio: '#f58a5a', baixo: '#ffd07a', nuvem: '#fff0c8', nuvemS: '#e8736a', disco: '#fff6c0', tamDisco: .9965, nevoa: '#f7a766', asfalto: '#6a5a78', faixa: '#ffe9a8', agua: '#2f8fb0', predio: '#a8657a', aco: '#d9542f', conc: '#e8c9a6', chave: '#ffe2b0', forca: 3.2, ceu: '#b9d4ff', chao: '#b06a58', hemi: 1.55, cidade: '#c46a66' },
   manha: { alto: '#1f7fe0', meio: '#74c6f7', baixo: '#e9fbff', nuvem: '#ffffff', nuvemS: '#a8d4f0', disco: '#fffbe0', tamDisco: .9978, nevoa: '#bfe6f5', asfalto: '#5f6f86', faixa: '#fff3c0', agua: '#26b0c9', predio: '#7fa0b8', aco: '#f2a21d', conc: '#e6e2d4', chave: '#fff6dc', forca: 3.4, ceu: '#d4ecff', chao: '#8a9a80', hemi: 1.6, cidade: '#8fb6cc' },
   noite: { alto: '#1c1450', meio: '#5a2f9a', baixo: '#e0589a', nuvem: '#b46ad0', nuvemS: '#3d2478', disco: '#f5f0ff', tamDisco: .997, nevoa: '#7a3f98', asfalto: '#4c4580', faixa: '#ffe07a', agua: '#3a2f8c', predio: '#4a3a80', aco: '#8a3fc0', conc: '#b3a3d8', chave: '#dcd0ff', forca: 3.1, ceu: '#b49cff', chao: '#6a3f80', hemi: 1.7, cidade: '#5c3a92' },
+  mare: { alto: '#0f6f9a', meio: '#2fc4c0', baixo: '#f4ffd8', nuvem: '#f2fff4', nuvemS: '#5fc9c4', disco: '#ffffff', tamDisco: .9975, nevoa: '#7fdcd0', asfalto: '#3f6478', faixa: '#fff0a0', agua: '#12b39a', predio: '#4f9aa0', aco: '#2d7bd0', conc: '#cfeee2', chave: '#fffbe6', forca: 3.2, ceu: '#c8fff4', chao: '#4a8a80', hemi: 1.6, cidade: '#5fb4b4' },
+  aurora: { alto: '#5a3fc4', meio: '#ff7fb0', baixo: '#ffe3b0', nuvem: '#fff0f4', nuvemS: '#e87fc0', disco: '#fff4d0', tamDisco: .994, nevoa: '#ffb0b8', asfalto: '#6a5a88', faixa: '#fff0b8', agua: '#5f7fe0', predio: '#b87fb4', aco: '#1fa88a', conc: '#ffe0d4', chave: '#fff0e0', forca: 3.2, ceu: '#e4d0ff', chao: '#b87f8a', hemi: 1.6, cidade: '#c484c0' },
+  brasa: { alto: '#3a1030', meio: '#c4302a', baixo: '#ffb43a', nuvem: '#ff8a4a', nuvemS: '#7a1f30', disco: '#fff0a0', tamDisco: .9955, nevoa: '#e8703a', asfalto: '#5f4a86', faixa: '#ffd24a', agua: '#ff6a1f', predio: '#7a3a4a', aco: '#4a5a78', conc: '#d8b09a', chave: '#ffe0b8', forca: 3.2, ceu: '#e0c0ff', chao: '#8a4a5a', hemi: 1.65, cidade: '#8a2f34' },
+  eclipse: { alto: '#120a38', meio: '#4a1f8a', baixo: '#ff9a3a', nuvem: '#c45ab0', nuvemS: '#2f1460', disco: '#1a0a2e', tamDisco: .9935, nevoa: '#8a4a90', asfalto: '#4a3f70', faixa: '#ffe07a', agua: '#4a2fa0', predio: '#4f2f7a', aco: '#e8a21f', conc: '#c9b8e0', chave: '#ffe8d0', forca: 3.2, ceu: '#c4b0ff', chao: '#7a4a78', hemi: 1.7, cidade: '#6a2f78' },
   tempestade: { alto: '#0f3a4a', meio: '#2f8a80', baixo: '#c8f08a', nuvem: '#7cc8a0', nuvemS: '#1d4f58', disco: '#f0ffd0', tamDisco: .9985, nevoa: '#6fae92', asfalto: '#4f5f68', faixa: '#ffe680', agua: '#1f6f74', predio: '#4a7078', aco: '#c8452f', conc: '#bcc7b4', chave: '#eaffd8', forca: 3, ceu: '#b0e8d8', chao: '#5a6a4a', hemi: 1.65, cidade: '#4f8480' },
 };
 
@@ -205,9 +209,9 @@ export function criarCenario(cena, renderer, tx, ruido, qual) {
   return {
     // d = distância percorrida; a câmera está em z = -d
     atualizar(d, t, cam) {
-      const b = Math.floor((d - 24) / PERIODO) * PERIODO; trechos.forEach((g, i) => { g.position.z = -(b + i * PERIODO); });
+      const b = Math.floor((d - 24) / PERIODO) * PERIODO; trechos.forEach((g, i) => { g.position.z = -(b + i * PERIODO); g.visible = b + i * PERIODO < d + 228; });
       // só o trecho perto do pelotão faz sombra
-      trechos.forEach((g, i) => { const z0 = b + i * PERIODO, sim = ligado && z0 < d + 46 && z0 + PERIODO > d - 14; if (g.userData.s !== sim) { g.userData.s = sim; for (const m of g.children) if (m.material !== mAsf && m.material !== mVidro && !m.userData.borda) m.castShadow = sim; } });
+      trechos.forEach((g, i) => { const z0 = b + i * PERIODO, sim = ligado && z0 < d + 40 && z0 + PERIODO > d - 14; if (g.userData.s !== sim) { g.userData.s = sim; for (const m of g.children) if (m.material !== mAsf && m.material !== mVidro && !m.userData.borda) m.castShadow = sim; } });
       const c = Math.floor((d - 60) / 360) * 360; cidades.forEach((m, i) => { m.position.z = -(c + i * 360); });
       for (const f of fumos) { let z = f.userData.z; while (z > -d + 20) z -= 360; f.position.z = z; }
       domo.position.copy(cam.position); agua.position.z = -d - 150; mNev.uniforms.uT.value = uT.value = t;
