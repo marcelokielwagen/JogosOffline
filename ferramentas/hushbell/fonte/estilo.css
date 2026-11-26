@@ -1,0 +1,52 @@
+:root { --tinta: #6b4438; }
+* { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { height: 100%; overflow: hidden; background: #eccfa9; color: var(--tinta); font-family: Optima, "Gill Sans", Candara, "Segoe UI", sans-serif; user-select: none; -webkit-user-select: none; }
+#tela { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; opacity: 0; transition: opacity 2.2s; cursor: grab; }
+#tela.pronta { opacity: 1; } #tela.arrastando { cursor: grabbing; }
+#vinheta { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(70, 35, 30, .16)); }
+#titulo { position: fixed; left: 0; right: 0; top: max(5.5vh, env(safe-area-inset-top)); text-align: center; pointer-events: none; transition: opacity 1.8s; }
+@media (orientation: landscape) { #titulo { left: calc(28px + env(safe-area-inset-left)); right: auto; top: auto; bottom: calc(24px + env(safe-area-inset-bottom)); text-align: left; } }
+#titulo.some { opacity: 0; }
+#titulo h1 { font-weight: 300; font-size: clamp(26px, 4.4vh, 44px); letter-spacing: .42em; margin-right: -.42em; }
+#titulo p { margin-top: 1vh; font-size: 14px; letter-spacing: .14em; opacity: .85; animation: respira 4s ease-in-out infinite; }
+@keyframes respira { 50% { opacity: .35; } }
+#botoes { position: fixed; right: calc(14px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 10px; }
+#botoes button { width: 48px; height: 48px; border: 0; border-radius: 50%; background: rgba(255, 246, 232, .34); color: var(--tinta); cursor: pointer; transition: background .3s, transform .2s; }
+#botoes button:hover { background: rgba(255, 246, 232, .6); } #botoes button:active { transform: scale(.92); }
+#botoes button:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
+#botoes svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto; }
+#bSom .ox { display: none; } #bSom[data-v="1"] .o2, #bSom[data-v="0"] .o1, #bSom[data-v="0"] .o2 { display: none; } #bSom[data-v="0"] .ox { display: inline; }
+#nomeHora { position: fixed; left: 0; right: 0; bottom: calc(28px + env(safe-area-inset-bottom)); text-align: center; letter-spacing: .3em; font-size: 14px; opacity: 0; transition: opacity 1s; pointer-events: none; }
+#nomeHora.ver { opacity: .9; }
+#semgl { position: fixed; inset: 0; display: grid; place-items: center; padding: 30px; text-align: center; }
+#veu { position: fixed; inset: 0; background: #eccfa9; opacity: 0; pointer-events: none; transition: opacity .9s ease; }
+#veu.ver { opacity: 1; pointer-events: auto; }
+#bJogar { position: fixed; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); width: 66px; height: 66px; margin-left: -33px; border: 1.5px solid currentColor; border-radius: 50%; background: rgba(255, 246, 232, .38); color: var(--tinta); cursor: pointer; transition: opacity .8s, background .3s, transform .2s; }
+#bJogar svg { width: 30px; height: 30px; margin-left: 4px; fill: currentColor; stroke: none; display: block; margin: auto; transform: translateX(2px); }
+#bJogar:hover { background: rgba(255, 246, 232, .62); } #bJogar:active { transform: scale(.93); }
+#bJogar.some { opacity: 0; pointer-events: none; }
+@media (orientation: landscape) and (max-height: 500px) { #bJogar { bottom: calc(14px + env(safe-area-inset-bottom)); } }
+#nomeNivel { position: fixed; left: 0; right: 0; top: max(7vh, calc(env(safe-area-inset-top) + 18px)); text-align: center; letter-spacing: .32em; font-size: clamp(15px, 2.3vh, 20px); opacity: 0; transition: opacity 1.4s; pointer-events: none; }
+#nomeNivel.ver { opacity: .92; }
+#pontos { position: fixed; left: 0; right: 0; bottom: calc(104px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 4px; transition: opacity .8s; }
+#pontos.some { opacity: 0; pointer-events: none; }
+#pontos button { width: 30px; height: 30px; border: 0; background: none; padding: 0; cursor: pointer; color: var(--tinta); }
+#pontos button::after { content: ""; display: block; width: 10px; height: 10px; margin: auto; border-radius: 50%; border: 1.5px solid currentColor; opacity: .55; transition: transform .2s; }
+#pontos button.feito::after { background: currentColor; opacity: .8; }
+#pontos button.proximo::after { opacity: 1; transform: scale(1.35); }
+#pontos button:disabled { cursor: default; } #pontos button:disabled::after { opacity: .25; }
+#pontos button:not(:disabled):hover::after { transform: scale(1.5); }
+@media (orientation: landscape) and (max-height: 500px) { #pontos { bottom: calc(86px + env(safe-area-inset-bottom)); } }
+#dica { position: fixed; left: 0; top: 0; width: 64px; height: 64px; margin: -14px 0 0 -32px; pointer-events: none; opacity: 0; transition: opacity .9s; color: var(--tinta); }
+#dica.ver { opacity: .85; }
+#dica svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+#dica .mao { fill: rgba(255, 248, 236, .9); animation: arrasta 2.4s ease-in-out infinite; }
+#dica .arco, #dica .seta { stroke-dasharray: 4 5; opacity: .8; }
+#dica.tocar .arco, #dica.tocar .seta { display: none; } #dica.tocar .mao { animation: toca 1.6s ease-in-out infinite; }
+@keyframes arrasta { 0%, 12% { transform: translate(-14px, 4px); } 55%, 70% { transform: translate(14px, 4px); } 100% { transform: translate(-14px, 4px); } }
+@keyframes toca { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(5px) scale(.94); } }
+#tela.sobrePeca { cursor: grab; } #tela.sobreChao { cursor: pointer; }
+#sair { position: fixed; left: calc(14px + env(safe-area-inset-left)); top: calc(14px + env(safe-area-inset-top)); width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 246, 232, .34); color: var(--tinta); display: grid; place-items: center; transition: background .3s; }
+#sair:hover { background: rgba(255, 246, 232, .6); }
+#sair svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }

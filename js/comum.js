@@ -59,6 +59,7 @@ const JO = (() => {
     const ps = carregar('pinballShow', null), pz = carregar('ponteZero', null);
     let na = null, naFeitas = 0; try { na = JSON.parse(localStorage.getItem('nascente.v2')) || JSON.parse(localStorage.getItem('nascente.v1')); naFeitas = new Set(na ? (na.feitas || [na.concluidas || []]).flat() : []).size; } catch (e) {}
     let cd = null; try { cd = JSON.parse(localStorage.getItem('candeia.v1')); } catch (e) {}
+    let hb = null; try { hb = JSON.parse(localStorage.getItem('hushbell.v1')); } catch (e) {}
     let zn = {}; try { const x = JSON.parse(localStorage.getItem('zen.v1')); zn = (x && x.feitas) || {}; } catch (e) {}
     const znJ = j => `${['facil', 'medio', 'dificil'].reduce((a, d) => a + String(zn[j + '/' + d] || '').split('1').length - 1, 0)} de 150`;
     let kh = null; try { const x = JSON.parse(localStorage.getItem('keepsake.v2')); kh = x ? x.d : JSON.parse(localStorage.getItem('keepsake.v1')); } catch (e) {}
@@ -80,6 +81,7 @@ const JO = (() => {
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
       ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 10` : '0 de 10']]],
       ['Nascente', [['Fases concluídas', `${naFeitas} de 100`]]],
+      ['Hushbell', [['Monumentos', `${hb && hb.feitos ? Math.min(5, hb.feitos) : 0} de 5`]]],
       ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
       ['Gem Shatter', [['Fases vencidas', `${fl.length} de 50`], ['Estrelas', `${fl.reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Obras na mina', `${gm && gm.obras ? gm.obras.flat().filter(Boolean).length : 0} de 25`]]],
       ['Keepsake Hunt', [['Fases vencidas', `${Object.keys((kh && kh.estrelas) || {}).length} de 50`], ['Estrelas', `${Object.values((kh && kh.estrelas) || {}).reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Lembranças', `${Object.keys((kh && kh.lembrancas) || {}).length} de 50`], ['Obras na casa', `${kh && Array.isArray(kh.obras) ? kh.obras.reduce((a, b) => a + (+b || 0), 0) : 0} de 25`]]],

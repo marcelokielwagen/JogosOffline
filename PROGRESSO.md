@@ -374,3 +374,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
 - **Menu por categorias e voltar só pela suíte (25/11/2026)**, pedido do dono: 6 categorias com atalhos no topo. `js/suite.js` (uma linha no `<head>` de cada jogo, inclusive os novos) esconde todo link
   `../../index.html` de quem entra direto pelo link do jogo; pela suíte os botões aparecem. Cache `jogos-offline-v64`. Testado por `ferramentas/suite/testes.mjs`: 14 cartões, direto, pela suíte, recarregar,
   sem internet. Não testado num celular de verdade. Falta o dono autorizar a publicação.
+- **Hushbell (25-26/11/2026)**, pedido do dono (jogo 1 de 2 da série 3D relaxante, em 5 fases): arquitetura impossível em 3D, sininho que anda por ilusão de ótica, 5 níveis (peças
+  que giram, ponte levadiça, roda, escada que gira, triângulo impossível), 4 horas do dia, música e sons por código. Arquivo único com o Three.js dentro (`jogos/hushbell/index.html`,
+  fonte em `ferramentas/hushbell/fonte`, `montar.mjs`). No menu (Para relaxar), Estatísticas, capa e cache `jogos-offline-v66` com autorização do dono em 26/11/2026. Testado: níveis
+  provados por `resolver.mjs`, campanha jogada por toque e teclado, suíte (`ferramentas/suite/testes.mjs`, 15 cartões), sem internet. Não testado num celular de verdade. Publicado com autorização do dono em 26/11/2026.
