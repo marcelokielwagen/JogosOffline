@@ -8,7 +8,7 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { $('#semgl').hidden = false; $('#abertura').hidden = true; return; }
 const ehToque = matchMedia('(pointer: coarse)').matches;
-const Q = ehToque ? { seg: 300, arvores: 6500, pedras: 900, flores: 9000, sombra: 1024, px: 1.5 } : { seg: 400, arvores: 13000, pedras: 1800, flores: 22000, sombra: 2048, px: 1.75 };
+const Q = ehToque ? { seg: 300, arvores: 9000, pedras: 1600, flores: 16000, sombra: 1024, px: 1.5 } : { seg: 400, arvores: 19000, pedras: 3200, flores: 40000, sombra: 2048, px: 1.75 };
 renderer.setPixelRatio(Math.min(devicePixelRatio, Q.px));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 0.96;
@@ -24,7 +24,7 @@ sol.shadow.bias = -0.0005; sol.shadow.normalBias = 0.5;
 cena.add(sol, sol.target);
 const solDir = new THREE.Vector3(0.5, 0.6, 0.4).normalize();
 const ceu = criarCeu(); cena.add(ceu);
-const polen = criarPolen(cena), plan = new Planador(cena);
+const plan = new Planador(cena);
 
 let raiz = null, voo = null, iVoo = -1, nuvens = null, passaros = null, agua = null, modoTela = 'abertura', tempo = 0;
 const estado = { cume: 1, arcos: 0, lugares: 0, concluido: false, piloto: false, kRota: 0, saltou: false };
@@ -48,11 +48,12 @@ function carregarVoo(i) {
   raiz = new THREE.Group(); cena.add(raiz);
   const def = VOOS[i]; iVoo = i; aplicarClima(def);
   semear(def.semente); situarCumes(def); construirRelevo(def, Q.seg);
+  semear(def.semente + 5); tracarCascatas(def);
   raiz.add(malhaTerreno(def)); agua = malhaAgua(def); agua.material.uniforms.uSolDir.value.copy(solDir); raiz.add(agua);
   semear(def.semente + 1); plantarVegetacao(raiz, def, Q.arvores);
   espalharPedras(raiz, def, Q.pedras); espalharFlores(raiz, def, Q.flores);
   nuvens = criarNuvens(raiz, def); criarCordilheiras(raiz, def); passaros = criarPassaros(raiz, def);
-  voo = construirVoo(def, { raiz });
+  voo = construirVoo(def, { raiz }); passaros.nasTermicas(voo.rota.filter(p => p.termica).map(p => p.termica));
   Object.assign(estado, { cume: 1, arcos: 0, lugares: 0, concluido: false, piloto: false, kRota: 1, saltou: false });
   plan.pousar(voo.inicio.x, voo.inicio.y, voo.inicio.z, voo.inicio.yaw);
   voo.cumes[0].feito = true; voo.cumes[1].definirAlvo(true);
@@ -106,7 +107,7 @@ function atualizarSeta() {
 }
 
 // ---------- câmera ----------
-let camOrb = 0, camDist = 16, arrasto = null, orbYaw = 0, orbPitch = 0, ultArrasto = -9, camYawAtual = 0;
+let camOrb = 0, camDist = 13, arrasto = null, orbYaw = 0, orbPitch = 0, ultArrasto = -9, camYawAtual = 0;
 const alvoCam = new THREE.Vector3(), camPos = new THREE.Vector3(), tmpV = new THREE.Vector3();
 function atualizarCamera(dt) {
   if (modoTela !== 'jogo' && voo) {   // abertura e painéis: passeio lento em volta do primeiro aqueduto
@@ -129,7 +130,7 @@ function atualizarCamera(dt) {
   }
   const dist = camDist * (innerWidth < innerHeight ? 1.5 : 1);
   if (tempo - ultArrasto > 1.6 && !arrasto) { orbYaw *= Math.exp(-dt * 1.5); orbPitch *= Math.exp(-dt * 1.5); }
-  const y = plan.yaw + orbYaw, el = 0.2 + orbPitch;
+  const y = plan.yaw + orbYaw, el = 0.3 + orbPitch;
   tmpV.set(plan.pos.x + Math.sin(y) * dist * Math.cos(el), plan.pos.y + dist * Math.sin(el) + 2.2, plan.pos.z + Math.cos(y) * dist * Math.cos(el));
   const minY = piso(tmpV.x, tmpV.z) + 3; if (tmpV.y < minY) tmpV.y = minY;
   camPos.lerp(tmpV, 1 - Math.exp(-dt * 3.2));
@@ -225,7 +226,7 @@ function comandoPiloto() {
     const q = rota[estado.kRota + 1], passou = q && p.cume === undefined && ((plan.pos.x - p.x) * (q.x - p.x) + (plan.pos.z - p.z) * (q.z - p.z)) > 0;
     if (dh < (p.cume !== undefined ? 16 : 10) || passou || (p.cume !== undefined && p.cume < estado.cume)) { estado.kRota++; return comandoPiloto(); }
   }
-  return { yaw: Math.atan2(-dx, -dz), pitch: lim(Math.atan2(dy, Math.max(dh, 25)) + 0.06, -0.45, 0.32), sopro: dy > 10 && !p.termica && dh < 300 };
+  return { yaw: Math.atan2(-dx, -dz), pitch: lim(Math.atan2(dy, Math.max(dh, 25)) + 0.06, dy < -25 ? -0.68 : -0.45, 0.32), sopro: dy > 10 && !p.termica && dh < 300 };
 }
 
 // ---------- eventos do voo ----------
@@ -331,16 +332,15 @@ function passo(dt) {
     const prox = voo.arcos.findIndex(b => !b.feito);
     voo.arcos.forEach((a, i) => a.atualizar(dt, tempo, i === prox));
     voo.cumes.forEach(c => c.atualizar(dt, tempo, plan));
-    passaros.atualizar(dt, tempo);
+    passaros.atualizar(dt, tempo, plan, modoTela === 'jogo' && plan.estado === 'voando'); voo.barcos.atualizar(dt, tempo);
     nuvens.position.x = ((nuvens.position.x + dt * nuvens.userData.vel + 300) % 600 + 600) % 600 - 300;
     // cachoeira mais perto define o som da água
-    let dm = 1e9; for (const l of voo.lugares) if (l.tipo === 'cachoeira') dm = Math.min(dm, Math.hypot(camera.position.x - l.x, camera.position.z - l.z, (camera.position.y - l.y) * 0.7));
+    let dm = 1e9; for (const l of voo.lugares.filter(l => l.tipo === 'cachoeira').concat(voo.sonsAgua)) dm = Math.min(dm, Math.hypot(camera.position.x - l.x, camera.position.z - l.z, (camera.position.y - l.y) * 0.7));
     Som.cachoeira(modoTela === 'jogo' ? 1 - suave(40, 320, dm) : 0);
   }
   if (window.__vista) { camera.position.copy(window.__vista.p); camera.lookAt(window.__vista.a); } else atualizarCamera(dt);   // __vista: só para fotos de teste
   ceu.position.copy(camera.position);
   sol.target.position.copy(plan.pos); sol.position.copy(plan.pos).addScaledVector(solDir, 700);
-  polen.atualizar(dt, tempo, camera);
   Som.atualizar(plan.estado === 'voando' && modoTela === 'jogo' ? plan.v : 0, plan.sopro, plan.rasante);
   if (modoTela === 'jogo') { tocarAvisos(); atualizarSeta(); }
   renderer.render(cena, camera);

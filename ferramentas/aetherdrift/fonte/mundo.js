@@ -209,6 +209,7 @@ function malhaTerreno(def) {
     // neve no alto (menos onde é muito íngreme)
     const lnv = cor.linhaNeve + perlin(x / 80 + 7, z / 80) * 26;
     c.lerp(neve, suave(lnv, lnv + 26, y) * (1 - suave(0.55, 0.8, incl) * 0.75));
+    if (TER.ocupado && TER.ocupado[v]) c.lerp(tmp.copy(g1).offsetHSL(0.01, 0.06, -0.03), 0.75);
     // margens de areia e seixos
     c.lerp(areia, (1 - suave(r.w + 1, r.w + 7 + 3 * perlin(x / 20, z / 20), d)) * (y < r.L + 3.5 ? 1 : 0.3));
     cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b;
@@ -300,6 +301,81 @@ function criarCeu() {
 }
 
 // =====================================================================
+// CASCATAS NAS ENCOSTAS (estilo vale suíço) e VILAREJO — só o traçado aqui;
+// as malhas são feitas em voos.js. Os lugares ocupados ficam sem árvores.
+// =====================================================================
+function marcarOcupado(x, z, raio) {
+  const { cel, ini, n } = TER, ci = Math.round((x - ini) / cel), cj = Math.round((z - ini) / cel), rc = Math.ceil(raio / cel);
+  for (let j = cj - rc; j <= cj + rc; j++) for (let i = ci - rc; i <= ci + rc; i++) if (i >= 0 && j >= 0 && i < n && j < n) TER.ocupado[j * n + i] = 1;
+}
+function tracarCascatas(def) {
+  TER.ocupado = new Uint8Array(TER.n * TER.n); TER.cascatas = []; TER.chales = []; TER.rebanho = [];
+  const qtd = (def.cascatas && def.cascatas.qtd) || 0, V = def.vale, lista = TER.cascatas;
+  for (let tent = 0; tent < 12000 && lista.length < qtd; tent++) {
+    const x0 = entre(-830, 830), z0 = entre(-830, 830), c0 = celula(x0, z0), r0 = TER.rio[TER.idx[c0]], d0 = TER.dist[c0];
+    if (d0 < r0.w + V.chao + V.largo * 0.4 || d0 > r0.w + V.chao + V.largo + 110) continue;
+    const y0 = alturaTerreno(x0, z0); if (y0 - r0.L < 70 || y0 > def.cores.linhaNeve + 60) continue;
+    if (def.cumes.some(cu => Math.hypot(x0 - cu.x, z0 - cu.z) < 120)) continue;
+    if (lista.some(o => Math.hypot(o.pts[0].x - x0, o.pts[0].z - z0) < 85 || Math.hypot(o.fim.x - x0, o.fim.z - z0) < 55)) continue;
+    // a água desce pela linha de maior declive; no plano, segue para o rio
+    const pts = []; let x = x0, z = z0, ok = false, queda = 0;
+    for (let k = 0; k < 520; k++) {
+      const y = alturaTerreno(x, z), c = celula(x, z), r = TER.rio[TER.idx[c]];
+      pts.push({ x, y, z });
+      if (TER.dist[c] < r.w + 0.5) { ok = true; break; }
+      if (k > 1 && pts[k - 1].y - y > 2.4) queda += pts[k - 1].y - y;
+      const gx = (alturaTerreno(x + 2, z) - alturaTerreno(x - 2, z)) / 4, gz = (alturaTerreno(x, z + 2) - alturaTerreno(x, z - 2)) / 4, g = Math.hypot(gx, gz) || 1e-6;
+      const rx = r.x - x, rz = r.z - z, rl = Math.hypot(rx, rz) || 1, w = 1 - suave(0.06, 0.3, g);
+      let dx = mix(-gx / g, rx / rl, w), dz = mix(-gz / g, rz / rl, w); const l = Math.hypot(dx, dz) || 1;
+      x += dx / l * 3; z += dz / l * 3;
+    }
+    if (!ok || queda < 40) continue;
+    if (lista.some(o => o.pts.some(p => Math.hypot(p.x - pts[pts.length - 1].x, p.z - pts[pts.length - 1].z) < 24))) continue;
+    for (let k = 0; k < pts.length; k++) {   // declive (queda por metro andado), suavizado
+      const a = pts[Math.max(k - 2, 0)], b = pts[Math.min(k + 2, pts.length - 1)], hd = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+      pts[k].s = (a.y - b.y) / hd;
+    }
+    for (const p of pts) marcarOcupado(p.x, p.z, 8);
+    lista.push({ pts, fim: pts[pts.length - 1], queda });
+  }
+  escolherVilarejo(def);
+}
+function escolherVilarejo(def) {
+  const vila = def.vilarejo; if (!vila) return;
+  const V = def.vale, livre = (x, z) => !TER.ocupado[celula(x, z)];
+  const plano = (x, z) => {
+    const c = celula(x, z), r = TER.rio[TER.idx[c]], d = TER.dist[c], y = alturaTerreno(x, z);
+    return d > r.w + 16 && d < r.w + V.chao + 50 && y > r.L + 1.5 && declive(x, z) < 0.16 && livre(x, z) && !def.cumes.some(cu => Math.hypot(x - cu.x, z - cu.z) < 60);
+  };
+  const quintalOk = (x, z) => { const c = celula(x, z), r = TER.rio[TER.idx[c]]; return TER.dist[c] > r.w + 8 && alturaTerreno(x, z) > r.L + 1 && declive(x, z) < 0.3 && livre(x, z); };
+  const centros = [];
+  for (let tent = 0; tent < 3000 && centros.length < vila.grupos; tent++) {
+    const x = entre(-860, 860), z = entre(-860, 860);
+    if (plano(x, z) && !centros.some(c => Math.hypot(c.x - x, c.z - z) < 200)) centros.push({ x, z });
+  }
+  for (const c of centros) {
+    const n = 4 + Math.floor(rnd() * 5);
+    for (let k = 0, t = 0; k < n && t < 250; t++) {
+      const x = c.x + entre(-75, 75), z = c.z + entre(-75, 75), rot = rnd() * TAU;
+      if (TER.chales.some(o => Math.hypot(o.x - x, o.z - z) < 30)) continue;
+      // o quintal inteiro (cerca 18 x 17 m, na frente da casa) precisa caber no plano
+      const canto = (lx, lz) => [x + lx * Math.cos(rot) + lz * Math.sin(rot), z - lx * Math.sin(rot) + lz * Math.cos(rot)];
+      if (!plano(x, z) || ![[-9, -6], [9, -6], [-9, 11], [9, 11]].every(([a, b]) => quintalOk(...canto(a, b)))) continue;
+      TER.chales.push({ x, z, y: alturaTerreno(x, z), rot, esc: entre(0.9, 1.15) });
+      for (const [a, b] of [[0, 0], [0, 7], [-6, 4], [6, 4]]) marcarOcupado(...canto(a, b), 9);
+      k++;
+    }
+    // um rebanho pastando perto de cada grupo de casas
+    const ang = rnd() * TAU, bx = c.x + Math.cos(ang) * 80, bz = c.z + Math.sin(ang) * 80;
+    for (let k = 0, t = 0; k < vila.bichos && t < 80; t++) {
+      const x = bx + entre(-30, 30), z = bz + entre(-30, 30), cl = celula(x, z), r = TER.rio[TER.idx[cl]];
+      if (TER.dist[cl] < r.w + 6 || declive(x, z) > 0.3) continue;
+      TER.rebanho.push({ x, z, y: alturaTerreno(x, z), rot: rnd() * TAU, tipo: k < 3 ? 'cavalo' : 'vaca' }); k++;
+    }
+  }
+}
+
+// =====================================================================
 // VEGETAÇÃO E PEDRAS (instanciadas e em blocos, para o celular aguentar)
 // =====================================================================
 function juntarGeos(lista) {
@@ -321,14 +397,14 @@ function geoCopa() {
 
 function plantarVegetacao(raiz, def, qtd) {
   const v = def.vegetacao, cor = def.cores, BL = 334, nb = Math.ceil(TER.tam / BL);
-  const blocos = Array.from({ length: nb * nb }, () => ({ pin: [], fol: [] }));
+  const blocos = Array.from({ length: nb * nb }, () => ({ pin: [], fol: [], arb: [] })), ocup = TER.ocupado;
   const geoP = geoPinheiro(), geoF = geoCopa(), geoT = new THREE.CylinderGeometry(0.12, 0.2, 1, 5).translate(0, 0.5, 0);
   const tenta = qtd * 9;
   for (let t = 0; t < tenta; t++) {
     const x = entre(-930, 930), z = entre(-930, 930), y = alturaTerreno(x, z), c = celula(x, z), r = TER.rio[TER.idx[c]];
-    if (TER.dist[c] < r.w + 9 || y < r.L + 1.5) continue;
+    if (TER.dist[c] < r.w + 9 || y < r.L + 1.5 || (ocup && ocup[c])) continue;
     if (y > cor.linhaArvore + perlin(x / 60, z / 60) * 30) continue;
-    const dcl = declive(x, z); if (dcl > 0.62) continue;
+    const dcl = declive(x, z); if (dcl > (v.encosta || 0.62)) continue;
     let dens = 0.5 + 0.5 * perlin(x / 160 + 21, z / 160 - 8) + 0.25 * perlin(x / 40, z / 40);
     if (cor.aridez) dens += 0.45 * (1 - suave(r.w + 10, r.w + 110, TER.dist[c])) - 0.3 * suave(r.w + 80, r.w + 220, TER.dist[c]);
     if (dens < v.mata && rnd() < 0.93) continue;
@@ -337,10 +413,26 @@ function plantarVegetacao(raiz, def, qtd) {
     const pinheiro = y > v.pinheiroAcima + perlin(x / 90, z / 90) * 40 || rnd() < v.pinheiroQto;
     (pinheiro ? b.pin : b.fol).push([x, y, z]);
   }
+  // arbustos e moitas ao longo das margens do rio
+  for (let t = 0; t < qtd * 0.5; t++) {
+    const r = TER.rio[Math.floor(rnd() * TER.rio.length)], o = (r.w + entre(3, 26)) * (rnd() < 0.5 ? -1 : 1), x = r.x - r.tz * o, z = r.z + r.tx * o;
+    const c = celula(x, z), y = alturaTerreno(x, z); if (TER.dist[c] < TER.rio[TER.idx[c]].w + 2.5 || y < r.L + 0.6 || (ocup && ocup[c]) || declive(x, z) > 0.8) continue;
+    if (r.L > cor.linhaArvore + 40) continue;
+    const b = blocos[Math.floor((z + 1000) / BL) * nb + Math.floor((x + 1000) / BL)]; if (b) b.arb.push([x, y, z]);
+  }
   const mP = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mF = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mT = comNeblina(new THREE.MeshLambertMaterial({ color: cor.tronco }));
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), cc = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
   let total = 0;
   for (const b of blocos) {
+    if (b.arb.length) {
+      const im = new THREE.InstancedMesh(geoF, mF, b.arb.length);
+      b.arb.forEach(([x, y, z], i) => {
+        const r = entre(1.1, 2.6) * v.escala; q.setFromAxisAngle(cima, rnd() * TAU);
+        im.setMatrixAt(i, m4.compose(p.set(x, y + r * 0.35, z), q, s.set(r * entre(1, 1.5), r * entre(0.6, 0.9), r)));
+        im.setColorAt(i, cc.set(v.folhas[Math.floor(rnd() * v.folhas.length)]).offsetHSL(0, entre(-0.02, 0.04), entre(-0.07, 0)));
+      });
+      im.receiveShadow = true; raiz.add(im); total += b.arb.length;
+    }
     const nt = b.pin.length + b.fol.length; if (!nt) continue;
     const troncos = new THREE.InstancedMesh(geoT, mT, nt); let it = 0;
     if (b.pin.length) {
@@ -373,17 +465,25 @@ function plantarVegetacao(raiz, def, qtd) {
 
 function espalharPedras(raiz, def, qtd) {
   const geo = new THREE.DodecahedronGeometry(1, 0), m = new THREE.InstancedMesh(geo, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff', flatShading: true })), qtd);
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), e = new THREE.Euler();
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), p0 = new THREE.Vector3(), c = new THREE.Color(), e = new THREE.Euler();
   let k = 0;
-  for (let t = 0; t < qtd * 6 && k < qtd * 0.8; t++) {
+  for (let t = 0; t < qtd * 6 && k < qtd * 0.7; t++) {
     const x = entre(-940, 940), z = entre(-940, 940), cl = celula(x, z), r = TER.rio[TER.idx[cl]], d = TER.dist[cl], y = alturaTerreno(x, z);
-    const margem = d > r.w + 1 && d < r.w + 14, encosta = declive(x, z) > 0.35, seco = def.cores.aridez && d > r.w + 60 && rnd() < 0.012;
-    if (!margem && !seco && !(encosta && rnd() < 0.06)) continue;
+    const margem = d > r.w + 1 && d < r.w + 14, encosta = declive(x, z) > 0.35, seco = def.cores.aridez && d > r.w + 60 && rnd() < 0.012, prado = !encosta && rnd() < 0.01;
+    if (!margem && !seco && !prado && !(encosta && rnd() < 0.12)) continue;
     if (def.cumes.some(cu => Math.hypot(x - cu.x, z - cu.z) < 30)) continue;
     const tam = margem ? entre(0.6, 2.2) : entre(1.5, 5.5);
     q.setFromEuler(e.set(rnd() * 3, rnd() * 3, rnd() * 3));
     m.setMatrixAt(k, m4.compose(p.set(x, y - tam * 0.15, z), q, s.set(tam * entre(0.9, 1.5), tam * entre(0.5, 0.9), tam)));
     m.setColorAt(k++, c.set(def.cores.rocha[0]).offsetHSL(0, -0.03, entre(0.02, 0.1)));
+  }
+  // pedras ao lado das cascatas e dos riachos que descem das montanhas
+  for (const cs of TER.cascatas || []) for (let i = 2; i < cs.pts.length && k < qtd; i += 3) {
+    const p = cs.pts[i], b = cs.pts[Math.min(i + 1, cs.pts.length - 1)], tl = Math.hypot(b.x - p.x, b.z - p.z) || 1, lado = rnd() < 0.5 ? -1 : 1, o = lado * entre(3.5, 7);
+    const x = p.x - (b.z - p.z) / tl * o, z = p.z + (b.x - p.x) / tl * o, tam = entre(0.9, 3);
+    q.setFromEuler(e.set(rnd() * 3, rnd() * 3, rnd() * 3));
+    m.setMatrixAt(k, m4.compose(p0.set(x, alturaTerreno(x, z) - tam * 0.2, z), q, s.set(tam * entre(1, 1.5), tam * entre(0.6, 0.9), tam)));
+    m.setColorAt(k++, c.set(def.cores.rocha[rnd() < 0.5 ? 0 : 1]).offsetHSL(0, -0.02, entre(-0.02, 0.08)));
   }
   // pedras redondas no meio das corredeiras (a água espuma em volta)
   for (let i = 0; i < TER.rio.length && k < qtd; i += 2) {
@@ -484,52 +584,82 @@ function criarCordilheiras(raiz, def) {
 // PÁSSAROS: bandos pequenos que circulam devagar
 // =====================================================================
 function criarPassaros(raiz, def) {
-  const asa = lado => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.45, 0, 0, 0.5, 1.7 * lado, 0, 0.15], 3)); return g; };
-  const gE = asa(-1), gD = asa(1), mat = new THREE.MeshBasicMaterial({ color: def.passaros.cor, side: THREE.DoubleSide }), bandos = [];
-  for (const [x, y, z, raio] of def.passaros.bandos) {
+  const asa = (lado, l) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.45, 0, 0, 0.5, l * lado, 0, 0.15], 3)); return g; };
+  const gE = asa(-1, 1.7), gD = asa(1, 1.7), gAE = asa(-1, 2.8), gAD = asa(1, 2.8);
+  const mat = new THREE.MeshBasicMaterial({ color: def.passaros.cor, side: THREE.DoubleSide });
+  const matA = new THREE.MeshBasicMaterial({ color: def.passaros.aguia || '#d8b894', side: THREE.DoubleSide });
+  const novaAve = (esc, grande) => {
+    const ave = new THREE.Group(), e = new THREE.Mesh(grande ? gAE : gE, grande ? matA : mat), d = new THREE.Mesh(grande ? gAD : gD, grande ? matA : mat);
+    ave.add(e, d); ave.scale.setScalar(esc); ave.userData = { o: new THREE.Vector3(), f: entre(2.6, 3.6), fase: rnd() * TAU, e, d }; return ave;
+  };
+  const bater = (a, t, forca = 0.6) => { const u = a.userData, b = Math.sin(t * u.f + u.fase); u.e.rotation.z = -b * forca; u.d.rotation.z = b * forca; };
+  const rio = TER.rio, bandos = [], rasantes = [], aguias = [];
+  // bandos que circulam devagar (os do vale e mais alguns sobre o rio)
+  const defs = def.passaros.bandos.slice();
+  for (let k = 0; k < 1; k++) { const r = rio[Math.floor(entre(0.2, 0.8) * rio.length)]; defs.push([r.x, r.L + entre(55, 110), r.z, entre(70, 130)]); }
+  for (const [x, y, z, raio] of defs) {
     const g = new THREE.Group(), aves = [];
-    for (let i = 0; i < 7; i++) {
-      const ave = new THREE.Group(), e = new THREE.Mesh(gE, mat), d = new THREE.Mesh(gD, mat); ave.add(e, d); ave.scale.setScalar(entre(1.6, 2.2));
-      ave.userData = { o: new THREE.Vector3(entre(-14, 14), entre(-5, 5), entre(-14, 14)), f: entre(2.6, 3.6), fase: rnd() * TAU, e, d };
-      g.add(ave); aves.push(ave);
-    }
-    raiz.add(g); bandos.push({ g, aves, x, y, z, raio, a: rnd() * TAU, v: entre(0.04, 0.07) });
+    for (let i = 0; i < 5; i++) { const a = novaAve(entre(1.6, 2.2)); a.userData.o.set(entre(-16, 16), entre(-5, 5), entre(-16, 16)); g.add(a); aves.push(a); }
+    raiz.add(g); bandos.push({ g, aves, x, y, z, raio, a: rnd() * TAU, v: entre(0.04, 0.08) * (rnd() < 0.5 ? -1 : 1) });
   }
+  // andorinhas: sobem e descem o rio, rente à água
+  for (let k = 0; k < 2; k++) {
+    const g = new THREE.Group(), aves = [];
+    for (let i = 0; i < 3; i++) { const a = novaAve(entre(0.8, 1.1)); a.userData.f = entre(6, 8); a.userData.o.set(entre(-5, 5), entre(-1.5, 1.5), entre(-6, 6)); g.add(a); aves.push(a); }
+    raiz.add(g); rasantes.push({ g, aves, i: entre(0.05, 0.95) * (rio.length - 1), v: entre(13, 19), dir: rnd() < 0.5 ? -1 : 1, fase: rnd() * TAU });
+  }
+  // águias: planam em círculos largos sobre as encostas, quase sem bater asa
+  // (as águias são postas depois, girando dentro das espirais de vento do caminho)
+  // de vez em quando um bando vem voar ao lado do planador
+  const comp = { g: new THREE.Group(), aves: [], espera: entre(30, 50), t: -1, lado: 1 };
+  for (let i = 0; i < 5; i++) { const a = novaAve(entre(1.3, 1.7)); a.userData.o.set((i % 2 ? 1 : -1) * Math.ceil(i / 2) * 3.2, entre(-1, 1), -Math.ceil(i / 2) * 3.4); comp.g.add(a); comp.aves.push(a); }
+  comp.g.visible = false; raiz.add(comp.g);
+  const fr = new THREE.Vector3(), di = new THREE.Vector3();
   return {
-    atualizar(dt, t) {
-      for (const b of bandos) {
-        b.a += b.v * dt;
-        b.g.position.set(b.x + Math.cos(b.a) * b.raio, b.y + Math.sin(t * 0.3 + b.x) * 6, b.z + Math.sin(b.a) * b.raio); b.g.rotation.y = -b.a;
-        for (const a of b.aves) {
-          const u = a.userData, bat = Math.sin(t * u.f + u.fase);
-          a.position.set(u.o.x + Math.sin(t * 0.4 + u.fase) * 3, u.o.y + Math.sin(t * 0.7 + u.fase) * 1.5, u.o.z);
-          u.e.rotation.z = -bat * 0.6; u.d.rotation.z = bat * 0.6;
-        }
+    // duas águias girando em cada espiral de vento: mostram onde o ar sobe
+    nasTermicas(lista) {
+      for (const T of lista) for (let k = 0; k < 2; k++) {
+        const a = novaAve(entre(2.3, 2.8), true); raiz.add(a);
+        aguias.push({ a, x: T.x, z: T.z, y: mix(T.base, T.topo, 0.35 + k * 0.3), raio: T.r * entre(0.35, 0.55), ang: rnd() * TAU, v: 0.22 * (k ? 1 : 1.15) });
       }
     },
-  };
-}
-
-// ---------- pólen e luz flutuando em volta da câmera ----------
-function criarPolen(cena) {
-  const N = 420, pos = new Float32Array(N * 3), vel = new Float32Array(N);
-  for (let i = 0; i < N; i++) { pos[i * 3] = entre(-60, 60); pos[i * 3 + 1] = entre(-25, 30); pos[i * 3 + 2] = entre(-60, 60); vel[i] = entre(0.2, 0.7); }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const mat = new THREE.PointsMaterial({ size: 0.5, map: texturaBrilho(), transparent: true, depthWrite: false, color: '#fff6dc', opacity: 0.8 });
-  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; cena.add(pts);
-  return {
-    pts,
-    atualizar(dt, t, cam) {
-      const c = cam.position;
-      for (let i = 0; i < N; i++) {
-        let x = pos[i * 3], y = pos[i * 3 + 1], z = pos[i * 3 + 2];
-        x += (Math.sin(t * 0.3 + i) * 0.25 + 0.35) * dt; y += (Math.sin(t * 0.5 + i * 1.7) * 0.2 + vel[i] * 0.15) * dt; z += Math.cos(t * 0.27 + i * 0.5) * 0.25 * dt;
-        if (x - c.x > 60) x -= 120; if (x - c.x < -60) x += 120;
-        if (z - c.z > 60) z -= 120; if (z - c.z < -60) z += 120;
-        if (y - c.y > 30) y -= 55; if (y - c.y < -25) y += 55;
-        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+    atualizar(dt, t, plan, voando) {
+      for (const b of bandos) {
+        b.a += b.v * dt;
+        b.g.position.set(b.x + Math.cos(b.a) * b.raio, b.y + Math.sin(t * 0.3 + b.x) * 6, b.z + Math.sin(b.a) * b.raio);
+        b.g.rotation.y = b.v > 0 ? -b.a : Math.PI - b.a;
+        for (const a of b.aves) { const u = a.userData; a.position.set(u.o.x + Math.sin(t * 0.4 + u.fase) * 3, u.o.y + Math.sin(t * 0.7 + u.fase) * 1.5, u.o.z); bater(a, t); }
       }
-      geo.attributes.position.needsUpdate = true;
+      for (const r of rasantes) {
+        r.i += r.dir * r.v * dt / 4;
+        if (r.i < 2 || r.i > rio.length - 3) { r.dir *= -1; r.i = lim(r.i, 2, rio.length - 3); }
+        const p = rio[Math.floor(r.i)], s = Math.sin(t * 0.9 + r.fase), o = s * p.w * 0.6;
+        r.g.position.set(p.x - p.tz * o, p.L + 4 + 2.5 * Math.sin(t * 1.3 + r.fase), p.z + p.tx * o);
+        r.g.rotation.y = Math.atan2(p.tx * r.dir, p.tz * r.dir) + Math.cos(t * 0.9 + r.fase) * 0.5 * r.dir;
+        for (const a of r.aves) { const u = a.userData; a.position.set(u.o.x + Math.sin(t * 2 + u.fase) * 1.5, u.o.y, u.o.z); bater(a, t, 0.8); }
+      }
+      for (const g of aguias) {
+        g.ang += g.v * dt;
+        g.a.position.set(g.x + Math.cos(g.ang) * g.raio, g.y + Math.sin(t * 0.2 + g.x) * 8, g.z + Math.sin(g.ang) * g.raio);
+        g.a.rotation.set(0, g.v > 0 ? -g.ang : Math.PI - g.ang, 0); g.a.rotateZ(g.v > 0 ? 0.32 : -0.32);
+        const u = g.a.userData, b = Math.sin(t * 0.8 + u.fase) * 0.08 + 0.12; u.e.rotation.z = -b; u.d.rotation.z = b;
+      }
+      // bando companheiro: chega por trás, voa junto um pouco e vai embora subindo
+      if (comp.t < 0) {
+        if (voando) comp.espera -= dt;
+        if (comp.espera <= 0 && voando && plan.v > 6) { comp.t = 0; comp.lado = rnd() < 0.5 ? -1 : 1; comp.g.visible = true; }
+      }
+      if (comp.t >= 0) {
+        comp.t += dt; const T = comp.t;
+        fr.set(plan.vel.x, 0, plan.vel.z); if (fr.lengthSq() < 0.01) fr.set(0, 0, 1); fr.normalize();
+        di.set(fr.z, 0, -fr.x).multiplyScalar(comp.lado);
+        const chega = suave(0, 5, T), sai = suave(13, 20, T);
+        const tras = mix(-45, 2, chega) + sai * 25, lado = mix(30, 16, chega) + sai * 50, cima = mix(10, 3, chega) + sai * 30;
+        comp.g.position.copy(plan.pos).addScaledVector(fr, tras).addScaledVector(di, lado); comp.g.position.y += cima;
+        comp.g.rotation.y = Math.atan2(fr.x, fr.z) + comp.lado * -sai * 0.6;
+        for (const a of comp.aves) { const u = a.userData; a.position.set(u.o.x, u.o.y + Math.sin(t * 0.8 + u.fase) * 0.8, u.o.z); bater(a, t); }
+        if (T > 21) { comp.t = -1; comp.g.visible = false; comp.espera = entre(70, 120); }
+      }
     },
   };
 }

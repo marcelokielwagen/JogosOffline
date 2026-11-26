@@ -43,20 +43,7 @@ class ArcoLuz {
 class Termica {
   constructor(raiz, x, z, base, topo, r = 55, forca = 11) {
     Object.assign(this, { x, z, base, topo, r, forca });
-    const N = 340, sem = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) { sem[i * 3] = rnd(); sem[i * 3 + 1] = rnd(); sem[i * 3 + 2] = rnd(); }
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3)); geo.setAttribute('aSem', new THREE.BufferAttribute(sem, 3));
-    this.pts = new THREE.Points(geo, new THREE.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { ...U, mapa: { value: texturaBrilho() }, uR: { value: r }, uH: { value: topo - base } },
-      vertexShader: `attribute vec3 aSem; uniform float uTempo, uR, uH; varying float vA;
-        void main(){ float h = mod(aSem.y * uH + uTempo * (5. + aSem.z * 4.), uH); float a = aSem.x * 6.2832 + uTempo * (.35 + aSem.z * .3) + h * .02;
-          float r = uR * (.2 + .8 * sqrt(aSem.z)) * (.75 + .25 * h / uH);
-          vec4 mv = modelViewMatrix * vec4(cos(a) * r, h, sin(a) * r, 1.); gl_Position = projectionMatrix * mv;
-          gl_PointSize = (2.2 + aSem.z * 2.5) * 260. / -mv.z; vA = smoothstep(0., .12, h / uH) * (1. - smoothstep(.75, 1., h / uH)); }`,
-      fragmentShader: `uniform sampler2D mapa; varying float vA; void main(){ vec4 t = texture2D(mapa, gl_PointCoord); gl_FragColor = vec4(vec3(1., .86, .55) * t.a * vA * .55, 1.); }`,
-    }));
-    this.pts.position.set(x, base, z); this.pts.frustumCulled = false; raiz.add(this.pts);
+    // sem desenho próprio: duas águias girando mostram onde o ar sobe
   }
   // quanto sobe aqui (0 se fora)
   em(p) {
@@ -223,6 +210,173 @@ function cruzouCortina(o, p0, p1) {
   return Math.abs(u) < k.larg / 2 + 2 && Math.abs(d.y) < k.alt / 2 + 1;
 }
 
+// cascatas descendo pelas paredes do vale: fita de água que cai solta do paredão e vira riacho até o rio
+function criarCascatas(raiz, def) {
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4,
+    uniforms: { ...U, uCor: { value: new THREE.Color(def.cores.aguaRasa) } },
+    vertexShader: 'attribute float aV; attribute float aS; varying float vV; varying float vS; varying float vU; varying vec3 vMundo; void main(){ vV = aV; vS = aS; vU = uv.x; vec4 w = modelMatrix * vec4(position, 1.); vMundo = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform vec3 uCor; varying float vV; varying float vS; varying float vU; varying vec3 vMundo; ${GLSL_RUIDO}${GLSL_NEVOA}
+      void main(){ float q = smoothstep(.45, 1.5, vS);
+        float n = vnoise(vec2(vU * 6., vV * .1 - uTempo * mix(.9, 3.6, q))), n2 = vnoise(vec2(vU * 17., vV * .28 - uTempo * mix(1.6, 6., q)));
+        float esp = smoothstep(.35, .8, n * .6 + n2 * .4);
+        vec3 c = mix(uCor, vec3(1.), clamp(q * .72 + esp * (.25 + .45 * q), 0., 1.));
+        float borda = smoothstep(0., .2, vU) * smoothstep(1., .8, vU) * mix(1., .75 + .25 * smoothstep(.2, .6, n), q);
+        c = neblinaVale(c, vMundo); c = nevoaLonge(c, vMundo); gl_FragColor = vec4(c, borda * mix(.9, .62 + .35 * esp, q));
+        #include <colorspace_fragment>
+      }`,
+  });
+  const nomes = (def.cascatas && def.cascatas.nomes) || [], lugares = [], sons = [];
+  TER.cascatas.forEach((cs, ic) => {
+    const P = cs.pts, pos = [], uv = [], aV = [], aS = [], ind = [];
+    let acc = 0, ini = 0;
+    P.forEach((p, k) => {
+      const b = P[Math.min(k + 1, P.length - 1)], a = P[Math.max(k - 1, 0)], tx0 = b.x - a.x, tz0 = b.z - a.z, tl = Math.hypot(tx0, tz0) || 1, tx = tx0 / tl, tz = tz0 / tl;
+      if (k) acc += Math.hypot(p.x - P[k - 1].x, p.y - P[k - 1].y, p.z - P[k - 1].z);
+      const q = suave(0.5, 1.6, p.s), fora = 1.6 * q, W = (2.8 + 4.6 * q) * suave(0, 18, acc) + 0.6, cx = p.x + tx * fora, cz = p.z + tz * fora, cy = p.y + 0.45;
+      for (const l of [-1, 1]) {
+        const ex = cx - tz * l * W / 2, ez = cz + tx * l * W / 2;
+        pos.push(ex, Math.max(cy, alturaTerreno(ex, ez) + 0.35), ez); uv.push(l < 0 ? 0 : 1, 0); aV.push(acc); aS.push(p.s);
+      }
+      if (k) { const o = (k - 1) * 2; ind.push(o, o + 2, o + 1, o + 1, o + 2, o + 3); }
+      if (!ini && P[Math.max(k - 3, 0)].s > 1 && p.s < 0.45) ini = k;   // pé da queda principal
+    });
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    geo.setAttribute('aV', new THREE.Float32BufferAttribute(aV, 1)); geo.setAttribute('aS', new THREE.Float32BufferAttribute(aS, 1)); geo.setIndex(ind);
+    const m = new THREE.Mesh(geo, mat); m.renderOrder = 1; raiz.add(m);
+    const pe = P[ini || Math.floor(P.length * 0.6)];
+    criarBorrifo(raiz, pe.x, pe.y - 0.5, pe.z, 9);
+    sons.push({ x: pe.x, y: pe.y, z: pe.z });
+    const topo = P[0];
+    if (nomes[ic]) lugares.push({ nome: nomes[ic][0], frase: nomes[ic][1], x: mix(topo.x, pe.x, 0.5), z: mix(topo.z, pe.z, 0.5), y: mix(topo.y, pe.y, 0.5), raio: 140, achado: false, tipo: 'cachoeira' });
+  });
+  return { lugares, sons };
+}
+// casinhas de madeira com telhado inclinado e um rebanho pastando
+function criarVilarejo(raiz, def, aquedutos) {
+  const vila = def.vilarejo; if (!vila || !TER.chales.length) return;
+  const longeAq = (x, z) => aquedutos.every(o => Math.abs((x - o.x) * o.tx + (z - o.z) * o.tz) > 16);
+  const chales = TER.chales.filter(c => longeAq(c.x, c.z));
+  const geoC = new THREE.BoxGeometry(8, 5, 6).translate(0, 2.5, 0);
+  const tel = new THREE.Shape(); tel.moveTo(-5.2, 0); tel.lineTo(0, 3.6); tel.lineTo(5.2, 0); tel.lineTo(-5.2, 0);
+  const geoT = new THREE.ExtrudeGeometry(tel, { depth: 7.4, bevelEnabled: false }).translate(0, 4.9, -3.7);
+  const geoB = new THREE.BoxGeometry(8.2, 1.6, 6.2).translate(0, 0.8, 0);
+  const mC = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mT = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mB = comNeblina(new THREE.MeshLambertMaterial({ color: vila.base || '#e9e2d4' }));
+  const iC = new THREE.InstancedMesh(geoC, mC, chales.length), iT = new THREE.InstancedMesh(geoT, mT, chales.length), iB = new THREE.InstancedMesh(geoB, mB, chales.length);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
+  chales.forEach((h, i) => {
+    q.setFromAxisAngle(cima, h.rot); m4.compose(p.set(h.x, h.y - 0.4, h.z), q, s.setScalar(h.esc));
+    iC.setMatrixAt(i, m4); iT.setMatrixAt(i, m4); iB.setMatrixAt(i, m4);
+    iC.setColorAt(i, c.set(vila.paredes[i % vila.paredes.length]).offsetHSL(0, 0, entre(-0.03, 0.03)));
+    iT.setColorAt(i, c.set(vila.telhados[i % vila.telhados.length]).offsetHSL(0, 0, entre(-0.03, 0.03)));
+  });
+  for (const im of [iC, iT, iB]) { im.castShadow = im.receiveShadow = true; raiz.add(im); }
+  // chaminé e fumacinha subindo devagar
+  const iCh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 2.4, 0.9), mB, chales.length), base = [], sem = [];
+  chales.forEach((h, i) => {
+    const cx = 2.2 * h.esc, cz = 1.4 * h.esc, x = h.x + cx * Math.cos(h.rot) + cz * Math.sin(h.rot), z = h.z - cx * Math.sin(h.rot) + cz * Math.cos(h.rot), y = h.y - 0.4 + 7.6 * h.esc;
+    iCh.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, h.rot), s.setScalar(h.esc)));
+    if (i % 2 === 0) for (let k = 0; k < 9; k++) { base.push(x, y + 1.2, z); sem.push(rnd(), rnd(), rnd()); }
+  });
+  iCh.castShadow = true; raiz.add(iCh);
+  if (base.length) {
+    const gF = new THREE.BufferGeometry(); gF.setAttribute('position', new THREE.Float32BufferAttribute(base, 3)); gF.setAttribute('aSem', new THREE.Float32BufferAttribute(sem, 3));
+    const vx = def.vento[0], vz = def.vento[1];
+    const fum = new THREE.Points(gF, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, uniforms: { ...U, mapa: { value: texturaBrilho() } },
+      vertexShader: `attribute vec3 aSem; uniform float uTempo; varying float vA;
+        void main(){ float f = fract(aSem.x + uTempo * (.05 + aSem.y * .03)); vec3 p = position + vec3(${vx.toFixed(2)} * f * 14. + sin(uTempo * .7 + aSem.z * 6.) * f * 1.5, f * 16., ${vz.toFixed(2)} * f * 14.);
+          vec4 mv = modelViewMatrix * vec4(p, 1.); gl_Position = projectionMatrix * mv; gl_PointSize = (2.5 + f * 9.) * 300. / -mv.z; vA = smoothstep(0., .1, f) * (1. - f); }`,
+      fragmentShader: `uniform sampler2D mapa; varying float vA; void main(){ float a = texture2D(mapa, gl_PointCoord).a * vA * .35; if (a < .01) discard; gl_FragColor = vec4(.96, .96, .95, a); }`,
+    }));
+    fum.frustumCulled = false; raiz.add(fum);
+  }
+  criarQuintais(raiz, chales);
+  // rebanho: vacas (ou ovelhas/cabras, pela cor) e alguns cavalos, com pernas
+  const bichos = TER.rebanho.filter(b => longeAq(b.x, b.z)); if (!bichos.length) return;
+  const caixa = (w, h, d, x, y, z, rx = 0) => new THREE.BoxGeometry(w, h, d).rotateX(rx).translate(x, y, z);
+  const pernas = (h, dx, dz) => [-1, 1].flatMap(a => [-1, 1].map(b => caixa(0.22, h, 0.22, a * dx, h / 2, b * dz)));
+  const geoVaca = juntarGeos([caixa(1.1, 0.9, 2.1, 0, 1.15, 0), caixa(0.6, 0.6, 0.75, 0, 1.4, 1.35), ...pernas(0.78, 0.36, 0.75)]);
+  const geoCav = juntarGeos([caixa(0.85, 0.85, 2.2, 0, 1.55, 0), caixa(0.38, 1.0, 0.5, 0, 2.15, 1.1, 0.55), caixa(0.36, 0.42, 0.85, 0, 2.6, 1.55), caixa(0.14, 0.9, 0.3, 0, 1.6, -1.2, 0.5), ...pernas(1.15, 0.3, 0.8)]);
+  const mBicho = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' }));
+  for (const [tipo, geo, cores] of [['vaca', geoVaca, vila.bichosCor], ['cavalo', geoCav, ['#b98a62', '#d4ac84', '#8f6b52', '#efe6d6']]]) {
+    const lista = bichos.filter(b => (b.tipo || 'vaca') === tipo); if (!lista.length) continue;
+    const im = new THREE.InstancedMesh(geo, mBicho, lista.length);
+    lista.forEach((b, i) => {
+      q.setFromAxisAngle(cima, b.rot); im.setMatrixAt(i, m4.compose(p.set(b.x, b.y - 0.1, b.z), q, s.setScalar(entre(0.9, 1.1))));
+      im.setColorAt(i, c.set(cores[Math.floor(rnd() * cores.length)]));
+    });
+    im.castShadow = true; raiz.add(im);
+  }
+}
+// quintal de cada casa: cerca de madeira com portão, horta, árvore de fruta e galinhas
+function criarQuintais(raiz, chales) {
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
+  const mundoDe = (h, lx, lz) => [h.x + lx * Math.cos(h.rot) + lz * Math.sin(h.rot), h.z - lx * Math.sin(h.rot) + lz * Math.cos(h.rot)];
+  const trilhos = [], postes = [], hortas = [], fileiras = [], arvores = [], galinhas = [];
+  const lados = [[-9, -6, 9, -6], [-9, -6, -9, 11], [9, -6, 9, 11], [-9, 11, -1.6, 11], [1.6, 11, 9, 11]];
+  for (const h of chales) {
+    for (const [a0, b0, a1, b1] of lados) {
+      const [x0, z0] = mundoDe(h, a0, b0), [x1, z1] = mundoDe(h, a1, b1), len = Math.hypot(x1 - x0, z1 - z0), ang = Math.atan2(-(z1 - z0), x1 - x0);
+      const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2, ym = alturaTerreno(xm, zm);
+      for (const hh of [0.5, 1.0]) trilhos.push([xm, ym + hh, zm, ang, len]);
+      const np = Math.max(1, Math.round(len / 3));
+      for (let k = 0; k <= np; k++) { const x = mix(x0, x1, k / np), z = mix(z0, z1, k / np); postes.push([x, alturaTerreno(x, z), z]); }
+    }
+    const [hx, hz] = mundoDe(h, 4.8, 6.5); hortas.push([hx, alturaTerreno(hx, hz), hz, h.rot]);
+    for (const dz of [-1.6, 0, 1.6]) { const [fx, fz] = mundoDe(h, 4.8, 6.5 + dz); fileiras.push([fx, alturaTerreno(fx, fz), fz, h.rot]); }
+    const [ax, az] = mundoDe(h, -5.8, 7); arvores.push([ax, alturaTerreno(ax, az), az]);
+    for (let k = 0; k < 5; k++) { const [gx, gz] = mundoDe(h, entre(-7.5, 1), entre(4, 10)); galinhas.push([gx, alturaTerreno(gx, gz), gz, rnd() * TAU]); }
+  }
+  const madeira = comNeblina(new THREE.MeshLambertMaterial({ color: '#dcc6a4' }));
+  const iTr = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.12, 0.1), madeira, trilhos.length);
+  trilhos.forEach(([x, y, z, a, l], i) => iTr.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, a), s.set(l, 1, 1))));
+  const iPo = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 1.3, 0.16).translate(0, 0.55, 0), madeira, postes.length);
+  postes.forEach(([x, y, z], i) => iPo.setMatrixAt(i, m4.compose(p.set(x, y - 0.1, z), q.identity(), s.set(1, 1, 1))));
+  const iHo = new THREE.InstancedMesh(new THREE.BoxGeometry(5.5, 0.3, 5).translate(0, 0.1, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#b59472' })), hortas.length);
+  hortas.forEach(([x, y, z, r], i) => iHo.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.set(1, 1, 1))));
+  const iFi = new THREE.InstancedMesh(new THREE.BoxGeometry(5, 0.45, 0.7).translate(0, 0.35, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), fileiras.length);
+  fileiras.forEach(([x, y, z, r], i) => { iFi.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.set(1, 1, 1))); iFi.setColorAt(i, c.set(['#8cc06a', '#a6cc72', '#7fb565', '#e3c46a'][i % 4])); });
+  const copa = geoCopa(), iAr = new THREE.InstancedMesh(copa, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), arvores.length);
+  const iTr2 = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.15, 0.22, 1, 6).translate(0, 0.5, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#8a6e58' })), arvores.length);
+  arvores.forEach(([x, y, z], i) => {
+    const r = entre(1.8, 2.4); iAr.setMatrixAt(i, m4.compose(p.set(x, y + 2.2 + r * 0.6, z), q.setFromAxisAngle(cima, rnd() * TAU), s.set(r, r * 0.9, r)));
+    iAr.setColorAt(i, c.set(['#93c472', '#a8cc7c', '#9bbf6c'][i % 3])); iTr2.setMatrixAt(i, m4.compose(p.set(x, y - 0.2, z), q.identity(), s.set(1, 2.6, 1)));
+  });
+  const geoGal = juntarGeos([new THREE.BoxGeometry(0.34, 0.32, 0.48).translate(0, 0.32, 0), new THREE.BoxGeometry(0.2, 0.22, 0.2).translate(0, 0.55, 0.22)]);
+  const iGa = new THREE.InstancedMesh(geoGal, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), galinhas.length);
+  galinhas.forEach(([x, y, z, r], i) => { iGa.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.setScalar(1.2))); iGa.setColorAt(i, c.set(['#fffaf2', '#ecc89a', '#c98f5f', '#fffaf2'][i % 4])); });
+  for (const im of [iTr, iPo, iHo, iFi, iAr, iTr2, iGa]) { im.castShadow = true; im.receiveShadow = true; raiz.add(im); }
+}
+
+// barquinhos a vela passeando devagar nos lagos largos
+function criarBarcos(raiz, def) {
+  const rio = TER.rio, lista = [];
+  const casco = new THREE.BoxGeometry(1.5, 0.6, 4.4).translate(0, 0.3, 0), pc = casco.attributes.position;
+  for (let i = 0; i < pc.count; i++) if (pc.getZ(i) > 0) pc.setX(i, pc.getX(i) * 0.35);   // proa fina
+  casco.computeVertexNormals();
+  const gV = new THREE.BufferGeometry(); gV.setAttribute('position', new THREE.Float32BufferAttribute([0, 0.8, -1.4, 0, 5.4, 0.2, 0, 0.8, 1.3], 3)); gV.computeVertexNormals();
+  const mC = comNeblina(new THREE.MeshLambertMaterial({ color: '#b48a6a' })), mV = comNeblina(new THREE.MeshLambertMaterial({ color: '#fffaf0', side: THREE.DoubleSide }));
+  for (const [a, b, W] of def.rio.lagos || []) {
+    if (W < 38) continue;
+    const ia = Math.round((a + 0.03) * (rio.length - 1)), ib = Math.min(Math.round((b - 0.02) * (rio.length - 1)), rio.length - 2); if (ib - ia < 8) continue;
+    const n = W > 60 ? 3 : 2;
+    for (let k = 0; k < n; k++) {
+      const g = new THREE.Group(), c = new THREE.Mesh(casco, mC), v = new THREE.Mesh(gV, mV); g.add(c, v); g.scale.setScalar(1.3); raiz.add(g);
+      lista.push({ g, ia, ib, off: entre(-0.5, 0.5), fase: rnd() * TAU, vel: entre(0.025, 0.045) });
+    }
+  }
+  return {
+    atualizar(dt, t) {
+      for (const o of lista) {
+        const u = 0.5 + 0.5 * Math.sin(t * o.vel + o.fase), du = Math.cos(t * o.vel + o.fase), f = o.ia + (o.ib - o.ia) * u, r = rio[Math.floor(f)], w = r.w * o.off;
+        o.g.position.set(r.x - r.tz * w, r.L - 0.3 + Math.sin(t * 1.3 + o.fase) * 0.06, r.z + r.tx * w);
+        o.g.rotation.set(Math.sin(t * 0.9 + o.fase) * 0.04, Math.atan2(r.tx * Math.sign(du), r.tz * Math.sign(du)), Math.sin(t * 1.1 + o.fase) * 0.06);
+      }
+    },
+  };
+}
 // ---------------- montagem de um voo ----------------
 function posicaoNoRio(t) { const rio = TER.rio; return rio[lim(Math.round(t * (rio.length - 1)), 0, rio.length - 1)]; }
 function distRio(x, z) { return TER.dist[celula(x, z)]; }
@@ -271,8 +425,11 @@ function construirVoo(def, ctx) {
   const evitar = def.rio.degraus.slice(1).filter(g => g[2] !== 'c').map(g => Math.round(g[0] * (rio.length - 1)))
     .concat(def.lugares.filter(l => l.tipo === 'arco').map(l => Math.round(l.t * (rio.length - 1))));
   (def.aquedutos || []).forEach((a, j) => {
-    const s = j === 0 ? 0 : nT - 1, ia = iCumes[s], ib = iCumes[s + 1];
+    const s = j === 0 ? (def.trechoAqueduto || 0) : nT - 1, ia = iCumes[s], ib = iCumes[s + 1];
     let i = Math.round(ia + (ib - ia) * 0.8);
+    // no 1º trecho, só depois de dar para descer planando do cume até o vão (sem mergulho brusco)
+    if (j === 0 && !def.trechoAqueduto) { const cu = def.cumes[0], pl = (def.planeio || 0.38) * 0.85, ent = ia + Math.sign(ib - ia) * 10;
+      for (let k = ent; k !== ib; k += Math.sign(ib - ia)) { const dist = Math.hypot(rio[ent].x - cu.x, rio[ent].z - cu.z) + Math.abs(k - ent) * 4; if (dist * pl >= cu.h + 6 - (rio[k].L + 14)) { if (Math.abs(k - ia) > Math.abs(i - ia)) i = ib > ia ? Math.min(k, ib - 12) : Math.max(k, ib + 12); break; } } }
     // longe de cachoeiras e do arco de pedra, e num trecho reto do rio (curva fechada faria o planador cruzar fora do vão)
     const curva = k => { const a = rio[lim(k - 15, 0, rio.length - 1)], b = rio[lim(k + 15, 0, rio.length - 1)]; return Math.abs(angDif(Math.atan2(a.tx, a.tz), Math.atan2(b.tx, b.tz))); };
     let melhor = i, nota = 1e9;
@@ -286,19 +443,23 @@ function construirVoo(def, ctx) {
   for (const a of def.aquedutos || []) {
     const r0 = posicaoNoRio(a.t), i = rio.indexOf(r0), A = rio[lim(i - 10, 0, rio.length - 1)], B = rio[lim(i + 10, 0, rio.length - 1)], dl = Math.hypot(B.x - A.x, B.z - A.z);
     const r = { ...r0, tx: (B.x - A.x) / dl, tz: (B.z - A.z) / dl }, o = criarAqueduto(raiz, def, r); aquedutos.push(o);
-    passagens.push({ x: r.x, z: r.z, y: r.L + 14, R: 8.5 });
+    passagens.push({ x: r.x, z: r.z, y: r.L + 14, R: 8.5, tx: r.tx, tz: r.tz });
     lugares.push({ nome: a.nome, frase: a.frase, x: r.x, z: r.z, raio: 150, achado: false });
   }
+  // --- cascatas nas encostas e vilarejo ---
+  const cascatas = criarCascatas(raiz, def); lugares.push(...cascatas.lugares);
+  criarVilarejo(raiz, def, aquedutos);
+  const barcos = criarBarcos(raiz, def);
   // --- lugares especiais ---
   let arcoPedra = null;
   for (const l of def.lugares) {
     const r = posicaoNoRio(l.t);
-    if (l.tipo === 'arco') { arcoPedra = { ...criarArcoPedra(raiz, def, r), r }; passagens.push({ x: r.x, z: r.z, y: r.L + arcoPedra.R * 0.55, R: 9 }); lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 120, achado: false }); }
+    if (l.tipo === 'arco') { arcoPedra = { ...criarArcoPedra(raiz, def, r), r }; passagens.push({ x: r.x, z: r.z, y: r.L + arcoPedra.R * 0.55, R: 9, tx: r.tx, tz: r.tz }); lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 120, achado: false }); }
     else if (l.tipo === 'arvore') { const x = r.x - r.tz * l.lado * (r.w + 46), z = r.z + r.tx * l.lado * (r.w + 46); criarArvoreAnciao(raiz, def, x, z); lugares.push({ nome: l.nome, frase: l.frase, x, z, raio: 120, achado: false }); }
     else lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 150, achado: false });
   }
   // --- rota de cada trecho: cume → vale (planando) → espiral de vento → próximo cume ---
-  const PLANEIO = 0.38;   // quanto se desce por metro andado, num mergulho tranquilo
+  const PLANEIO = def.planeio || 0.38;   // quanto se desce por metro andado, num mergulho tranquilo
   const tDe = cu => { let m = 1e9, k = 0; rio.forEach((r, i) => { const d = Math.hypot(r.x - cu.x, r.z - cu.z); if (d < m) { m = d; k = i; } }); return k; };
   for (let s = 0; s < cumes.length - 1; s++) {
     const A = def.cumes[s], B = def.cumes[s + 1], ia = tDe(A), ib = tDe(B), passo = ia < ib ? 1 : -1;
@@ -309,7 +470,7 @@ function construirVoo(def, ctx) {
     for (let i = entrada; passo > 0 ? i <= saida : i >= saida; i += passo * 12) {
       const r = rio[i];
       const ps = passagens.find(q => !q.usado && Math.hypot(r.x - q.x, r.z - q.z) < 30);
-      if (ps) { trecho.push({ x: ps.x, y: ps.y, z: ps.z, rio: i, fixo: true, pedra: true, R: ps.R }); ps.usado = true; continue; }
+      if (ps) { trecho.push({ x: ps.x - ps.tx * passo * 42, y: ps.y + 4, z: ps.z - ps.tz * passo * 42, fixo: true }, { x: ps.x, y: ps.y, z: ps.z, rio: i, fixo: true, pedra: true, R: ps.R }); ps.usado = true; continue; }
       trecho.push({ x: r.x, y: Math.max(r.L, rio[lim(i + 6 * passo, 0, rio.length - 1)].L) + 18 + 4 * Math.sin(i * 0.06), z: r.z, rio: i });
     }
     // altura planejada: ninguém precisa mergulhar mais que o normal para pegar os arcos
@@ -318,7 +479,7 @@ function construirVoo(def, ctx) {
     // antes de cada passagem (aqueduto, arco de pedra) a descida começa cedo, sem mergulho brusco no fim
     trecho.forEach((f, k) => {
       if (!f.fixo) return; let acc = 0;
-      for (let j = k - 1; j >= 0; j--) { acc += Math.hypot(trecho[j + 1].x - trecho[j].x, trecho[j + 1].z - trecho[j].z); if (trecho[j].fixo) break; trecho[j].y = Math.min(trecho[j].y, f.y + acc * 0.42); }
+      for (let j = k - 1; j >= 0; j--) { acc += Math.hypot(trecho[j + 1].x - trecho[j].x, trecho[j + 1].z - trecho[j].z); if (trecho[j].fixo) break; trecho[j].y = Math.min(trecho[j].y, f.y + acc * PLANEIO * 1.1); }
     });
     rota.push(...trecho);
     // espiral de vento entre o rio e o próximo cume
@@ -331,7 +492,7 @@ function construirVoo(def, ctx) {
   for (let k = 0; k < def.termicasExtras; k++) {
     for (let tent = 0; tent < 40; tent++) {
       const x = entre(-700, 700), z = entre(-700, 700), y = alturaTerreno(x, z);
-      if (distRio(x, z) < 50 || declive(x, z) > 0.3) continue;
+      if (distRio(x, z) < 50 || declive(x, z) > 0.3 || rota.some(p => Math.hypot(p.x - x, p.z - z) < 110)) continue;   // longe do caminho, para não atrapalhar o voo guiado
       termicas.push(new Termica(raiz, x, z, y, y + entre(160, 240), 45, 9)); break;
     }
   }
@@ -348,9 +509,9 @@ function construirVoo(def, ctx) {
   });
   // início: no primeiro cume, de frente para o vale
   const A = def.cumes[0], r1 = rota[1];
-  const inicio = { x: A.x, y: A.h + 0.9, z: A.z, yaw: Math.atan2(-(r1.x - A.x), -(r1.z - A.z)) };
+  const dI = Math.hypot(r1.x - A.x, r1.z - A.z) || 1, inicio = { x: A.x + (r1.x - A.x) / dI * 5, y: A.h + 2.3, z: A.z + (r1.z - A.z) / dI * 5, yaw: Math.atan2(-(r1.x - A.x), -(r1.z - A.z)) };
   return {
-    inicio, cumes, arcos, termicas, lugares, rota, borrifos, aquedutos,
+    inicio, cumes, arcos, termicas, lugares, rota, borrifos, aquedutos, sonsAgua: cascatas.sons, barcos,
     vento: new THREE.Vector2(...def.vento).normalize(),
   };
 }

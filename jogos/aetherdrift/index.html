@@ -564,6 +564,7 @@ function malhaTerreno(def) {
     // neve no alto (menos onde é muito íngreme)
     const lnv = cor.linhaNeve + perlin(x / 80 + 7, z / 80) * 26;
     c.lerp(neve, suave(lnv, lnv + 26, y) * (1 - suave(0.55, 0.8, incl) * 0.75));
+    if (TER.ocupado && TER.ocupado[v]) c.lerp(tmp.copy(g1).offsetHSL(0.01, 0.06, -0.03), 0.75);
     // margens de areia e seixos
     c.lerp(areia, (1 - suave(r.w + 1, r.w + 7 + 3 * perlin(x / 20, z / 20), d)) * (y < r.L + 3.5 ? 1 : 0.3));
     cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b;
@@ -655,6 +656,81 @@ function criarCeu() {
 }
 
 // =====================================================================
+// CASCATAS NAS ENCOSTAS (estilo vale suíço) e VILAREJO — só o traçado aqui;
+// as malhas são feitas em voos.js. Os lugares ocupados ficam sem árvores.
+// =====================================================================
+function marcarOcupado(x, z, raio) {
+  const { cel, ini, n } = TER, ci = Math.round((x - ini) / cel), cj = Math.round((z - ini) / cel), rc = Math.ceil(raio / cel);
+  for (let j = cj - rc; j <= cj + rc; j++) for (let i = ci - rc; i <= ci + rc; i++) if (i >= 0 && j >= 0 && i < n && j < n) TER.ocupado[j * n + i] = 1;
+}
+function tracarCascatas(def) {
+  TER.ocupado = new Uint8Array(TER.n * TER.n); TER.cascatas = []; TER.chales = []; TER.rebanho = [];
+  const qtd = (def.cascatas && def.cascatas.qtd) || 0, V = def.vale, lista = TER.cascatas;
+  for (let tent = 0; tent < 12000 && lista.length < qtd; tent++) {
+    const x0 = entre(-830, 830), z0 = entre(-830, 830), c0 = celula(x0, z0), r0 = TER.rio[TER.idx[c0]], d0 = TER.dist[c0];
+    if (d0 < r0.w + V.chao + V.largo * 0.4 || d0 > r0.w + V.chao + V.largo + 110) continue;
+    const y0 = alturaTerreno(x0, z0); if (y0 - r0.L < 70 || y0 > def.cores.linhaNeve + 60) continue;
+    if (def.cumes.some(cu => Math.hypot(x0 - cu.x, z0 - cu.z) < 120)) continue;
+    if (lista.some(o => Math.hypot(o.pts[0].x - x0, o.pts[0].z - z0) < 85 || Math.hypot(o.fim.x - x0, o.fim.z - z0) < 55)) continue;
+    // a água desce pela linha de maior declive; no plano, segue para o rio
+    const pts = []; let x = x0, z = z0, ok = false, queda = 0;
+    for (let k = 0; k < 520; k++) {
+      const y = alturaTerreno(x, z), c = celula(x, z), r = TER.rio[TER.idx[c]];
+      pts.push({ x, y, z });
+      if (TER.dist[c] < r.w + 0.5) { ok = true; break; }
+      if (k > 1 && pts[k - 1].y - y > 2.4) queda += pts[k - 1].y - y;
+      const gx = (alturaTerreno(x + 2, z) - alturaTerreno(x - 2, z)) / 4, gz = (alturaTerreno(x, z + 2) - alturaTerreno(x, z - 2)) / 4, g = Math.hypot(gx, gz) || 1e-6;
+      const rx = r.x - x, rz = r.z - z, rl = Math.hypot(rx, rz) || 1, w = 1 - suave(0.06, 0.3, g);
+      let dx = mix(-gx / g, rx / rl, w), dz = mix(-gz / g, rz / rl, w); const l = Math.hypot(dx, dz) || 1;
+      x += dx / l * 3; z += dz / l * 3;
+    }
+    if (!ok || queda < 40) continue;
+    if (lista.some(o => o.pts.some(p => Math.hypot(p.x - pts[pts.length - 1].x, p.z - pts[pts.length - 1].z) < 24))) continue;
+    for (let k = 0; k < pts.length; k++) {   // declive (queda por metro andado), suavizado
+      const a = pts[Math.max(k - 2, 0)], b = pts[Math.min(k + 2, pts.length - 1)], hd = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+      pts[k].s = (a.y - b.y) / hd;
+    }
+    for (const p of pts) marcarOcupado(p.x, p.z, 8);
+    lista.push({ pts, fim: pts[pts.length - 1], queda });
+  }
+  escolherVilarejo(def);
+}
+function escolherVilarejo(def) {
+  const vila = def.vilarejo; if (!vila) return;
+  const V = def.vale, livre = (x, z) => !TER.ocupado[celula(x, z)];
+  const plano = (x, z) => {
+    const c = celula(x, z), r = TER.rio[TER.idx[c]], d = TER.dist[c], y = alturaTerreno(x, z);
+    return d > r.w + 16 && d < r.w + V.chao + 50 && y > r.L + 1.5 && declive(x, z) < 0.16 && livre(x, z) && !def.cumes.some(cu => Math.hypot(x - cu.x, z - cu.z) < 60);
+  };
+  const quintalOk = (x, z) => { const c = celula(x, z), r = TER.rio[TER.idx[c]]; return TER.dist[c] > r.w + 8 && alturaTerreno(x, z) > r.L + 1 && declive(x, z) < 0.3 && livre(x, z); };
+  const centros = [];
+  for (let tent = 0; tent < 3000 && centros.length < vila.grupos; tent++) {
+    const x = entre(-860, 860), z = entre(-860, 860);
+    if (plano(x, z) && !centros.some(c => Math.hypot(c.x - x, c.z - z) < 200)) centros.push({ x, z });
+  }
+  for (const c of centros) {
+    const n = 4 + Math.floor(rnd() * 5);
+    for (let k = 0, t = 0; k < n && t < 250; t++) {
+      const x = c.x + entre(-75, 75), z = c.z + entre(-75, 75), rot = rnd() * TAU;
+      if (TER.chales.some(o => Math.hypot(o.x - x, o.z - z) < 30)) continue;
+      // o quintal inteiro (cerca 18 x 17 m, na frente da casa) precisa caber no plano
+      const canto = (lx, lz) => [x + lx * Math.cos(rot) + lz * Math.sin(rot), z - lx * Math.sin(rot) + lz * Math.cos(rot)];
+      if (!plano(x, z) || ![[-9, -6], [9, -6], [-9, 11], [9, 11]].every(([a, b]) => quintalOk(...canto(a, b)))) continue;
+      TER.chales.push({ x, z, y: alturaTerreno(x, z), rot, esc: entre(0.9, 1.15) });
+      for (const [a, b] of [[0, 0], [0, 7], [-6, 4], [6, 4]]) marcarOcupado(...canto(a, b), 9);
+      k++;
+    }
+    // um rebanho pastando perto de cada grupo de casas
+    const ang = rnd() * TAU, bx = c.x + Math.cos(ang) * 80, bz = c.z + Math.sin(ang) * 80;
+    for (let k = 0, t = 0; k < vila.bichos && t < 80; t++) {
+      const x = bx + entre(-30, 30), z = bz + entre(-30, 30), cl = celula(x, z), r = TER.rio[TER.idx[cl]];
+      if (TER.dist[cl] < r.w + 6 || declive(x, z) > 0.3) continue;
+      TER.rebanho.push({ x, z, y: alturaTerreno(x, z), rot: rnd() * TAU, tipo: k < 3 ? 'cavalo' : 'vaca' }); k++;
+    }
+  }
+}
+
+// =====================================================================
 // VEGETAÇÃO E PEDRAS (instanciadas e em blocos, para o celular aguentar)
 // =====================================================================
 function juntarGeos(lista) {
@@ -676,14 +752,14 @@ function geoCopa() {
 
 function plantarVegetacao(raiz, def, qtd) {
   const v = def.vegetacao, cor = def.cores, BL = 334, nb = Math.ceil(TER.tam / BL);
-  const blocos = Array.from({ length: nb * nb }, () => ({ pin: [], fol: [] }));
+  const blocos = Array.from({ length: nb * nb }, () => ({ pin: [], fol: [], arb: [] })), ocup = TER.ocupado;
   const geoP = geoPinheiro(), geoF = geoCopa(), geoT = new THREE.CylinderGeometry(0.12, 0.2, 1, 5).translate(0, 0.5, 0);
   const tenta = qtd * 9;
   for (let t = 0; t < tenta; t++) {
     const x = entre(-930, 930), z = entre(-930, 930), y = alturaTerreno(x, z), c = celula(x, z), r = TER.rio[TER.idx[c]];
-    if (TER.dist[c] < r.w + 9 || y < r.L + 1.5) continue;
+    if (TER.dist[c] < r.w + 9 || y < r.L + 1.5 || (ocup && ocup[c])) continue;
     if (y > cor.linhaArvore + perlin(x / 60, z / 60) * 30) continue;
-    const dcl = declive(x, z); if (dcl > 0.62) continue;
+    const dcl = declive(x, z); if (dcl > (v.encosta || 0.62)) continue;
     let dens = 0.5 + 0.5 * perlin(x / 160 + 21, z / 160 - 8) + 0.25 * perlin(x / 40, z / 40);
     if (cor.aridez) dens += 0.45 * (1 - suave(r.w + 10, r.w + 110, TER.dist[c])) - 0.3 * suave(r.w + 80, r.w + 220, TER.dist[c]);
     if (dens < v.mata && rnd() < 0.93) continue;
@@ -692,10 +768,26 @@ function plantarVegetacao(raiz, def, qtd) {
     const pinheiro = y > v.pinheiroAcima + perlin(x / 90, z / 90) * 40 || rnd() < v.pinheiroQto;
     (pinheiro ? b.pin : b.fol).push([x, y, z]);
   }
+  // arbustos e moitas ao longo das margens do rio
+  for (let t = 0; t < qtd * 0.5; t++) {
+    const r = TER.rio[Math.floor(rnd() * TER.rio.length)], o = (r.w + entre(3, 26)) * (rnd() < 0.5 ? -1 : 1), x = r.x - r.tz * o, z = r.z + r.tx * o;
+    const c = celula(x, z), y = alturaTerreno(x, z); if (TER.dist[c] < TER.rio[TER.idx[c]].w + 2.5 || y < r.L + 0.6 || (ocup && ocup[c]) || declive(x, z) > 0.8) continue;
+    if (r.L > cor.linhaArvore + 40) continue;
+    const b = blocos[Math.floor((z + 1000) / BL) * nb + Math.floor((x + 1000) / BL)]; if (b) b.arb.push([x, y, z]);
+  }
   const mP = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mF = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mT = comNeblina(new THREE.MeshLambertMaterial({ color: cor.tronco }));
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), cc = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
   let total = 0;
   for (const b of blocos) {
+    if (b.arb.length) {
+      const im = new THREE.InstancedMesh(geoF, mF, b.arb.length);
+      b.arb.forEach(([x, y, z], i) => {
+        const r = entre(1.1, 2.6) * v.escala; q.setFromAxisAngle(cima, rnd() * TAU);
+        im.setMatrixAt(i, m4.compose(p.set(x, y + r * 0.35, z), q, s.set(r * entre(1, 1.5), r * entre(0.6, 0.9), r)));
+        im.setColorAt(i, cc.set(v.folhas[Math.floor(rnd() * v.folhas.length)]).offsetHSL(0, entre(-0.02, 0.04), entre(-0.07, 0)));
+      });
+      im.receiveShadow = true; raiz.add(im); total += b.arb.length;
+    }
     const nt = b.pin.length + b.fol.length; if (!nt) continue;
     const troncos = new THREE.InstancedMesh(geoT, mT, nt); let it = 0;
     if (b.pin.length) {
@@ -728,17 +820,25 @@ function plantarVegetacao(raiz, def, qtd) {
 
 function espalharPedras(raiz, def, qtd) {
   const geo = new THREE.DodecahedronGeometry(1, 0), m = new THREE.InstancedMesh(geo, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff', flatShading: true })), qtd);
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), e = new THREE.Euler();
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), p0 = new THREE.Vector3(), c = new THREE.Color(), e = new THREE.Euler();
   let k = 0;
-  for (let t = 0; t < qtd * 6 && k < qtd * 0.8; t++) {
+  for (let t = 0; t < qtd * 6 && k < qtd * 0.7; t++) {
     const x = entre(-940, 940), z = entre(-940, 940), cl = celula(x, z), r = TER.rio[TER.idx[cl]], d = TER.dist[cl], y = alturaTerreno(x, z);
-    const margem = d > r.w + 1 && d < r.w + 14, encosta = declive(x, z) > 0.35, seco = def.cores.aridez && d > r.w + 60 && rnd() < 0.012;
-    if (!margem && !seco && !(encosta && rnd() < 0.06)) continue;
+    const margem = d > r.w + 1 && d < r.w + 14, encosta = declive(x, z) > 0.35, seco = def.cores.aridez && d > r.w + 60 && rnd() < 0.012, prado = !encosta && rnd() < 0.01;
+    if (!margem && !seco && !prado && !(encosta && rnd() < 0.12)) continue;
     if (def.cumes.some(cu => Math.hypot(x - cu.x, z - cu.z) < 30)) continue;
     const tam = margem ? entre(0.6, 2.2) : entre(1.5, 5.5);
     q.setFromEuler(e.set(rnd() * 3, rnd() * 3, rnd() * 3));
     m.setMatrixAt(k, m4.compose(p.set(x, y - tam * 0.15, z), q, s.set(tam * entre(0.9, 1.5), tam * entre(0.5, 0.9), tam)));
     m.setColorAt(k++, c.set(def.cores.rocha[0]).offsetHSL(0, -0.03, entre(0.02, 0.1)));
+  }
+  // pedras ao lado das cascatas e dos riachos que descem das montanhas
+  for (const cs of TER.cascatas || []) for (let i = 2; i < cs.pts.length && k < qtd; i += 3) {
+    const p = cs.pts[i], b = cs.pts[Math.min(i + 1, cs.pts.length - 1)], tl = Math.hypot(b.x - p.x, b.z - p.z) || 1, lado = rnd() < 0.5 ? -1 : 1, o = lado * entre(3.5, 7);
+    const x = p.x - (b.z - p.z) / tl * o, z = p.z + (b.x - p.x) / tl * o, tam = entre(0.9, 3);
+    q.setFromEuler(e.set(rnd() * 3, rnd() * 3, rnd() * 3));
+    m.setMatrixAt(k, m4.compose(p0.set(x, alturaTerreno(x, z) - tam * 0.2, z), q, s.set(tam * entre(1, 1.5), tam * entre(0.6, 0.9), tam)));
+    m.setColorAt(k++, c.set(def.cores.rocha[rnd() < 0.5 ? 0 : 1]).offsetHSL(0, -0.02, entre(-0.02, 0.08)));
   }
   // pedras redondas no meio das corredeiras (a água espuma em volta)
   for (let i = 0; i < TER.rio.length && k < qtd; i += 2) {
@@ -839,52 +939,82 @@ function criarCordilheiras(raiz, def) {
 // PÁSSAROS: bandos pequenos que circulam devagar
 // =====================================================================
 function criarPassaros(raiz, def) {
-  const asa = lado => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.45, 0, 0, 0.5, 1.7 * lado, 0, 0.15], 3)); return g; };
-  const gE = asa(-1), gD = asa(1), mat = new THREE.MeshBasicMaterial({ color: def.passaros.cor, side: THREE.DoubleSide }), bandos = [];
-  for (const [x, y, z, raio] of def.passaros.bandos) {
+  const asa = (lado, l) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.45, 0, 0, 0.5, l * lado, 0, 0.15], 3)); return g; };
+  const gE = asa(-1, 1.7), gD = asa(1, 1.7), gAE = asa(-1, 2.8), gAD = asa(1, 2.8);
+  const mat = new THREE.MeshBasicMaterial({ color: def.passaros.cor, side: THREE.DoubleSide });
+  const matA = new THREE.MeshBasicMaterial({ color: def.passaros.aguia || '#d8b894', side: THREE.DoubleSide });
+  const novaAve = (esc, grande) => {
+    const ave = new THREE.Group(), e = new THREE.Mesh(grande ? gAE : gE, grande ? matA : mat), d = new THREE.Mesh(grande ? gAD : gD, grande ? matA : mat);
+    ave.add(e, d); ave.scale.setScalar(esc); ave.userData = { o: new THREE.Vector3(), f: entre(2.6, 3.6), fase: rnd() * TAU, e, d }; return ave;
+  };
+  const bater = (a, t, forca = 0.6) => { const u = a.userData, b = Math.sin(t * u.f + u.fase); u.e.rotation.z = -b * forca; u.d.rotation.z = b * forca; };
+  const rio = TER.rio, bandos = [], rasantes = [], aguias = [];
+  // bandos que circulam devagar (os do vale e mais alguns sobre o rio)
+  const defs = def.passaros.bandos.slice();
+  for (let k = 0; k < 1; k++) { const r = rio[Math.floor(entre(0.2, 0.8) * rio.length)]; defs.push([r.x, r.L + entre(55, 110), r.z, entre(70, 130)]); }
+  for (const [x, y, z, raio] of defs) {
     const g = new THREE.Group(), aves = [];
-    for (let i = 0; i < 7; i++) {
-      const ave = new THREE.Group(), e = new THREE.Mesh(gE, mat), d = new THREE.Mesh(gD, mat); ave.add(e, d); ave.scale.setScalar(entre(1.6, 2.2));
-      ave.userData = { o: new THREE.Vector3(entre(-14, 14), entre(-5, 5), entre(-14, 14)), f: entre(2.6, 3.6), fase: rnd() * TAU, e, d };
-      g.add(ave); aves.push(ave);
-    }
-    raiz.add(g); bandos.push({ g, aves, x, y, z, raio, a: rnd() * TAU, v: entre(0.04, 0.07) });
+    for (let i = 0; i < 5; i++) { const a = novaAve(entre(1.6, 2.2)); a.userData.o.set(entre(-16, 16), entre(-5, 5), entre(-16, 16)); g.add(a); aves.push(a); }
+    raiz.add(g); bandos.push({ g, aves, x, y, z, raio, a: rnd() * TAU, v: entre(0.04, 0.08) * (rnd() < 0.5 ? -1 : 1) });
   }
+  // andorinhas: sobem e descem o rio, rente à água
+  for (let k = 0; k < 2; k++) {
+    const g = new THREE.Group(), aves = [];
+    for (let i = 0; i < 3; i++) { const a = novaAve(entre(0.8, 1.1)); a.userData.f = entre(6, 8); a.userData.o.set(entre(-5, 5), entre(-1.5, 1.5), entre(-6, 6)); g.add(a); aves.push(a); }
+    raiz.add(g); rasantes.push({ g, aves, i: entre(0.05, 0.95) * (rio.length - 1), v: entre(13, 19), dir: rnd() < 0.5 ? -1 : 1, fase: rnd() * TAU });
+  }
+  // águias: planam em círculos largos sobre as encostas, quase sem bater asa
+  // (as águias são postas depois, girando dentro das espirais de vento do caminho)
+  // de vez em quando um bando vem voar ao lado do planador
+  const comp = { g: new THREE.Group(), aves: [], espera: entre(30, 50), t: -1, lado: 1 };
+  for (let i = 0; i < 5; i++) { const a = novaAve(entre(1.3, 1.7)); a.userData.o.set((i % 2 ? 1 : -1) * Math.ceil(i / 2) * 3.2, entre(-1, 1), -Math.ceil(i / 2) * 3.4); comp.g.add(a); comp.aves.push(a); }
+  comp.g.visible = false; raiz.add(comp.g);
+  const fr = new THREE.Vector3(), di = new THREE.Vector3();
   return {
-    atualizar(dt, t) {
-      for (const b of bandos) {
-        b.a += b.v * dt;
-        b.g.position.set(b.x + Math.cos(b.a) * b.raio, b.y + Math.sin(t * 0.3 + b.x) * 6, b.z + Math.sin(b.a) * b.raio); b.g.rotation.y = -b.a;
-        for (const a of b.aves) {
-          const u = a.userData, bat = Math.sin(t * u.f + u.fase);
-          a.position.set(u.o.x + Math.sin(t * 0.4 + u.fase) * 3, u.o.y + Math.sin(t * 0.7 + u.fase) * 1.5, u.o.z);
-          u.e.rotation.z = -bat * 0.6; u.d.rotation.z = bat * 0.6;
-        }
+    // duas águias girando em cada espiral de vento: mostram onde o ar sobe
+    nasTermicas(lista) {
+      for (const T of lista) for (let k = 0; k < 2; k++) {
+        const a = novaAve(entre(2.3, 2.8), true); raiz.add(a);
+        aguias.push({ a, x: T.x, z: T.z, y: mix(T.base, T.topo, 0.35 + k * 0.3), raio: T.r * entre(0.35, 0.55), ang: rnd() * TAU, v: 0.22 * (k ? 1 : 1.15) });
       }
     },
-  };
-}
-
-// ---------- pólen e luz flutuando em volta da câmera ----------
-function criarPolen(cena) {
-  const N = 420, pos = new Float32Array(N * 3), vel = new Float32Array(N);
-  for (let i = 0; i < N; i++) { pos[i * 3] = entre(-60, 60); pos[i * 3 + 1] = entre(-25, 30); pos[i * 3 + 2] = entre(-60, 60); vel[i] = entre(0.2, 0.7); }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const mat = new THREE.PointsMaterial({ size: 0.5, map: texturaBrilho(), transparent: true, depthWrite: false, color: '#fff6dc', opacity: 0.8 });
-  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; cena.add(pts);
-  return {
-    pts,
-    atualizar(dt, t, cam) {
-      const c = cam.position;
-      for (let i = 0; i < N; i++) {
-        let x = pos[i * 3], y = pos[i * 3 + 1], z = pos[i * 3 + 2];
-        x += (Math.sin(t * 0.3 + i) * 0.25 + 0.35) * dt; y += (Math.sin(t * 0.5 + i * 1.7) * 0.2 + vel[i] * 0.15) * dt; z += Math.cos(t * 0.27 + i * 0.5) * 0.25 * dt;
-        if (x - c.x > 60) x -= 120; if (x - c.x < -60) x += 120;
-        if (z - c.z > 60) z -= 120; if (z - c.z < -60) z += 120;
-        if (y - c.y > 30) y -= 55; if (y - c.y < -25) y += 55;
-        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+    atualizar(dt, t, plan, voando) {
+      for (const b of bandos) {
+        b.a += b.v * dt;
+        b.g.position.set(b.x + Math.cos(b.a) * b.raio, b.y + Math.sin(t * 0.3 + b.x) * 6, b.z + Math.sin(b.a) * b.raio);
+        b.g.rotation.y = b.v > 0 ? -b.a : Math.PI - b.a;
+        for (const a of b.aves) { const u = a.userData; a.position.set(u.o.x + Math.sin(t * 0.4 + u.fase) * 3, u.o.y + Math.sin(t * 0.7 + u.fase) * 1.5, u.o.z); bater(a, t); }
       }
-      geo.attributes.position.needsUpdate = true;
+      for (const r of rasantes) {
+        r.i += r.dir * r.v * dt / 4;
+        if (r.i < 2 || r.i > rio.length - 3) { r.dir *= -1; r.i = lim(r.i, 2, rio.length - 3); }
+        const p = rio[Math.floor(r.i)], s = Math.sin(t * 0.9 + r.fase), o = s * p.w * 0.6;
+        r.g.position.set(p.x - p.tz * o, p.L + 4 + 2.5 * Math.sin(t * 1.3 + r.fase), p.z + p.tx * o);
+        r.g.rotation.y = Math.atan2(p.tx * r.dir, p.tz * r.dir) + Math.cos(t * 0.9 + r.fase) * 0.5 * r.dir;
+        for (const a of r.aves) { const u = a.userData; a.position.set(u.o.x + Math.sin(t * 2 + u.fase) * 1.5, u.o.y, u.o.z); bater(a, t, 0.8); }
+      }
+      for (const g of aguias) {
+        g.ang += g.v * dt;
+        g.a.position.set(g.x + Math.cos(g.ang) * g.raio, g.y + Math.sin(t * 0.2 + g.x) * 8, g.z + Math.sin(g.ang) * g.raio);
+        g.a.rotation.set(0, g.v > 0 ? -g.ang : Math.PI - g.ang, 0); g.a.rotateZ(g.v > 0 ? 0.32 : -0.32);
+        const u = g.a.userData, b = Math.sin(t * 0.8 + u.fase) * 0.08 + 0.12; u.e.rotation.z = -b; u.d.rotation.z = b;
+      }
+      // bando companheiro: chega por trás, voa junto um pouco e vai embora subindo
+      if (comp.t < 0) {
+        if (voando) comp.espera -= dt;
+        if (comp.espera <= 0 && voando && plan.v > 6) { comp.t = 0; comp.lado = rnd() < 0.5 ? -1 : 1; comp.g.visible = true; }
+      }
+      if (comp.t >= 0) {
+        comp.t += dt; const T = comp.t;
+        fr.set(plan.vel.x, 0, plan.vel.z); if (fr.lengthSq() < 0.01) fr.set(0, 0, 1); fr.normalize();
+        di.set(fr.z, 0, -fr.x).multiplyScalar(comp.lado);
+        const chega = suave(0, 5, T), sai = suave(13, 20, T);
+        const tras = mix(-45, 2, chega) + sai * 25, lado = mix(30, 16, chega) + sai * 50, cima = mix(10, 3, chega) + sai * 30;
+        comp.g.position.copy(plan.pos).addScaledVector(fr, tras).addScaledVector(di, lado); comp.g.position.y += cima;
+        comp.g.rotation.y = Math.atan2(fr.x, fr.z) + comp.lado * -sai * 0.6;
+        for (const a of comp.aves) { const u = a.userData; a.position.set(u.o.x, u.o.y + Math.sin(t * 0.8 + u.fase) * 0.8, u.o.z); bater(a, t); }
+        if (T > 21) { comp.t = -1; comp.g.visible = false; comp.espera = entre(70, 120); }
+      }
     },
   };
 }
@@ -909,47 +1039,88 @@ function texturaBrilho() {
 
 /* ===== planador.js ===== */
 /* =====================================================================
-   PLANADOR — a única forma do jogo: uma asa leve cor de creme, sem
-   piloto à mostra, com rastros de luz nas pontas.
+   PLANADOR — uma asa-delta de verdade: vela com listras e varetas,
+   tubos de alumínio, mastro com cabos, trapézio e o piloto deitado
+   na cadeirinha, segurando a barra (de pé no cume antes de saltar).
    Voo calmo e sem queda: o chão e a água "empurram" o planador para
    cima (nunca bate), espirais de vento sobem sozinhas e o Espaço dá
    um sopro para subir quando quiser.
    ===================================================================== */
 function montarPlanador() {
   const g = new THREE.Group();
-  // asa em flecha, com pontas que sobem de leve; feita à mão (dois lados)
-  const P = [], C = [], creme = new THREE.Color('#fff8ec'), ouro = new THREE.Color('#f2c46e'), pessego = new THREE.Color('#f7d2b4');
-  const perfil = [ // [x (envergadura), z bordo de ataque, z bordo de fuga, y]
-    [0, -1.25, 1.1, 0], [0.9, -0.95, 1.05, 0.04], [1.9, -0.55, 0.95, 0.1], [2.9, -0.1, 0.8, 0.2], [3.7, 0.3, 0.72, 0.38], [4.15, 0.55, 0.7, 0.62],
-  ];
-  for (const lado of [-1, 1]) for (let i = 0; i < perfil.length - 1; i++) {
-    const [x0, a0, f0, y0] = perfil[i], [x1, a1, f1, y1] = perfil[i + 1];
-    const meio0 = mix(a0, f0, 0.5), meio1 = mix(a1, f1, 0.5);
-    // duas faixas por trecho: frente (creme) e trás (pêssego), e um filete dourado no bordo
-    const quad = (A, B, Cc, D, cor) => { P.push(...A, ...B, ...Cc, ...Cc, ...B, ...D); for (let k = 0; k < 6; k++) C.push(cor.r, cor.g, cor.b); };
-    const v = (x, z, y, dy = 0) => [x * lado, y + dy, z];
-    quad(v(x0, a0, y0, 0.03), v(x0, a0 + 0.12, y0, 0.05), v(x1, a1, y1, 0.03), v(x1, a1 + 0.12, y1, 0.05), ouro);
-    quad(v(x0, a0 + 0.12, y0, 0.05), v(x0, meio0, y0, 0.07), v(x1, a1 + 0.12, y1, 0.05), v(x1, meio1, y1, 0.07), creme);
-    quad(v(x0, meio0, y0, 0.07), v(x0, f0, y0), v(x1, meio1, y1, 0.07), v(x1, f1, y1), i % 2 ? creme : pessego);
+  // ---------- vela: grade em envergadura (u) x corda (v), com barriga e bordo de fuga recortado ----------
+  const NU = 48, NV = 10, SPAN = 4.7;
+  const ataque = u => -1.65 + 2.05 * u, fuga = u => 1.35 - 0.62 * Math.pow(u, 1.2) - 0.07 * Math.abs(Math.sin(u * Math.PI * 5));
+  const altura = (u, v) => 0.17 * Math.sin(Math.PI * Math.pow(v, 0.8)) * (1 - 0.55 * u) - 0.12 * u * u + 0.05 * v * u;
+  const cores = { borda: new THREE.Color('#fbf6ee'), vela: new THREE.Color('#fff4e2'), faixa1: new THREE.Color('#f39a76'), faixa2: new THREE.Color('#f7c35f'), faixa3: new THREE.Color('#7fc6c0') };
+  const P = [], C = [], I = [], pt = (lado, u, v) => { const zA = ataque(u), zF = fuga(u); return [lado * SPAN * u, altura(u, v), mix(zA, zF, v)]; };
+  const corDe = (u, v) => {
+    if (v < 0.14) return cores.borda;                      // bolsa de bordo de ataque, mais clara
+    const w = u + v * 0.35;                                // listras em chevron
+    if (w > 0.42 && w < 0.5) return cores.faixa1; if (w > 0.5 && w < 0.56) return cores.faixa2; if (w > 0.56 && w < 0.62) return cores.faixa3;
+    return cores.vela;
+  };
+  for (const lado of [-1, 1]) {
+    const base = P.length / 3;
+    for (let i = 0; i <= NU; i++) for (let j = 0; j <= NV; j++) { const u = i / NU, v = j / NV; P.push(...pt(lado, u, v)); const c = corDe(u, v); C.push(c.r, c.g, c.b); }
+    for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++) {
+      const a = base + i * (NV + 1) + j, b = a + NV + 1;
+      if (lado > 0) I.push(a, a + 1, b, b, a + 1, b + 1); else I.push(a, b, a + 1, b, b + 1, a + 1);
+    }
   }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
-  geo.computeVertexNormals();
-  const asa = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
-  asa.castShadow = true; g.add(asa);
-  // casulo: corpinho liso sob a asa, com anel dourado
-  const casulo = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 12), new THREE.MeshStandardMaterial({ color: '#fffaf2', roughness: 0.45 }));
-  casulo.scale.set(0.8, 0.7, 2.6); casulo.position.set(0, -0.32, 0.05); casulo.castShadow = true; g.add(casulo);
-  const anel = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: '#f0bd5e', roughness: 0.3, metalness: 0.3 }));
-  anel.position.set(0, -0.32, -0.25); g.add(anel);
-  const vidro = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 10), new THREE.MeshStandardMaterial({ color: '#cfe9ec', roughness: 0.1, metalness: 0.2 }));
-  vidro.scale.set(0.9, 0.7, 1.4); vidro.position.set(0, -0.18, -0.55); g.add(vidro);
-  // cauda em V
-  const cauda = new THREE.BufferGeometry();
-  cauda.setAttribute('position', new THREE.Float32BufferAttribute([0, -0.2, 0.9, 0, -0.2, 1.9, -0.75, 0.25, 1.95, 0, -0.2, 0.9, 0, -0.2, 1.9, 0.75, 0.25, 1.95], 3)); cauda.computeVertexNormals();
-  g.add(new THREE.Mesh(cauda, new THREE.MeshLambertMaterial({ color: '#f9e3c8', side: THREE.DoubleSide })));
+  const gVela = new THREE.BufferGeometry(); gVela.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); gVela.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); gVela.setIndex(I); gVela.computeVertexNormals();
+  const vela = new THREE.Mesh(gVela, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })); vela.castShadow = true; g.add(vela);
+  // varetas (linhas finas sobre a vela)
+  const varetas = [];
+  for (const lado of [-1, 1]) for (let i = 3; i < NU; i += 6) for (let j = 1; j < NV; j++) { varetas.push(...pt(lado, i / NU, (j - 1) / NV), ...pt(lado, i / NU, j / NV)); }
+  for (let k = 1; k < varetas.length; k += 3) varetas[k] += 0.012;
+  const gVar = new THREE.BufferGeometry(); gVar.setAttribute('position', new THREE.Float32BufferAttribute(varetas, 3));
+  g.add(new THREE.LineSegments(gVar, new THREE.LineBasicMaterial({ color: '#e3cfb2' })));
+  // ---------- estrutura de alumínio ----------
+  const metal = new THREE.MeshStandardMaterial({ color: '#c7ccd2', roughness: 0.35, metalness: 0.6 });
+  const tubo = (a, b, r = 0.035, mat = metal) => {
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 8), mat);
+    m.position.copy(A).add(B).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); m.castShadow = true; g.add(m); return m;
+  };
+  const nariz = [0, -0.03, -1.65], cauda = [0, -0.06, 1.3], topoMastro = [0, 0.95, 0.05], pendura = [0, -0.07, 0.05];
+  tubo(nariz, cauda, 0.04);                                                     // quilha
+  for (const s of [-1, 1]) for (let i = 0; i < NU; i += 12) tubo(pt(s, i / NU, 0.02), pt(s, (i + 12) / NU, 0.02), 0.04);   // bordo de ataque
+  tubo([0, 0.0, 0.05], topoMastro, 0.03);                                       // mastro
+  const bA = [-0.82, -1.5, -0.62], bB = [0.82, -1.5, -0.62];
+  tubo(pendura, bA, 0.03); tubo(pendura, bB, 0.03); tubo(bA, bB, 0.033);         // trapézio e barra
+  const pontaE = pt(-1, 1, 0.3), pontaD = pt(1, 1, 0.3);
+  // cabos: de cima (mastro) e de baixo (barra)
+  const cabos = [];
+  for (const q of [nariz, cauda, pontaE, pontaD, pt(-1, 0.55, 0.05), pt(1, 0.55, 0.05)]) cabos.push(...topoMastro, ...q);
+  for (const q of [nariz, cauda]) cabos.push(...bA, ...q, ...bB, ...q);
+  cabos.push(...bA, ...pt(-1, 0.55, 0.05), ...bB, ...pt(1, 0.55, 0.05), ...bA, ...pontaE, ...bB, ...pontaD);
+  const gCab = new THREE.BufferGeometry(); gCab.setAttribute('position', new THREE.Float32BufferAttribute(cabos, 3));
+  g.add(new THREE.LineSegments(gCab, new THREE.LineBasicMaterial({ color: '#9aa1a8', transparent: true, opacity: 0.75 })));
+  // ---------- piloto: pendurado pela fita, deitado na cadeirinha ----------
+  const pele = new THREE.MeshLambertMaterial({ color: '#f1c9a5' }), roupa = new THREE.MeshLambertMaterial({ color: '#6fb0b4' }), cadeira = new THREE.MeshLambertMaterial({ color: '#f2a979' });
+  const capacete = new THREE.MeshStandardMaterial({ color: '#fff3dc', roughness: 0.3 }), viseira = new THREE.MeshStandardMaterial({ color: '#cfe6ea', roughness: 0.1, metalness: 0.3 });
+  const piloto = new THREE.Group(); piloto.position.set(0, -1.12, 0.05); g.add(piloto);   // pivô = onde a fita prende na cadeirinha
+  const parte = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.x = rx; m.castShadow = true; piloto.add(m); return m; };
+  const esfera = new THREE.SphereGeometry(1, 14, 10), cil = new THREE.CylinderGeometry(1, 1, 1, 10);
+  parte(esfera, cadeira, 0, -0.04, 0.35, 0.27, 0.22, 0.85);          // casulo da cadeirinha (pernas dentro)
+  parte(esfera, roupa, 0, 0.02, -0.25, 0.25, 0.2, 0.36);             // tronco e ombros
+  parte(esfera, cadeira, 0, 0.17, 0.05, 0.2, 0.08, 0.5);             // paraquedas reserva nas costas
+  parte(esfera, capacete, 0, 0.1, -0.75, 0.15, 0.15, 0.17);          // capacete
+  parte(esfera, pele, 0, 0.03, -0.8, 0.11, 0.11, 0.11);              // rosto
+  parte(esfera, viseira, 0, 0.07, -0.86, 0.12, 0.06, 0.08);          // viseira
+  // braços: dos ombros até a barra
+  const maoE = new THREE.Vector3(-0.34, -0.38, -0.67), maoD = new THREE.Vector3(0.34, -0.38, -0.67);
+  for (const [om, mao] of [[new THREE.Vector3(-0.22, 0.02, -0.45), maoE], [new THREE.Vector3(0.22, 0.02, -0.45), maoD]]) {
+    const d = mao.clone().sub(om), m = new THREE.Mesh(cil, roupa); m.scale.set(0.055, d.length(), 0.055);
+    m.position.copy(om).add(mao).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); piloto.add(m);
+    const luva = new THREE.Mesh(esfera, pele); luva.scale.setScalar(0.06); luva.position.copy(mao); piloto.add(luva);
+  }
+  // fita que liga a cadeirinha ao ponto de pendurar
+  const fita = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.05, 5), new THREE.MeshLambertMaterial({ color: '#e8dccb' }));
+  fita.position.set(0, -0.59, 0.05); g.add(fita);
   // pontas das asas (onde nascem os rastros)
-  const pontas = [new THREE.Vector3(-4.15, 0.62, 0.66), new THREE.Vector3(4.15, 0.62, 0.66)];
-  return { g, pontas };
+  const pontas = [new THREE.Vector3(...pt(-1, 1, 0.5)), new THREE.Vector3(...pt(1, 1, 0.5))];
+  return { g, pontas, piloto };
 }
 
 // rastro: fita que some aos poucos, presa numa ponta da asa
@@ -978,7 +1149,7 @@ class Rastro {
 
 class Planador {
   constructor(cena) {
-    const m = montarPlanador(); this.g = m.g; this.pontasLocais = m.pontas; cena.add(this.g);
+    const m = montarPlanador(); this.g = m.g; this.pontasLocais = m.pontas; this.piloto = m.piloto; this.pose = 1; cena.add(this.g);
     this.rastros = [new Rastro(cena), new Rastro(cena)];
     this.pos = new THREE.Vector3(); this.vel = new THREE.Vector3();
     this.v = 20; this.yaw = 0; this.pitch = 0; this.roll = 0; this.taxaYaw = 0;
@@ -1005,7 +1176,7 @@ class Planador {
     const T = this.termica, emTermica = T && !e.x && !e.y && !e.piloto;
     if (e.piloto) {
       const dy = angDif(this.yaw, e.piloto.yaw); rollAlvo = lim(dy * 1.6, -0.8, 0.8);
-      pitchAlvo = lim(e.piloto.pitch, -0.5, 0.35);
+      pitchAlvo = lim(e.piloto.pitch, -0.7, 0.35);
     } else if (emTermica) {
       // circula em volta do centro da coluna, num raio confortável (giro para a direita)
       const dx = this.pos.x - T.x, dz = this.pos.z - T.z, d = Math.hypot(dx, dz) || 1, R0 = T.r * 0.5, rx = dx / d, rz = dz / d;
@@ -1055,6 +1226,9 @@ class Planador {
     g.rotation.set(0, 0, 0); g.rotation.order = 'YXZ';
     const balanco = this.estado === 'pousado' ? Math.sin(t * 1.3) * 0.03 : Math.sin(t * 0.9) * 0.025 + this.sopro * Math.sin(t * 14) * 0.03;
     g.rotation.y = this.yaw; g.rotation.x = this.pitch + (this.estado === 'pousado' ? 0.04 : 0); g.rotation.z = this.roll + balanco;
+    // piloto: de pé no cume, deitado em voo; o corpo pende um pouco para o lado da curva
+    this.pose += ((this.estado === 'pousado' ? 1 : 0) - this.pose) * Math.min(1, (dt || 0.016) * 2.5);
+    this.piloto.rotation.set(this.pose * Math.PI * 0.47, 0, -this.roll * 0.35 * (1 - this.pose));
     g.updateMatrixWorld();
     const lado = new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion);
     const forca = this.estado === 'voando' ? 0.25 + 0.75 * suave(16, 34, this.v) : 0;
@@ -1110,15 +1284,17 @@ const VOOS = [
       { tipo: 'arvore', t: 0.66, lado: 1, nome: 'Oliveira Anciã', frase: 'Dá azeitonas desde muito antes dos mapas.' },
       { tipo: 'lago', t: 0.975, nome: 'Lago Espelho', frase: 'O céu inteiro cabe na água parada.' },
     ],
+    cascatas: { qtd: 10, nomes: [['Fio d\'Água da Encosta', 'Desce do morro e vai encontrar o rio.'], ['Cascata das Oliveiras', 'Um fio branco entre as árvores cinza-prata.']] },
+    vilarejo: { grupos: 7, paredes: ['#f4ecdc', '#efe3cc', '#f6efe2'], telhados: ['#d9a07e', '#cf9474', '#e0ad8a'], base: '#e2d6bf', bichos: 16, bichosCor: ['#fbf8f0', '#f3eee2', '#e9e1d0'] },
     termicasExtras: 4,
     cores: {
       grama: ['#b4c487', '#9fb57c'], prado: '#c8cf96', seco: '#d8c79c', secoQto: 0.3, alpino: '#d9c9a6',
       arido: ['#e3d0a8', '#d6bf94'], aridez: 1,
-      rocha: ['#d8c6a8', '#c3ae91'], pedraDe: 0.36, neve: '#fbfaf6', linhaNeve: 900, linhaArvore: 260,
+      rocha: ['#d8c6a8', '#c3ae91'], pedraDe: 0.44, neve: '#fbfaf6', linhaNeve: 900, linhaArvore: 260,
       areia: '#eadcbf', tronco: '#8f7562', aguaRasa: '#a6ddd3', aguaFunda: '#4ea7a6', aguaCeu: '#e2eeec', aqueduto: '#ece1ca',
     },
     vegetacao: {
-      mata: 0.5, pinheiroAcima: 900, pinheiroQto: 0.3, escala: 1, estreito: true,
+      mata: 0.42, pinheiroAcima: 900, pinheiroQto: 0.3, escala: 1, estreito: true,
       pinheiros: ['#6f8a62', '#7b9468', '#647f5c'], folhas: ['#a7ae86', '#9aa37a', '#b3b98f', '#a3b282'],
       flores: ['#fff8f0', '#ffe39a', '#f2c9b8', '#ffffff'],
     },
@@ -1126,6 +1302,75 @@ const VOOS = [
     nuvens: { qtd: 60, baixas: 0.25, alt: [400, 520], altBaixa: [100, 150], luz: '#ffffff', sombra: '#eadfd2', vento: 2.2 },
     longe: [[1500, 180, 400, '#cbc6b6', '#cbc6b6'], [2100, 240, 560, '#d6d3c6', '#d6d3c6'], [2900, 300, 760, '#e0ded4', '#e0ded4']],
     passaros: { cor: '#fffaf2', bandos: [[-300, 210, -200, 120], [200, 170, 300, 150], [500, 260, 600, 110], [-500, 300, -500, 90]] },
+  },
+  {
+    id: 'alpes', nome: 'Vale das Cascatas', det: 'Prados verdes, paredões com cascatas, casinhas e picos nevados', cor: '#9cc98a', semente: 53,
+    ola: 'Bem-vindo ao Vale das Cascatas',
+    ceu: { topo: '#9ccbe6', horiz: '#f3f2ea', baixo: '#e9ebe2', sol: [0.5, 0.42, -0.7], solCor: '#fff2d6' },
+    luz: { sol: '#fff5e4', solInt: 2.7, hemiCeu: '#e8f0f6', hemiChao: '#cbd2b4', hemiInt: 1.3 },
+    fog: { cor: '#eef1ec', perto: 380, longe: 2200 },
+    neblina: { cor: '#fbfcf8', topo: 150, esp: 55, forca: 0.42 },
+    vento: [-0.5, 0.9],
+    rio: {
+      pts: [[-800, -620], [-610, -560], [-440, -430], [-320, -230], [-140, -150], [40, -40], [110, 160], [290, 290], [470, 270], [640, 420], [800, 620]],
+      degraus: [[0, 205], [0.18, 176], [0.36, 148, 'c'], [0.55, 120], [0.74, 94, 'c'], [0.9, 70]],
+      lagos: [[0.12, 0.18, 40], [0.49, 0.55, 44], [0.92, 1.01, 80]],
+      largura: 9,
+    },
+    vale: { raio: 320, chao: 62, largo: 95 }, trechoAqueduto: 1,
+    relevo: { base: 150, amp: 430, escala: 470, borda: 300 },
+    cumesDef: [
+      { t: 0.1, lado: 1, h: 445, nome: 'Pico da Partida' },
+      { t: 0.38, lado: -1, h: 435, nome: 'Pico das Cascatas' },
+      { t: 0.63, lado: 1, h: 430, nome: 'Pico do Sino' },
+      { t: 0.88, lado: -1, h: 450, nome: 'Pico do Vale Verde' },
+    ],
+    coresCumes: ['#f6c9b0', '#b9dcc8', '#f7dd9c', '#d4c8ee'],
+    cachoeiras: [
+      ['Cachoeira do Moinho', 'Antigamente a água daqui girava uma roda de madeira.'],
+      ['Cachoeira da Ponte Velha', 'A última descida antes do lago grande.'],
+      ['Queda do Lago Verde', 'A água chega mansa no lago comprido.'],
+    ],
+    corredeiras: [
+      ['Corredeira dos Seixos Brancos', 'Água gelada e clarinha, vinda das geleiras.'],
+      ['Corredeira do Prado', 'Corre entre as vacas e as flores.'],
+    ],
+    aquedutos: [
+      { t: 0.27, nome: 'Viaduto de Pedra', frase: 'Passe por baixo: a água escorre dos arcos como chuva.' },
+      { t: 0.79, nome: 'Viaduto do Vale', frase: 'Os arcos parecem pequenos perto dos paredões.' },
+    ],
+    cascatas: {
+      qtd: 30,
+      nomes: [
+        ['Véu da Noiva Branca', 'Cai tão do alto que vira névoa antes de chegar no chão.'],
+        ['Cascata dos Cem Metros', 'Do topo do paredão até o prado, sem parar.'],
+        ['Fio de Leite', 'Branquinha, desce pela pedra cinza.'],
+        ['Cascata do Degelo', 'Vem da neve lá de cima, gelada e brilhante.'],
+        ['Cascata do Sino', 'Dizem que o barulho dela parece um sino ao longe.'],
+        ['Cascata Escondida', 'Só aparece para quem voa perto do paredão.'],
+      ],
+    },
+    vilarejo: { grupos: 12, paredes: ['#f7f1e6', '#f2e7d4', '#e9d9bf', '#f5ede0'], telhados: ['#b98b6c', '#c79a78', '#a97f63', '#d2a684'], base: '#dcd4c4', bichos: 18, bichosCor: ['#fbf8f2', '#f1e7d6', '#d9b48f', '#efe9df'] },
+    lugares: [
+      { tipo: 'arco', t: 0.46, nome: 'Portal do Prado', frase: 'Uma janela de pedra no meio do vale verde.' },
+      { tipo: 'arvore', t: 0.66, lado: 1, nome: 'Abeto Ancião', frase: 'O mais velho da floresta, guarda o vale há séculos.' },
+      { tipo: 'lago', t: 0.97, nome: 'Lago Comprido', frase: 'Os picos nevados se olham na água verde.' },
+    ],
+    termicasExtras: 4,
+    cores: {
+      grama: ['#a8cf84', '#93c179'], prado: '#c6df98', seco: '#d6d69c', secoQto: 0.08, alpino: '#b7d098',
+      rocha: ['#c9c5bc', '#aeaaa2'], pedraDe: 0.64, neve: '#f8f8f5', linhaNeve: 420, linhaArvore: 390,
+      areia: '#e5e2d3', tronco: '#7a6656', aguaRasa: '#a4e2d8', aguaFunda: '#3fa9b0', aguaCeu: '#e3f2f2', aqueduto: '#ddd6c8',
+    },
+    vegetacao: {
+      mata: 0.36, pinheiroAcima: 190, pinheiroQto: 0.6, escala: 1.05, encosta: 1.15,
+      pinheiros: ['#5b8566', '#678f70', '#73997b'], folhas: ['#9cc67d', '#b1d38d', '#8dbb76', '#c3d993'],
+      flores: ['#ffffff', '#fff2a0', '#f4c6d6', '#d9d2f6', '#ffd9a8'],
+    },
+    anciao: '#6f9a78',
+    nuvens: { qtd: 85, baixas: 0.35, alt: [520, 640], altBaixa: [270, 310], luz: '#ffffff', sombra: '#e1e4e6', vento: 1.7 },
+    longe: [[1500, 260, 560, '#b9c6cc', '#ffffff'], [2100, 320, 740, '#c9d3d8', '#ffffff'], [2900, 380, 940, '#d8dee1', '#fbfbfb']],
+    passaros: { cor: '#ffffff', aguia: '#d2b18e', bandos: [[-300, 260, -250, 120], [200, 240, 250, 140], [500, 300, 450, 100], [-550, 320, -480, 90]] },
   },
   {
     id: 'entardecer', nome: 'Desfiladeiro do Entardecer', det: 'Mesas de arenito, luz dourada e um arco de pedra', cor: '#f0b58a', semente: 23,
@@ -1167,14 +1412,16 @@ const VOOS = [
       { tipo: 'arvore', t: 0.71, lado: -1, nome: 'Bordo Dourado', frase: 'As folhas dele parecem pequenas brasas.' },
       { tipo: 'lago', t: 0.97, nome: 'Lago do Poente', frase: 'O sol se deita na água todo fim de tarde.' },
     ],
+    vilarejo: { grupos: 5, paredes: ['#f3dcc0', '#eccfae', '#f6e4cc'], telhados: ['#d98f6a', '#e2a07c', '#cf8662'], base: '#e6cfb2', bichos: 14, bichosCor: ['#f6efe2', '#e2cdb0', '#c9a07c'] },
+    cascatas: { qtd: 12, nomes: [['Véu do Arenito', 'A água cai pela parede vermelha e vira poeira de luz.'], ['Cascata das Duas Mesas', 'Nasce lá no alto, entre as mesas de pedra.']] },
     termicasExtras: 4,
     cores: {
       grama: ['#c7c084', '#b2b27a'], prado: '#dccf96', seco: '#e3c58e', secoQto: 0.6, alpino: '#dcc9a0',
-      rocha: ['#e2ad8e', '#cf957a'], pedraDe: 0.3, neve: '#fff8f0', linhaNeve: 900, linhaArvore: 210,
+      rocha: ['#e2ad8e', '#cf957a'], pedraDe: 0.4, neve: '#fff8f0', linhaNeve: 900, linhaArvore: 210,
       areia: '#f0dcbc', tronco: '#8a6a58', aguaRasa: '#a3dcd0', aguaFunda: '#3f9ea0', aguaCeu: '#efe8dc',
     },
     vegetacao: {
-      mata: 0.6, pinheiroAcima: 200, pinheiroQto: 0.25, escala: 1,
+      mata: 0.5, pinheiroAcima: 200, pinheiroQto: 0.25, escala: 1,
       pinheiros: ['#7c9670', '#8aa27a', '#6f8a68'], folhas: ['#e9a85f', '#f0c167', '#d98f5c', '#c9b66e', '#efd08a'],
       flores: ['#fff4e0', '#ffd27a', '#f5b08a', '#ffffff'],
     },
@@ -1223,14 +1470,16 @@ const VOOS = [
       { tipo: 'arvore', t: 0.27, lado: 1, nome: 'Lariço Antigo', frase: 'Ele já viu mil invernos e continua aqui.' },
       { tipo: 'lago', t: 0.96, nome: 'Lago do Céu', frase: 'Lá no alto, o lago parece um pedaço do céu caído.' },
     ],
+    vilarejo: { grupos: 7, paredes: ['#f6f0e4', '#efe4d0', '#e8d8bd'], telhados: ['#b98b6c', '#a97f63', '#c79a78'], base: '#d8d2c4', bichos: 16, bichosCor: ['#fbf8f2', '#efe6d6', '#d6b28c'] },
+    cascatas: { qtd: 18, nomes: [['Cascata do Degelo Alto', 'A neve derrete e despenca pela pedra.'], ['Fio de Prata', 'Tão fino que parece desenhado na montanha.'], ['Queda do Lariço', 'Termina num prado cheio de flores.']] },
     termicasExtras: 5,
     cores: {
-      grama: ['#9fbf8c', '#86aa7e'], prado: '#bccd96', seco: '#cfc390', secoQto: 0.25, alpino: '#cacbb2',
-      rocha: ['#bdb3a8', '#a0978f'], pedraDe: 0.33, neve: '#f4f3ef', linhaNeve: 300, linhaArvore: 250,
+      grama: ['#9fbf8c', '#86aa7e'], prado: '#bccd96', seco: '#cfc390', secoQto: 0.25, alpino: '#bccca0',
+      rocha: ['#bdb3a8', '#a0978f'], pedraDe: 0.52, neve: '#f4f3ef', linhaNeve: 320, linhaArvore: 280,
       areia: '#e2dccb', tronco: '#7d6a5c', aguaRasa: '#9fe0dc', aguaFunda: '#38a5b2', aguaCeu: '#e1f1f3',
     },
     vegetacao: {
-      mata: 0.5, pinheiroAcima: 150, pinheiroQto: 0.6, escala: 1.05,
+      mata: 0.4, pinheiroAcima: 150, encosta: 1, pinheiroQto: 0.6, escala: 1.05,
       pinheiros: ['#5f8a6e', '#6e9878', '#7ea585'], folhas: ['#a7c487', '#c2d49a', '#e8d27c'],
       flores: ['#ffffff', '#d6cdf5', '#fff1a8', '#f6c9d8'],
     },
@@ -1287,20 +1536,7 @@ class ArcoLuz {
 class Termica {
   constructor(raiz, x, z, base, topo, r = 55, forca = 11) {
     Object.assign(this, { x, z, base, topo, r, forca });
-    const N = 340, sem = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) { sem[i * 3] = rnd(); sem[i * 3 + 1] = rnd(); sem[i * 3 + 2] = rnd(); }
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3)); geo.setAttribute('aSem', new THREE.BufferAttribute(sem, 3));
-    this.pts = new THREE.Points(geo, new THREE.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { ...U, mapa: { value: texturaBrilho() }, uR: { value: r }, uH: { value: topo - base } },
-      vertexShader: `attribute vec3 aSem; uniform float uTempo, uR, uH; varying float vA;
-        void main(){ float h = mod(aSem.y * uH + uTempo * (5. + aSem.z * 4.), uH); float a = aSem.x * 6.2832 + uTempo * (.35 + aSem.z * .3) + h * .02;
-          float r = uR * (.2 + .8 * sqrt(aSem.z)) * (.75 + .25 * h / uH);
-          vec4 mv = modelViewMatrix * vec4(cos(a) * r, h, sin(a) * r, 1.); gl_Position = projectionMatrix * mv;
-          gl_PointSize = (2.2 + aSem.z * 2.5) * 260. / -mv.z; vA = smoothstep(0., .12, h / uH) * (1. - smoothstep(.75, 1., h / uH)); }`,
-      fragmentShader: `uniform sampler2D mapa; varying float vA; void main(){ vec4 t = texture2D(mapa, gl_PointCoord); gl_FragColor = vec4(vec3(1., .86, .55) * t.a * vA * .55, 1.); }`,
-    }));
-    this.pts.position.set(x, base, z); this.pts.frustumCulled = false; raiz.add(this.pts);
+    // sem desenho próprio: duas águias girando mostram onde o ar sobe
   }
   // quanto sobe aqui (0 se fora)
   em(p) {
@@ -1467,6 +1703,173 @@ function cruzouCortina(o, p0, p1) {
   return Math.abs(u) < k.larg / 2 + 2 && Math.abs(d.y) < k.alt / 2 + 1;
 }
 
+// cascatas descendo pelas paredes do vale: fita de água que cai solta do paredão e vira riacho até o rio
+function criarCascatas(raiz, def) {
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4,
+    uniforms: { ...U, uCor: { value: new THREE.Color(def.cores.aguaRasa) } },
+    vertexShader: 'attribute float aV; attribute float aS; varying float vV; varying float vS; varying float vU; varying vec3 vMundo; void main(){ vV = aV; vS = aS; vU = uv.x; vec4 w = modelMatrix * vec4(position, 1.); vMundo = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform vec3 uCor; varying float vV; varying float vS; varying float vU; varying vec3 vMundo; ${GLSL_RUIDO}${GLSL_NEVOA}
+      void main(){ float q = smoothstep(.45, 1.5, vS);
+        float n = vnoise(vec2(vU * 6., vV * .1 - uTempo * mix(.9, 3.6, q))), n2 = vnoise(vec2(vU * 17., vV * .28 - uTempo * mix(1.6, 6., q)));
+        float esp = smoothstep(.35, .8, n * .6 + n2 * .4);
+        vec3 c = mix(uCor, vec3(1.), clamp(q * .72 + esp * (.25 + .45 * q), 0., 1.));
+        float borda = smoothstep(0., .2, vU) * smoothstep(1., .8, vU) * mix(1., .75 + .25 * smoothstep(.2, .6, n), q);
+        c = neblinaVale(c, vMundo); c = nevoaLonge(c, vMundo); gl_FragColor = vec4(c, borda * mix(.9, .62 + .35 * esp, q));
+        #include <colorspace_fragment>
+      }`,
+  });
+  const nomes = (def.cascatas && def.cascatas.nomes) || [], lugares = [], sons = [];
+  TER.cascatas.forEach((cs, ic) => {
+    const P = cs.pts, pos = [], uv = [], aV = [], aS = [], ind = [];
+    let acc = 0, ini = 0;
+    P.forEach((p, k) => {
+      const b = P[Math.min(k + 1, P.length - 1)], a = P[Math.max(k - 1, 0)], tx0 = b.x - a.x, tz0 = b.z - a.z, tl = Math.hypot(tx0, tz0) || 1, tx = tx0 / tl, tz = tz0 / tl;
+      if (k) acc += Math.hypot(p.x - P[k - 1].x, p.y - P[k - 1].y, p.z - P[k - 1].z);
+      const q = suave(0.5, 1.6, p.s), fora = 1.6 * q, W = (2.8 + 4.6 * q) * suave(0, 18, acc) + 0.6, cx = p.x + tx * fora, cz = p.z + tz * fora, cy = p.y + 0.45;
+      for (const l of [-1, 1]) {
+        const ex = cx - tz * l * W / 2, ez = cz + tx * l * W / 2;
+        pos.push(ex, Math.max(cy, alturaTerreno(ex, ez) + 0.35), ez); uv.push(l < 0 ? 0 : 1, 0); aV.push(acc); aS.push(p.s);
+      }
+      if (k) { const o = (k - 1) * 2; ind.push(o, o + 2, o + 1, o + 1, o + 2, o + 3); }
+      if (!ini && P[Math.max(k - 3, 0)].s > 1 && p.s < 0.45) ini = k;   // pé da queda principal
+    });
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    geo.setAttribute('aV', new THREE.Float32BufferAttribute(aV, 1)); geo.setAttribute('aS', new THREE.Float32BufferAttribute(aS, 1)); geo.setIndex(ind);
+    const m = new THREE.Mesh(geo, mat); m.renderOrder = 1; raiz.add(m);
+    const pe = P[ini || Math.floor(P.length * 0.6)];
+    criarBorrifo(raiz, pe.x, pe.y - 0.5, pe.z, 9);
+    sons.push({ x: pe.x, y: pe.y, z: pe.z });
+    const topo = P[0];
+    if (nomes[ic]) lugares.push({ nome: nomes[ic][0], frase: nomes[ic][1], x: mix(topo.x, pe.x, 0.5), z: mix(topo.z, pe.z, 0.5), y: mix(topo.y, pe.y, 0.5), raio: 140, achado: false, tipo: 'cachoeira' });
+  });
+  return { lugares, sons };
+}
+// casinhas de madeira com telhado inclinado e um rebanho pastando
+function criarVilarejo(raiz, def, aquedutos) {
+  const vila = def.vilarejo; if (!vila || !TER.chales.length) return;
+  const longeAq = (x, z) => aquedutos.every(o => Math.abs((x - o.x) * o.tx + (z - o.z) * o.tz) > 16);
+  const chales = TER.chales.filter(c => longeAq(c.x, c.z));
+  const geoC = new THREE.BoxGeometry(8, 5, 6).translate(0, 2.5, 0);
+  const tel = new THREE.Shape(); tel.moveTo(-5.2, 0); tel.lineTo(0, 3.6); tel.lineTo(5.2, 0); tel.lineTo(-5.2, 0);
+  const geoT = new THREE.ExtrudeGeometry(tel, { depth: 7.4, bevelEnabled: false }).translate(0, 4.9, -3.7);
+  const geoB = new THREE.BoxGeometry(8.2, 1.6, 6.2).translate(0, 0.8, 0);
+  const mC = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mT = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), mB = comNeblina(new THREE.MeshLambertMaterial({ color: vila.base || '#e9e2d4' }));
+  const iC = new THREE.InstancedMesh(geoC, mC, chales.length), iT = new THREE.InstancedMesh(geoT, mT, chales.length), iB = new THREE.InstancedMesh(geoB, mB, chales.length);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
+  chales.forEach((h, i) => {
+    q.setFromAxisAngle(cima, h.rot); m4.compose(p.set(h.x, h.y - 0.4, h.z), q, s.setScalar(h.esc));
+    iC.setMatrixAt(i, m4); iT.setMatrixAt(i, m4); iB.setMatrixAt(i, m4);
+    iC.setColorAt(i, c.set(vila.paredes[i % vila.paredes.length]).offsetHSL(0, 0, entre(-0.03, 0.03)));
+    iT.setColorAt(i, c.set(vila.telhados[i % vila.telhados.length]).offsetHSL(0, 0, entre(-0.03, 0.03)));
+  });
+  for (const im of [iC, iT, iB]) { im.castShadow = im.receiveShadow = true; raiz.add(im); }
+  // chaminé e fumacinha subindo devagar
+  const iCh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 2.4, 0.9), mB, chales.length), base = [], sem = [];
+  chales.forEach((h, i) => {
+    const cx = 2.2 * h.esc, cz = 1.4 * h.esc, x = h.x + cx * Math.cos(h.rot) + cz * Math.sin(h.rot), z = h.z - cx * Math.sin(h.rot) + cz * Math.cos(h.rot), y = h.y - 0.4 + 7.6 * h.esc;
+    iCh.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, h.rot), s.setScalar(h.esc)));
+    if (i % 2 === 0) for (let k = 0; k < 9; k++) { base.push(x, y + 1.2, z); sem.push(rnd(), rnd(), rnd()); }
+  });
+  iCh.castShadow = true; raiz.add(iCh);
+  if (base.length) {
+    const gF = new THREE.BufferGeometry(); gF.setAttribute('position', new THREE.Float32BufferAttribute(base, 3)); gF.setAttribute('aSem', new THREE.Float32BufferAttribute(sem, 3));
+    const vx = def.vento[0], vz = def.vento[1];
+    const fum = new THREE.Points(gF, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, uniforms: { ...U, mapa: { value: texturaBrilho() } },
+      vertexShader: `attribute vec3 aSem; uniform float uTempo; varying float vA;
+        void main(){ float f = fract(aSem.x + uTempo * (.05 + aSem.y * .03)); vec3 p = position + vec3(${vx.toFixed(2)} * f * 14. + sin(uTempo * .7 + aSem.z * 6.) * f * 1.5, f * 16., ${vz.toFixed(2)} * f * 14.);
+          vec4 mv = modelViewMatrix * vec4(p, 1.); gl_Position = projectionMatrix * mv; gl_PointSize = (2.5 + f * 9.) * 300. / -mv.z; vA = smoothstep(0., .1, f) * (1. - f); }`,
+      fragmentShader: `uniform sampler2D mapa; varying float vA; void main(){ float a = texture2D(mapa, gl_PointCoord).a * vA * .35; if (a < .01) discard; gl_FragColor = vec4(.96, .96, .95, a); }`,
+    }));
+    fum.frustumCulled = false; raiz.add(fum);
+  }
+  criarQuintais(raiz, chales);
+  // rebanho: vacas (ou ovelhas/cabras, pela cor) e alguns cavalos, com pernas
+  const bichos = TER.rebanho.filter(b => longeAq(b.x, b.z)); if (!bichos.length) return;
+  const caixa = (w, h, d, x, y, z, rx = 0) => new THREE.BoxGeometry(w, h, d).rotateX(rx).translate(x, y, z);
+  const pernas = (h, dx, dz) => [-1, 1].flatMap(a => [-1, 1].map(b => caixa(0.22, h, 0.22, a * dx, h / 2, b * dz)));
+  const geoVaca = juntarGeos([caixa(1.1, 0.9, 2.1, 0, 1.15, 0), caixa(0.6, 0.6, 0.75, 0, 1.4, 1.35), ...pernas(0.78, 0.36, 0.75)]);
+  const geoCav = juntarGeos([caixa(0.85, 0.85, 2.2, 0, 1.55, 0), caixa(0.38, 1.0, 0.5, 0, 2.15, 1.1, 0.55), caixa(0.36, 0.42, 0.85, 0, 2.6, 1.55), caixa(0.14, 0.9, 0.3, 0, 1.6, -1.2, 0.5), ...pernas(1.15, 0.3, 0.8)]);
+  const mBicho = comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' }));
+  for (const [tipo, geo, cores] of [['vaca', geoVaca, vila.bichosCor], ['cavalo', geoCav, ['#b98a62', '#d4ac84', '#8f6b52', '#efe6d6']]]) {
+    const lista = bichos.filter(b => (b.tipo || 'vaca') === tipo); if (!lista.length) continue;
+    const im = new THREE.InstancedMesh(geo, mBicho, lista.length);
+    lista.forEach((b, i) => {
+      q.setFromAxisAngle(cima, b.rot); im.setMatrixAt(i, m4.compose(p.set(b.x, b.y - 0.1, b.z), q, s.setScalar(entre(0.9, 1.1))));
+      im.setColorAt(i, c.set(cores[Math.floor(rnd() * cores.length)]));
+    });
+    im.castShadow = true; raiz.add(im);
+  }
+}
+// quintal de cada casa: cerca de madeira com portão, horta, árvore de fruta e galinhas
+function criarQuintais(raiz, chales) {
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), cima = new THREE.Vector3(0, 1, 0);
+  const mundoDe = (h, lx, lz) => [h.x + lx * Math.cos(h.rot) + lz * Math.sin(h.rot), h.z - lx * Math.sin(h.rot) + lz * Math.cos(h.rot)];
+  const trilhos = [], postes = [], hortas = [], fileiras = [], arvores = [], galinhas = [];
+  const lados = [[-9, -6, 9, -6], [-9, -6, -9, 11], [9, -6, 9, 11], [-9, 11, -1.6, 11], [1.6, 11, 9, 11]];
+  for (const h of chales) {
+    for (const [a0, b0, a1, b1] of lados) {
+      const [x0, z0] = mundoDe(h, a0, b0), [x1, z1] = mundoDe(h, a1, b1), len = Math.hypot(x1 - x0, z1 - z0), ang = Math.atan2(-(z1 - z0), x1 - x0);
+      const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2, ym = alturaTerreno(xm, zm);
+      for (const hh of [0.5, 1.0]) trilhos.push([xm, ym + hh, zm, ang, len]);
+      const np = Math.max(1, Math.round(len / 3));
+      for (let k = 0; k <= np; k++) { const x = mix(x0, x1, k / np), z = mix(z0, z1, k / np); postes.push([x, alturaTerreno(x, z), z]); }
+    }
+    const [hx, hz] = mundoDe(h, 4.8, 6.5); hortas.push([hx, alturaTerreno(hx, hz), hz, h.rot]);
+    for (const dz of [-1.6, 0, 1.6]) { const [fx, fz] = mundoDe(h, 4.8, 6.5 + dz); fileiras.push([fx, alturaTerreno(fx, fz), fz, h.rot]); }
+    const [ax, az] = mundoDe(h, -5.8, 7); arvores.push([ax, alturaTerreno(ax, az), az]);
+    for (let k = 0; k < 5; k++) { const [gx, gz] = mundoDe(h, entre(-7.5, 1), entre(4, 10)); galinhas.push([gx, alturaTerreno(gx, gz), gz, rnd() * TAU]); }
+  }
+  const madeira = comNeblina(new THREE.MeshLambertMaterial({ color: '#dcc6a4' }));
+  const iTr = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.12, 0.1), madeira, trilhos.length);
+  trilhos.forEach(([x, y, z, a, l], i) => iTr.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, a), s.set(l, 1, 1))));
+  const iPo = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 1.3, 0.16).translate(0, 0.55, 0), madeira, postes.length);
+  postes.forEach(([x, y, z], i) => iPo.setMatrixAt(i, m4.compose(p.set(x, y - 0.1, z), q.identity(), s.set(1, 1, 1))));
+  const iHo = new THREE.InstancedMesh(new THREE.BoxGeometry(5.5, 0.3, 5).translate(0, 0.1, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#b59472' })), hortas.length);
+  hortas.forEach(([x, y, z, r], i) => iHo.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.set(1, 1, 1))));
+  const iFi = new THREE.InstancedMesh(new THREE.BoxGeometry(5, 0.45, 0.7).translate(0, 0.35, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), fileiras.length);
+  fileiras.forEach(([x, y, z, r], i) => { iFi.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.set(1, 1, 1))); iFi.setColorAt(i, c.set(['#8cc06a', '#a6cc72', '#7fb565', '#e3c46a'][i % 4])); });
+  const copa = geoCopa(), iAr = new THREE.InstancedMesh(copa, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), arvores.length);
+  const iTr2 = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.15, 0.22, 1, 6).translate(0, 0.5, 0), comNeblina(new THREE.MeshLambertMaterial({ color: '#8a6e58' })), arvores.length);
+  arvores.forEach(([x, y, z], i) => {
+    const r = entre(1.8, 2.4); iAr.setMatrixAt(i, m4.compose(p.set(x, y + 2.2 + r * 0.6, z), q.setFromAxisAngle(cima, rnd() * TAU), s.set(r, r * 0.9, r)));
+    iAr.setColorAt(i, c.set(['#93c472', '#a8cc7c', '#9bbf6c'][i % 3])); iTr2.setMatrixAt(i, m4.compose(p.set(x, y - 0.2, z), q.identity(), s.set(1, 2.6, 1)));
+  });
+  const geoGal = juntarGeos([new THREE.BoxGeometry(0.34, 0.32, 0.48).translate(0, 0.32, 0), new THREE.BoxGeometry(0.2, 0.22, 0.2).translate(0, 0.55, 0.22)]);
+  const iGa = new THREE.InstancedMesh(geoGal, comNeblina(new THREE.MeshLambertMaterial({ color: '#fff' })), galinhas.length);
+  galinhas.forEach(([x, y, z, r], i) => { iGa.setMatrixAt(i, m4.compose(p.set(x, y, z), q.setFromAxisAngle(cima, r), s.setScalar(1.2))); iGa.setColorAt(i, c.set(['#fffaf2', '#ecc89a', '#c98f5f', '#fffaf2'][i % 4])); });
+  for (const im of [iTr, iPo, iHo, iFi, iAr, iTr2, iGa]) { im.castShadow = true; im.receiveShadow = true; raiz.add(im); }
+}
+
+// barquinhos a vela passeando devagar nos lagos largos
+function criarBarcos(raiz, def) {
+  const rio = TER.rio, lista = [];
+  const casco = new THREE.BoxGeometry(1.5, 0.6, 4.4).translate(0, 0.3, 0), pc = casco.attributes.position;
+  for (let i = 0; i < pc.count; i++) if (pc.getZ(i) > 0) pc.setX(i, pc.getX(i) * 0.35);   // proa fina
+  casco.computeVertexNormals();
+  const gV = new THREE.BufferGeometry(); gV.setAttribute('position', new THREE.Float32BufferAttribute([0, 0.8, -1.4, 0, 5.4, 0.2, 0, 0.8, 1.3], 3)); gV.computeVertexNormals();
+  const mC = comNeblina(new THREE.MeshLambertMaterial({ color: '#b48a6a' })), mV = comNeblina(new THREE.MeshLambertMaterial({ color: '#fffaf0', side: THREE.DoubleSide }));
+  for (const [a, b, W] of def.rio.lagos || []) {
+    if (W < 38) continue;
+    const ia = Math.round((a + 0.03) * (rio.length - 1)), ib = Math.min(Math.round((b - 0.02) * (rio.length - 1)), rio.length - 2); if (ib - ia < 8) continue;
+    const n = W > 60 ? 3 : 2;
+    for (let k = 0; k < n; k++) {
+      const g = new THREE.Group(), c = new THREE.Mesh(casco, mC), v = new THREE.Mesh(gV, mV); g.add(c, v); g.scale.setScalar(1.3); raiz.add(g);
+      lista.push({ g, ia, ib, off: entre(-0.5, 0.5), fase: rnd() * TAU, vel: entre(0.025, 0.045) });
+    }
+  }
+  return {
+    atualizar(dt, t) {
+      for (const o of lista) {
+        const u = 0.5 + 0.5 * Math.sin(t * o.vel + o.fase), du = Math.cos(t * o.vel + o.fase), f = o.ia + (o.ib - o.ia) * u, r = rio[Math.floor(f)], w = r.w * o.off;
+        o.g.position.set(r.x - r.tz * w, r.L - 0.3 + Math.sin(t * 1.3 + o.fase) * 0.06, r.z + r.tx * w);
+        o.g.rotation.set(Math.sin(t * 0.9 + o.fase) * 0.04, Math.atan2(r.tx * Math.sign(du), r.tz * Math.sign(du)), Math.sin(t * 1.1 + o.fase) * 0.06);
+      }
+    },
+  };
+}
 // ---------------- montagem de um voo ----------------
 function posicaoNoRio(t) { const rio = TER.rio; return rio[lim(Math.round(t * (rio.length - 1)), 0, rio.length - 1)]; }
 function distRio(x, z) { return TER.dist[celula(x, z)]; }
@@ -1515,8 +1918,11 @@ function construirVoo(def, ctx) {
   const evitar = def.rio.degraus.slice(1).filter(g => g[2] !== 'c').map(g => Math.round(g[0] * (rio.length - 1)))
     .concat(def.lugares.filter(l => l.tipo === 'arco').map(l => Math.round(l.t * (rio.length - 1))));
   (def.aquedutos || []).forEach((a, j) => {
-    const s = j === 0 ? 0 : nT - 1, ia = iCumes[s], ib = iCumes[s + 1];
+    const s = j === 0 ? (def.trechoAqueduto || 0) : nT - 1, ia = iCumes[s], ib = iCumes[s + 1];
     let i = Math.round(ia + (ib - ia) * 0.8);
+    // no 1º trecho, só depois de dar para descer planando do cume até o vão (sem mergulho brusco)
+    if (j === 0 && !def.trechoAqueduto) { const cu = def.cumes[0], pl = (def.planeio || 0.38) * 0.85, ent = ia + Math.sign(ib - ia) * 10;
+      for (let k = ent; k !== ib; k += Math.sign(ib - ia)) { const dist = Math.hypot(rio[ent].x - cu.x, rio[ent].z - cu.z) + Math.abs(k - ent) * 4; if (dist * pl >= cu.h + 6 - (rio[k].L + 14)) { if (Math.abs(k - ia) > Math.abs(i - ia)) i = ib > ia ? Math.min(k, ib - 12) : Math.max(k, ib + 12); break; } } }
     // longe de cachoeiras e do arco de pedra, e num trecho reto do rio (curva fechada faria o planador cruzar fora do vão)
     const curva = k => { const a = rio[lim(k - 15, 0, rio.length - 1)], b = rio[lim(k + 15, 0, rio.length - 1)]; return Math.abs(angDif(Math.atan2(a.tx, a.tz), Math.atan2(b.tx, b.tz))); };
     let melhor = i, nota = 1e9;
@@ -1530,19 +1936,23 @@ function construirVoo(def, ctx) {
   for (const a of def.aquedutos || []) {
     const r0 = posicaoNoRio(a.t), i = rio.indexOf(r0), A = rio[lim(i - 10, 0, rio.length - 1)], B = rio[lim(i + 10, 0, rio.length - 1)], dl = Math.hypot(B.x - A.x, B.z - A.z);
     const r = { ...r0, tx: (B.x - A.x) / dl, tz: (B.z - A.z) / dl }, o = criarAqueduto(raiz, def, r); aquedutos.push(o);
-    passagens.push({ x: r.x, z: r.z, y: r.L + 14, R: 8.5 });
+    passagens.push({ x: r.x, z: r.z, y: r.L + 14, R: 8.5, tx: r.tx, tz: r.tz });
     lugares.push({ nome: a.nome, frase: a.frase, x: r.x, z: r.z, raio: 150, achado: false });
   }
+  // --- cascatas nas encostas e vilarejo ---
+  const cascatas = criarCascatas(raiz, def); lugares.push(...cascatas.lugares);
+  criarVilarejo(raiz, def, aquedutos);
+  const barcos = criarBarcos(raiz, def);
   // --- lugares especiais ---
   let arcoPedra = null;
   for (const l of def.lugares) {
     const r = posicaoNoRio(l.t);
-    if (l.tipo === 'arco') { arcoPedra = { ...criarArcoPedra(raiz, def, r), r }; passagens.push({ x: r.x, z: r.z, y: r.L + arcoPedra.R * 0.55, R: 9 }); lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 120, achado: false }); }
+    if (l.tipo === 'arco') { arcoPedra = { ...criarArcoPedra(raiz, def, r), r }; passagens.push({ x: r.x, z: r.z, y: r.L + arcoPedra.R * 0.55, R: 9, tx: r.tx, tz: r.tz }); lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 120, achado: false }); }
     else if (l.tipo === 'arvore') { const x = r.x - r.tz * l.lado * (r.w + 46), z = r.z + r.tx * l.lado * (r.w + 46); criarArvoreAnciao(raiz, def, x, z); lugares.push({ nome: l.nome, frase: l.frase, x, z, raio: 120, achado: false }); }
     else lugares.push({ nome: l.nome, frase: l.frase, x: r.x, z: r.z, raio: 150, achado: false });
   }
   // --- rota de cada trecho: cume → vale (planando) → espiral de vento → próximo cume ---
-  const PLANEIO = 0.38;   // quanto se desce por metro andado, num mergulho tranquilo
+  const PLANEIO = def.planeio || 0.38;   // quanto se desce por metro andado, num mergulho tranquilo
   const tDe = cu => { let m = 1e9, k = 0; rio.forEach((r, i) => { const d = Math.hypot(r.x - cu.x, r.z - cu.z); if (d < m) { m = d; k = i; } }); return k; };
   for (let s = 0; s < cumes.length - 1; s++) {
     const A = def.cumes[s], B = def.cumes[s + 1], ia = tDe(A), ib = tDe(B), passo = ia < ib ? 1 : -1;
@@ -1553,7 +1963,7 @@ function construirVoo(def, ctx) {
     for (let i = entrada; passo > 0 ? i <= saida : i >= saida; i += passo * 12) {
       const r = rio[i];
       const ps = passagens.find(q => !q.usado && Math.hypot(r.x - q.x, r.z - q.z) < 30);
-      if (ps) { trecho.push({ x: ps.x, y: ps.y, z: ps.z, rio: i, fixo: true, pedra: true, R: ps.R }); ps.usado = true; continue; }
+      if (ps) { trecho.push({ x: ps.x - ps.tx * passo * 42, y: ps.y + 4, z: ps.z - ps.tz * passo * 42, fixo: true }, { x: ps.x, y: ps.y, z: ps.z, rio: i, fixo: true, pedra: true, R: ps.R }); ps.usado = true; continue; }
       trecho.push({ x: r.x, y: Math.max(r.L, rio[lim(i + 6 * passo, 0, rio.length - 1)].L) + 18 + 4 * Math.sin(i * 0.06), z: r.z, rio: i });
     }
     // altura planejada: ninguém precisa mergulhar mais que o normal para pegar os arcos
@@ -1562,7 +1972,7 @@ function construirVoo(def, ctx) {
     // antes de cada passagem (aqueduto, arco de pedra) a descida começa cedo, sem mergulho brusco no fim
     trecho.forEach((f, k) => {
       if (!f.fixo) return; let acc = 0;
-      for (let j = k - 1; j >= 0; j--) { acc += Math.hypot(trecho[j + 1].x - trecho[j].x, trecho[j + 1].z - trecho[j].z); if (trecho[j].fixo) break; trecho[j].y = Math.min(trecho[j].y, f.y + acc * 0.42); }
+      for (let j = k - 1; j >= 0; j--) { acc += Math.hypot(trecho[j + 1].x - trecho[j].x, trecho[j + 1].z - trecho[j].z); if (trecho[j].fixo) break; trecho[j].y = Math.min(trecho[j].y, f.y + acc * PLANEIO * 1.1); }
     });
     rota.push(...trecho);
     // espiral de vento entre o rio e o próximo cume
@@ -1575,7 +1985,7 @@ function construirVoo(def, ctx) {
   for (let k = 0; k < def.termicasExtras; k++) {
     for (let tent = 0; tent < 40; tent++) {
       const x = entre(-700, 700), z = entre(-700, 700), y = alturaTerreno(x, z);
-      if (distRio(x, z) < 50 || declive(x, z) > 0.3) continue;
+      if (distRio(x, z) < 50 || declive(x, z) > 0.3 || rota.some(p => Math.hypot(p.x - x, p.z - z) < 110)) continue;   // longe do caminho, para não atrapalhar o voo guiado
       termicas.push(new Termica(raiz, x, z, y, y + entre(160, 240), 45, 9)); break;
     }
   }
@@ -1592,9 +2002,9 @@ function construirVoo(def, ctx) {
   });
   // início: no primeiro cume, de frente para o vale
   const A = def.cumes[0], r1 = rota[1];
-  const inicio = { x: A.x, y: A.h + 0.9, z: A.z, yaw: Math.atan2(-(r1.x - A.x), -(r1.z - A.z)) };
+  const dI = Math.hypot(r1.x - A.x, r1.z - A.z) || 1, inicio = { x: A.x + (r1.x - A.x) / dI * 5, y: A.h + 2.3, z: A.z + (r1.z - A.z) / dI * 5, yaw: Math.atan2(-(r1.x - A.x), -(r1.z - A.z)) };
   return {
-    inicio, cumes, arcos, termicas, lugares, rota, borrifos, aquedutos,
+    inicio, cumes, arcos, termicas, lugares, rota, borrifos, aquedutos, sonsAgua: cascatas.sons, barcos,
     vento: new THREE.Vector2(...def.vento).normalize(),
   };
 }
@@ -1610,7 +2020,7 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { $('#semgl').hidden = false; $('#abertura').hidden = true; return; }
 const ehToque = matchMedia('(pointer: coarse)').matches;
-const Q = ehToque ? { seg: 300, arvores: 6500, pedras: 900, flores: 9000, sombra: 1024, px: 1.5 } : { seg: 400, arvores: 13000, pedras: 1800, flores: 22000, sombra: 2048, px: 1.75 };
+const Q = ehToque ? { seg: 300, arvores: 9000, pedras: 1600, flores: 16000, sombra: 1024, px: 1.5 } : { seg: 400, arvores: 19000, pedras: 3200, flores: 40000, sombra: 2048, px: 1.75 };
 renderer.setPixelRatio(Math.min(devicePixelRatio, Q.px));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 0.96;
@@ -1626,7 +2036,7 @@ sol.shadow.bias = -0.0005; sol.shadow.normalBias = 0.5;
 cena.add(sol, sol.target);
 const solDir = new THREE.Vector3(0.5, 0.6, 0.4).normalize();
 const ceu = criarCeu(); cena.add(ceu);
-const polen = criarPolen(cena), plan = new Planador(cena);
+const plan = new Planador(cena);
 
 let raiz = null, voo = null, iVoo = -1, nuvens = null, passaros = null, agua = null, modoTela = 'abertura', tempo = 0;
 const estado = { cume: 1, arcos: 0, lugares: 0, concluido: false, piloto: false, kRota: 0, saltou: false };
@@ -1650,11 +2060,12 @@ function carregarVoo(i) {
   raiz = new THREE.Group(); cena.add(raiz);
   const def = VOOS[i]; iVoo = i; aplicarClima(def);
   semear(def.semente); situarCumes(def); construirRelevo(def, Q.seg);
+  semear(def.semente + 5); tracarCascatas(def);
   raiz.add(malhaTerreno(def)); agua = malhaAgua(def); agua.material.uniforms.uSolDir.value.copy(solDir); raiz.add(agua);
   semear(def.semente + 1); plantarVegetacao(raiz, def, Q.arvores);
   espalharPedras(raiz, def, Q.pedras); espalharFlores(raiz, def, Q.flores);
   nuvens = criarNuvens(raiz, def); criarCordilheiras(raiz, def); passaros = criarPassaros(raiz, def);
-  voo = construirVoo(def, { raiz });
+  voo = construirVoo(def, { raiz }); passaros.nasTermicas(voo.rota.filter(p => p.termica).map(p => p.termica));
   Object.assign(estado, { cume: 1, arcos: 0, lugares: 0, concluido: false, piloto: false, kRota: 1, saltou: false });
   plan.pousar(voo.inicio.x, voo.inicio.y, voo.inicio.z, voo.inicio.yaw);
   voo.cumes[0].feito = true; voo.cumes[1].definirAlvo(true);
@@ -1708,7 +2119,7 @@ function atualizarSeta() {
 }
 
 // ---------- câmera ----------
-let camOrb = 0, camDist = 16, arrasto = null, orbYaw = 0, orbPitch = 0, ultArrasto = -9, camYawAtual = 0;
+let camOrb = 0, camDist = 13, arrasto = null, orbYaw = 0, orbPitch = 0, ultArrasto = -9, camYawAtual = 0;
 const alvoCam = new THREE.Vector3(), camPos = new THREE.Vector3(), tmpV = new THREE.Vector3();
 function atualizarCamera(dt) {
   if (modoTela !== 'jogo' && voo) {   // abertura e painéis: passeio lento em volta do primeiro aqueduto
@@ -1731,7 +2142,7 @@ function atualizarCamera(dt) {
   }
   const dist = camDist * (innerWidth < innerHeight ? 1.5 : 1);
   if (tempo - ultArrasto > 1.6 && !arrasto) { orbYaw *= Math.exp(-dt * 1.5); orbPitch *= Math.exp(-dt * 1.5); }
-  const y = plan.yaw + orbYaw, el = 0.2 + orbPitch;
+  const y = plan.yaw + orbYaw, el = 0.3 + orbPitch;
   tmpV.set(plan.pos.x + Math.sin(y) * dist * Math.cos(el), plan.pos.y + dist * Math.sin(el) + 2.2, plan.pos.z + Math.cos(y) * dist * Math.cos(el));
   const minY = piso(tmpV.x, tmpV.z) + 3; if (tmpV.y < minY) tmpV.y = minY;
   camPos.lerp(tmpV, 1 - Math.exp(-dt * 3.2));
@@ -1827,7 +2238,7 @@ function comandoPiloto() {
     const q = rota[estado.kRota + 1], passou = q && p.cume === undefined && ((plan.pos.x - p.x) * (q.x - p.x) + (plan.pos.z - p.z) * (q.z - p.z)) > 0;
     if (dh < (p.cume !== undefined ? 16 : 10) || passou || (p.cume !== undefined && p.cume < estado.cume)) { estado.kRota++; return comandoPiloto(); }
   }
-  return { yaw: Math.atan2(-dx, -dz), pitch: lim(Math.atan2(dy, Math.max(dh, 25)) + 0.06, -0.45, 0.32), sopro: dy > 10 && !p.termica && dh < 300 };
+  return { yaw: Math.atan2(-dx, -dz), pitch: lim(Math.atan2(dy, Math.max(dh, 25)) + 0.06, dy < -25 ? -0.68 : -0.45, 0.32), sopro: dy > 10 && !p.termica && dh < 300 };
 }
 
 // ---------- eventos do voo ----------
@@ -1933,16 +2344,15 @@ function passo(dt) {
     const prox = voo.arcos.findIndex(b => !b.feito);
     voo.arcos.forEach((a, i) => a.atualizar(dt, tempo, i === prox));
     voo.cumes.forEach(c => c.atualizar(dt, tempo, plan));
-    passaros.atualizar(dt, tempo);
+    passaros.atualizar(dt, tempo, plan, modoTela === 'jogo' && plan.estado === 'voando'); voo.barcos.atualizar(dt, tempo);
     nuvens.position.x = ((nuvens.position.x + dt * nuvens.userData.vel + 300) % 600 + 600) % 600 - 300;
     // cachoeira mais perto define o som da água
-    let dm = 1e9; for (const l of voo.lugares) if (l.tipo === 'cachoeira') dm = Math.min(dm, Math.hypot(camera.position.x - l.x, camera.position.z - l.z, (camera.position.y - l.y) * 0.7));
+    let dm = 1e9; for (const l of voo.lugares.filter(l => l.tipo === 'cachoeira').concat(voo.sonsAgua)) dm = Math.min(dm, Math.hypot(camera.position.x - l.x, camera.position.z - l.z, (camera.position.y - l.y) * 0.7));
     Som.cachoeira(modoTela === 'jogo' ? 1 - suave(40, 320, dm) : 0);
   }
   if (window.__vista) { camera.position.copy(window.__vista.p); camera.lookAt(window.__vista.a); } else atualizarCamera(dt);   // __vista: só para fotos de teste
   ceu.position.copy(camera.position);
   sol.target.position.copy(plan.pos); sol.position.copy(plan.pos).addScaledVector(solDir, 700);
-  polen.atualizar(dt, tempo, camera);
   Som.atualizar(plan.estado === 'voando' && modoTela === 'jogo' ? plan.v : 0, plan.sopro, plan.rasante);
   if (modoTela === 'jogo') { tocarAvisos(); atualizarSeta(); }
   renderer.render(cena, camera);

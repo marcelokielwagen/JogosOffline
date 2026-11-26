@@ -16,8 +16,21 @@ Sem relógio e sem queda: o vento de baixo nunca deixa o planador encostar no ch
   atravessar dá respingos na tela e som), corredeiras (degrau com 'c': descida longa com espuma e pedras no rio), 1º vale virou **Vale das Fontes**
   no estilo Nascente (terra clara, verde só perto da água, oliveiras e ciprestes). 2 aquedutos e 2 corredeiras em cada vale.
 
+- **27/11/2026 (3ª rodada)** — pedido dele: mais vegetação, cachoeiras no meio das montanhas estilo Suíça, vales lindos, mais vida e aves.
+  Feito: vale novo **Vale das Cascatas** (2º da lista: fundo plano e verde, paredões altos de pedra, 12 cascatas descendo pelas encostas, casinhas e vacas);
+  cascatas nas encostas também nos outros vales (4, 5 e 7); mais árvores e moitas nas margens; ovelhas e casinhas no Vale das Fontes;
+  aves: bandos maiores, andorinhas rente ao rio, águias planando e um bando que de vez em quando voa ao lado do planador.
+  Piloto do vento mergulha mais forte quando está alto demais e se alinha antes de cada vão.
+- **27/11/2026 (4ª rodada)** — ele não gostou das bolinhas amarelas (brilho das espirais de vento e pólen): tiradas; agora 2 águias girando mostram cada espiral do caminho.
+  Menos pássaros; mais cascatas (7/20/8/12); montanhas mais verdes (pedra só no mais íngreme, musgo em volta das cascatas); mais pedras (também ao lado dos riachos);
+  fumacinha nas chaminés, casinhas também nos Lagos do Céu, barquinhos a vela nos lagos largos. Espirais extras ficam longe do caminho.
+- **27/11/2026 (5ª rodada)** — asa mais real com piloto: asa-delta com vela listrada e varetas, tubos de alumínio, mastro e cabos, trapézio;
+  piloto de capacete deitado na cadeirinha segurando a barra (de pé no cume antes de saltar, inclina o corpo nas curvas). Câmera um pouco mais alta e perto.
+- **27/11/2026 (6ª rodada)** — mais casas com quintal (cerca com portão, horta, árvore de fruta, galinhas), vacas/ovelhas/cabras com pernas e cavalos,
+  casas também no Entardecer; cascatas: Fontes 10, Cascatas 30, Entardecer 12, Lagos 18.
+
 ## O que existe agora
-- **3 voos (vales), todos abertos desde o início:**
+- **4 voos (vales), todos abertos desde o início:** (o Vale das Cascatas é o 2º)
   1. Vale das Fontes — estilo Nascente: terra clara, oliveiras e ciprestes, 3 cachoeiras, 2 corredeiras, 2 aquedutos, Arco de Pedra, Oliveira Anciã, Lago Espelho.
   2. Desfiladeiro do Entardecer — mesas de arenito em degraus, árvores de outono, 4 cachoeiras, Janela do Desfiladeiro, Bordo Dourado.
   3. Lagos do Céu — picos com neve, lagos turquesa largos, mar de nuvens baixo, Portal de Gelo e Pedra, Lariço Antigo.
@@ -37,10 +50,10 @@ Sem relógio e sem queda: o vento de baixo nunca deixa o planador encostar no ch
   `planador.js` modelo e voo (chão macio, térmica em espiral, borda que traz de volta, rastros) · `dados.js` os 3 vales (VOOS) ·
   `voos.js` peças (ArcoLuz, Termica, Cume com coroa e coluna de luz, borrifo de cachoeira, arco de pedra, árvore anciã),
   posição dos cumes e rota de cada trecho · `jogo.js` laço, câmera, controles, telas, piloto do vento.
-- **Novo vale:** um item a mais em `VOOS` (dados.js): pontos do rio, degraus (t, nível, 'c' = corredeira), lagos, cumes (t, lado, altura, nome), aquedutos (nomes; a posição é escolhida sozinha perto do fim do 1º e do último trecho, num trecho reto do rio), cores (`aridez: 1` = estilo Nascente).
+- **Novo vale:** um item a mais em `VOOS` (dados.js): pontos do rio, degraus (t, nível, 'c' = corredeira), lagos, cumes (t, lado, altura, nome), cascatas ({ qtd, nomes }), vilarejo (casas e bichos), trechoAqueduto (em qual trecho vai o 1º aqueduto), aquedutos (nomes; a posição é escolhida sozinha perto do fim do 1º e do último trecho, num trecho reto do rio), cores (`aridez: 1` = estilo Nascente).
 - Teste no console: `__ad` e `sim(segundos, entrada)`; `__ad.alternarPiloto(true); sim(200)` faz o voo inteiro sozinho.
 - Capa: `node ferramentas/aetherdrift/capa.mjs`. A cada mudança, subir a versão do `sw.js`.
 
 ## Próximos passos possíveis (só com o OK do Marcelo)
-- Testar no celular (desempenho: 300 segmentos de relevo e ~6.500 árvores no toque).
+- Testar no celular (desempenho: 300 segmentos de relevo e ~9.000 tentativas de árvore no toque).
 - Mais vales; hora do dia mudando devagar; modo foto.

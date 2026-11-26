@@ -1,45 +1,86 @@
 /* =====================================================================
-   PLANADOR — a única forma do jogo: uma asa leve cor de creme, sem
-   piloto à mostra, com rastros de luz nas pontas.
+   PLANADOR — uma asa-delta de verdade: vela com listras e varetas,
+   tubos de alumínio, mastro com cabos, trapézio e o piloto deitado
+   na cadeirinha, segurando a barra (de pé no cume antes de saltar).
    Voo calmo e sem queda: o chão e a água "empurram" o planador para
    cima (nunca bate), espirais de vento sobem sozinhas e o Espaço dá
    um sopro para subir quando quiser.
    ===================================================================== */
 function montarPlanador() {
   const g = new THREE.Group();
-  // asa em flecha, com pontas que sobem de leve; feita à mão (dois lados)
-  const P = [], C = [], creme = new THREE.Color('#fff8ec'), ouro = new THREE.Color('#f2c46e'), pessego = new THREE.Color('#f7d2b4');
-  const perfil = [ // [x (envergadura), z bordo de ataque, z bordo de fuga, y]
-    [0, -1.25, 1.1, 0], [0.9, -0.95, 1.05, 0.04], [1.9, -0.55, 0.95, 0.1], [2.9, -0.1, 0.8, 0.2], [3.7, 0.3, 0.72, 0.38], [4.15, 0.55, 0.7, 0.62],
-  ];
-  for (const lado of [-1, 1]) for (let i = 0; i < perfil.length - 1; i++) {
-    const [x0, a0, f0, y0] = perfil[i], [x1, a1, f1, y1] = perfil[i + 1];
-    const meio0 = mix(a0, f0, 0.5), meio1 = mix(a1, f1, 0.5);
-    // duas faixas por trecho: frente (creme) e trás (pêssego), e um filete dourado no bordo
-    const quad = (A, B, Cc, D, cor) => { P.push(...A, ...B, ...Cc, ...Cc, ...B, ...D); for (let k = 0; k < 6; k++) C.push(cor.r, cor.g, cor.b); };
-    const v = (x, z, y, dy = 0) => [x * lado, y + dy, z];
-    quad(v(x0, a0, y0, 0.03), v(x0, a0 + 0.12, y0, 0.05), v(x1, a1, y1, 0.03), v(x1, a1 + 0.12, y1, 0.05), ouro);
-    quad(v(x0, a0 + 0.12, y0, 0.05), v(x0, meio0, y0, 0.07), v(x1, a1 + 0.12, y1, 0.05), v(x1, meio1, y1, 0.07), creme);
-    quad(v(x0, meio0, y0, 0.07), v(x0, f0, y0), v(x1, meio1, y1, 0.07), v(x1, f1, y1), i % 2 ? creme : pessego);
+  // ---------- vela: grade em envergadura (u) x corda (v), com barriga e bordo de fuga recortado ----------
+  const NU = 48, NV = 10, SPAN = 4.7;
+  const ataque = u => -1.65 + 2.05 * u, fuga = u => 1.35 - 0.62 * Math.pow(u, 1.2) - 0.07 * Math.abs(Math.sin(u * Math.PI * 5));
+  const altura = (u, v) => 0.17 * Math.sin(Math.PI * Math.pow(v, 0.8)) * (1 - 0.55 * u) - 0.12 * u * u + 0.05 * v * u;
+  const cores = { borda: new THREE.Color('#fbf6ee'), vela: new THREE.Color('#fff4e2'), faixa1: new THREE.Color('#f39a76'), faixa2: new THREE.Color('#f7c35f'), faixa3: new THREE.Color('#7fc6c0') };
+  const P = [], C = [], I = [], pt = (lado, u, v) => { const zA = ataque(u), zF = fuga(u); return [lado * SPAN * u, altura(u, v), mix(zA, zF, v)]; };
+  const corDe = (u, v) => {
+    if (v < 0.14) return cores.borda;                      // bolsa de bordo de ataque, mais clara
+    const w = u + v * 0.35;                                // listras em chevron
+    if (w > 0.42 && w < 0.5) return cores.faixa1; if (w > 0.5 && w < 0.56) return cores.faixa2; if (w > 0.56 && w < 0.62) return cores.faixa3;
+    return cores.vela;
+  };
+  for (const lado of [-1, 1]) {
+    const base = P.length / 3;
+    for (let i = 0; i <= NU; i++) for (let j = 0; j <= NV; j++) { const u = i / NU, v = j / NV; P.push(...pt(lado, u, v)); const c = corDe(u, v); C.push(c.r, c.g, c.b); }
+    for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++) {
+      const a = base + i * (NV + 1) + j, b = a + NV + 1;
+      if (lado > 0) I.push(a, a + 1, b, b, a + 1, b + 1); else I.push(a, b, a + 1, b, b + 1, a + 1);
+    }
   }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
-  geo.computeVertexNormals();
-  const asa = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
-  asa.castShadow = true; g.add(asa);
-  // casulo: corpinho liso sob a asa, com anel dourado
-  const casulo = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 12), new THREE.MeshStandardMaterial({ color: '#fffaf2', roughness: 0.45 }));
-  casulo.scale.set(0.8, 0.7, 2.6); casulo.position.set(0, -0.32, 0.05); casulo.castShadow = true; g.add(casulo);
-  const anel = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: '#f0bd5e', roughness: 0.3, metalness: 0.3 }));
-  anel.position.set(0, -0.32, -0.25); g.add(anel);
-  const vidro = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 10), new THREE.MeshStandardMaterial({ color: '#cfe9ec', roughness: 0.1, metalness: 0.2 }));
-  vidro.scale.set(0.9, 0.7, 1.4); vidro.position.set(0, -0.18, -0.55); g.add(vidro);
-  // cauda em V
-  const cauda = new THREE.BufferGeometry();
-  cauda.setAttribute('position', new THREE.Float32BufferAttribute([0, -0.2, 0.9, 0, -0.2, 1.9, -0.75, 0.25, 1.95, 0, -0.2, 0.9, 0, -0.2, 1.9, 0.75, 0.25, 1.95], 3)); cauda.computeVertexNormals();
-  g.add(new THREE.Mesh(cauda, new THREE.MeshLambertMaterial({ color: '#f9e3c8', side: THREE.DoubleSide })));
+  const gVela = new THREE.BufferGeometry(); gVela.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); gVela.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); gVela.setIndex(I); gVela.computeVertexNormals();
+  const vela = new THREE.Mesh(gVela, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })); vela.castShadow = true; g.add(vela);
+  // varetas (linhas finas sobre a vela)
+  const varetas = [];
+  for (const lado of [-1, 1]) for (let i = 3; i < NU; i += 6) for (let j = 1; j < NV; j++) { varetas.push(...pt(lado, i / NU, (j - 1) / NV), ...pt(lado, i / NU, j / NV)); }
+  for (let k = 1; k < varetas.length; k += 3) varetas[k] += 0.012;
+  const gVar = new THREE.BufferGeometry(); gVar.setAttribute('position', new THREE.Float32BufferAttribute(varetas, 3));
+  g.add(new THREE.LineSegments(gVar, new THREE.LineBasicMaterial({ color: '#e3cfb2' })));
+  // ---------- estrutura de alumínio ----------
+  const metal = new THREE.MeshStandardMaterial({ color: '#c7ccd2', roughness: 0.35, metalness: 0.6 });
+  const tubo = (a, b, r = 0.035, mat = metal) => {
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 8), mat);
+    m.position.copy(A).add(B).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); m.castShadow = true; g.add(m); return m;
+  };
+  const nariz = [0, -0.03, -1.65], cauda = [0, -0.06, 1.3], topoMastro = [0, 0.95, 0.05], pendura = [0, -0.07, 0.05];
+  tubo(nariz, cauda, 0.04);                                                     // quilha
+  for (const s of [-1, 1]) for (let i = 0; i < NU; i += 12) tubo(pt(s, i / NU, 0.02), pt(s, (i + 12) / NU, 0.02), 0.04);   // bordo de ataque
+  tubo([0, 0.0, 0.05], topoMastro, 0.03);                                       // mastro
+  const bA = [-0.82, -1.5, -0.62], bB = [0.82, -1.5, -0.62];
+  tubo(pendura, bA, 0.03); tubo(pendura, bB, 0.03); tubo(bA, bB, 0.033);         // trapézio e barra
+  const pontaE = pt(-1, 1, 0.3), pontaD = pt(1, 1, 0.3);
+  // cabos: de cima (mastro) e de baixo (barra)
+  const cabos = [];
+  for (const q of [nariz, cauda, pontaE, pontaD, pt(-1, 0.55, 0.05), pt(1, 0.55, 0.05)]) cabos.push(...topoMastro, ...q);
+  for (const q of [nariz, cauda]) cabos.push(...bA, ...q, ...bB, ...q);
+  cabos.push(...bA, ...pt(-1, 0.55, 0.05), ...bB, ...pt(1, 0.55, 0.05), ...bA, ...pontaE, ...bB, ...pontaD);
+  const gCab = new THREE.BufferGeometry(); gCab.setAttribute('position', new THREE.Float32BufferAttribute(cabos, 3));
+  g.add(new THREE.LineSegments(gCab, new THREE.LineBasicMaterial({ color: '#9aa1a8', transparent: true, opacity: 0.75 })));
+  // ---------- piloto: pendurado pela fita, deitado na cadeirinha ----------
+  const pele = new THREE.MeshLambertMaterial({ color: '#f1c9a5' }), roupa = new THREE.MeshLambertMaterial({ color: '#6fb0b4' }), cadeira = new THREE.MeshLambertMaterial({ color: '#f2a979' });
+  const capacete = new THREE.MeshStandardMaterial({ color: '#fff3dc', roughness: 0.3 }), viseira = new THREE.MeshStandardMaterial({ color: '#cfe6ea', roughness: 0.1, metalness: 0.3 });
+  const piloto = new THREE.Group(); piloto.position.set(0, -1.12, 0.05); g.add(piloto);   // pivô = onde a fita prende na cadeirinha
+  const parte = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.x = rx; m.castShadow = true; piloto.add(m); return m; };
+  const esfera = new THREE.SphereGeometry(1, 14, 10), cil = new THREE.CylinderGeometry(1, 1, 1, 10);
+  parte(esfera, cadeira, 0, -0.04, 0.35, 0.27, 0.22, 0.85);          // casulo da cadeirinha (pernas dentro)
+  parte(esfera, roupa, 0, 0.02, -0.25, 0.25, 0.2, 0.36);             // tronco e ombros
+  parte(esfera, cadeira, 0, 0.17, 0.05, 0.2, 0.08, 0.5);             // paraquedas reserva nas costas
+  parte(esfera, capacete, 0, 0.1, -0.75, 0.15, 0.15, 0.17);          // capacete
+  parte(esfera, pele, 0, 0.03, -0.8, 0.11, 0.11, 0.11);              // rosto
+  parte(esfera, viseira, 0, 0.07, -0.86, 0.12, 0.06, 0.08);          // viseira
+  // braços: dos ombros até a barra
+  const maoE = new THREE.Vector3(-0.34, -0.38, -0.67), maoD = new THREE.Vector3(0.34, -0.38, -0.67);
+  for (const [om, mao] of [[new THREE.Vector3(-0.22, 0.02, -0.45), maoE], [new THREE.Vector3(0.22, 0.02, -0.45), maoD]]) {
+    const d = mao.clone().sub(om), m = new THREE.Mesh(cil, roupa); m.scale.set(0.055, d.length(), 0.055);
+    m.position.copy(om).add(mao).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); piloto.add(m);
+    const luva = new THREE.Mesh(esfera, pele); luva.scale.setScalar(0.06); luva.position.copy(mao); piloto.add(luva);
+  }
+  // fita que liga a cadeirinha ao ponto de pendurar
+  const fita = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.05, 5), new THREE.MeshLambertMaterial({ color: '#e8dccb' }));
+  fita.position.set(0, -0.59, 0.05); g.add(fita);
   // pontas das asas (onde nascem os rastros)
-  const pontas = [new THREE.Vector3(-4.15, 0.62, 0.66), new THREE.Vector3(4.15, 0.62, 0.66)];
-  return { g, pontas };
+  const pontas = [new THREE.Vector3(...pt(-1, 1, 0.5)), new THREE.Vector3(...pt(1, 1, 0.5))];
+  return { g, pontas, piloto };
 }
 
 // rastro: fita que some aos poucos, presa numa ponta da asa
@@ -68,7 +109,7 @@ class Rastro {
 
 class Planador {
   constructor(cena) {
-    const m = montarPlanador(); this.g = m.g; this.pontasLocais = m.pontas; cena.add(this.g);
+    const m = montarPlanador(); this.g = m.g; this.pontasLocais = m.pontas; this.piloto = m.piloto; this.pose = 1; cena.add(this.g);
     this.rastros = [new Rastro(cena), new Rastro(cena)];
     this.pos = new THREE.Vector3(); this.vel = new THREE.Vector3();
     this.v = 20; this.yaw = 0; this.pitch = 0; this.roll = 0; this.taxaYaw = 0;
@@ -95,7 +136,7 @@ class Planador {
     const T = this.termica, emTermica = T && !e.x && !e.y && !e.piloto;
     if (e.piloto) {
       const dy = angDif(this.yaw, e.piloto.yaw); rollAlvo = lim(dy * 1.6, -0.8, 0.8);
-      pitchAlvo = lim(e.piloto.pitch, -0.5, 0.35);
+      pitchAlvo = lim(e.piloto.pitch, -0.7, 0.35);
     } else if (emTermica) {
       // circula em volta do centro da coluna, num raio confortável (giro para a direita)
       const dx = this.pos.x - T.x, dz = this.pos.z - T.z, d = Math.hypot(dx, dz) || 1, R0 = T.r * 0.5, rx = dx / d, rz = dz / d;
@@ -145,6 +186,9 @@ class Planador {
     g.rotation.set(0, 0, 0); g.rotation.order = 'YXZ';
     const balanco = this.estado === 'pousado' ? Math.sin(t * 1.3) * 0.03 : Math.sin(t * 0.9) * 0.025 + this.sopro * Math.sin(t * 14) * 0.03;
     g.rotation.y = this.yaw; g.rotation.x = this.pitch + (this.estado === 'pousado' ? 0.04 : 0); g.rotation.z = this.roll + balanco;
+    // piloto: de pé no cume, deitado em voo; o corpo pende um pouco para o lado da curva
+    this.pose += ((this.estado === 'pousado' ? 1 : 0) - this.pose) * Math.min(1, (dt || 0.016) * 2.5);
+    this.piloto.rotation.set(this.pose * Math.PI * 0.47, 0, -this.roll * 0.35 * (1 - this.pose));
     g.updateMatrixWorld();
     const lado = new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion);
     const forca = this.estado === 'voando' ? 0.25 + 0.75 * suave(16, 34, this.v) : 0;
