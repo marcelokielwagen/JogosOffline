@@ -1,7 +1,7 @@
 // Keepsake Hunt: confere a progressão (ficha, migração, junção, casa, álbum, marcos, mesa do dia) e mede o ritmo.   node meta.mjs
 import { readFileSync } from 'node:fs';
 const html = readFileSync('C:/Users/Minhoca/Projetos/JogosOffline/jogos/keepsake-hunt/index.html', 'utf8'), bl = id => html.match(new RegExp('<script id="' + id + '">([\\s\\S]*?)</script>'))[1].replace("'use strict';", '');
-const { N, M } = new Function(bl('nucleo') + bl('meta') + ';return{N:Nucleo,M:Meta}')(), F = N.FICHA; let n = 0, ruins = 0; const ok = (c, m) => { n++; if (!c) { ruins++; if (ruins < 20) console.log('FALHOU:', m); } };
+const { N, M } = new Function(bl('nucleo') + bl('eco') + bl('meta') + ';return{N:Nucleo,M:Meta}')(), F = N.FICHA; let n = 0, ruins = 0; const ok = (c, m) => { n++; if (!c) { ruins++; if (ruins < 20) console.log('FALHOU:', m); } };
 let s = 1; const R = () => (s = (s * 16807) % 2147483647) / 2147483647, RI = (a, b) => a + Math.floor(R() * (b - a + 1));
 const ord = x => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(k => [k, ord(x[k])])) : x, igual = (a, b) => JSON.stringify(ord(a)) === JSON.stringify(ord(b));
 // conteúdo
