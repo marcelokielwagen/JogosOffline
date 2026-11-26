@@ -1,3 +1,4 @@
+// glaze: Glaze Break conta no total
 // Menu por categorias e botão de voltar só para quem entra pela suíte.   node testes.mjs <pasta das fotos>
 import { abrir, dorme } from '../nascente/nav.mjs';
 const p = await abrir({ w: 390, h: 844, movel: true, url: '/manifest.webmanifest' }), base = p.base + '/', F = process.argv[2]; let ruins = 0;
@@ -9,7 +10,7 @@ const ir = async u => { await p.cmd('Page.navigate', { url: base + u }); await c
 const voltas = () => p.av(`[...document.querySelectorAll('a')].filter(a=>a.id!=='voltar'&&a.href.split('?')[0]===new URL('../../index.html',location.href).href&&getComputedStyle(a).display!=='none').length`);
 await ir('index.html'); if (F) await p.foto(F + '/menu-celular.png');
 ok('cabe na largura', await p.av('document.documentElement.scrollWidth<=innerWidth'));
-const cart = await p.av(`[...document.querySelectorAll('a.cartao')].map(a=>a.getAttribute('href'))`); ok('17 cartões em 6 categorias', cart.length === 17 && await p.av(`document.querySelectorAll('.categoria').length`) === 6);
+const cart = await p.av(`[...document.querySelectorAll('a.cartao')].map(a=>a.getAttribute('href'))`); ok('18 cartões em 6 categorias', cart.length === 18 && await p.av(`document.querySelectorAll('.categoria').length`) === 6);
 await p.av(`document.querySelector('[data-vai=cartas]').click()`); await dorme(1200); const y = await p.av(`document.querySelector('#cat-cartas').getBoundingClientRect().top`); ok('atalho Cartas', y > 40 && y < 90, y); if (F) await p.foto(F + '/menu-cartas.png');
 for (const h of cart) {
   await ir('manifest.webmanifest'); await ir(h); const d = await voltas(), arrumado = await p.av(`document.documentElement.scrollWidth<=innerWidth`);
