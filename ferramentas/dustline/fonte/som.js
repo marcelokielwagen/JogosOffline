@@ -121,6 +121,11 @@ const Som = (() => {
     contagem(n) { const t = ctx.currentTime; voz(n ? hz(69) : hz(81), t, n ? .4 : .9, n ? .1 : .14, { tipo: 'triangle', eco: .4, destino: G.musica }); },
     marco() { const t = ctx.currentTime; [0, 2, 4].forEach((i, k) => voz(nota(i + 2), t + k * .07, .9, .08, { tipo: 'triangle', eco: .5, pan: (k - 1) * .4 })); },
     chegada(recorde) { const t = ctx.currentTime; [0, 1, 2, 3, 4, 5, 7].forEach((i, k) => voz(nota(i), t + k * .09, 1.6, .09 - k * .006, { tipo: 'triangle', eco: .6, pan: (k % 2 ? 1 : -1) * .3 })); if (recorde) [5, 7, 9].forEach((i, k) => voz(nota(i), t + .8 + k * .12, 1.4, .06, { tipo: 'sine', eco: .6 })); },
+    // drift: nota que sobe com o multiplicador, acorde ao guardar os pontos, queda suave ao perder, sopro do turbo
+    combo(m) { const t = ctx.currentTime; voz(nota(m + 3), t, .5, .06, { tipo: 'triangle', eco: .4 }); },
+    drift(v) { const t = ctx.currentTime, n = v >= 4000 ? 5 : v >= 1600 ? 4 : 3; for (let k = 0; k < n; k++) voz(nota(k * 2 + 2), t + k * .06, 1.1, .07, { tipo: 'triangle', eco: .5, pan: (k % 2 ? 1 : -1) * .3 }); },
+    perdeu() { const t = ctx.currentTime; voz(hz(62), t, .7, .08, { tipo: 'sine', ate: hz(50), eco: .3 }); },
+    turbo() { const t = ctx.currentTime; chiado(t, .7, .1, 'bandpass', 700, .6, G.carro); voz(70, t, .6, .08, { tipo: 'sawtooth', ate: 140, corte: 500, destino: G.carro }); },
     // batida: um baque grave e abafado (nada de estalo metálico)
     batida(f) { if (ctx.currentTime - (E.ult || 0) < .25) return; E.ult = ctx.currentTime; const t = ctx.currentTime, v = Math.min(1, f / 12); voz(90, t, .35, .2 + v * .3, { ate: 45, corte: 400, destino: G.carro }); chiado(t, .25, .08 + v * .12, 'lowpass', 700, .7, G.carro); }
   };

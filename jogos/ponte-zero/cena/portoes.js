@@ -75,7 +75,8 @@ export function criarPortoes(cena, S, ruido) {
   const rotulo = (w = 160, h = 80) => { const L = letreiro(w, h), mL = D(new THREE.SpriteMaterial({ map: D(L.t), depthWrite: false, fog: false, toneMapped: false })), s = new THREE.Sprite(mL); s.renderOrder = 4; return { L, s }; };
   const barris = S.barris.map((b, i) => {
     const g = new THREE.Group(); g.position.set(b.x, 0, -b.d); g.visible = false; cena.add(g); let pq = null, duplo = false, y = 1.6;
-    if (b.tipo === 'reforco') { const m = caixa(g); m.position.y = .5; pq = new THREE.Mesh(copa, mObj); g.add(pq); y = 1.5; }
+    if (b.tipo === 'reforco' && b.da?.tipo === 'especial') { cxArma(g); pq = new THREE.Mesh(copa, mObj); g.add(pq); y = 1.6; }
+    else if (b.tipo === 'reforco') { const m = caixa(g); m.position.y = .5; pq = new THREE.Mesh(copa, mObj); g.add(pq); y = 1.5; }
     else if (b.tipo === 'gaiola') { gaiola(g); duplo = true; y = 2.55; } else if (b.tipo === 'caixa') { cxArma(g); duplo = true; y = 1.95; }
     else if (b.tipo === 'carro') { carro(i)(g); y = 2; } else if (b.tipo === 'hidrante') { hid(g); y = 1.75; } else barril(g);
     const { L, s } = duplo ? rotulo(256, 160) : rotulo(); s.position.y = y; if (duplo) s.scale.set(1.9, 1.19, 1); else s.scale.set(1.3, .65, 1); g.add(s);
@@ -87,6 +88,12 @@ export function criarPortoes(cena, S, ruido) {
     const g = new THREE.Group(); cena.add(g); let L = null, s = null, n = obras.size;
     if (o.tipo === 'carro') { const m = carro(n + 1)(g); m.rotation.y = (o.caiu ? .35 : .12) * (n % 2 ? 1 : -1) + (n % 3 === 0 ? Math.PI : 0); g.position.set(o.x, 0, -o.d); ({ L, s } = rotulo()); s.position.y = 2; s.scale.set(1.3, .65, 1); g.add(s); }
     else if (o.tipo === 'escombro') { const P = new Pecas(); for (const [x, y, z, r, c] of [[0, .5, 0, .85, '#6a5560'], [.55, .35, .3, .5, '#8a7078'], [-.55, .3, .2, .5, '#57444e'], [.1, 1.1, -.1, .45, '#8a7078'], [-.3, .9, .4, .34, '#ff7a1e']]) P.por(new THREE.DodecahedronGeometry(r, 0), c, { x, y, z, ry: x * 5 }); com(P)(g); g.position.set(o.x, 0, -o.d); ({ L, s } = rotulo()); s.position.y = 1.9; s.scale.set(1.3, .65, 1); g.add(s); }
+    else if (o.tipo === 'muralha') { // muralha comprida de concreto, com faixa amarela e preta no alto e blocos marcados
+      const P = new Pecas(), c = o.d1 - o.d0, w = o.x1 - o.x0;
+      P.por(caixaRedonda(w + .5, .3, c, .06, 1), '#7d7488', { y: .15 }).por(caixaRedonda(w, 1.9, c, .1, 1), '#b9aecb', { y: 1.15 }).por(caixaRedonda(w + .06, .22, c, .05, 1), '#ffc62e', { y: 2.06 });
+      for (let k = 0; k < Math.min(c, 180) / 3; k++) P.por(caixaChanfro(w + .08, 1.7, .08, .02), '#8f859e', { y: 1.1, z: c / 2 - k * 3 }).por(caixaChanfro(w + .1, .23, .9, .02), '#1d1822', { y: 2.06, z: c / 2 - 1.2 - k * 3 });
+      com(P)(g); g.position.set(o.x, 0, -(o.d0 + o.d1) / 2);
+    }
     else { // canteiro: cavaletes listrados na frente e do lado, cones e material dentro
       const P = new Pecas(), w = o.x1 - o.x0, c = o.d1 - o.d0, dentro = o.x0 < -5 ? 1 : -1, xi = dentro > 0 ? o.x1 : o.x0, cava = (x, z, ry, l) => { P.por(caixaChanfro(l, .3, .1, .025), '#ff7a1f', { x, y: .95, z, ry }).por(caixaChanfro(l, .3, .1, .025), '#fbf6ea', { x, y: .5, z, ry }); for (let k = 0; k < 3; k++) { const q = (k - 1) * l * .32; P.por(caixaChanfro(l * .13, .31, .115, .025), '#fbf6ea', { x: x + Math.cos(ry) * q, y: .95, z: z - Math.sin(ry) * q, ry }).por(caixaChanfro(l * .13, .31, .115, .025), '#ff7a1f', { x: x + Math.cos(ry) * q, y: .5, z: z - Math.sin(ry) * q, ry }); } for (const q of [-.44, .44]) P.por(caixaChanfro(.1, 1.2, .3, .025), '#3a3550', { x: x + Math.cos(ry) * q * l, y: .6, z: z - Math.sin(ry) * q * l, ry }); };
       const nf = Math.max(1, Math.round(w / 2)); for (let k = 0; k < nf; k++) cava(o.x0 + w * (k + .5) / nf, c / 2 - .15, 0, w / nf * .92);
@@ -135,7 +142,7 @@ export function criarPortoes(cena, S, ruido) {
         const b = o.b, perto = b.d - d; o.g.visible = b.vivo && perto < 92 && perto > -15; if (!o.g.visible) continue; longe(o.g, perto); o.g.position.set(b.x, b.alt || 0, -b.d); if (o.pq) o.pq.visible = b.alt > 0;
         if (b.tipo === 'carro') { const v = b.voa; if (v) { const k = Math.min(1, v.t / v.dur), r = v.fica ? (1 - k) * 1.2 : (1 - k) * 7; o.g.children[0].rotation.set(r * .7, r * .5 + .4, r * .3); } }
         const hp = String(Math.max(1, Math.ceil(b.vida))), v = b.reforco ? '+' + b.reforco : hp;
-        if (v !== o.ultimo) { o.ultimo = v; if (o.duplo) o.L.escrever(b.da.tipo === 'arma' ? 'ARMA' : b.da.tipo === 'cadencia' ? '+' + b.da.v + '%' : '+' + b.da.v, hp, b.da.tipo === 'especial' ? b.da.arma : undefined); else o.L.escrever(v); }
+        if (v !== o.ultimo) { o.ultimo = v; if (o.duplo) o.L.escrever(b.da.tipo === 'sinal' ? 'HELI' : b.da.tipo === 'arma' ? 'ARMA' : b.da.tipo === 'cadencia' ? '+' + b.da.v + '%' : '+' + b.da.v, hp, b.da.tipo === 'especial' ? b.da.arma : undefined); else o.L.escrever(v); }
         o.g.scale.setScalar(1 + b.dano * .05);
       }
       for (const o of S.blocos) { const r = obras.get(o) || obra(o), perto = o.d0 - d; r.vivo = t; r.g.visible = perto < 92; longe(r.g, perto); if (r.L) { const v = String(Math.max(1, Math.ceil(o.vida))); if (v !== r.ultimo) { r.ultimo = v; r.L.escrever(v); } r.g.scale.setScalar(1 + o.dano * .03); } }

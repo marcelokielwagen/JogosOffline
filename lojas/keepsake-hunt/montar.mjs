@@ -2,7 +2,7 @@
 // Copia o jogo, tira o que só faz sentido no site (link "Todos os jogos", suíte, ícone da suíte) e põe o provedor das lojas.
 // Depois: npx cap sync (veja LEIAME.md).
 import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';
-const AQUI = path.dirname(fileURLToPath(import.meta.url)), JOGO = path.resolve(AQUI, '../../jogos/keepsake-hunt'), WWW = path.join(AQUI, 'www');
+const AQUI = path.dirname(fileURLToPath(import.meta.url)), JOGO = path.resolve(AQUI, '../../guardados/keepsake-hunt'), WWW = path.join(AQUI, 'www');
 rmSync(WWW, { recursive: true, force: true }); mkdirSync(WWW, { recursive: true });
 let h = readFileSync(path.join(JOGO, 'index.html'), 'utf8'); const crlf = h.includes('\r\n'); h = h.replaceAll('\r\n', '\n');
 const troca = (a, b) => { if (!h.includes(a)) throw new Error('não achei: ' + a); h = h.replace(a, b); };

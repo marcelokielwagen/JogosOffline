@@ -16,7 +16,7 @@ export function criarSom(ligado) {
     if (n === 'eco') { const k = 44100 / ctx.sampleRate, m = Math.floor(b.length / k), r = ctx.createBuffer(2, m, ctx.sampleRate); for (let c = 0; c < 2; c++) { const x = b.getChannelData(c), y = r.getChannelData(c); for (let i = 0; i < m; i++) { const p = i * k, j = p | 0; y[i] = x[j] + ((x[j + 1] || 0) - x[j]) * (p - j); } } try { eco.buffer = r; } catch (_) { /* sem eco */ } return; }
     if (LACOS.includes(n)) { const g = ctx.createGain(), s = ctx.createBufferSource(); g.gain.value = 0; s.buffer = b; s.loop = true; s.connect(g); g.connect(AMB.includes(n) ? musicaLivre() : fogo); s.start(); laco[n] = { g, s }; }
   }
-  const LACOS = ['giratoria', 'chamas', 'passos', 'vento', 'camaPistola', 'camaSub', 'camaFuzil', 'ambFogo', 'ventania', 'desliza'], AMB = ['vento', 'passos', 'ambFogo', 'ventania', 'desliza']; let livre = null, fogo, eco, envia; const conta = [0, 0, 0], ritmo = [0, 0, 0], jato = {}; const musicaLivre = () => livre || (livre = ctx.createGain(), livre.connect(mestre), livre);
+  const LACOS = ['giratoria', 'chamas', 'passos', 'vento', 'camaPistola', 'camaSub', 'camaFuzil', 'ambFogo', 'ventania', 'desliza', 'rotor'], AMB = ['vento', 'passos', 'ambFogo', 'ventania', 'desliza', 'rotor']; let livre = null, fogo, eco, envia; const conta = [0, 0, 0], ritmo = [0, 0, 0], jato = {}; const musicaLivre = () => livre || (livre = ctx.createGain(), livre.connect(mestre), livre);
   function abrir() {
     if (ctx || morto) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC({ latencyHint: 'interactive' }); mestre = ctx.createGain(); mestre.gain.value = ligado() ? 1 : 0; const fim = ctx.createWaveShaper(), cv = new Float32Array(2049); for (let i = 0; i < cv.length; i++) { const x = (i / 1024 - 1) * 1.5, a = Math.abs(x); cv[i] = Math.sign(x) * (a < .75 ? a : .75 + .22 * Math.tanh((a - .75) / .22)); } fim.curve = cv; const entra = ctx.createGain(); entra.gain.value = 1 / 1.5; saida = fim; mestre.connect(entra); entra.connect(fim); fim.connect(ctx.destination);
@@ -68,6 +68,9 @@ export function criarSom(ligado) {
         case 'barril': tocar('barril', { v: 1, pan: d.x / 8, vel: varia(.04) }); abaixar(.4, .6); break;
         case 'portao': if (!d.bom) { tocar('portaoRuim', { v: 1, molha: .15 }); abaixar(.6, .5); break; } tocar(d.l.tipo === 'vezes' || d.q > 14 ? 'portaoMuito' : 'portaoBom', { v: 1, molha: .12 }); abaixar(.6, .5); if (d.l.tipo === 'especial') entrou(d.l.arma); else if (d.l.tipo === 'cadencia') tocar('cadencia', { v: .95, em: .1 }); else if (d.q > 0) chegam(d.q, .2); break;
         case 'resgate': tocar('gaiola', { v: 1 }); chegam(Math.max(5, d.q), .3); abaixar(.6, .5); break;
+        case 'sinal': tocar('caixaArma', { v: 1 }); tocar('aviso', { v: .8, em: .2 }); break;
+        case 'heliSolta': tocar('arremesso', { v: .5, vel: 1.3 }); break;
+        case 'destruicao': tocar('cadencia', { v: .8 }); break;
         case 'caixa': tocar('caixaArma', { v: 1 }); if (d.l.tipo === 'especial') entrou(d.l.arma); break;
         case 'premioMeio': if (d.l.tipo === 'especial') entrou(d.l.arma); else chegam(d.q, .3); break;
         case 'adrenalina': tocar('adrenalina', { v: 1 }); abaixar(.5, 1.2); break;
@@ -86,8 +89,8 @@ export function criarSom(ligado) {
         case 'virou': tocar('virou', { v: .9 }); break;
         case 'reforco': tocar('reforco', { v: 1 }); chegam(d.q, .25); break;
         case 'chefeEntra': tocar('onda', { v: .7, vel: .6 }); break;
-        case 'chefePousa': tocar('pancada', { v: 1, vel: .85 }); tocar('explosao2', { v: .5, vel: .7 }); tocar(RUGE[d.id] || RUGE[d.T.corpo === 'bruto' || d.T.corpo === 'casca' ? 'cancela' : 'operario'], { v: d.meio ? .8 : 1, em: .3, vel: d.meio ? 1.35 : 1 }); abaixar(.25, d.meio ? 1.1 : 1.8); break;
-        case 'fase': tocar(RUGE[d.id], { v: 1, vel: 1.08 }); abaixar(.3, 1.4); break;
+        case 'chefePousa': tocar('pancada', { v: 1, vel: .85 }); tocar('explosao2', { v: .5, vel: .7 }); tocar(RUGE[d.T.visual || d.id] || RUGE[d.T.corpo === 'bruto' || d.T.corpo === 'casca' ? 'cancela' : 'operario'], { v: d.meio ? .8 : 1, em: .3, vel: d.meio ? 1.35 : 1 }); abaixar(.25, d.meio ? 1.1 : 1.8); break;
+        case 'fase': tocar(RUGE[d.T.visual || d.id], { v: 1, vel: 1.08 }); abaixar(.3, 1.4); break;
         case 'passoChefe': tocar('pisada', { v: .9, pan: d.x / 10, vel: varia(.06) }); break;
         case 'marca': if (d.vao) tocar('range', { v: .8 }); if (d.bola) tocar('bolaNeve', { v: .9, pan: d.x / 8, em: Math.max(0, d.dur - 1.15), vel: varia(.06) }); if (d.escombro) tocar('assobio', { v: .9, pan: d.x / 8, em: Math.max(0, d.dur - 1.6), vel: varia(.08) }); if (d.som === 'gosma') break; if (passou('ma', .25)) tocar('aviso', { v: .8 }); break;
         case 'golpe': { const s = d.m.som; if (passou('go' + s, .08)) { if (s === 'pancada' || s === 'varrida') { tocar(s, { v: 1, vel: varia(.04) }); abaixar(.35, .6); } else tocar(s, { v: s === 'grito' ? 1 : .9, vel: varia(.05) }); if (s === 'grito') abaixar(.25, 1.1); } break; }
@@ -103,6 +106,7 @@ export function criarSom(ligado) {
       if (!ctx) return; const t = ctx.currentTime, alvo = ligado() ? 1 : 0; if (mestre.gain.value !== alvo) mestre.gain.setTargetAtTime(alvo, t, .03);
       if (t - (ult.amb ?? -1) < .12) return; const dt = Math.min(.5, t - (ult.amb ?? t)) || .12; ult.amb = t; const l = laco;
       ['camaPistola', 'camaSub', 'camaFuzil'].forEach((n, k) => { ritmo[k] += (conta[k] / dt - ritmo[k]) * .5; conta[k] = 0; l[n]?.g.gain.setTargetAtTime(pode() ? Math.min(.75, Math.sqrt(Math.max(0, ritmo[k] - 9) / 170)) : 0, t, .07); });
+      { const h = S.heli, perto = h && h.estado !== 'fora' ? Math.max(0, 1 - Math.abs(h.d - S.d) / 90) : 0; l.rotor?.g.gain.setTargetAtTime(!parado && pode() ? perto * perto * .9 : 0, t, .25); }
       for (const n in jato) if (t > jato[n].ate + .12) { tocar(jato[n].fecha, { v: .9 }); delete jato[n]; }
       l.passos?.g.gain.setTargetAtTime(!parado && S.estado === 'jogando' && S.ritmo > .4 ? Math.min(1, .35 + Math.sqrt(S.n) * .1) : 0, t, .15); const ce = S.trecho.cenario; l.vento?.g.gain.setTargetAtTime(ce === 'inverno' ? 0 : parado ? .8 : .55, t, .4); l.ventania?.g.gain.setTargetAtTime(ce === 'inverno' ? .8 : 0, t, .4); l.ambFogo?.g.gain.setTargetAtTime(ce === 'apocalipse' || ce === 'brasa' ? .55 : 0, t, .4); l.desliza?.g.gain.setTargetAtTime(!parado && (S.noGelo || S.trecho.escorrega) ? Math.min(.6, Math.max(0, Math.abs(S.vx) - 1.2) * (S.noGelo ? .2 : .08)) : 0, t, .08);
       if (!parado && S.estado === 'jogando' && t > ultGemido) { const c = S.d + S.frente, perto = []; for (const z of S.zumbis) if (!z.morto && z.d - c < 26) { perto.push(z); if (perto.length > 24) break; } if (perto.length) { const z = perto[Math.floor(Math.random() * perto.length)]; tocar(um('gemido', 4), { v: Math.min(.5, .2 + perto.length * .014) * (z.tipo === 'blindado' ? 1.3 : 1), pan: z.x / 6, vel: varia(.16) * (z.tipo === 'blindado' ? .72 : z.tipo === 'corredor' ? 1.3 : 1) }); ultGemido = t + (perto.length > 12 ? .28 : .6) + Math.random() * .5; } }

@@ -10,6 +10,8 @@ body.ponte-zero { margin: 0; overflow: hidden; background: #1a1230; overscroll-b
 .pz-hud { position: absolute; inset: 0; pointer-events: none; }
 .pz-caminho { position: absolute; top: 10px; left: 50%; width: min(70%, 340px); height: 12px; transform: translateX(-50%); border-radius: 8px; background: rgba(26, 18, 32, .7); overflow: hidden; border: 3px solid var(--tinta); }
 .pz-caminho i, .pz-arma i, .pz-carga i, .pz-vida i { display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(0); }
+.pz.defesa .pz-caminho { top: 62px; } .pz.defesa .pz-horda { top: 80px; }
+.pz-horda { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font: 900 15px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 2px 0 var(--tinta), 0 0 4px var(--tinta); white-space: nowrap; }
 .pz-caminho i { background: var(--ouro); } .pz-caminho u { position: absolute; top: 0; bottom: 0; width: 6px; margin-left: -3px; background: #ff5a3c; border-inline: 2px solid var(--tinta); }
 .pz-chefe { position: absolute; top: 8px; left: 50%; width: min(88%, 460px); transform: translateX(-50%); text-align: center; }
 .pz-chefe b { display: block; font-size: 20px; line-height: 1.1; font-weight: 900; text-shadow: -2px -2px 0 var(--tinta), 2px -2px 0 var(--tinta), -2px 2px 0 var(--tinta), 2px 2px 0 var(--tinta), 0 4px 0 var(--tinta); }

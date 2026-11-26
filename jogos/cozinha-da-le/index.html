@@ -63,84 +63,116 @@ function coracao(x, y, s, c) { ctx.save(); ctx.translate(x, y); ctx.scale(s / 10
 function flor(x, y, r, cp, cc) { for (let i = 0; i < 5; i++) { const a = i * TAU / 5; el(x + Math.cos(a) * r * .55, y + Math.sin(a) * r * .55, r * .55, r * .4, cp, a); } el(x, y, r * .32, r * .32, cc); }
 function pontos(n, seed, fx, fy) { const r = rnd(seed), a = []; for (let i = 0; i < n; i++) a.push([fx(r()), fy(r()), r(), .7 + r() * 1.1]); return a; }
 
-/* ------------------------------------------------------------ COMIDAS (também usadas na Fase 2) */
-function dAbacate(r) {
-  ctx.rotate(-.35);
-  sil(() => ctx.ellipse(0, 0, r * .74, r * .98, 0, 0, TAU), '#4e7f2e', 2);
-  el(0, r * .06, r * .6, r * .82, '#c9e27a'); el(0, r * .12, r * .46, r * .64, '#e6f3a6');
-  sil(() => ctx.ellipse(0, r * .24, r * .3, r * .3, 0, 0, TAU), '#8b5a30', 1.6);
-  el(-r * .1, r * .14, r * .1, r * .07, 'rgba(255,255,255,.55)');
+/* ------------------------------------------------------------ PRATOS (pedido do dono, 26/11/2026)
+   Salmão com tarê, macarrão com camarão, risoto com calabresa, yakissoba, lasanha, feijoada e
+   strogonoff. Cada um é desenhado em volta de (0,0), cabendo num raio r (base perto de y = +r*.45). */
+function monte(r, cor, w = .95, h = .62) { sil(() => { ctx.moveTo(-r * w, r * .38); ctx.bezierCurveTo(-r * w, -r * h, r * w, -r * h, r * w, r * .38); ctx.quadraticCurveTo(0, r * .56, -r * w, r * .38); }, cor, 1.8); }
+function fatia(x, y, rr, cor, esc) { el(x, y + rr * .18, rr, rr * .62, esc); el(x, y, rr, rr * .62, cor); ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .62, 0, 0, TAU); linha('rgba(70,20,10,.55)', 1); for (const [a, b] of [[-.35, -.15], [.3, .1], [-.05, .25]]) el(x + a * rr, y + b * rr * .6, rr * .13, rr * .09, '#f6d2b0'); }
+function salsinha(pts, r) { for (const [x, y] of pts) { el(x * r, y * r, r * .07, r * .05, '#4f9a3a', .6); el(x * r + r * .06, y * r - r * .03, r * .06, r * .045, '#6cbf4e', -.5); } }
+function dSalmao(r) {
+  monte(r, '#fbf6ec', .9, .35);
+  for (const [x, y] of [[-.5, .05], [-.2, -.05], [.2, -.03], [.5, .07], [-.35, .22], [.05, .2], [.4, .24]]) el(x * r, y * r, r * .08, r * .05, '#fff');
+  ctx.save(); ctx.rotate(-.12);
+  const pedaco = () => { ctx.moveTo(-r * .78, -r * .1); ctx.quadraticCurveTo(-r * .7, -r * .72, 0, -r * .7); ctx.quadraticCurveTo(r * .72, -r * .72, r * .8, -r * .14); ctx.quadraticCurveTo(0, r * .02, -r * .78, -r * .1); };
+  sil(pedaco, '#ff8a4c', 2);
+  ctx.save(); ctx.beginPath(); pedaco(); ctx.clip();
+  ctx.strokeStyle = 'rgba(255,236,214,.85)'; ctx.lineWidth = r * .06;
+  for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(k * r * .24 - r * .12, -r * .8); ctx.quadraticCurveTo(k * r * .24 + r * .1, -r * .4, k * r * .24 - r * .05, r * .05); ctx.stroke(); }
+  ctx.restore();
+  // tarê escorrendo
+  sil(() => { ctx.moveTo(-r * .6, -r * .5); ctx.bezierCurveTo(-r * .2, -r * .74, r * .3, -r * .7, r * .62, -r * .48); ctx.quadraticCurveTo(r * .56, -r * .3, r * .5, -r * .42); ctx.quadraticCurveTo(r * .2, -r * .5, r * .05, -r * .4); ctx.quadraticCurveTo(0, -r * .2, -r * .1, -r * .42); ctx.quadraticCurveTo(-r * .35, -r * .45, -r * .6, -r * .5); }, '#6b2e14', 1.2, '#3a1608');
+  el(-r * .2, -r * .58, r * .16, r * .04, 'rgba(255,220,180,.6)', -.15);
+  for (const [x, y] of [[-.35, -.56], [-.05, -.62], [.25, -.6], [.45, -.52], [.1, -.5]]) el(x * r, y * r, r * .04, r * .025, '#fff6dc', .4);
+  ctx.restore();
+  for (const [x, y] of [[-.15, -.72], [.15, -.74]]) { ctx.beginPath(); ctx.arc(x * r, y * r, r * .07, 0, TAU); ctx.fillStyle = '#7ccf5e'; ctx.fill(); linha('#3f7a32', 1); }
 }
-function dAbacaxi(r) {
-  for (const [a, l] of [[-.6, .62], [-.28, .85], [0, 1], [.28, .85], [.6, .62]]) {
-    ctx.save(); ctx.translate(0, -r * .32); ctx.rotate(a);
-    sil(() => { ctx.moveTo(-r * .14, 0); ctx.quadraticCurveTo(-r * .05, -r * l * .6, 0, -r * l); ctx.quadraticCurveTo(r * .05, -r * l * .6, r * .14, 0); ctx.closePath(); }, '#62b04a', 1.4);
-    ctx.restore();
-  }
-  const corpo = () => ctx.ellipse(0, r * .3, r * .6, r * .7, 0, 0, TAU);
-  sil(corpo, '#f4b62f', 2);
-  ctx.save(); ctx.beginPath(); corpo(); ctx.clip(); ctx.strokeStyle = '#c98a1e'; ctx.lineWidth = r * .06;
-  for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(-r + k * r * .32, -r * .5); ctx.lineTo(r + k * r * .32, r * 1.1); ctx.moveTo(r - k * r * .32, -r * .5); ctx.lineTo(-r - k * r * .32, r * 1.1); ctx.stroke(); }
-  el(-r * .25, r * .05, r * .12, r * .2, 'rgba(255,255,255,.4)'); ctx.restore();
-}
-function dPimentao(r) {
-  sil(() => { ctx.ellipse(-r * .32, r * .12, r * .42, r * .66, -.15, 0, TAU); ctx.moveTo(r * .74, r * .12); ctx.ellipse(r * .32, r * .12, r * .42, r * .66, .15, 0, TAU); ctx.moveTo(r * .45, r * .18); ctx.ellipse(0, r * .18, r * .45, r * .7, 0, 0, TAU); }, '#f7c52e', 2);
-  for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * r * .13, -r * .3); ctx.quadraticCurveTo(s * r * .22, r * .3, s * r * .1, r * .78); linha('rgba(200,130,20,.55)', r * .07); }
-  el(-r * .34, -r * .02, r * .09, r * .22, 'rgba(255,255,255,.55)', -.2);
-  el(0, -r * .44, r * .28, r * .11, '#6db04a');
-  sil(() => { ctx.moveTo(-r * .08, -r * .46); ctx.quadraticCurveTo(-r * .04, -r * .8, r * .2, -r * .86); ctx.lineTo(r * .22, -r * .72); ctx.quadraticCurveTo(r * .06, -r * .7, r * .1, -r * .46); ctx.closePath(); }, '#5a9a3e', 1.4);
-}
-function dCastanha(r) {
-  const um = (x, y, s, rot) => {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
-    const path = () => { ctx.moveTo(0, -r * .62); ctx.quadraticCurveTo(r * .72, -r * .38, r * .6, r * .22); ctx.quadraticCurveTo(r * .5, r * .6, 0, r * .6); ctx.quadraticCurveTo(-r * .5, r * .6, -r * .6, r * .22); ctx.quadraticCurveTo(-r * .72, -r * .38, 0, -r * .62); };
-    sil(path, '#7b4527', 2);
-    ctx.save(); ctx.beginPath(); path(); ctx.clip(); el(0, r * .64, r * .72, r * .3, '#d8b48a'); ctx.restore();
-    el(-r * .22, -r * .18, r * .1, r * .22, 'rgba(255,255,255,.35)', -.4);
-    ctx.beginPath(); ctx.moveTo(0, -r * .62); ctx.lineTo(0, -r * .76); linha('#5a3018', 2.4);
+function dMacarrao(r) {
+  monte(r, '#f6d36a', .92, .6);
+  ctx.save(); ctx.beginPath(); ctx.moveTo(-r * .92, r * .38); ctx.bezierCurveTo(-r * .92, -r * .6, r * .92, -r * .6, r * .92, r * .38); ctx.clip();
+  ctx.strokeStyle = '#e3b23c'; ctx.lineWidth = r * .05;
+  for (let k = 0; k < 9; k++) { ctx.beginPath(); const y = -r * .4 + k * r * .1; ctx.moveTo(-r, y); for (let x = -r; x <= r; x += r * .2) ctx.quadraticCurveTo(x + r * .1, y + (k % 2 ? -1 : 1) * r * .12, x + r * .2, y); ctx.stroke(); }
+  ctx.restore();
+  const camarao = (x, y, s, rot) => {
+    ctx.save(); ctx.translate(x * r, y * r); ctx.rotate(rot); ctx.scale(s, s);
+    sil(() => { ctx.arc(0, 0, r * .3, Math.PI * .95, Math.PI * 2.3); ctx.arc(0, 0, r * .13, Math.PI * 2.3, Math.PI * .95, true); ctx.closePath(); }, '#ff8f6b', 1.6, '#a8402a');
+    ctx.strokeStyle = 'rgba(255,240,225,.8)'; ctx.lineWidth = r * .035;
+    for (const a of [1.3, 1.75, 2.2, 2.65]) { ctx.beginPath(); ctx.moveTo(Math.cos(a * Math.PI) * r * .14, Math.sin(a * Math.PI) * r * .14); ctx.lineTo(Math.cos(a * Math.PI) * r * .29, Math.sin(a * Math.PI) * r * .29); ctx.stroke(); }
+    sil(() => { ctx.moveTo(-r * .3, 0); ctx.lineTo(-r * .46, -r * .1); ctx.lineTo(-r * .42, r * .08); ctx.closePath(); }, '#e2603e', 1.2, '#a8402a');
     ctx.restore();
   };
-  um(-r * .36, r * .1, .74, -.3); um(r * .36, r * .04, .74, .3);
+  camarao(-.38, -.18, 1, .3); camarao(.36, -.2, 1, -.4); camarao(0, -.48, .95, 0);
+  el(-r * .3, -r * .1, r * .08, r * .05, '#d63a2a'); el(r * .12, -r * .04, r * .08, r * .05, '#d63a2a');
+  salsinha([[-.1, -.2], [.55, -.02], [-.6, .05], [.2, -.62]], r);
 }
-function dUva(r) {
-  const g = [[-.36, -.25], [0, -.27], [.36, -.25], [-.18, .07], [.18, .07], [0, .4]];
-  sil(() => { for (const [x, y] of g) { ctx.moveTo(x * r + r * .26, y * r); ctx.arc(x * r, y * r, r * .26, 0, TAU); } }, '#9a5bb8', 1.8);
-  for (const [x, y] of g) { ctx.beginPath(); ctx.arc(x * r, y * r, r * .26, 0, TAU); linha('rgba(90,40,110,.5)', 1.2); el(x * r - r * .08, y * r - r * .08, r * .07, r * .06, 'rgba(255,255,255,.7)'); }
-  ctx.beginPath(); ctx.moveTo(0, -r * .5); ctx.lineTo(r * .05, -r * .78); linha('#6b4a2a', r * .09);
-  sil(() => ctx.ellipse(r * .3, -r * .62, r * .26, r * .14, -.4, 0, TAU), '#62b04a', 1.4);
+function dRisoto(r) {
+  monte(r, '#f3e2b4', .94, .5);
+  for (let k = 0; k < 26; k++) { const a = k * 2.4, d = (k % 7) / 7; el(Math.cos(a) * r * .75 * d, -r * .02 + Math.sin(a) * r * .3 * d, r * .05, r * .025, '#fffaf0', a); }
+  const rodela = (x, y, s) => { const rr = r * .23 * s; el(x * r, y * r + rr * .2, rr, rr * .6, '#7a2418'); el(x * r, y * r, rr, rr * .6, '#c2412c'); ctx.beginPath(); ctx.ellipse(x * r, y * r, rr, rr * .6, 0, 0, TAU); linha('#5a160c', 1.2); el(x * r, y * r, rr * .72, rr * .42, '#d9644a'); for (const [a, b] of [[-.3, -.1], [.25, .1], [0, .2], [.3, -.2], [-.2, .25]]) el(x * r + a * rr, y * r + b * rr * .6, rr * .1, rr * .07, '#fbe0c8'); };
+  rodela(-.42, -.06, 1); rodela(.38, -.1, 1); rodela(-.02, -.34, 1.05); rodela(.05, .14, .9);
+  salsinha([[-.15, -.12], [.6, .12], [-.65, .16], [.25, -.4]], r);
 }
-function dMilho(r) {
-  for (const s of [-1, 1]) sil(() => { ctx.moveTo(0, r * .9); ctx.quadraticCurveTo(s * r * .7, r * .5, s * r * .38, -r * .5); ctx.quadraticCurveTo(s * r * .3, r * .2, 0, r * .9); }, '#6cb34e', 1.6);
-  const cob = () => ctx.ellipse(0, -r * .05, r * .34, r * .8, 0, 0, TAU);
-  sil(cob, '#f6cf3e', 2);
-  ctx.save(); ctx.beginPath(); cob(); ctx.clip();
-  for (let yy = -6; yy <= 6; yy++) for (let xx = -2; xx <= 2; xx++) el(xx * r * .15 + (yy % 2 ? r * .075 : 0), yy * r * .13, r * .06, r * .055, '#fde68a');
+function dYakissoba(r) {
+  monte(r, '#b8783a', .94, .6);
+  ctx.save(); ctx.beginPath(); ctx.moveTo(-r * .94, r * .38); ctx.bezierCurveTo(-r * .94, -r * .6, r * .94, -r * .6, r * .94, r * .38); ctx.clip();
+  ctx.strokeStyle = '#d99a52'; ctx.lineWidth = r * .045;
+  for (let k = 0; k < 10; k++) { ctx.beginPath(); const y = -r * .45 + k * r * .09; ctx.moveTo(-r, y); for (let x = -r; x <= r; x += r * .25) ctx.quadraticCurveTo(x + r * .12, y + (k % 2 ? 1 : -1) * r * .14, x + r * .25, y); ctx.stroke(); }
   ctx.restore();
-  for (const s of [-1, 1]) sil(() => { ctx.moveTo(s * r * .05, r * .9); ctx.quadraticCurveTo(s * r * .55, r * .55, s * r * .3, r * .05); ctx.quadraticCurveTo(s * r * .25, r * .5, s * r * .05, r * .9); }, '#7cc45e', 1.4);
+  const brocolis = (x, y) => { ctx.beginPath(); ctx.moveTo(x * r, y * r + r * .05); ctx.lineTo(x * r, y * r + r * .2); linha('#7cb84a', r * .08); sil(() => { for (const [a, b] of [[-.09, 0], [.09, 0], [0, -.08]]) { ctx.moveTo(x * r + a * r + r * .1, y * r + b * r); ctx.arc(x * r + a * r, y * r + b * r, r * .1, 0, TAU); } }, '#3f9a3a', 1.2, '#24602a'); };
+  brocolis(-.45, -.22); brocolis(.42, -.12); brocolis(.02, -.46);
+  for (const [x, y, a] of [[-.15, -.1, .5], [.2, -.32, -.4], [.6, .1, .2], [-.6, .08, -.3]]) { ctx.save(); ctx.translate(x * r, y * r); ctx.rotate(a); sil(() => ctx.roundRect(-r * .16, -r * .04, r * .32, r * .08, r * .03), '#f2852b', 1, '#b4501a'); ctx.restore(); }
+  for (const [x, y] of [[.15, .05], [-.32, .15]]) sil(() => ctx.ellipse(x * r, y * r, r * .14, r * .08, .3, 0, TAU), '#f7e6c4', 1, '#a07a50');
+  // hashis
+  ctx.save(); ctx.rotate(-.5); for (const dx of [0, r * .12]) sil(() => ctx.roundRect(r * .2 + dx, -r * 1.05, r * .07, r * .95, r * .03), '#e2b46c', 1.2, '#8a5a24'); ctx.restore();
 }
-function dCenoura(r) {
-  ctx.rotate(.55);
-  for (const a of [-.5, 0, .5]) { ctx.save(); ctx.translate(0, -r * .6); ctx.rotate(a); sil(() => ctx.ellipse(0, -r * .28, r * .11, r * .3, 0, 0, TAU), '#62b04a', 1.4); ctx.restore(); }
-  sil(() => { ctx.moveTo(-r * .36, -r * .55); ctx.quadraticCurveTo(0, -r * .72, r * .36, -r * .55); ctx.quadraticCurveTo(r * .2, r * .3, 0, r * .95); ctx.quadraticCurveTo(-r * .2, r * .3, -r * .36, -r * .55); }, '#f2852b', 2);
-  for (const y of [-.25, .05, .35]) { ctx.beginPath(); ctx.moveTo(-r * .2, y * r); ctx.lineTo(-r * .05, y * r + r * .04); linha('#c55e16', r * .05); }
-  el(-r * .14, -r * .3, r * .05, r * .2, 'rgba(255,255,255,.45)');
+function dLasanha(r) {
+  const w = r * .85, top = -r * .55, base = r * .3, cam = (base - top) / 5;
+  const cor = ['#f4d27a', '#d9402c', '#f4d27a', '#d9402c', '#f4d27a'];
+  sil(() => { ctx.moveTo(-w, top); ctx.lineTo(w * .55, top - r * .2); ctx.lineTo(w * .55, base - r * .2); ctx.lineTo(-w, base); ctx.closePath(); }, '#e9b75a', 1.8);
+  for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.moveTo(-w, top + k * cam); ctx.lineTo(w * .55, top + k * cam - r * .2); ctx.lineTo(w * .55, top + (k + 1) * cam - r * .2); ctx.lineTo(-w, top + (k + 1) * cam); ctx.closePath(); ctx.fillStyle = cor[k]; ctx.fill(); }
+  // lado da frente (mais claro) e topo gratinado
+  sil(() => { ctx.moveTo(w * .55, top - r * .2); ctx.lineTo(w, top - r * .02); ctx.lineTo(w, base - r * .02); ctx.lineTo(w * .55, base - r * .2); ctx.closePath(); }, '#c9352a', 1.4);
+  for (let k = 0; k < 5; k += 2) { ctx.beginPath(); ctx.moveTo(w * .55, top + k * cam - r * .2); ctx.lineTo(w, top + k * cam - r * .02); ctx.lineTo(w, top + (k + 1) * cam - r * .02); ctx.lineTo(w * .55, top + (k + 1) * cam - r * .2); ctx.closePath(); ctx.fillStyle = '#f0c868'; ctx.fill(); }
+  sil(() => { ctx.moveTo(-w, top); ctx.lineTo(w * .55, top - r * .2); ctx.lineTo(w, top - r * .02); ctx.lineTo(-w * .45, top + r * .18); ctx.closePath(); }, '#f7c64a', 1.6);
+  for (const [x, y] of [[-.5, -.5], [-.1, -.6], [.3, -.66], [.55, -.6], [.05, -.48], [-.3, -.42]]) el(x * r, y * r, r * .1, r * .05, '#c9772a', .2);
+  salsinha([[-.25, -.55], [.35, -.62]], r);
 }
-function dMorango(r) {
-  const corpo = () => { ctx.moveTo(0, r * .9); ctx.bezierCurveTo(-r * .95, r * .2, -r * .8, -r * .62, 0, -r * .45); ctx.bezierCurveTo(r * .8, -r * .62, r * .95, r * .2, 0, r * .9); };
-  sil(corpo, '#e8473f', 2);
-  for (const [x, y] of [[-.3, -.15], [.05, -.2], [.35, -.1], [-.2, .2], [.18, .18], [0, .5], [-.42, .1], [.42, .15]]) el(x * r, y * r, r * .04, r * .06, '#ffe08a');
-  el(-r * .3, -r * .22, r * .1, r * .16, 'rgba(255,255,255,.45)', -.3);
-  sil(() => { for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + (i - 2) * .55; ctx.moveTo(0, -r * .45); ctx.lineTo(Math.cos(a) * r * .45, -r * .45 + Math.sin(a) * r * .3 + r * .15); } }, '#5aa646', 2.5, '#3f7a32');
+function dFeijoada(r) {
+  // cumbuca de barro com feijão preto, carnes e uma rodela de laranja
+  el(0, r * .1, r * .86, r * .36, '#3a2014');
+  sil(() => { ctx.moveTo(-r * .88, -r * .12); ctx.quadraticCurveTo(-r * .82, r * .52, 0, r * .5); ctx.quadraticCurveTo(r * .82, r * .52, r * .88, -r * .12); ctx.closePath(); }, '#a8582c', 2);
+  el(-r * .45, r * .14, r * .1, r * .2, 'rgba(255,220,180,.35)', .4);
+  sil(() => ctx.ellipse(0, -r * .12, r * .88, r * .32, 0, 0, TAU), '#8a4522', 1.6);
+  el(0, -r * .12, r * .76, r * .25, '#2a1610');
+  for (let k = 0; k < 22; k++) { const a = k * 2.4, d = .2 + (k % 6) / 7; el(Math.cos(a) * r * .62 * d, -r * .12 + Math.sin(a) * r * .2 * d, r * .07, r * .045, '#120806', a); el(Math.cos(a) * r * .62 * d - r * .02, -r * .135 + Math.sin(a) * r * .2 * d, r * .025, r * .015, 'rgba(255,255,255,.35)'); }
+  fatia(-r * .3, -r * .2, r * .17, '#b8402e', '#6a1e12'); fatia(r * .28, -r * .1, r * .16, '#b8402e', '#6a1e12');
+  sil(() => ctx.roundRect(-r * .05, -r * .32, r * .3, r * .14, r * .05), '#d98a6a', 1.2, '#7a3a24');
+  el(-r * .05, -r * .02, r * .12, r * .06, '#fff3e0');
+  // couve e laranja ao lado
+  for (const [x, a] of [[-.7, -.5], [-.58, -.2]]) el(x * r, -r * .38, r * .14, r * .06, '#3f8a2e', a);
+  ctx.save(); ctx.translate(r * .66, -r * .42); sil(() => ctx.arc(0, 0, r * .24, 0, TAU), '#f7a21b', 1.6, '#a85e10'); el(0, 0, r * .18, r * .18, '#ffd065');
+  ctx.strokeStyle = '#f7a21b'; ctx.lineWidth = r * .03; for (let k = 0; k < 8; k++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(k * TAU / 8) * r * .17, Math.sin(k * TAU / 8) * r * .17); ctx.stroke(); } ctx.restore();
+}
+function dStrogonoff(r) {
+  // arroz de um lado, molho rosado com carne e cogumelo do outro, batata palha por cima
+  sil(() => ctx.ellipse(-r * .42, -r * .02, r * .5, r * .38, 0, 0, TAU), '#fbf6ec', 1.6);
+  for (const [x, y] of [[-.6, -.1], [-.35, -.2], [-.2, 0], [-.5, .1], [-.7, .08], [-.3, .15]]) el(x * r, y * r, r * .07, r * .04, '#fff');
+  sil(() => { ctx.moveTo(-r * .1, r * .3); ctx.bezierCurveTo(-r * .2, -r * .55, r * .95, -r * .5, r * .9, r * .2); ctx.quadraticCurveTo(r * .4, r * .45, -r * .1, r * .3); }, '#e7a07a', 1.8);
+  el(r * .4, -r * .02, r * .38, r * .2, 'rgba(255,230,210,.45)');
+  for (const [x, y] of [[.15, -.12], [.5, -.25], [.62, .05], [.32, .1]]) sil(() => ctx.roundRect(x * r - r * .1, y * r - r * .06, r * .2, r * .12, r * .04), '#8a4a2a', 1, '#4a2210');
+  for (const [x, y] of [[.38, -.08], [.72, -.12]]) { sil(() => { ctx.arc(x * r, y * r, r * .11, Math.PI, 0); ctx.closePath(); }, '#f2e6cc', 1, '#8a6a40'); sil(() => ctx.roundRect(x * r - r * .035, y * r, r * .07, r * .09, r * .02), '#e6d4b0', .8, '#8a6a40'); }
+  ctx.strokeStyle = '#f7c548'; ctx.lineWidth = r * .045; ctx.lineCap = 'round';
+  for (let k = 0; k < 16; k++) { const x = -r * .1 + (k * 37 % 90) / 100 * r, y = -r * .52 + (k * 53 % 30) / 100 * r, a = k * 1.7; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * r * .14, y + Math.sin(a) * r * .06); ctx.stroke(); }
+  ctx.lineCap = 'butt';
+  salsinha([[-.45, -.32], [.82, -.05]], r);
 }
 const COMIDAS = {
-  abacate: { nome: 'Abacate', cor: '#a7d684', esc: '#6aa64c', d: dAbacate },
-  abacaxi: { nome: 'Abacaxi', cor: '#ffd75e', esc: '#d9a92e', d: dAbacaxi },
-  pimentao: { nome: 'Pimentão', cor: '#ffb347', esc: '#d98a22', d: dPimentao },
-  castanha: { nome: 'Castanha', cor: '#c4936a', esc: '#8a5f3e', d: dCastanha },
-  uva: { nome: 'Uva', cor: '#cfa2e4', esc: '#9467b0', d: dUva },
-  milho: { nome: 'Milho', cor: '#fff0a0', esc: '#dcc25a', d: dMilho },
-  cenoura: { nome: 'Cenoura', cor: '#ffa070', esc: '#d9693c', d: dCenoura },
-  morango: { nome: 'Morango', cor: '#ffa4b4', esc: '#d9677e', d: dMorango },
+  salmao: { nome: 'Salmão com tarê', cor: '#ffb08a', esc: '#d9744a', d: dSalmao },
+  macarrao: { nome: 'Macarrão com camarão', cor: '#ffe27a', esc: '#d4b23a', d: dMacarrao },
+  risoto: { nome: 'Risoto com calabresa', cor: '#b8de8a', esc: '#79a84e', d: dRisoto },
+  yakissoba: { nome: 'Yakissoba', cor: '#e8c49a', esc: '#ad8350', d: dYakissoba },
+  lasanha: { nome: 'Lasanha', cor: '#ff9a9a', esc: '#cc5a5a', d: dLasanha },
+  feijoada: { nome: 'Feijoada', cor: '#c8b2e4', esc: '#8e74b4', d: dFeijoada },
+  strogonoff: { nome: 'Strogonoff', cor: '#a8dcd4', esc: '#62a89e', d: dStrogonoff },
 };
 function comida(nome, x, y, r) { ctx.save(); ctx.translate(x, y); COMIDAS[nome].d(r); ctx.restore(); }
 
@@ -689,7 +721,7 @@ function pratoServico(p) {
   sil(() => ctx.ellipse(x, y0, 40, 12.5, 0, 0, TAU), '#fffaf2', 1.4, '#9a6a3a'); el(x, y0, 28, 8, '#f3eadb');
   const n = p.fase === 'festa' && !p.comeu ? 10 : p.pratos;
   for (let k = 0; k < n; k++) { const yy = y0 - 3 - k * 4; el(x, yy + 2, 34, 10, cf.esc); el(x, yy, 34, 10, cf.cor); ctx.beginPath(); ctx.ellipse(x, yy, 34, 10, 0, 0, TAU); linha('rgba(90,50,20,.4)', 1); }
-  if (n > 0) comida(p.pedido, x, y0 - 3 - (n - 1) * 4 - 6, 15);
+  if (n > 0) comida(p.pedido, x, y0 - 3 - (n - 1) * 4 - 9, 22);
   for (let k = 0; k < 10; k++) { const tx = x - 31 + k * 7; ctx.beginPath(); ctx.roundRect(tx - 2.5, YB + 59, 5, 13, 2.5); ctx.fillStyle = k < p.pratos || (p.fase === 'festa' && !p.comeu) ? cf.esc : 'rgba(255,240,210,.55)'; ctx.fill(); linha('rgba(120,70,20,.5)', 1); }
 }
 /* ------------------------------------------------------------ TABULEIRO (Fase 2)
@@ -711,7 +743,7 @@ function livre(v) { return !v.bloq && v.escondidos === 0 && v.pronto === 0; }
 function podeIr(a, b) { if (!a || !b || a === b || b.bloq || b.pronto) return false; const ta = topo(a), tb = topo(b); return !!ta && (!tb || tb.f === ta.f) && b.pilha.length < MAXP; }
 
 /* comidas que aparecem: os 3 pedidos do balcão + reservas, até 5 tipos */
-function poolComidas() { const s = new Set(pers.map(p => p.pedido)); for (const k of ['abacate', 'milho', 'uva', 'morango', 'cenoura']) { if (s.size >= 5) break; s.add(k); } return [...s]; }
+function poolComidas() { const s = new Set(pers.map(p => p.pedido)); for (const k of Object.keys(COMIDAS).sort(() => Math.random() - .5)) { if (s.size >= 5) break; s.add(k); } return [...s]; }
 function gerarPilha(pool) {
   const total = 3 + Math.floor(Math.random() * 4), pil = []; let ult = null;
   while (pil.length < total) { let f; do f = pool[Math.floor(Math.random() * pool.length)]; while (f === ult && pool.length > 1); const n = Math.min(total - pil.length, 1 + Math.floor(Math.random() * 3)); for (let k = 0; k < n; k++) pil.push(f); ult = f; }
@@ -764,7 +796,7 @@ function prato(x, y, f, comComida) {
   const c = COMIDAS[f];
   el(x, y + 3, 40, 13, c.esc); ctx.beginPath(); ctx.ellipse(x, y + 3, 40, 13, 0, 0, Math.PI); linha('rgba(80,40,10,.35)', 1.2);
   el(x, y, 40, 13, c.cor); ctx.beginPath(); ctx.ellipse(x, y, 40, 13, 0, 0, TAU); linha('rgba(80,40,10,.4)', 1.2);
-  if (comComida) { el(x, y, 29, 9, 'rgba(255,255,255,.35)'); comida(f, x, y - 8, 19); }
+  if (comComida) { el(x, y, 29, 9, 'rgba(255,255,255,.35)'); comida(f, x, y - 10, 28); }
 }
 function desenhaPilha(v) {
   const tp = topo(v), tx = v.treme > 0 ? Math.sin(T * 60) * 4 * v.treme : 0, sq = Math.sin(v.pulo * Math.PI) * .25;
@@ -839,7 +871,7 @@ function barraInferior() {
   ctx.save(); const ck = 1 - Math.sin(cestaK * Math.PI) * .1; ctx.translate(470, y + 30); ctx.scale(ck, ck); ctx.translate(-470, -(y + 30));
   sil(() => { ctx.moveTo(420, y + 6); ctx.lineTo(520, y + 6); ctx.lineTo(510, y + 52); ctx.lineTo(430, y + 52); ctx.closePath(); }, '#c98a4a', 1.6, '#6a3a22');
   ctx.beginPath(); for (let k = 0; k < 5; k++) { ctx.moveTo(428 + k * 20, y + 8); ctx.lineTo(434 + k * 18, y + 50); } linha('rgba(110,60,25,.4)', 1.5);
-  comida('cenoura', 440, y - 2, 13); comida('abacate', 470, y - 6, 13); comida('morango', 498, y - 2, 13);
+  comida('lasanha', 442, y - 2, 15); comida('macarrao', 470, y - 7, 16); comida('salmao', 498, y - 2, 15);
   sil(() => ctx.roundRect(432, y + 34, 76, 24, 10), '#4fbf7a', 1.4, '#2a7a4a'); ctx.fillStyle = '#fff'; ctx.fillText('Servir', 470, y + 47);
   ctx.restore(); ctx.textAlign = 'left';
 }
@@ -852,7 +884,7 @@ function bolha(p) {
   if (p.nega > 0) rot = Math.sin(T * 30) * .2 * p.nega;
   ctx.save(); ctx.translate(bx, by); ctx.rotate(rot); ctx.scale(s, s);
   sil(() => { ctx.arc(0, 0, 30, 0, TAU); ctx.moveTo(-14, 24); ctx.lineTo(-30, 40); ctx.lineTo(-2, 29); }, '#fff', 2.5, '#7a4a36');
-  el(0, 0, 25, 25, '#fff8ec'); comida(p.pedido, 0, 1, 18);
+  el(0, 0, 25, 25, '#fff8ec'); comida(p.pedido, 0, 4, 23);
   ctx.restore();
 }
 function etiqueta(p) {
@@ -876,7 +908,7 @@ function comidaVoando(p) {
   if (p.fase !== 'festa' || p.faseT > .55) return;
   const u = easeOut(p.faseT / .55), P = pos(p), A = ANC[p.tipo];
   const x0 = p.x, y0 = YB + 30 - 9 * 4 - 8, x1 = P.x, y1 = P.y + (A.hy + 30) * ESC;
-  comida(p.pedido, x0 + (x1 - x0) * u, y0 + (y1 - y0) * u - Math.sin(Math.PI * u) * 40, 16 - 4 * u);
+  comida(p.pedido, x0 + (x1 - x0) * u, y0 + (y1 - y0) * u - Math.sin(Math.PI * u) * 40, 22 - 6 * u);
 }
 
 /* ------------------------------------------------------------ DESENHO DO PERSONAGEM */

@@ -1,7 +1,7 @@
 // Glaze Break: confere a progressão da Fase 2 (ficha v2, migração da v1, junção, painéis, peças raras, cartas, marcos, painel do dia) e mede o ritmo.   node meta.mjs
 import { readFileSync } from 'node:fs';
 const html = readFileSync('C:/Users/Minhoca/Projetos/JogosOffline/jogos/glaze-break/index.html', 'utf8'), bl = id => html.match(new RegExp('<script id="' + id + '">([\\s\\S]*?)</script>'))[1].replace("'use strict';", '');
-const { N, M } = new Function(bl('nucleo') + bl('meta') + ';return{N:Nucleo,M:Meta}')(); let n = 0, ruins = 0; const ok = (c, m) => { n++; if (!c) { ruins++; if (ruins < 25) console.log('FALHOU:', m); } };
+const { N, M } = new Function(bl('nucleo') + bl('eco') + bl('meta') + ';return{N:Nucleo,M:Meta}')(); let n = 0, ruins = 0; const ok = (c, m) => { n++; if (!c) { ruins++; if (ruins < 25) console.log('FALHOU:', m); } };
 let s = 7; const R = () => (s = (s * 16807) % 2147483647) / 2147483647, RI = (a, b) => a + Math.floor(R() * (b - a + 1));
 const ord = x => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(k => [k, ord(x[k])])) : x, igual = (a, b) => JSON.stringify(ord(a)) === JSON.stringify(ord(b));
 

@@ -75,18 +75,46 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 #controles button.ativo { background: rgba(255, 248, 236, .7); }
 #semgl { position: fixed; inset: 0; display: grid; place-items: center; padding: 30px; text-align: center; }
 
+/* cores do carro */
+#cores { display: flex; gap: 10px; margin-top: auto; margin-bottom: 12px; background: var(--papel); border-radius: 22px; padding: 6px 10px; }
+#cores button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .9); cursor: pointer; box-shadow: 0 1px 3px rgba(60, 45, 30, .25); padding: 0; }
+#cores button[aria-checked="true"] { outline: 2.5px solid var(--tinta); outline-offset: 2px; }
+#inicio #modos { margin-top: 0; }
+/* medalhas */
+#pistas button { position: relative; }
+.med { position: absolute; right: 10px; bottom: 10px; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .15); }
+.med.m1, .medalha.m1::before { background: #c58a5a; } .med.m2, .medalha.m2::before { background: #c9c6bf; } .med.m3, .medalha.m3::before { background: #e8bd4a; }
+#fim .medalha { font-size: 14px; margin-top: 8px; display: flex; gap: 6px; align-items: center; justify-content: center; }
+#fim .medalha::before { content: ''; width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+#fim .extra { font-size: 13px; opacity: .65; margin-top: 4px; min-height: 1.2em; }
+/* drift */
+#relogio.pequeno { font-size: clamp(15px, 2.2vh, 19px); opacity: .85; }
+#placar { position: fixed; left: 0; right: 0; top: calc(42px + env(safe-area-inset-top)); text-align: center; font-size: clamp(22px, 3.6vh, 32px); letter-spacing: .06em; font-variant-numeric: tabular-nums; color: #fff8ec; text-shadow: 0 1px 8px rgba(60, 45, 30, .5); }
+#painel:has(#placar:not([hidden])) #marcos { top: calc(84px + env(safe-area-inset-top)); }
+#drift { position: fixed; left: 50%; top: 23%; transform: translate(-50%, 6px); display: flex; align-items: baseline; gap: 8px; color: #fff8ec; text-shadow: 0 2px 10px rgba(60, 45, 30, .55); opacity: 0; transition: opacity .25s, transform .25s; }
+#drift.ver { opacity: 1; transform: translate(-50%, 0); }
+#drift .pts { font-size: clamp(28px, 5vh, 44px); font-weight: 300; font-variant-numeric: tabular-nums; }
+#drift .mult { font-size: clamp(18px, 3vh, 26px); color: #ffe2a8; white-space: nowrap; }
+#drift i { position: absolute; left: 0; right: 0; bottom: -6px; height: 3px; border-radius: 2px; background: #fff8ec; transform-origin: left; transform: scaleX(var(--folga, 1)); opacity: .8; }
+#drift.zona .mult::after { content: ' zona ×2'; font-size: .6em; color: #ffc48a; letter-spacing: .05em; }
+#dnota { position: fixed; left: 0; right: 0; top: calc(23% + 54px); text-align: center; font-size: clamp(16px, 2.5vh, 21px); letter-spacing: .08em; color: #fff8ec; text-shadow: 0 1px 8px rgba(60, 45, 30, .6); opacity: 0; transition: opacity .4s, transform .4s; transform: translateY(6px); pointer-events: none; }
+#dnota.ver { opacity: 1; transform: none; } #dnota.perdeu { color: #ffd2c4; } #dnota.turbo { color: #ffd59a; }
+#painel:has(#placar:not([hidden])) ~ #aviso { top: calc(110px + env(safe-area-inset-top)); }
+
 </style>
 </head>
 <body>
-<canvas id="tela" aria-label="Rali numa estrada de terra, em 3D"></canvas>
+<canvas id="tela" aria-label="Drift numa estrada de terra, em 3D"></canvas>
 <div id="veu"></div>
 
 <!-- tela inicial: escolher pista e modo -->
 <section id="inicio">
   <a id="sair" href="../../index.html" aria-label="Voltar para a coleção de jogos" title="Coleção de jogos"><svg viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></a>
   <div id="titulo"><h1>dustline</h1></div>
+  <div id="cores" role="radiogroup" aria-label="Cor do carro"></div>
   <div id="modos" role="radiogroup" aria-label="Modo">
     <button data-modo="tempo" role="radio" aria-checked="true">contra o relógio</button>
+    <button data-modo="drift" role="radio" aria-checked="false">drift</button>
     <button data-modo="livre" role="radio" aria-checked="false">passeio livre</button>
   </div>
   <div id="pistas" role="list"></div>
@@ -97,12 +125,15 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
   <button id="bVoltar" aria-label="Voltar para as pistas" title="Pistas"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
   <div id="relogio" aria-live="off"></div>
   <div id="marcos" aria-hidden="true"></div>
+  <div id="placar" hidden></div>
+  <div id="drift" aria-hidden="true"><span class="pts"></span><span class="mult"></span><i></i></div>
+  <div id="dnota" aria-live="polite"></div>
 </div>
 <div id="contagem" aria-live="assertive"></div>
 <div id="aviso" aria-live="polite"></div>
 <section id="fim" hidden>
   <div class="cartao">
-    <p class="nome"></p><p class="tempo"></p><p class="melhor"></p>
+    <p class="nome"></p><p class="tempo"></p><p class="melhor"></p><p class="medalha"></p><p class="extra"></p>
     <div class="acoes">
       <button id="bDeNovo"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4h4"/></svg>de novo</button>
       <button id="bProxima"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>próxima</button>
@@ -252,6 +283,11 @@ const Som = (() => {
     contagem(n) { const t = ctx.currentTime; voz(n ? hz(69) : hz(81), t, n ? .4 : .9, n ? .1 : .14, { tipo: 'triangle', eco: .4, destino: G.musica }); },
     marco() { const t = ctx.currentTime; [0, 2, 4].forEach((i, k) => voz(nota(i + 2), t + k * .07, .9, .08, { tipo: 'triangle', eco: .5, pan: (k - 1) * .4 })); },
     chegada(recorde) { const t = ctx.currentTime; [0, 1, 2, 3, 4, 5, 7].forEach((i, k) => voz(nota(i), t + k * .09, 1.6, .09 - k * .006, { tipo: 'triangle', eco: .6, pan: (k % 2 ? 1 : -1) * .3 })); if (recorde) [5, 7, 9].forEach((i, k) => voz(nota(i), t + .8 + k * .12, 1.4, .06, { tipo: 'sine', eco: .6 })); },
+    // drift: nota que sobe com o multiplicador, acorde ao guardar os pontos, queda suave ao perder, sopro do turbo
+    combo(m) { const t = ctx.currentTime; voz(nota(m + 3), t, .5, .06, { tipo: 'triangle', eco: .4 }); },
+    drift(v) { const t = ctx.currentTime, n = v >= 4000 ? 5 : v >= 1600 ? 4 : 3; for (let k = 0; k < n; k++) voz(nota(k * 2 + 2), t + k * .06, 1.1, .07, { tipo: 'triangle', eco: .5, pan: (k % 2 ? 1 : -1) * .3 }); },
+    perdeu() { const t = ctx.currentTime; voz(hz(62), t, .7, .08, { tipo: 'sine', ate: hz(50), eco: .3 }); },
+    turbo() { const t = ctx.currentTime; chiado(t, .7, .1, 'bandpass', 700, .6, G.carro); voz(70, t, .6, .08, { tipo: 'sawtooth', ate: 140, corte: 500, destino: G.carro }); },
     // batida: um baque grave e abafado (nada de estalo metálico)
     batida(f) { if (ctx.currentTime - (E.ult || 0) < .25) return; E.ult = ctx.currentTime; const t = ctx.currentTime, v = Math.min(1, f / 12); voz(90, t, .35, .2 + v * .3, { ate: 45, corte: 400, destino: G.carro }); chiado(t, .25, .08 + v * .12, 'lowpass', 700, .7, G.carro); }
   };
@@ -264,29 +300,30 @@ const Som = (() => {
 })();
 
 /* ===== etapas.js ===== */
-/* As 5 pistas. Cada uma: cores da luz e do chão, forma dos morros e da estrada, tipo de árvore, clima e música.
+/* As 5 pistas. Cada uma: cores da luz e do chão, forma dos morros e da estrada, tipo de árvore, clima, música e
+   medalhas (tempo: [prata, ouro] em segundos; drift: [prata, ouro] em pontos; bronze é chegar).
    Tons naturais (nada de azul-escuro). A estrada vai de um lado ao outro do mapa, sem cruzar consigo mesma. */
 const ETAPAS = [
   { id: 'pinhal', nome: 'Pinhal na névoa', semente: 3,
     ceu: ['#a9c6c0', '#dfe6d9', '#f1e3cf'], nevoa: '#e8e1d2', perto: 22, longe: 190, sol: '#fff1dc', solAlt: .26, solDir: -.7, luz: 1.05, ceuLuz: '#e3ece4', chaoLuz: '#8a8a62', amb: .62, tinta: '#5b4a3a',
     chao: ['#7f9a55', '#93a95c', '#a9b267', '#6f8a4e'], terra: '#b39672', pedra: '#9c968a', estrada: ['#a99a6e', '#b49474', '#c2a37d', '#a88b68'],
-    morro: { amp: 40, freq: .006, det: 5 }, curva: { amp: 46, freq: .021, ruido: 22 }, arvore: 'pinheiro', densidade: .42, clima: 'nevoa', musica: 'manha', grip: 1, poeira: '#d9c4a0', marca: '#6e5a42' },
+    morro: { amp: 40, freq: .006, det: 5 }, curva: { amp: 46, freq: .021, ruido: 22 }, arvore: 'pinheiro', densidade: .42, clima: 'nevoa', musica: 'manha', medalhas: { tempo: [90, 72], drift: [12000, 30000] }, grip: 1, poeira: '#d9c4a0', marca: '#6e5a42' },
   { id: 'serra', nome: 'Serra ao entardecer', semente: 11,
     ceu: ['#8b7a96', '#e4a98c', '#f4c08c'], nevoa: '#e9b38f', perto: 70, longe: 430, sol: '#ffc98a', solAlt: .1, solDir: 2.2, luz: 1.15, ceuLuz: '#f2c8a6', chaoLuz: '#6e5a4a', amb: .78, tinta: '#5a3a33',
     chao: ['#a39a5c', '#b5a463', '#c2ad6c', '#8f8a52'], terra: '#c09068', pedra: '#a8907c', estrada: ['#b18f6a', '#bf9670', '#cfa57c', '#a8805e'],
-    morro: { amp: 60, freq: .005, det: 6 }, curva: { amp: 50, freq: .026, ruido: 14 }, arvore: 'pinheiro', densidade: .58, clima: 'poeira', musica: 'tarde', grip: 1, poeira: '#e2b88f', marca: '#7a5640' },
+    morro: { amp: 60, freq: .005, det: 6 }, curva: { amp: 50, freq: .026, ruido: 14 }, arvore: 'pinheiro', densidade: .58, clima: 'poeira', musica: 'tarde', medalhas: { tempo: [87, 70], drift: [12000, 30000] }, grip: 1, poeira: '#e2b88f', marca: '#7a5640' },
   { id: 'cerejeiras', nome: 'Vale das cerejeiras', semente: 23,
     ceu: ['#b9d2c9', '#eee6dc', '#f7e6dc'], nevoa: '#f2e4dc', perto: 40, longe: 300, sol: '#fff6ea', solAlt: .4, solDir: .9, luz: 1.0, ceuLuz: '#eef2ea', chaoLuz: '#94a070', amb: .7, tinta: '#5e4448',
     chao: ['#9bb86a', '#acc274', '#bccb80', '#8eae63'], terra: '#c3a184', pedra: '#b0a69c', estrada: ['#b9a184', '#c6a98a', '#d3b796', '#b49678'],
-    morro: { amp: 26, freq: .007, det: 4 }, curva: { amp: 38, freq: .024, ruido: 18 }, arvore: 'cerejeira', densidade: .5, clima: 'petalas', musica: 'primavera', grip: 1, poeira: '#e6d2bb', marca: '#7c6250' },
+    morro: { amp: 26, freq: .007, det: 4 }, curva: { amp: 38, freq: .024, ruido: 18 }, arvore: 'cerejeira', densidade: .5, clima: 'petalas', musica: 'primavera', medalhas: { tempo: [88, 70], drift: [12000, 30000] }, grip: 1, poeira: '#e6d2bb', marca: '#7c6250' },
   { id: 'neve', nome: 'Neve no planalto', semente: 31,
     ceu: ['#b7b3c2', '#e2dfe2', '#f0ece6'], nevoa: '#ebe8e6', perto: 18, longe: 170, sol: '#fff2e2', solAlt: .2, solDir: -1.6, luz: 1.0, ceuLuz: '#f1eff0', chaoLuz: '#b8b4b0', amb: .78, tinta: '#4e4a54',
     chao: ['#f3f1ee', '#e9e7e6', '#fbfaf8', '#e2e0e0'], terra: '#d8d2ca', pedra: '#a7a3a0', estrada: ['#e2ddd6', '#d6cdc2', '#cdbfae', '#b4a28e'],
-    morro: { amp: 34, freq: .0065, det: 4 }, curva: { amp: 50, freq: .026, ruido: 20 }, arvore: 'pinheiroNeve', densidade: .45, clima: 'neve', musica: 'neve', grip: .72, poeira: '#f6f4f2', marca: '#9a8f86' },
+    morro: { amp: 34, freq: .0065, det: 4 }, curva: { amp: 50, freq: .026, ruido: 20 }, arvore: 'pinheiroNeve', densidade: .45, clima: 'neve', musica: 'neve', medalhas: { tempo: [107, 85], drift: [12000, 30000] }, grip: .72, poeira: '#f6f4f2', marca: '#9a8f86' },
   { id: 'outono', nome: 'Outono junto ao lago', semente: 47,
     ceu: ['#a7b3a0', '#ead7bc', '#f3d3a8'], nevoa: '#ecd6b8', perto: 50, longe: 340, sol: '#ffdca6', solAlt: .16, solDir: 2.8, luz: 1.1, ceuLuz: '#f2dcbc', chaoLuz: '#7a6a4c', amb: .72, tinta: '#5b3e2e',
     chao: ['#9a9a58', '#ab9f5c', '#b9a463', '#8c9052'], terra: '#b98e64', pedra: '#a39582', estrada: ['#ab8d68', '#b8966f', '#c8a57c', '#a07f5c'],
-    morro: { amp: 34, freq: .0058, det: 5 }, curva: { amp: 44, freq: .022, ruido: 18 }, arvore: 'outono', densidade: .5, clima: 'folhas', musica: 'outono', grip: .96, poeira: '#dcc09a', marca: '#6e523c', lago: -6 }
+    morro: { amp: 34, freq: .0058, det: 5 }, curva: { amp: 44, freq: .022, ruido: 18 }, arvore: 'outono', densidade: .5, clima: 'folhas', musica: 'outono', medalhas: { tempo: [88, 70], drift: [12000, 30000] }, grip: .96, poeira: '#dcc09a', marca: '#6e523c', lago: -6 }
 ];
 
 /* ===== mundo.js ===== */
@@ -299,7 +336,7 @@ const sorte2 = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.545
 function ruido(x, y) { const i = Math.floor(x), j = Math.floor(y), f = x - i, g = y - j, u = f * f * (3 - 2 * f), v = g * g * (3 - 2 * g); const a = sorte2(i, j), b = sorte2(i + 1, j), c = sorte2(i, j + 1), d = sorte2(i + 1, j + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
 const fbm = (x, y, n = 4) => { let s = 0, a = .5; for (let k = 0; k < n; k++) { s += a * ruido(x, y); x = x * 2.03 + 7.1; y = y * 2.03 + 3.3; a *= .5; } return s; };
 const suaveP = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-const MAPA = 480, LARGURA = 7.4;
+const MAPA = 480, LARGURA = 8.8;
 let MUNDO = null;
 // sorteio que dá sempre o mesmo resultado para a mesma etapa (a pista não muda de uma vez para outra)
 function sorteador(s) { let a = s * 9301 + 49297; return () => { a = (a * 9301 + 49297) % 233280; return a / 233280; }; }
@@ -310,10 +347,15 @@ function criarMundo(E) {
 
   /* ---------- estrada: pontos de controle de um lado ao outro, amostrados a cada metro ---------- */
   // a estrada nunca passa perto de si mesma (senão daria para cortar caminho): se passar, as curvas ficam mais suaves
-  const sorteios = []; for (let k = 0; k < 40; k++) sorteios.push(rnd() - .5);
+  const sorteios = []; for (let k = 0; k < 60; k++) sorteios.push(rnd() - .5);
   let P = null;
   for (let fator = 1; !P; fator *= .85) {
-    const ctrl = []; let k = 0; for (let x = -180; x <= 180; x += 24) ctrl.push(new THREE.Vector3(x, 0, (Math.sin(x * E.curva.freq + S) * E.curva.amp + sorteios[k++] * E.curva.ruido * 2 + Math.sin(x * .011 + S * 3) * E.curva.amp * .4) * fator));
+    // três trechos de um lado ao outro do mapa, ligados por duas curvas em U (a estrada serpenteia)
+    const ctrl = []; let k = 0;
+    const trecho = (z0, sentido) => { for (let x = -180; x <= 180; x += 24) { const xx = x * sentido, aperta = 1 - Math.pow(Math.abs(xx) / 180, 4) * .75;
+      ctrl.push(new THREE.Vector3(xx, 0, z0 + (Math.sin(xx * E.curva.freq + S + z0) * E.curva.amp + sorteios[k++ % 60] * E.curva.ruido * 2 + Math.sin(xx * .011 + S * 3 + z0) * E.curva.amp * .4) * fator * .5 * aperta)); } };
+    const volta = (x, z0, z1) => { const s = Math.sign(x); ctrl.push(new THREE.Vector3(x + s * 16, 0, z0 + (z1 - z0) * .18), new THREE.Vector3(x + s * 26, 0, (z0 + z1) / 2), new THREE.Vector3(x + s * 16, 0, z0 + (z1 - z0) * .82)); };
+    trecho(-112, 1); volta(194, -112, 0); trecho(0, -1); volta(-194, 0, 112); trecho(112, 1);
     ctrl[0].z = ctrl[1].z; ctrl[ctrl.length - 1].z = ctrl[ctrl.length - 2].z;   // pontas retas
     const curva = new THREE.CatmullRomCurve3(ctrl, false, 'centripetal'), Q = curva.getSpacedPoints(Math.round(curva.getLength()));
     let bom = true; for (let i = 0; i < Q.length && bom; i += 3) for (let j = i + 30; j < Q.length; j += 3) if ((Q[i].x - Q[j].x) ** 2 + (Q[i].z - Q[j].z) ** 2 < 22 * 22) { bom = false; break; }
@@ -389,7 +431,7 @@ function criarMundo(E) {
   }
 
   /* ---------- largada, marcos e chegada ---------- */
-  const ini = 16, fim = P.length - 16, marcos = [.2, .4, .6, .8].map(f => Math.round(ini + (fim - ini) * f));
+  const ini = 16, fim = P.length - 16, marcos = [1, 2, 3, 4, 5, 6].map(f => f / 7).map(f => Math.round(ini + (fim - ini) * f));
   const portais = []; const lado = i => { const t = new THREE.Vector3().subVectors(P[Math.min(P.length - 1, i + 2)], P[Math.max(0, i - 2)]).setY(0).normalize(); return { t, l: new THREE.Vector3(-t.z, 0, t.x) }; };
   const poste = (x, z, h, c) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, h, 8), new THREE.MeshLambertMaterial({ color: c })); m.position.set(x, altura(x, z) + h / 2, z); m.castShadow = true; return m; };
   function portal(i, tipo) {
@@ -406,8 +448,25 @@ function criarMundo(E) {
   }
   portal(ini, 'largada'); marcos.forEach(i => portal(i, 'marco')); portal(fim, 'chegada');
 
+  /* ---------- zonas de drift: as curvas mais fechadas, marcadas por cones dos dois lados (pontos em dobro) ---------- */
+  const curv = P.map((p, i) => { const a = P[Math.max(0, i - 7)], b = P[Math.min(P.length - 1, i + 7)]; let d = Math.atan2(b.x - p.x, b.z - p.z) - Math.atan2(p.x - a.x, p.z - a.z); d -= Math.round(d / 6.2832) * 6.2832; return Math.abs(d) / 14; });
+  const zonas = [], emZona = new Uint8Array(P.length);
+  for (let i = ini + 20; i < fim - 20; i++) {
+    if (curv[i] < .017) continue; let j = i; while (j < fim - 12 && curv[j] >= .012) j++;
+    if (j - i >= 18 && (!zonas.length || i - zonas.at(-1)[1] > 40)) { const z = [Math.max(ini + 8, i - 10), Math.min(fim - 6, j + 8)]; zonas.push(z); for (let k = z[0]; k <= z[1]; k++) emZona[k] = 1; }
+    i = j;
+  }
+  {
+    const lugares = []; for (const [a, b] of zonas) for (let i = a; i <= b; i += 4) { const { l } = lado(i), p = P[i]; for (const s of [-1, 1]) lugares.push([p.x + l.x * (LARGURA / 2 + .7) * s, p.z + l.z * (LARGURA / 2 + .7) * s, (i - a) / 4 % 2]); }
+    if (lugares.length) {
+      const g = new THREE.ConeGeometry(.26, .72, 8).translate(0, .36, 0), m = new THREE.InstancedMesh(g, new THREE.MeshLambertMaterial({ color: '#fff' }), lugares.length), M = new THREE.Matrix4(), c = new THREE.Color();
+      lugares.forEach(([x, z, k], n) => { M.makeTranslation(x, altura(x, z) - .02, z); m.setMatrixAt(n, M); m.setColorAt(n, c.set(k ? '#f4ead8' : '#e3773a')); });
+      m.castShadow = true; grupo.add(m);
+    }
+  }
+
   grupo.add(criarMontanhas(E), criarCeu());
-  return { E, grupo, pontos: P, perto, altura, naEstrada, bateu, molhado, maisPerto, ini, fim, marcos, portais, arvores: arv,
+  return { E, grupo, pontos: P, perto, altura, naEstrada, bateu, molhado, maisPerto, ini, fim, marcos, portais, arvores: arv, zonas, emZona,
     largada: () => { const i = ini - 9, p = P[i], s = P[i + 4]; return { x: p.x, z: p.z, rumo: Math.atan2(s.x - p.x, s.z - p.z) }; },
     descartar() { grupo.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } };
 }
@@ -462,96 +521,212 @@ float s=max(0.,dot(vD,normalize(uS)));c=mix(c,cS,pow(s,10.)*.55+pow(s,500.)*.9);
 }
 
 /* ===== carro.js ===== */
-/* Carro: um hatch pequeno e quadradinho, de poucos polígonos (desenho próprio), e uma física simples de teste.
-   */
-function criarCarro() {
-  const g = new THREE.Group(), corpo = new THREE.Group(), lambert = c => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
-  const M = { lata: lambert('#e2b23c'), faixa: lambert('#f4ead2'), vidro: lambert('#3f5f5c'), escuro: lambert('#3b3330'), farol: new THREE.MeshBasicMaterial({ color: '#fff5d6' }), lanterna: lambert('#c4553f'), roda: lambert('#2e2a28'), cubo: lambert('#cfc6b5') };
-  const caixa = (w, h, l, x, y, z, m) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, l), m); b.position.set(x, y, z); b.castShadow = true; corpo.add(b); return b; };
-  caixa(1.72, .5, 3.7, 0, .62, 0, M.lata);                                   // carroceria
-  caixa(1.76, .14, 3.74, 0, .44, 0, M.escuro);                               // saia
-  caixa(1.74, .1, 3.72, 0, .82, 0, M.faixa);                                 // faixa clara em volta
-  // cabine: perfil de trapézio extrudado
-  const s = new THREE.Shape(); s.moveTo(-1.45, 0); s.lineTo(1.0, 0); s.lineTo(.62, .62); s.lineTo(-1.2, .62); s.closePath();
-  const cab = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: 1.5, bevelEnabled: false }), M.lata); cab.geometry.translate(0, 0, -.75); cab.rotation.y = -Math.PI / 2; cab.position.set(0, .87, -.15); cab.castShadow = true; corpo.add(cab);
-  const vs = new THREE.Shape(); vs.moveTo(-1.38, .06); vs.lineTo(.93, .06); vs.lineTo(.6, .56); vs.lineTo(-1.15, .56); vs.closePath();
-  const vid = new THREE.Mesh(new THREE.ExtrudeGeometry(vs, { depth: 1.54, bevelEnabled: false }), M.vidro); vid.geometry.translate(0, 0, -.77); vid.rotation.y = -Math.PI / 2; vid.position.set(0, .87, -.15); vid.scale.set(1, 1, 1); corpo.add(vid);
-  caixa(1.5, .08, 1.7, 0, 1.52, -.42, M.lata);                               // teto
-  caixa(1.2, .06, .5, 0, 1.6, -.6, M.escuro);                                // bagageiro
-  caixa(1.8, .2, .14, 0, .5, 1.9, M.escuro); caixa(1.8, .2, .14, 0, .5, -1.9, M.escuro);   // para-choques
-  for (const x of [-.55, .55]) { const f = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .06, 12).rotateX(Math.PI / 2), M.farol); f.position.set(x, .68, 1.86); corpo.add(f); caixa(.3, .12, .05, x * 1.25, .7, -1.86, M.lanterna); }
-  caixa(.5, .5, .02, -.88, .66, .1, M.faixa).rotation.z = 0; const num = caixa(.02, .36, .36, -.875, .66, .1, M.escuro); num.position.x = -.885;   // círculo de número (sem marca)
-  // rodas
-  const rodas = [], rg = new THREE.CylinderGeometry(.36, .36, .26, 10).rotateZ(Math.PI / 2), cg = new THREE.CylinderGeometry(.17, .17, .27, 8).rotateZ(Math.PI / 2);
-  for (const [x, z] of [[-.86, 1.2], [.86, 1.2], [-.86, -1.22], [.86, -1.22]]) { const r = new THREE.Group(), pneu = new THREE.Mesh(rg, M.roda), cubo = new THREE.Mesh(cg, M.cubo); pneu.castShadow = true; r.add(pneu, cubo); r.position.set(x, .36, z); g.add(r); rodas.push(r); }
+/* Carro: um cupê de drift baixo e largo, de desenho próprio (sem marca). A carroceria é "costurada" a partir de
+   cortes transversais ao longo do comprimento (capô longo, para-lamas largos, teto baixo, traseira fastback),
+   com facetas à mostra no estilo do jogo. Vidros, faixa central e saias saem da mesma malha. */
+const PINTURAS = [
+  { id: 'perola', nome: 'pérola', lata: '#efe8dc', faixa: '#c4553f' },
+  { id: 'tangerina', nome: 'tangerina', lata: '#e0782f', faixa: '#f4ead2' },
+  { id: 'mostarda', nome: 'mostarda', lata: '#e2b23c', faixa: '#3b3330' },
+  { id: 'oliva', nome: 'oliva', lata: '#7f8c4c', faixa: '#efe2c4' },
+  { id: 'vinho', nome: 'vinho', lata: '#93403b', faixa: '#ecdcc2' },
+  { id: 'menta', nome: 'menta', lata: '#93c4ab', faixa: '#f6efe4' }
+];
+const RODA = { r: .34, x: .86, z: 1.3 };
+
+// interpola numa tabela [[z, valor], ...] (z decrescente)
+function tabela(T, z) { if (z >= T[0][0]) return T[0][1]; for (let i = 1; i < T.length; i++) if (z >= T[i][0]) { const [z0, a] = T[i - 1], [z1, b] = T[i], k = (z - z1) / (z0 - z1); return b + (a - b) * k; } return T.at(-1)[1]; }
+
+function geometriaCarroceria() {
+  const ZS = [2.2, 2.14, 2.02, 1.85, 1.62, 1.42, 1.18, .95, .72, .55, .3, .05, -.25, -.55, -.85, -1.1, -1.32, -1.55, -1.78, -1.96, -2.1, -2.18];
+  const BELT = [[2.2, .5], [2.12, .6], [1.9, .69], [1.5, .75], [1.1, .79], [.6, .84], [.2, .88], [-.6, .92], [-1.3, .94], [-1.8, .93], [-2.05, .88], [-2.18, .74]];
+  const LADO = [[2.2, .66], [2.1, .82], [1.85, .93], [1.5, .99], [1.3, 1.01], [1.05, .98], [.7, .93], [.2, .91], [-.4, .93], [-.9, .99], [-1.3, 1.03], [-1.65, 1.0], [-1.95, .94], [-2.18, .84]];
+  const TETO = [[.58, 0], [-.02, 1.31], [-.82, 1.28], [-1.78, .97]];   // para-brisa sobe, teto, vidro de trás desce até a tampa
+  const arco = z => { let a = 0; for (const zw of [RODA.z, -RODA.z]) { const u = (z - zw) / .52; if (Math.abs(u) < 1) a = Math.max(a, .3 * Math.sqrt(1 - u * u)); } return a; };
+  const aneis = ZS.map(z => {
+    const yb = .26 + arco(z), yBelt = tabela(BELT, z), w = tabela(LADO, z);
+    let yTeto = yBelt + .04, wTeto = w - .32, vidroLado = false, vidroCima = false, cabine = false;
+    if (z < TETO[0][0] && z > TETO[3][0]) {
+      vidroLado = cabine = true; wTeto = .66;
+      if (z > TETO[1][0]) { const k = (TETO[0][0] - z) / (TETO[0][0] - TETO[1][0]); yTeto = yBelt + (TETO[1][1] - yBelt) * Math.pow(k, .8); vidroCima = true; }
+      else if (z > TETO[2][0]) yTeto = TETO[1][1] + (TETO[2][1] - TETO[1][1]) * (TETO[1][0] - z) / (TETO[1][0] - TETO[2][0]);
+      else { const k = (TETO[2][0] - z) / (TETO[2][0] - TETO[3][0]); yTeto = TETO[2][1] + (Math.max(yBelt + .04, TETO[3][1]) - TETO[2][1]) * k; vidroCima = true; }
+      if (yTeto - yBelt < .1) vidroLado = false;
+    }
+    const yMid = Math.max(yb + .16, (yb + yBelt) / 2 + .04);
+    // meio perfil (de baixo, no centro, subindo pelo lado direito até o centro do teto)
+    const p = [[0, yb], [w - .1, yb], [w, Math.min(yMid - .04, yb + .1)], [w + .01, yMid], [w - .07, yBelt], [w - .2, yBelt + .03], [wTeto, yTeto], [.22, yTeto + .025], [0, yTeto + .03]];
+    return { z, p, vidroLado, vidroCima, cabine };
+  });
+  // materiais: 0 lata, 1 vidro, 2 faixa, 3 escuro (saia e assoalho)
+  const pos = [[], [], [], []];
+  const tri = (m, a, b, c) => pos[m].push(...a, ...b, ...c);
+  for (let k = 0; k < aneis.length - 1; k++) {
+    const A = aneis[k], B = aneis[k + 1];
+    for (let j = 0; j < A.p.length - 1; j++) {
+      let m = 0;
+      if (j <= 1) m = 3; else if (j === 5 && A.vidroLado && B.vidroLado) m = 1; else if (j >= 6 && A.vidroCima && B.vidroCima && (A.cabine || B.cabine)) m = 1; else if (j === 7) m = 2;
+      for (const s of [1, -1]) {
+        const a = [A.p[j][0] * s, A.p[j][1], A.z], b = [A.p[j + 1][0] * s, A.p[j + 1][1], A.z], c = [B.p[j][0] * s, B.p[j][1], B.z], d = [B.p[j + 1][0] * s, B.p[j + 1][1], B.z];
+        if (s > 0) { tri(m, a, c, b); tri(m, b, c, d); } else { tri(m, a, b, c); tri(m, b, d, c); }
+      }
+    }
+  }
+  // tampas da frente e de trás (leque a partir do centro)
+  for (const [A, sent] of [[aneis[0], 1], [aneis.at(-1), -1]]) {
+    const cy = A.p.reduce((t, q) => t + q[1], 0) / A.p.length, c = [0, cy, A.z];
+    for (let j = 0; j < A.p.length - 1; j++) for (const s of [1, -1]) {
+      const a = [A.p[j][0] * s, A.p[j][1], A.z], b = [A.p[j + 1][0] * s, A.p[j + 1][1], A.z];
+      if (s * sent > 0) tri(j <= 1 ? 3 : 0, c, b, a); else tri(j <= 1 ? 3 : 0, c, a, b);
+    }
+  }
+  return pos.map(v => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.computeVertexNormals(); return g; });
+}
+let GEO_CARRO = null;
+
+function criarCarro(pintura = PINTURAS[0], { fantasma = false } = {}) {
+  const g = new THREE.Group(), corpo = new THREE.Group();
+  const brilho = c => fantasma ? null : new THREE.MeshPhongMaterial({ color: c, flatShading: true, shininess: 70, specular: '#5c574f' });
+  const fosco = c => fantasma ? null : new THREE.MeshLambertMaterial({ color: c, flatShading: true });
+  const M = { lata: brilho(pintura.lata), faixa: brilho(pintura.faixa), vidro: fantasma ? null : new THREE.MeshPhongMaterial({ color: '#2f3d3b', flatShading: true, shininess: 120, specular: '#b8c4bf' }),
+    escuro: fosco('#2f2a28'), farol: new THREE.MeshBasicMaterial({ color: '#fff6dc' }), lanterna: new THREE.MeshBasicMaterial({ color: '#9c3a2c' }), pneu: fosco('#2a2624'), aro: brilho('#d9c9a6'), chama: new THREE.MeshBasicMaterial({ color: '#ffb35a', transparent: true, opacity: .85 }) };
+  if (fantasma) { const v = new THREE.MeshBasicMaterial({ color: '#fffaf0', transparent: true, opacity: .26, depthWrite: false }); for (const k in M) M[k] = v; }
+  const peca = (geo, m, x = 0, y = 0, z = 0) => { const b = new THREE.Mesh(geo, m); b.position.set(x, y, z); b.castShadow = !fantasma; corpo.add(b); return b; };
+  const caixa = (w, h, l, x, y, z, m) => peca(new THREE.BoxGeometry(w, h, l), m, x, y, z);
+  GEO_CARRO = GEO_CARRO || geometriaCarroceria();
+  [M.lata, M.vidro, M.faixa, M.escuro].forEach((m, i) => peca(GEO_CARRO[i], m));
+  // frente: para-choque com lábio, grade, faróis finos e puxados
+  caixa(1.28, .1, .14, 0, .29, 2.13, M.escuro);                                       // lábio dianteiro
+  caixa(.9, .13, .04, 0, .46, 2.17, M.escuro);                                       // grade
+  for (const s of [-1, 1]) {
+    const f = caixa(.34, .05, .16, s * .46, .655, 2.0, M.farol); f.rotation.set(-.5, s * -.3, 0);
+    caixa(.1, .08, 1.3, s * .88, .29, -.02, M.escuro);                                 // saia lateral
+    caixa(.16, .08, .12, s * .83, .96, .44, M.lata);                                  // retrovisor
+    caixa(.18, .08, .06, s * .55, .83, -2.13, M.lanterna);                          // lanternas
+  }
+  caixa(.64, .07, .05, 0, .83, -2.13, M.lanterna);                                   // faixa de lanterna no meio
+  caixa(1.05, .1, .12, 0, .32, -1.98, M.escuro);                                   // difusor
+  // aerofólio
+  for (const s of [-1, 1]) caixa(.06, .24, .14, s * .52, 1.03, -1.86, M.escuro);
+  const asa = caixa(1.78, .05, .36, 0, 1.16, -1.92, M.escuro); asa.rotation.x = .1;
+  for (const s of [-1, 1]) caixa(.04, .2, .42, s * .9, 1.14, -1.92, M.escuro);
+  // escapamento e chama do turbo
+  const esc = peca(new THREE.CylinderGeometry(.06, .06, .2, 8).rotateX(Math.PI / 2), M.escuro, -.42, .3, -2.17);
+  const chama = peca(new THREE.ConeGeometry(.09, .55, 7).rotateX(-Math.PI / 2), M.chama, -.42, .3, -2.5); chama.castShadow = false; chama.visible = false;
+  // rodas: pneu, aro claro e cinco raios (aparecem girando)
+  const rodas = [], rg = new THREE.CylinderGeometry(RODA.r, RODA.r, .3, 14).rotateZ(Math.PI / 2), ag = new THREE.CylinderGeometry(.23, .23, .31, 10).rotateZ(Math.PI / 2), raio = new THREE.BoxGeometry(.03, .055, .2).translate(0, 0, .11), cubo = new THREE.CylinderGeometry(.07, .07, .33, 6).rotateZ(Math.PI / 2);
+  for (const [x, z] of [[-RODA.x, RODA.z], [RODA.x, RODA.z], [-RODA.x, -RODA.z], [RODA.x, -RODA.z]]) {
+    const r = new THREE.Group(), gira = new THREE.Group(), pneu = new THREE.Mesh(rg, M.pneu); pneu.castShadow = !fantasma; gira.add(pneu, new THREE.Mesh(ag, M.escuro), new THREE.Mesh(cubo, M.aro));
+    for (let k = 0; k < 5; k++) { const rr = new THREE.Mesh(raio, M.aro); rr.position.x = Math.sign(x) * .16; rr.rotation.x = k * Math.PI * 2 / 5; gira.add(rr); }
+    r.add(gira); r.position.set(x, RODA.r, z); r.rotation.z = Math.sign(x) * (z > 0 ? .02 : .05); g.add(r); rodas.push({ grupo: r, gira });
+  }
   g.add(corpo);
   // sombra macia embaixo (ajuda a ler o carro no chão)
-  const so = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 4.6), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, vertexShader: 'varying vec2 vU;void main(){vU=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec2 vU;void main(){float d=length(vU*vec2(1.,.9));gl_FragColor=vec4(.18,.14,.1,.35*smoothstep(1.,.35,d));}' }));
-  so.rotation.x = -Math.PI / 2; so.position.y = .03; g.add(so);
-  return { grupo: g, corpo, rodas, farois: M.farol };
+  if (!fantasma) {
+    const so = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 5), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, vertexShader: 'varying vec2 vU;void main(){vU=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec2 vU;void main(){float d=length(vU*vec2(1.,.9));gl_FragColor=vec4(.16,.12,.09,.42*smoothstep(1.,.3,d));}' }));
+    so.rotation.x = -Math.PI / 2; so.position.y = .03; g.add(so);
+  }
+  return { grupo: g, corpo, rodas, farois: M.farol, lanterna: M.lanterna, chama, M,
+    pintar(p) { if (fantasma) return; M.lata.color.set(p.lata); M.faixa.color.set(p.faixa); } };
 }
 
-/* Física de rali, gostosa e perdoável:
-   - a direção gira o carro (rumo); a velocidade "fica para trás" quando ele gira, e a aderência dos pneus
-     puxa de volta. Se a curva pede mais aderência do que o chão tem, sobra velocidade de lado: é a derrapagem.
-   - freio de mão tira aderência de trás e solta a traseira; acelerar na derrapagem empurra mais um pouco.
-   - sem volante, o carro se endireita sozinho (ajuda gentil). Bater é macio: ricocheteia e perde velocidade. */
+/* Física de drift, gostosa e perdoável (pensada para teclado e botões de toque, sem volante analógico):
+   - o carro tem um rumo (para onde aponta) e a velocidade tem a sua direção; os pneus puxam a velocidade
+     para o rumo até o limite de aderência do chão.
+   - em aderência normal, virar forte só faz o carro "sair de frente" (não roda).
+   - DRIFT: começa com o freio de mão numa curva (em velocidade). Daí a
+     traseira fica solta e o jogo segura o ângulo e a curva: virar para dentro abre o ângulo (até ~50°) e fecha a
+     curva, soltar mantém (~29°), virar para fora endireita e sai do drift. Acelerar sustenta o drift; tirar o pé perde velocidade.
+   - saindo de um drift longo, o carro ganha um empurrão de turbo. Bater é macio: ricocheteia e perde velocidade. */
 function criarFisica(carro) {
-  const F = { x: 0, z: 0, y: 0, rumo: 0, vf: 0, vl: 0, giro: 0, giroRodas: 0, volante: 0, derrapa: 0, superficie: 1, rpm: .15, marcha: 1, carga: 0, pitch: 0, roll: 0, espera: 0, batida: null, ultBatida: 0, rodas: [] };
-  const q = new THREE.Quaternion(), qy = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), eu = new THREE.Euler();
-  F.colocar = ({ x, z, rumo }) => { Object.assign(F, { x, z, rumo, vf: 0, vl: 0, giro: 0, volante: 0, derrapa: 0 }); F.y = MUNDO.altura(x, z); F.passo(0, { gas: 0, freio: 0, virar: 0, mao: false }); };
+  const F = { x: 0, z: 0, y: 0, rumo: 0, psi: 0, s: 0, vf: 0, vl: 0, ang: 0, wv: 0, giro: 0, giroRodas: 0, volante: 0, deriva: false, dir: 0, tDeriva: 0, saiu: 0, turbo: 0, derrapa: 0, superficie: 1, rpm: .15, marcha: 1, carga: 0, pitch: 0, roll: 0, espera: 0, batida: null, rodas: [], vel: 0 };
+  const q = new THREE.Quaternion(), qy = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), eu = new THREE.Euler(), PI2 = Math.PI * 2, fecha = a => a - Math.round(a / PI2) * PI2;
+  const lanternaBase = new THREE.Color('#9c3a2c'), lanternaFreio = new THREE.Color('#ff5a3c');
+  F.colocar = ({ x, z, rumo }) => { Object.assign(F, { x, z, rumo, psi: rumo, s: 0, vf: 0, vl: 0, ang: 0, wv: 0, giro: 0, volante: 0, deriva: false, tDeriva: 0, saiu: 0, turbo: 0, derrapa: 0 }); F.y = MUNDO.altura(x, z); F.passo(0, { gas: 0, freio: 0, virar: 0, mao: false }); };
+  F.sairDrift = () => { F.deriva = false; F.tDeriva = 0; };
   F.passo = (dt, ent) => {
-    const M = MUNDO, sup = M.naEstrada(F.x, F.z), mu = (.62 + .38 * sup) * M.E.grip; F.superficie = sup;
-    // motor, freio e ré
-    const acel = ent.gas * 15 * (.6 + .4 * sup), freio = ent.freio * (F.vf > .5 ? 22 : 9);
-    let a = acel - F.vf * (.3 + (1 - sup) * .55) - F.vf * Math.abs(F.vf) * .0045;
-    if (ent.freio) { if (F.vf > .5) a -= freio; else { F.espera += dt; a = F.espera > .5 ? -ent.freio * 4 - F.vf * .5 : -F.vf * 6; } } else F.espera = 0;
-    if (ent.mao) a -= Math.sign(F.vf) * 3;
-    F.vf = Math.max(-5, F.vf + a * dt);
-    // direção: ângulo menor em alta velocidade; o giro segue o que as rodas pedem
-    F.volante += (ent.virar - F.volante) * Math.min(1, dt * 6);
-    const v = Math.hypot(F.vf, F.vl), dmax = .58 / (1 + Math.abs(F.vf) * .055), delta = -F.volante * dmax;
-    let alvoGiro = F.vf * Math.tan(delta) / 2.4;
-    const solto = ent.mao ? 1 : Math.min(1, Math.abs(F.vl) / 5);
-    alvoGiro *= 1 + solto * (.3 + ent.gas * .2);                          // traseira solta gira mais
-    if (!ent.virar && Math.abs(F.vl) > 1) alvoGiro += Math.sign(F.vl) * Math.min(.5, Math.abs(F.vl) * .06) * Math.sign(F.vf);   // endireita sozinho
-    const beta = Math.atan2(F.vl, Math.max(2, Math.abs(F.vf)));   // ajuda de estabilidade: a derrapagem passa de ~35° e o carro se corrige, sem rodar
-    if (Math.abs(beta) > .6) alvoGiro += Math.sign(beta) * (Math.abs(beta) - .6) * 4 * Math.sign(F.vf || 1);
-    F.giro += (alvoGiro - F.giro) * Math.min(1, dt * (ent.mao ? 3 : 7));
+    const M = MUNDO, sup = M.naEstrada(F.x, F.z), mu = (.6 + .4 * sup) * M.E.grip; F.superficie = sup; F.saiu = 0;
+    const sA = Math.abs(F.s);
+    // motor (mais força em baixa), turbo, arrasto, freio e ré
+    let a = ent.gas * 17.5 * (1 - Math.min(1, sA / 46) * .55) * (.65 + .35 * sup) * (F.deriva ? Math.max(.75, Math.cos(F.ang)) : 1);
+    if (F.turbo > 0) { a += 10 * Math.min(1, F.turbo * 2); F.turbo = Math.max(0, F.turbo - dt); }
+    a -= F.s * (.22 + (1 - sup) * .5) + F.s * sA * .0032;
+    if (ent.freio) { if (F.s > .5) a -= 24 * ent.freio; else { F.espera += dt; a = F.espera > .45 ? -ent.freio * 4 - F.s * .5 : -F.s * 6; } } else F.espera = 0;
+    if (ent.mao) a -= Math.sign(F.s) * 4;
+    if (F.deriva) a -= Math.abs(Math.sin(F.ang)) * (ent.gas ? 3 : 7) * Math.sign(F.s);
+    F.s = Math.max(-6, F.s + a * dt);
+    // volante
+    F.volante += (ent.virar - F.volante) * Math.min(1, dt * 7);
+    const dmax = .6 / (1 + sA * .05), delta = -F.volante * dmax;
+    // aderência lateral: o quanto os pneus conseguem dobrar a velocidade (m/s²)
+    const aMax = 9.8 * mu * (F.deriva ? 1.5 : 1.12) * (ent.mao ? .55 : 1), wvMax = aMax / Math.max(sA, 2);
+    // começar o drift
+    if (!F.deriva && F.s > 9 && Math.abs(F.volante) > .45 && ent.mao) { F.deriva = true; F.dir = -Math.sign(F.volante); F.tDeriva = 0; }
+    // giro do carro
+    let alvo;
+    if (F.deriva) {
+      const dentro = -F.volante * F.dir, angAlvo = F.dir * (dentro >= 0 ? .5 + .36 * dentro : .5 + .64 * dentro);
+      alvo = F.wv + (angAlvo - F.ang) * 3.4 + (ent.mao ? -F.volante * 1.2 : 0);
+      F.giro += (alvo - F.giro) * Math.min(1, dt * 6);
+    } else {
+      alvo = F.s * Math.tan(delta) / 2.6; const teto = wvMax * 1.1 + .25; alvo = Math.max(-teto, Math.min(teto, alvo));
+      F.giro += (alvo - F.giro) * Math.min(1, dt * 8);
+    }
     F.rumo += F.giro * dt;
-    // a velocidade fica para trás quando o carro gira; o pneu segura até o limite do chão
-    F.vl -= F.vf * F.giro * dt; F.vf += F.vl * F.giro * dt * .5;
-    const segura = 9.8 * mu * (ent.mao ? .55 : 1) * dt; F.vl -= Math.max(-segura, Math.min(segura, F.vl * Math.min(1, dt * 9)));
-    // ajuda de estabilidade: passou de ~32° de derrapagem, o giro que abriria mais é amortecido; o teto é ~48°
-    const b2 = Math.atan2(F.vl, Math.max(2, Math.abs(F.vf)));
-    if (Math.abs(b2) > .56 && F.giro * F.vl * Math.sign(F.vf || 1) < 0) F.giro *= Math.max(0, 1 - dt * 9);
-    if (Math.abs(b2) > .84 && Math.abs(F.vf) > 2) F.vl = Math.sign(F.vl) * Math.tan(.84) * Math.abs(F.vf);
-    F.derrapa = Math.abs(F.vl) + (ent.mao ? Math.abs(F.vf) * .15 : 0);
-    const sx = Math.sin(F.rumo), cz = Math.cos(F.rumo), x0 = F.x, z0 = F.z;
-    F.x += (sx * F.vf + cz * F.vl) * dt; F.z += (cz * F.vf - sx * F.vl) * dt;
-    if (M.molhado(F.x + sx * 1.6, F.z + cz * 1.6) || M.molhado(F.x, F.z)) { const f = Math.hypot(F.vf, F.vl); F.x = x0; F.z = z0; F.vf *= -.25; F.vl *= .3; F.batidaAgua = f; }
+    // a velocidade vira em direção ao rumo, até o limite dos pneus
+    let ang = fecha(F.rumo - F.psi);
+    if (sA < 1.5 || F.s < 0) { F.psi = F.rumo; F.wv = F.giro; ang = 0; }
+    else if (F.deriva) {   // no drift a seta escolhe a curva: para dentro fecha, solta mantém, para fora abre
+      const dentro = -F.volante * F.dir, wvAlvo = F.dir * wvMax * (dentro >= 0 ? .6 + .4 * dentro : .6 + .6 * dentro);
+      F.wv += (wvAlvo - F.wv) * Math.min(1, dt * 5); F.psi += F.wv * dt; ang = fecha(F.rumo - F.psi);
+    } else { F.wv = Math.max(-wvMax, Math.min(wvMax, ang * 10)); F.psi += F.wv * dt; ang = fecha(F.rumo - F.psi); }
+    if (!F.deriva) F.s -= Math.sign(F.s) * Math.abs(Math.sin(ang)) * 4 * dt;
+    if (Math.abs(ang) > 1.08) { F.psi = F.rumo - Math.sign(ang) * 1.08; ang = Math.sign(ang) * 1.08; }   // nunca roda: segura em ~62°
+    F.ang = ang;
+    if (F.deriva) {
+      F.tDeriva += dt;
+      const virouOLado = Math.sign(ang) === -F.dir && Math.abs(ang) > .06;
+      if ((Math.abs(ang) < .09 && F.tDeriva > .35) || F.s < 5 || virouOLado) {
+        if (F.tDeriva > .8 && F.s > 8) { F.turbo = Math.min(1.6, F.tDeriva * .32); F.saiu = F.tDeriva; }
+        F.deriva = false; F.tDeriva = 0;
+      }
+    }
+    F.vf = F.s * Math.cos(ang); F.vl = -F.s * Math.sin(ang);
+    F.derrapa = Math.abs(F.vl) + (ent.mao ? sA * .15 : 0) + (F.deriva && ent.gas ? 2 : 0);
+    // andar
+    const vx = Math.sin(F.psi) * F.s, vz = Math.cos(F.psi) * F.s, sx = Math.sin(F.rumo), cz = Math.cos(F.rumo), x0 = F.x, z0 = F.z;
+    F.x += vx * dt; F.z += vz * dt;
+    if (M.molhado(F.x + sx * 1.8, F.z + cz * 1.8) || M.molhado(F.x, F.z)) { F.x = x0; F.z = z0; F.batidaAgua = sA; F.s *= -.25; F.psi = F.rumo; F.sairDrift(); }
     // batida macia: dois círculos (frente e trás)
     F.batida = null;
-    for (const s of [1.05, -1.05]) {
-      const cx = F.x + sx * s, cz2 = F.z + cz * s, b = M.bateu(cx, cz2, 1.05); if (!b) continue;
+    for (const k of [1.15, -1.15]) {
+      const cx = F.x + sx * k, cz2 = F.z + cz * k, b = M.bateu(cx, cz2, 1.05); if (!b) continue;
       F.x += b.nx * b.f; F.z += b.nz * b.f;
-      const vx = sx * F.vf + cz * F.vl, vz = cz * F.vf - sx * F.vl, vn = vx * b.nx + vz * b.nz;
-      if (vn < 0) { const nvx = vx - 1.35 * vn * b.nx, nvz = vz - 1.35 * vn * b.nz; F.vf = (nvx * sx + nvz * cz) * .72; F.vl = (nvx * cz - nvz * sx) * .72; F.giro += (b.nx * cz - b.nz * sx) * vn * .04 * s; F.batida = { forca: -vn, ...b }; }
+      const ux = Math.sin(F.psi) * F.s, uz = Math.cos(F.psi) * F.s, vn = ux * b.nx + uz * b.nz;
+      if (vn < 0) {
+        const nx = (ux - 1.35 * vn * b.nx) * .72, nz = (uz - 1.35 * vn * b.nz) * .72; F.s = Math.hypot(nx, nz); F.psi = Math.atan2(nx, nz);
+        if (Math.cos(F.psi - F.rumo) < 0) { F.s = -F.s; F.psi += Math.PI; }
+        F.giro += (b.nx * cz - b.nz * sx) * vn * .04 * k; F.batida = { forca: -vn, ...b }; if (-vn > 4) F.sairDrift();
+      }
     }
-    const lim = MAPA / 2 - 6; if (Math.abs(F.x) > lim || Math.abs(F.z) > lim) { F.x = Math.max(-lim, Math.min(lim, F.x)); F.z = Math.max(-lim, Math.min(lim, F.z)); F.vf *= .9; F.vl *= .5; }
+    const lim = MAPA / 2 - 6; if (Math.abs(F.x) > lim || Math.abs(F.z) > lim) { F.x = Math.max(-lim, Math.min(lim, F.x)); F.z = Math.max(-lim, Math.min(lim, F.z)); F.s *= .9; }
     // chão: altura e inclinação pelos quatro cantos
     const h = (dx, dz) => M.altura(F.x + cz * dx + sx * dz, F.z - sx * dx + cz * dz), hf = h(0, 1.4), ht = h(0, -1.4), he = h(.9, 0), hd = h(-.9, 0), k = dt ? Math.min(1, dt * 18) : 1;
     F.y += ((hf + ht + he + hd) / 4 - F.y) * k; F.pitch += (Math.atan2(ht - hf, 2.8) - F.pitch) * Math.min(1, k * .6); F.roll += (Math.atan2(he - hd, 1.8) - F.roll) * Math.min(1, k * .6);
-    // marchas de mentira, para o som subir e trocar
-    const lims = [0, 8, 15, 22, 29, 99]; F.marcha = Math.max(1, lims.findIndex(l => Math.abs(F.vf) < l)); const lo = lims[F.marcha - 1], hi = lims[F.marcha];
-    F.rpm += ((.2 + .8 * (Math.abs(F.vf) - lo) / (hi - lo)) * (ent.gas ? 1 : .8) + (ent.gas && solto > .4 ? .18 : 0) - F.rpm) * Math.min(1, dt * 6); F.carga += (ent.gas - F.carga) * Math.min(1, dt * 5);
-    // desenho: carroceria inclina na derrapagem e nas frenagens
+    // marchas de mentira, para o som subir e trocar; no drift o pneu patina e a rotação sobe
+    const lims = [0, 9, 17, 25, 33, 99]; F.marcha = Math.max(1, lims.findIndex(l => sA < l)); const lo = lims[F.marcha - 1], hi = lims[F.marcha];
+    F.rpm += ((.2 + .8 * (sA - lo) / (hi - lo)) * (ent.gas ? 1 : .8) + (ent.gas && F.deriva ? .22 : 0) - F.rpm) * Math.min(1, dt * 6); F.rpm = Math.min(1.15, F.rpm); F.carga += (ent.gas - F.carga) * Math.min(1, dt * 5);
+    // desenho: carroceria inclina com a curva e nas frenagens; rodas da frente contra-esterçam no drift
     const c = carro.grupo; c.position.set(F.x, F.y, F.z); qy.setFromAxisAngle(up, F.rumo); c.quaternion.copy(qy).multiply(q.setFromEuler(eu.set(F.pitch, 0, F.roll)));
-    carro.corpo.rotation.set(-F.carga * .025 + Math.min(.05, ent.freio * .04), 0, Math.max(-.08, Math.min(.08, -F.vl * .012 - F.giro * F.vf * .004)));
-    F.giroRodas += F.vf * dt / .36; carro.rodas.forEach((r, i) => { r.children[0].rotation.x = r.children[1].rotation.x = F.giroRodas; r.rotation.y = i < 2 ? delta * .8 : 0; });
+    carro.corpo.rotation.set(-F.carga * .022 + Math.min(.045, ent.freio * .04), 0, Math.max(-.07, Math.min(.07, F.s * F.wv * .006)));
+    F.giroRodas += F.s * dt / RODA.r * (ent.gas && F.deriva ? 1.5 : 1);
+    const esterco = F.deriva ? Math.max(-.6, Math.min(.6, -ang * .9)) : delta * .85;
+    carro.rodas.forEach((r, i) => { r.gira.rotation.x = F.giroRodas; r.grupo.rotation.y = i < 2 ? esterco : 0; });
+    carro.lanterna.color.copy(ent.freio || ent.mao ? lanternaFreio : lanternaBase);
+    carro.chama.visible = F.turbo > 0; if (F.turbo > 0) carro.chama.scale.setScalar(.7 + Math.random() * .5);
     // onde ficam as rodas de trás (poeira e marcas)
-    F.rodas = [-.86, .86].map(o => [F.x + cz * o - sx * 1.22, F.z - sx * o - cz * 1.22]);
-    F.vel = v;
+    F.rodas = [-RODA.x, RODA.x].map(o => [F.x + cz * o - sx * RODA.z, F.z - sx * o - cz * RODA.z]);
+    F.vel = sA;
   };
   return F;
 }
@@ -632,8 +807,8 @@ const $ = id => document.getElementById(id), tela = $('tela');
 let R; try { R = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); } catch (e) { $('semgl').hidden = false; throw e; }
 R.outputColorSpace = THREE.LinearSRGBColorSpace; R.toneMapping = THREE.NoToneMapping; R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
 const cena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 1, 2600);
-const salvo = Object.assign({ volume: 1, etapa: 0, modo: 'tempo', melhores: {} }, (() => { try { return JSON.parse(localStorage.getItem('dustline.v1')) || {}; } catch { return {}; } })());
-salvo.melhores = salvo.melhores || {}; salvo.etapa = ETAPAS[salvo.etapa] ? salvo.etapa : 0;
+const salvo = Object.assign({ volume: 1, etapa: 0, modo: 'tempo', melhores: {}, pontos: {}, pintura: 'perola', dicas: 0 }, (() => { try { return JSON.parse(localStorage.getItem('dustline.v1')) || {}; } catch { return {}; } })());
+salvo.melhores = salvo.melhores || {}; salvo.pontos = salvo.pontos || {}; salvo.etapa = ETAPAS[salvo.etapa] ? salvo.etapa : 0;
 const guardar = () => { try { localStorage.setItem('dustline.v1', JSON.stringify(salvo)); } catch {} };
 
 // luz: sol baixo (sombra acompanha o carro) e luz do céu. No Three r170 a intensidade vai vezes π.
@@ -641,11 +816,11 @@ const sol = new THREE.DirectionalLight('#fff', 1), ceuLuz = new THREE.Hemisphere
 sol.castShadow = true; sol.shadow.mapSize.setScalar(Som.pequeno ? 1024 : 2048); sol.shadow.bias = -.0004; sol.shadow.normalBias = .04; sol.shadow.radius = 3;
 Object.assign(sol.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 1, far: 300 }); cena.add(sol, sol.target, ceuLuz);
 cena.fog = new THREE.Fog('#e8e1d2', 30, 250);
-const carro = criarCarro(), F = criarFisica(carro), poeira = criarPoeira(), marcas = criarMarcas(), clima = criarClima();
-cena.add(carro.grupo, poeira.malha, marcas.malha, clima.malha);
+const pintura = () => PINTURAS.find(p => p.id === salvo.pintura) || PINTURAS[0], carro = criarCarro(pintura()), fantasma = criarCarro(PINTURAS[0], { fantasma: true }), F = criarFisica(carro), poeira = criarPoeira(), marcas = criarMarcas(), clima = criarClima();
+cena.add(carro.grupo, fantasma.grupo, poeira.malha, marcas.malha, clima.malha); fantasma.grupo.visible = false;
 
 /* ---------- pista ---------- */
-let progresso = 0, preso = 0, etapa = salvo.etapa, estado = 'inicio', modo = salvo.modo === 'livre' ? 'livre' : 'tempo', relogio = 0, proxMarco = 0, longe = 0, tremor = 0, aoFim = 0;
+let progresso = 0, preso = 0, etapa = salvo.etapa, estado = 'inicio', modo = ['tempo', 'drift', 'livre'].includes(salvo.modo) ? salvo.modo : 'tempo', relogio = 0, proxMarco = 0, longe = 0, tremor = 0, aoFim = 0;
 function construir(i) {
   if (MUNDO) { cena.remove(MUNDO.grupo); MUNDO.descartar(); }
   etapa = i; const E = ETAPAS[i]; MUNDO = criarMundo(E); cena.add(MUNDO.grupo);
@@ -660,21 +835,34 @@ function construir(i) {
 function trocar(i, depois) { $('veu').classList.add('ver'); setTimeout(() => { if (i !== etapa || !MUNDO) construir(i); else { F.colocar(MUNDO.largada()); poeira.limpar(); marcas.limpar(); } mirar(0, true); depois && depois(); setTimeout(() => $('veu').classList.remove('ver'), 120); }, 650); }
 
 /* ---------- tela inicial ---------- */
+const ptsTxt = n => Math.round(n).toLocaleString('pt-BR'), MEDALHA = ['', 'bronze', 'prata', 'ouro'];
+// medalha: bronze por chegar; prata e ouro pelos alvos da pista (tempo: menor é melhor; drift: mais pontos)
+function medalha(E, m, v) { if (v == null) return 0; const [pr, ou] = E.medalhas[m]; return m === 'tempo' ? (v <= ou ? 3 : v <= pr ? 2 : 1) : (v >= ou ? 3 : v >= pr ? 2 : 1); }
 const tempoTxt = s => s == null ? '—' : `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 function listaPistas() {
   const el = $('pistas'); el.innerHTML = '';
   ETAPAS.forEach((E, i) => { const b = document.createElement('button'); b.setAttribute('role', 'listitem'); b.className = i === etapa ? 'atual' : ''; b.style.setProperty('--c', E.chao[1]);
-    b.innerHTML = `<span class="n">${E.nome}</span><span class="t">${modo === 'tempo' ? 'melhor ' + tempoTxt(salvo.melhores[E.id]) : 'passeio livre'}</span>`; b.onclick = () => { Som.botao(); comecar(i); }; el.append(b); });
+    const v = modo === 'tempo' ? salvo.melhores[E.id] : salvo.pontos[E.id], md = modo === 'livre' ? 0 : medalha(E, modo, v);
+    b.innerHTML = `<span class="n">${E.nome}</span><span class="t">${modo === 'tempo' ? 'melhor ' + tempoTxt(v) : modo === 'drift' ? 'recorde ' + (v == null ? '—' : ptsTxt(v)) : 'passeio livre'}</span>${md ? `<span class="med m${md}" title="${MEDALHA[md]}"></span>` : ''}`; b.onclick = () => { Som.botao(); comecar(i); }; el.append(b); });
 }
 for (const b of document.querySelectorAll('#modos button')) b.onclick = () => { modo = b.dataset.modo; salvo.modo = modo; guardar(); Som.botao(); for (const o of document.querySelectorAll('#modos button')) o.setAttribute('aria-checked', o === b); listaPistas(); };
 for (const o of document.querySelectorAll('#modos button')) o.setAttribute('aria-checked', o.dataset.modo === modo);
+function listaCores() {
+  const el = $('cores'); el.innerHTML = '';
+  PINTURAS.forEach(p => { const b = document.createElement('button'); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', p.id === salvo.pintura); b.setAttribute('aria-label', 'Carro ' + p.nome); b.title = p.nome;
+    b.style.background = `linear-gradient(90deg, ${p.lata} 0 38%, ${p.faixa} 38% 62%, ${p.lata} 62%)`; b.onclick = () => { salvo.pintura = p.id; guardar(); carro.pintar(p); Som.botao(); listaCores(); }; el.append(b); });
+}
+listaCores();
 function mostrarInicio() { estado = 'inicio'; $('inicio').classList.remove('some'); $('painel').hidden = true; $('fim').hidden = true; document.body.classList.remove('dirigindo'); aviso(''); listaPistas(); }
 function irInicio() { if (estado === 'inicio') return; trocar(etapa, mostrarInicio); }
 function comecar(i) {
   $('inicio').classList.add('some'); $('fim').hidden = true; estado = 'pausa';
   trocar(i, () => {
     document.body.classList.add('dirigindo');
+    zerarDrift(); gravacao = []; fant = null; fantasma.grupo.visible = false; $('placar').hidden = modo !== 'drift'; $('relogio').classList.toggle('pequeno', modo === 'drift');
     if (modo === 'livre') { estado = 'livre'; $('painel').hidden = false; $('relogio').textContent = ''; $('marcos').innerHTML = ''; aviso(ETAPAS[etapa].nome, 2600); return; }
+    if (modo === 'tempo') { try { fant = JSON.parse(localStorage.getItem('dustline.fantasma.' + ETAPAS[etapa].id)); } catch {} if (fant && fant.length > 6) { fantasma.grupo.visible = true; colocarFantasma(0); } else fant = null; }
+    if (salvo.dicas < 4) { salvo.dicas++; guardar(); setTimeout(() => aviso(Som.pequeno ? 'drift: freio de mão + virar na curva' : 'drift: espaço (freio de mão) + seta na curva', 4200), 900); }
     estado = 'contagem'; relogio = 0; proxMarco = 0; progresso = MUNDO.ini - 9; $('painel').hidden = false; $('relogio').textContent = tempoTxt(0);
     $('marcos').innerHTML = MUNDO.marcos.map(() => '<i></i>').join('');
     let n = 3; const passo = () => { if (estado !== 'contagem') return; const c = $('contagem'); c.textContent = n || ''; c.classList.add('ver'); Som.contagem(n); setTimeout(() => c.classList.remove('ver'), n ? 600 : 300);
@@ -684,10 +872,65 @@ function comecar(i) {
 }
 let relAviso = 0; function aviso(t, ms = 2400) { const a = $('aviso'); a.textContent = t; a.classList.toggle('ver', !!t); clearTimeout(relAviso); if (t) relAviso = setTimeout(() => a.classList.remove('ver'), ms); }
 function chegou() {
-  estado = 'fim'; const E = ETAPAS[etapa], antes = salvo.melhores[E.id], recorde = antes == null || relogio < antes; if (recorde) { salvo.melhores[E.id] = Math.round(relogio * 10) / 10; guardar(); }
+  if (D.ativa) guardarDrift(); $('drift').classList.remove('ver');
+  estado = 'fim'; const E = ETAPAS[etapa], c = $('fim'), drift = modo === 'drift', valor = drift ? D.total : Math.round(relogio * 10) / 10;
+  const lista = drift ? salvo.pontos : salvo.melhores, antes = lista[E.id], recorde = antes == null || (drift ? valor > antes : valor < antes);
+  if (recorde) { lista[E.id] = valor; guardar(); if (!drift) try { localStorage.setItem('dustline.fantasma.' + E.id, JSON.stringify(gravacao)); } catch {} }
+  const md = medalha(E, modo, valor), mdAntes = medalha(E, modo, antes);
   Som.chegada(recorde); aoFim = 1.4;
-  const c = $('fim'); c.querySelector('.nome').textContent = E.nome; c.querySelector('.tempo').textContent = tempoTxt(relogio);
-  c.querySelector('.melhor').textContent = recorde ? (antes == null ? 'primeiro tempo nesta pista' : 'novo melhor tempo!') : 'melhor: ' + tempoTxt(antes);
+  c.querySelector('.nome').textContent = E.nome; c.querySelector('.tempo').textContent = drift ? ptsTxt(valor) + ' pts' : tempoTxt(relogio);
+  c.querySelector('.melhor').textContent = recorde ? (antes == null ? (drift ? 'primeiro recorde nesta pista' : 'primeiro tempo nesta pista') : (drift ? 'novo recorde!' : 'novo melhor tempo!')) : (drift ? 'recorde: ' + ptsTxt(antes) : 'melhor: ' + tempoTxt(antes));
+  const [pr, ou] = E.medalhas[modo], alvo = md === 3 ? 'o máximo!' : `${md === 2 ? 'ouro' : 'prata'} com ${drift ? ptsTxt(md === 2 ? ou : pr) + ' pts' : tempoTxt(md === 2 ? ou : pr)}`;
+  c.querySelector('.medalha').className = 'medalha m' + md; c.querySelector('.medalha').textContent = (md > mdAntes ? 'nova medalha de ' : 'medalha de ') + MEDALHA[md] + ' · ' + alvo;
+  c.querySelector('.extra').textContent = drift ? 'tempo ' + tempoTxt(relogio) + (D.melhor ? ' · maior drift ' + ptsTxt(D.melhor) : '') : (D.melhor ? 'maior drift ' + ptsTxt(D.melhor) : '');
+  listaPistas();
+}
+
+/* ---------- drift: pontos por ângulo e velocidade, multiplicador que sobe com drifts encadeados ----------
+   Cada drift guarda seus pontos (× multiplicador) quando termina. O multiplicador sobe a cada 1,6 s de drift e
+   continua se o próximo drift começar até 1,6 s depois. Zonas de cones valem o dobro.
+   Bater forte ou sair muito da estrada perde só o drift atual (e zera o multiplicador). Saindo de um drift longo, turbo. */
+const D = { pts: 0, mult: 1, t: 0, folga: 0, fora: 0, ativa: false, total: 0, melhor: 0 };
+let relNota = 0;
+function zerarDrift() { Object.assign(D, { pts: 0, mult: 1, t: 0, folga: 9, fora: 0, ativa: false, total: 0, melhor: 0 }); $('placar').textContent = '0 pts'; $('drift').classList.remove('ver', 'zona'); }
+function notaDrift(txt, classe) { const n = $('dnota'); n.textContent = txt; n.className = 'ver ' + (classe || ''); clearTimeout(relNota); relNota = setTimeout(() => n.className = '', 1600); }
+function guardarDrift() {
+  const v = Math.round(D.pts * D.mult); D.ativa = false; D.pts = 0;
+  if (v < 60) return; D.total += v; D.melhor = Math.max(D.melhor, v); $('placar').textContent = ptsTxt(D.total) + ' pts';
+  const q = v >= 9000 ? 'lendário!' : v >= 4000 ? 'incrível!' : v >= 1600 ? 'ótimo drift' : v >= 500 ? 'bom drift' : 'drift';
+  notaDrift(`+${ptsTxt(v)} · ${q}`); Som.drift(v);
+}
+function perderDrift(porque) { if (D.pts * D.mult > 150) { notaDrift(porque, 'perdeu'); Som.perdeu(); } Object.assign(D, { ativa: false, pts: 0, mult: 1, t: 0, folga: 9 }); $('drift').classList.remove('ver'); }
+function drift(dt) {
+  if (estado !== 'correndo' && estado !== 'livre') return;
+  if (F.saiu > .8) { Som.turbo(); if (!D.ativa || D.folga > 0) notaDrift('turbo', 'turbo'); }
+  const e = MUNDO.perto(F.x, F.z), zona = !!(e && e.d < 12 && MUNDO.emZona[e.i]);
+  if (F.deriva && F.vel > 8) {
+    if (!D.ativa) { if (D.folga > 1.6) Object.assign(D, { mult: 1, t: 0 }); Object.assign(D, { ativa: true, pts: 0 }); }
+    D.pts += dt * Math.abs(F.ang) * 57.3 * F.vel * .25 * (zona ? 2 : 1); D.t += dt; D.folga = 0;
+    const m = Math.min(5, 1 + Math.floor(D.t / 1.6)); if (m > D.mult) { D.mult = m; Som.combo(m); }
+  } else { if (D.ativa) guardarDrift(); D.folga += dt; }
+  if (D.ativa) {
+    if (F.batida && F.batida.forca > 5) perderDrift('bateu · perdeu o drift');
+    else if (!e || e.d > LARGURA / 2 + 4) { D.fora += dt; if (D.fora > 1.5) perderDrift('fora da estrada · perdeu o drift'); } else D.fora = 0;
+  }
+  const el = $('drift');
+  const mostra = D.ativa || (D.t > 0 && D.folga < 1.6); el.classList.toggle('ver', mostra);
+  if (mostra) { el.classList.toggle('zona', zona && D.ativa); el.classList.toggle('espera', !D.ativa); el.querySelector('.pts').textContent = D.ativa ? ptsTxt(D.pts) : ''; el.querySelector('.mult').textContent = '×' + D.mult; el.style.setProperty('--folga', D.ativa ? 1 : 1 - D.folga / 1.6); }
+}
+
+/* ---------- fantasma: o carro da sua melhor volta, transparente (só contra o relógio) ---------- */
+let gravacao = [], fant = null;
+function colocarFantasma(t) {
+  const f = t * 15, i = Math.floor(f), u = f - i, n = fant.length / 3; if (i + 1 >= n) { fantasma.grupo.visible = false; return; }
+  const a = i * 3, b = a + 3, x = fant[a] + (fant[b] - fant[a]) * u, z = fant[a + 1] + (fant[b + 1] - fant[a + 1]) * u; let dr = fant[b + 2] - fant[a + 2]; dr -= Math.round(dr / (2 * Math.PI)) * 2 * Math.PI;
+  fantasma.grupo.position.set(x, MUNDO.altura(x, z) + .02, z); fantasma.grupo.rotation.set(0, fant[a + 2] + dr * u, 0);
+  const perto = Math.hypot(x - F.x, z - F.z); fantasma.M.lata.opacity = Math.min(.26, Math.max(.06, (perto - 2) * .05));
+}
+function fantasmaQuadro() {
+  if (estado !== 'correndo' || modo !== 'tempo') return;
+  const k = Math.floor(relogio * 15); while (gravacao.length / 3 <= k) gravacao.push(Math.round(F.x * 100) / 100, Math.round(F.z * 100) / 100, Math.round(F.rumo * 1000) / 1000);
+  if (fant && fantasma.grupo.visible) colocarFantasma(relogio);
 }
 $('bDeNovo').onclick = () => { Som.botao(); comecar(etapa); }; $('bProxima').onclick = () => { Som.botao(); comecar((etapa + 1) % ETAPAS.length); }; $('bPistas').onclick = () => { Som.botao(); irInicio(); };
 $('bVoltar').onclick = () => { Som.botao(); irInicio(); };
@@ -728,9 +971,9 @@ function medir() { const w = innerWidth, h = innerHeight; R.setPixelRatio(Math.m
 function mirar(dt, ja) {
   const ini = estado === 'inicio'; Cam.orbita += dt * .12;
   let d = F.rumo - Cam.rumo; d -= Math.round(d / (2 * Math.PI)) * 2 * Math.PI; Cam.rumo += d * Math.min(1, ja ? 1 : dt * .9);
-  const v = Math.min(Math.abs(F.vf), 30), lx = innerWidth < innerHeight ? 1.25 : 1, dist = (ini ? .72 : 1 + v * .006) * lx;
-  const a = ini ? F.rumo + Math.PI * .75 + Cam.orbita : Cam.rumo, frente = ini ? new THREE.Vector3() : new THREE.Vector3(Math.sin(F.rumo), 0, Math.cos(F.rumo)).multiplyScalar(v * .35);
-  const alvo = new THREE.Vector3(F.x, F.y + 1, F.z).add(frente), pos = alvo.clone().add(new THREE.Vector3(-Math.sin(a) * 38 * dist, (ini ? 26 : 41) * dist, -Math.cos(a) * 38 * dist));
+  const v = Math.min(Math.abs(F.vf), 30), lx = innerWidth < innerHeight ? 1.25 : 1, dist = (ini ? .62 : 1 + v * .007) * lx;
+  const a = ini ? F.rumo + Math.PI * .75 + Cam.orbita : Cam.rumo, frente = ini ? new THREE.Vector3() : new THREE.Vector3(Math.sin(F.rumo), 0, Math.cos(F.rumo)).multiplyScalar(v * .3);
+  const alvo = new THREE.Vector3(F.x, F.y + 1, F.z).add(frente), hz = (ini ? 30 : 27) * dist, pos = alvo.clone().add(new THREE.Vector3(-Math.sin(a) * hz, (ini ? 17 : 29) * dist, -Math.cos(a) * hz));
   if (ja) { Cam.alvo.copy(alvo); Cam.pos.copy(pos); } else { Cam.alvo.lerp(alvo, Math.min(1, dt * 4)); Cam.pos.lerp(pos, Math.min(1, dt * (ini ? 1.2 : 2.5))); }
   cam.position.copy(Cam.pos); if (tremor > 0) cam.position.add(new THREE.Vector3((Math.random() - .5) * tremor, (Math.random() - .5) * tremor, (Math.random() - .5) * tremor)); cam.lookAt(Cam.alvo);
   sol.position.copy(Cam.alvo).addScaledVector(CEU.dir, 140); sol.target.position.copy(Cam.alvo);
@@ -779,7 +1022,7 @@ function corrida(dt) {
 let t0 = 0, T = 0, primeiro = 2;
 function passo(dt) {
   T += dt; lerEntrada(); if (!MUNDO) return;
-  F.passo(dt, ent); efeitos(dt); corrida(dt); poeira.quadro(dt); MUNDO.arvores.quadro(dt); mirar(dt);
+  F.passo(dt, ent); efeitos(dt); corrida(dt); drift(dt); fantasmaQuadro(); poeira.quadro(dt); MUNDO.arvores.quadro(dt); mirar(dt);
   const escala = innerHeight / (2 * Math.tan(cam.fov * Math.PI / 360));
   clima.quadro(T, Cam.alvo, escala * .24); poeira.malha.material.uniforms.uEscala.value = escala * .2;
   Som.carro({ rpm: F.rpm, carga: F.carga, vel: Math.abs(F.vf), derrapa: F.derrapa, superficie: F.superficie });
@@ -789,7 +1032,7 @@ medir(); construir(etapa); mirar(0, true); mostrarInicio(); requestAnimationFram
 addEventListener('resize', medir); addEventListener('orientationchange', () => setTimeout(medir, 200));
 tela.addEventListener('webglcontextlost', e => e.preventDefault()); tela.addEventListener('webglcontextrestored', () => { primeiro = 2; });
 if (['localhost', '127.0.0.1'].includes(location.hostname)) window.__dustline = { THREE, R, cena, cam, F, Som, ent, teclas, toque, ETAPAS, passo, comecar, irInicio, voltarEstrada, construir, salvo,
-  get mundo() { return MUNDO; }, get estado() { return estado; }, get relogio() { return relogio; }, get proxMarco() { return proxMarco; }, get etapa() { return etapa; } };
+  drift: D, fantasma, carro, get modo() { return modo; }, get mundo() { return MUNDO; }, get estado() { return estado; }, get relogio() { return relogio; }, get proxMarco() { return proxMarco; }, get etapa() { return etapa; } };
 
 })();
 </script>

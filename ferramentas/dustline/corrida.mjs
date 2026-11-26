@@ -10,7 +10,7 @@ const PILOTO = `(seg)=>{const D=__dustline,F=D.F,M=D.mundo,P=M.pontos,T=D.teclas
   D.passo(1/60);if(F.batida)bat++;max=Math.max(max,Math.abs(F.vf));}T.clear();return {estado:D.estado,tempo:+D.relogio.toFixed(1),marcos:D.proxMarco,batidas:bat,vmax:+max.toFixed(1)}}`;
 for (let i = 0; i < 5; i++) {
   await D(`D.comecar(${i})`); ok(`pista ${i + 1}: contagem`, await espera(`D.estado==='contagem'`, 6)); ok('  largada', await espera(`D.estado==='correndo'`, 6));
-  const r = await p.av(`(${PILOTO})(240)`); ok(`  chegou (${await D(`D.ETAPAS[${i}].nome`)})`, r.estado === 'fim' && r.marcos === 4, JSON.stringify(r));
+  const r = await p.av(`(${PILOTO})(240)`); ok(`  chegou (${await D(`D.ETAPAS[${i}].nome`)})`, r.estado === "fim" && r.marcos === 6, JSON.stringify(r));
   ok('  melhor tempo gravado', Math.abs((await p.av(`JSON.parse(localStorage.getItem('dustline.v1')).melhores[__dustline.ETAPAS[${i}].id]`)) - r.tempo) < .2);
   await dorme(1800); ok('  cartão do fim aparece', await p.av(`!document.getElementById('fim').hidden`));
 }

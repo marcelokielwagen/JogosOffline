@@ -5,7 +5,7 @@ const pasta = process.argv[2]; const p = await abrir({ w: 390, h: 844, movel: tr
 const ok = (c, m) => { if (c) bons++; else { ruins++; console.log('FALHOU:', m); } }, E = x => p.av(x.replaceAll('@', '__glaze.'));
 const c = async sel => { const r = await E(`(()=>{const e=document.querySelector('${sel}');if(!e||e.disabled)return null;e.scrollIntoView({block:'nearest'});const r=e.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]})()`); if (!r) return ok(false, 'botão ' + sel); await p.toque(...r); await dorme(300); };
 const cabe = sel => E(`[...document.querySelectorAll('${sel}')].every(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.left>=-1&&r.top>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1})`);
-const recarrega = async () => { await p.recarregar(); for (let i = 0; i < 40; i++) { await dorme(200); if (await E("!!window.__glaze").catch(() => 0)) break; } await dorme(500); };
+const recarrega = async () => { await p.recarregar(); for (let i = 0; i < 40; i++) { await dorme(200); if (await E("!!window.__glaze").catch(() => 0)) break; } await dorme(500); await E("(document.querySelector('.solta.on [data-fecha]')||{click(){}}).click()"); await dorme(200); };   // Fase 3: fecha o aviso de chegada (moedas)
 const ABERT = '#bJogar,#bMapa,#bPaineis,#bCaderno,#bMarcos,#bDia,#bAjustes';
 
 // migração: uma ficha da Fase 1 vira v2 sem perder nada (e a v1 fica intocada)
@@ -54,7 +54,7 @@ await c('#uNao'); await dorme(300); ok(await E("@Jogo.aberto") === 'derrota' && 
 await E('@Progresso.d.tot.quebrados=1490'); await E('@Jogo.comecar(5).then(()=>1)'); await dorme(300);
 await E(`(()=>{const P=@Jogo.P,t=P.cel.find(t=>t&&t.rara);P.quebra(t,P.bolas[0],false);P.rara=1;P.itens=[];for(const x of P.cel)if(x&&x.vivo&&x.k!=='f'){x.vivo=false;P.restam--;P.quebrados++;}})()`); await dorme(2200);
 ok(await E("@Jogo.aberto") === 'vitoria', 'vence'); const vm = await E("document.getElementById('vMais').textContent"); ok(/Cruz de pincéis/.test(vm) && /Marco: Azulejos quebrados/.test(vm), 'vitória mostra peça e marco: ' + vm);
-ok(!(await E("document.getElementById('vObra').hidden")), 'oferece restaurar'); await p.foto(`${pasta}/f2-vitoria.png`); ok(await cabe('#vitoria .caixa .bt'), 'botões da vitória cabem');
+ok(!(await E("document.getElementById('vObra').hidden")), 'oferece restaurar'); await p.foto(`${pasta}/f2-vitoria.png`); ok(await cabe('#vitoria .caixa .bt:not([hidden])'), 'botões da vitória cabem');
 await c('#vObra'); ok(await E("@Jogo.aberto") === 'paineis', 'vitória leva aos painéis'); await c('#paineis [data-volta]');
 
 // caderno e carta

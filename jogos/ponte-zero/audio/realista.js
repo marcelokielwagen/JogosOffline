@@ -174,6 +174,9 @@ const desliza = () => { const n = 2, o = filtro(sopro(n, () => 1), 'bp', 2600, .
 const adrenalina = () => { const n = 1.7, o = novo(n); for (const t of [.02, .52, .98]) for (const [d, g] of [[0, 1], [.14, .75]]) { somar(o, escorrega(.22, 130, 62, .02, u => cai(u, .045, .003)), t + d, .7 * g); somar(o, tapa(.1, 360, .8, .022, .002), t + d, 1.6 * g); } somar(o, filtro(sopro(.7, t => sobeDesce(t, .7, .35, .2)), 'bp', t => 900 + 1100 * t, .9), .1, .8); somar(o, filtro(sopro(.5, t => sobeDesce(t, .5, .08, .35)), 'bp', t => 1700 - 1400 * t, .9), .95, .8); return o; };
 const estruturaRange = () => { const o = novo(1.6); somar(o, rangido(1.2, 130, 260), 0, 1.2); somar(o, rangido(.8, 310, 190), .4, .6); for (let k = 0; k < 5; k++) somar(o, ressoa(.3, CHAPA(entre(140, 240), .06)), .1 + k * .26, .8); return perto(o, .3); };
 
+// hélice de helicóptero: pás batendo no ar (5,5 por segundo) por cima do zumbido da turbina, em laço
+const rotor = () => { const n = 2.2, f = 5.5, o = novo(n + .3); for (let k = 0; k < Math.round((n + .3) * f); k++) { const t = k / f; somar(o, filtro(sopro(.2, u => cai(u, .045, .006)), 'lp', 300, .8), t, 1.6); somar(o, tapa(.1, 820, .7, .018, .003), t + .004, .3); } const w = filtro(sopro(n + .3, () => 1), 'bp', 2300, 5); modula(w, vaga(n + .3, 3), v => .7 + .3 * v); somar(o, w, 0, .12); return lacoLiso(o, .3); };
+
 // ---------- eco da ponte e da cidade (resposta do lugar, em dois canais) ----------
 export function ecoPonte() {
   const n = 1.45, faz = lado => {
@@ -194,7 +197,7 @@ export const REAIS = {
   entra1: [() => chegada(3, .75), .56, 0, 1, 2.2], entra2: [() => chegada(8, 1.05), .6, 0, 1, 2.2], entra3: [() => chegada(18, 1.35), .66, 0, 1, 2.2], ...Object.fromEntries(lista(4, i => ['ordem' + i, [() => FALAS[i](), .5]])), coro0: [() => coro(0, 6, .85), .56], coro1: [() => coro(2, 7, .9), .56], coro2: [() => coro(3, 6, .7), .56],
   portaoBom: [passaBom, .72, 0, 0, 2.8], portaoMuito: [passaMuito, .76, 0, 0, 2.8], portaoRuim: [passaRuim, .78], tinido0: [() => tinido(0), .42, 0, 0, 3], tinido1: [() => tinido(1), .42, 0, 0, 3], tinido2: [() => tinido(2), .42, 0, 0, 3], dente: [dente, .5], virou: [virou, .7, 0, 0, 2.8],
   reforco: [reforco, .74, 0, 0, 2.8], caixaArma: [caixaArma, .74, 0, 0, 2.8], gaiola: [gaiola, .74, 0, 0, 2.8], escudo: [escudo, .6, 0, 0, 2.8], batida: [batida, .7],
-  desaba: [desaba, .92], agua: [agua, .8], jorro: [jorro, .74, 0, 0, 2.8], fogo: [fogoSobe, .84], gosma: [gosma, .5], cuspe: [cuspe, .4], arremesso: [arremesso, .6], adrenalina: [adrenalina, .7], range: [estruturaRange, .6], gelo: [geloQuebra, .7], raio: [raioCai, .78, 0, 0, 2], bolaNeve: [bolaNeve, .6], assobio: [assobio, .5], ambFogo: [ambFogo, .4, 1], ventania: [ventania, .34, 1], desliza: [desliza, .4, 1],
+  desaba: [desaba, .92], agua: [agua, .8], jorro: [jorro, .74, 0, 0, 2.8], fogo: [fogoSobe, .84], gosma: [gosma, .5], cuspe: [cuspe, .4], arremesso: [arremesso, .6], adrenalina: [adrenalina, .7], range: [estruturaRange, .6], gelo: [geloQuebra, .7], raio: [raioCai, .78, 0, 0, 2], bolaNeve: [bolaNeve, .6], assobio: [assobio, .5], ambFogo: [ambFogo, .4, 1], ventania: [ventania, .34, 1], rotor: [rotor, .5, 1], desliza: [desliza, .4, 1],
 };
 // acabamento: limpa o subgrave que celular não toca, abre um pouco o médio e o agudo e segura só a pontinha do pico (sem achatar)
 export function acabar(x, pico, laco, k = 1.9) {

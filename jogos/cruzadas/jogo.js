@@ -164,11 +164,11 @@
   // Próxima casa: a vaga seguinte da palavra; com a palavra cheia e errada, mostra os erros (partida rápida).
   function avancar(w) {
     const k = w.cels.indexOf(atual);
-    if (cheia(w) && q) {
-      w.cels.forEach(x => { if (letras[x] !== sol[x]) marca[x] = 'erro'; });
+    if (cheia(w)) {
       atual = w.cels.find(x => letras[x] !== sol[x]);
       JO.som('erro'); JO.vibrar(40);
       w.cels.forEach(x => casas[x].animate && casas[x].animate([{ translate: '0' }, { translate: '-4px' }, { translate: '4px' }, { translate: '0' }], 200));
+      apagarErros(w.cels);
       return;
     }
     const resto = w.cels.slice(k + 1);
@@ -208,8 +208,22 @@
     let erros = 0, vistas = 0;
     lista.forEach(x => { if (letras[x]) { vistas++; marca[x] = letras[x] === sol[x] ? 'ok' : 'erro'; if (marca[x] === 'erro') erros++; } });
     if (vistas) JO.som(erros ? 'erro' : 'acerto');
-    $('aviso').textContent = !vistas ? 'Escreva alguma letra primeiro.' : erros ? (erros === 1 ? '1 letra errada.' : erros + ' letras erradas.') : 'Tudo certo até aqui!';
+    $('aviso').textContent = !vistas ? 'Escreva alguma letra primeiro.' : erros ? (erros === 1 ? '1 letra errada foi apagada.' : erros + ' letras erradas foram apagadas.') : 'Tudo certo até aqui!';
     desenhar();
+    if (erros) { atual = lista.find(x => letras[x] && letras[x] !== sol[x]) ?? atual; apagarErros(lista); }
+  }
+  // Pedido do dono: o que está errado some sozinho. Pisca em vermelho e, logo depois, a letra é apagada.
+  let apagando = null;
+  function apagarErros(cels) {
+    const erradas = cels.filter(x => letras[x] && letras[x] !== sol[x] && !presa(x));
+    if (!erradas.length) return;
+    erradas.forEach(x => { marca[x] = 'erro'; });
+    desenhar();
+    clearTimeout(apagando);
+    apagando = setTimeout(() => {
+      erradas.forEach(x => { if (letras[x] !== sol[x]) { letras[x] = ''; delete marca[x]; } });
+      guardar(); desenhar();
+    }, 650);
   }
   function revelar() {
     if (fim) return;
@@ -221,7 +235,7 @@
   function checarFim() {
     const cheias = sol.every((ch, x) => !ch || letras[x]);
     if (!cheias) return;
-    if (!sol.every((ch, x) => !ch || letras[x] === ch)) { $('aviso').textContent = 'Tudo preenchido, mas há letras erradas. Use ✓ Palavra.'; return; }
+    if (!sol.every((ch, x) => !ch || letras[x] === ch)) { $('aviso').textContent = 'Há letras erradas: elas vão sumir para você tentar de novo.'; return; }
     fim = true; marca = {};
     if (q) return fimRapida();
     guardar(); desenhar();

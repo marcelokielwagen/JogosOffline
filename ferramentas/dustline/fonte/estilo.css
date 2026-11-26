@@ -64,3 +64,29 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 #controles button.gas { width: 84px; height: 84px; } #controles button.mao { width: 54px; height: 54px; }
 #controles button.ativo { background: rgba(255, 248, 236, .7); }
 #semgl { position: fixed; inset: 0; display: grid; place-items: center; padding: 30px; text-align: center; }
+
+/* cores do carro */
+#cores { display: flex; gap: 10px; margin-top: auto; margin-bottom: 12px; background: var(--papel); border-radius: 22px; padding: 6px 10px; }
+#cores button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .9); cursor: pointer; box-shadow: 0 1px 3px rgba(60, 45, 30, .25); padding: 0; }
+#cores button[aria-checked="true"] { outline: 2.5px solid var(--tinta); outline-offset: 2px; }
+#inicio #modos { margin-top: 0; }
+/* medalhas */
+#pistas button { position: relative; }
+.med { position: absolute; right: 10px; bottom: 10px; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .15); }
+.med.m1, .medalha.m1::before { background: #c58a5a; } .med.m2, .medalha.m2::before { background: #c9c6bf; } .med.m3, .medalha.m3::before { background: #e8bd4a; }
+#fim .medalha { font-size: 14px; margin-top: 8px; display: flex; gap: 6px; align-items: center; justify-content: center; }
+#fim .medalha::before { content: ''; width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+#fim .extra { font-size: 13px; opacity: .65; margin-top: 4px; min-height: 1.2em; }
+/* drift */
+#relogio.pequeno { font-size: clamp(15px, 2.2vh, 19px); opacity: .85; }
+#placar { position: fixed; left: 0; right: 0; top: calc(42px + env(safe-area-inset-top)); text-align: center; font-size: clamp(22px, 3.6vh, 32px); letter-spacing: .06em; font-variant-numeric: tabular-nums; color: #fff8ec; text-shadow: 0 1px 8px rgba(60, 45, 30, .5); }
+#painel:has(#placar:not([hidden])) #marcos { top: calc(84px + env(safe-area-inset-top)); }
+#drift { position: fixed; left: 50%; top: 23%; transform: translate(-50%, 6px); display: flex; align-items: baseline; gap: 8px; color: #fff8ec; text-shadow: 0 2px 10px rgba(60, 45, 30, .55); opacity: 0; transition: opacity .25s, transform .25s; }
+#drift.ver { opacity: 1; transform: translate(-50%, 0); }
+#drift .pts { font-size: clamp(28px, 5vh, 44px); font-weight: 300; font-variant-numeric: tabular-nums; }
+#drift .mult { font-size: clamp(18px, 3vh, 26px); color: #ffe2a8; white-space: nowrap; }
+#drift i { position: absolute; left: 0; right: 0; bottom: -6px; height: 3px; border-radius: 2px; background: #fff8ec; transform-origin: left; transform: scaleX(var(--folga, 1)); opacity: .8; }
+#drift.zona .mult::after { content: ' zona ×2'; font-size: .6em; color: #ffc48a; letter-spacing: .05em; }
+#dnota { position: fixed; left: 0; right: 0; top: calc(23% + 54px); text-align: center; font-size: clamp(16px, 2.5vh, 21px); letter-spacing: .08em; color: #fff8ec; text-shadow: 0 1px 8px rgba(60, 45, 30, .6); opacity: 0; transition: opacity .4s, transform .4s; transform: translateY(6px); pointer-events: none; }
+#dnota.ver { opacity: 1; transform: none; } #dnota.perdeu { color: #ffd2c4; } #dnota.turbo { color: #ffd59a; }
+#painel:has(#placar:not([hidden])) ~ #aviso { top: calc(110px + env(safe-area-inset-top)); }

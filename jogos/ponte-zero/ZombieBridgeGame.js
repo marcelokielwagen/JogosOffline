@@ -11,6 +11,7 @@ const BASE = new URL('./', import.meta.url);
 const HTML = `
   <div class="pz-hud" aria-hidden="true" hidden>
     <div class="pz-caminho" data-trilho><i data-caminho></i><u data-marco></u></div>
+    <div class="pz-horda" data-horda hidden></div>
     <div class="pz-chefe" data-chefe hidden><b data-chefenome></b><em data-etapas hidden></em><div class="pz-vida"><i data-vida></i><s></s><s></s></div></div>
     <div class="pz-arma"><b data-arma></b><span><i data-evolui></i></span><small data-mortos></small><div class="pz-esp" data-esp></div></div>
     <div class="pz-adr" data-adr hidden><b>Adrenalina</b><span><i data-adrk></i></span></div>
@@ -99,11 +100,11 @@ export class ZombieBridgeGame {
   }
   #difs() { const d = this.#dados; this.#mostrar('dif', true); this.#q('dif').innerHTML = DIFICULDADES.map((x, i) => `<button data-n="${i}" aria-pressed="${i === d.dif}">${x.nome}</button>`).join(''); }
   #estrela(id) { const d = this.#dados; return d.estrelas[id] || (d.medalhas[id] ? 1 : 0); }
-  #texto(N, C) { const f = this.#dados.veteranos.filter(v => !v.fora).length; this.#q('texto').innerHTML = `<b class="pz-novo">${N.novo}</b>${CHEFES[N.meio.id].nome} no meio e ${C.nome} no fim.${f ? ` ${f > 1 ? f + ' veteranos vão' : 'Um veterano vai'} com você.` : ''}`; }
+  #texto(N, C) { const f = this.#dados.veteranos.filter(v => !v.fora).length; this.#q('texto').innerHTML = `<b class="pz-novo">${N.novo}</b>${N.defesa ? `Mova o pelotão para o lado que quer atacar: a muralha bloqueia os tiros. ${C.nome} vem pela direita.` : `${CHEFES[N.meio.id].nome} no meio e ${C.nome} no fim.`}${N.heli ? ' O helicóptero ajuda.' : ''}${f ? ` ${f > 1 ? f + ' veteranos vão' : 'Um veterano vai'} com você.` : ''}`; }
   #niveis() { const d = this.#dados; this.#difs(); this.#mostrar('niveis', true); this.#q('niveis').innerHTML = NIVEIS.map((n, i) => { const ab = i <= d.aberto, me = this.#estrela(n.chefe); return `<button data-n="${i}" ${ab ? '' : 'disabled'} aria-pressed="${i === this.#nivel}" aria-label="Nível ${i + 1}, ${n.nome}${ab ? me ? `, vencido no ${DIFICULDADES[me - 1].nome}` : '' : ', bloqueado'}"><b>${ab ? i + 1 : CADEADO}</b><span>${n.nome}</span>${me ? `<i>${'★'.repeat(me)}</i>` : ''}</button>`; }).join(''); }
   #comecar() {
     for (const n of ['entrada', 'aviso']) this.#q(n).getAnimations().forEach(a => a.cancel()); this.#som.acordar(); this.#nova(); this.#som.musica('acao');
-    this.#parado = false; this.#cena.noMenu = false; this.#dados.jogos++; this.#dados.nivel = this.#nivel; this.#salvar(); this.#mostrar('painel', false); this.#raiz.querySelector('.pz-hud').hidden = false; this.#mostrar('trilho', true); this.#mostrar('chefe', false); this.#q('marco').style.left = `${this.#S.trecho.meio.d / this.#S.trecho.comprimento * 100}%`; this.#mostrar('adr', !!this.#S.trecho.adrenalina); this.#mostrar('conta', true); this.#mostrar('dica', true); this.#raiz.classList.add('jogando'); this.#q('jogar').blur();
+    this.#parado = false; this.#cena.noMenu = false; this.#dados.jogos++; this.#dados.nivel = this.#nivel; this.#salvar(); this.#mostrar('painel', false); this.#raiz.querySelector('.pz-hud').hidden = false; this.#mostrar('trilho', true); this.#mostrar('chefe', false); const T0 = this.#S.trecho; this.#mostrar('marco', !!T0.meio); if (T0.meio) this.#q('marco').style.left = `${T0.meio.d / T0.comprimento * 100}%`; this.#mostrar('horda', !!T0.defesa); this.#raiz.classList.toggle('defesa', !!T0.defesa); this.#mostrar('adr', !!this.#S.trecho.adrenalina); this.#mostrar('conta', true); this.#mostrar('dica', true); this.#raiz.classList.add('jogando'); this.#q('jogar').blur();
   }
   #evento(n, d) {
     if (!this.#cena) return; const S = this.#S;
@@ -135,7 +136,12 @@ export class ZombieBridgeGame {
       case 'golpe': if (d.dentro) this.#p.vibrar(80); break;
       case 'placaCaiu': this.#avisar('Placa solta!', true); this.#p.vibrar(40); break;
       case 'fase': this.#avisar('Ele ficou furioso!', false); break;
-      case 'chefeEntra': this.#mostrar('trilho', false); this.#mostrar('dica', false); if (!d.meio) this.#som.musica('chefe'); break;
+      case 'heliVem': this.#uma('heli', d.missao === 'bomba' ? 'Bombardeio a caminho!' : 'Pegue as caixas!', true); break;
+      case 'bonus': this.#uma('bonus', 'Atire nas caixas!', true); break;
+      case 'sinal': this.#avisar('Chamou o helicóptero!', true); this.#p.vibrar(40); break;
+      case 'destruicao': this.#avisar('Bônus: cadência +6%', true); break;
+      case 'chefeFim': this.#mostrar('chefe', false); this.#uma('fimHorda', 'Agora a horda!', true); break;
+      case 'chefeEntra': this.#mostrar('trilho', !!S.trecho.defesa); this.#mostrar('dica', !!S.trecho.defesa); if (!d.meio) this.#som.musica('chefe'); break;
       case 'chefePousa': { this.#p.vibrar(120); this.#q('chefenome').textContent = d.T.nome; this.#q('chefe').classList.toggle('meio', d.meio); this.#q('chefe').classList.toggle('etapas', !!d.T.etapas); this.#mostrar('etapas', !!d.T.etapas); this.#mostrar('chefe', true); const e = this.#q('entrada'); e.querySelector('b').textContent = d.T.nome; e.querySelector('span').textContent = d.T.lema; e.getAnimations().forEach(a => a.cancel()); e.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(1.25)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .16 }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .78 }, { opacity: 0, transform: 'translate(-50%, -58%) scale(1)' }], { duration: 2100, fill: 'both', easing: 'ease-out' }); e.classList.toggle('meio', d.meio); this.#q('leitor').textContent = `${d.meio ? 'Meio-chefe' : 'Chefe'}: ${d.T.nome}`; break; }
       case 'chefeMorre': this.#avisar(`${d.T.nome} caiu!`, true); this.#p.vibrar(200); if (!d.meio) this.#som.musica(null); break;
       case 'derrota': this.#som.musica(null); break;
@@ -194,15 +200,15 @@ export class ZombieBridgeGame {
     this.#fim += dt; if (this.#fim < (venceu ? 2.6 : 1.9) || this.#parado) return;
     const N = S.trecho, C = CHEFES[N.chefe], ultimo = this.#nivel === NIVEIS.length - 1;
     this.#parado = true; this.#soltar(); this.#cena.noMenu = venceu ? .4 : .15; this.#raiz.querySelector('.pz-hud').hidden = true; this.#raiz.classList.remove('jogando'); this.#mostrar('conta', false); this.#mostrar('dica', false); const A = S.chefe ? S.chefe.T : C;
-    this.#q('selo').textContent = venceu ? `Nível ${this.#nivel + 1} concluído · ${DIFICULDADES[d.dif].nome}` : S.luta ? `${A.nome} ainda tinha ${Math.max(1, Math.round(S.chefe.vida / S.chefe.max * 100))}% de vida` : `Parou em ${Math.floor(S.d)} m de ${N.comprimento} m`;
-    this.#q('titulo').textContent = venceu ? `${C.nome} caiu!` : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? ultimo ? 'Você venceu todos os chefes. Tente uma dificuldade maior.' : `Próxima parada: ${NIVEIS[this.#nivel + 1].nome}. ${NIVEIS[this.#nivel + 1].novo}.` : S.luta ? 'Saia das marcas no chão e pegue as caixas verdes de reforço.' : 'Some soldados antes das hordas grandes e use os barris.';
+    this.#q('selo').textContent = venceu ? `Nível ${this.#nivel + 1} concluído · ${DIFICULDADES[d.dif].nome}` : S.luta && S.chefe ? `${A.nome} ainda tinha ${Math.max(1, Math.round(S.chefe.vida / S.chefe.max * 100))}% de vida` : N.defesa ? `Faltavam ${Math.ceil(N.defesa.metros * (1 - S.hordaSaiu / N.defesa.horda))} m de horda` : `Parou em ${Math.floor(S.d)} m de ${N.comprimento} m`;
+    this.#q('titulo').textContent = venceu ? `${C.nome} caiu!` : 'O pelotão caiu'; this.#q('texto').textContent = venceu ? ultimo ? 'Você venceu todos os chefes. Tente uma dificuldade maior.' : `Próxima parada: ${NIVEIS[this.#nivel + 1].nome}. ${NIVEIS[this.#nivel + 1].novo}.` : N.defesa ? 'Divida o tempo: segure a horda à esquerda e atire no chefe à direita antes que ele chegue.' : S.luta ? 'Saia das marcas no chão e pegue as caixas verdes de reforço.' : 'Some soldados antes das hordas grandes e use os barris.';
     this.#q('placar').innerHTML = `<div><b>${S.n}</b><span>soldados</span></div><div><b>${S.mortos}</b><span>eliminações</span></div><div><b>${d.melhor}</b><span>recorde</span></div>`; this.#mostrar('placar', true);
     this.#q('premio').textContent = [venceu && this.premioNovo && `Prêmio: ${C.premio.texto}`, this.vetNovo && `${this.vetNovo} virou veterano`].filter(Boolean).join(' · '); this.#mostrar('premio', venceu && (this.premioNovo || !!this.vetNovo));
     this.#q('painel').classList.add('fim'); if (venceu && !ultimo) this.#nivel++; this.#niveis(); this.#q('jogar').textContent = venceu ? ultimo ? 'Jogar de novo' : 'Próximo nível' : 'Tentar de novo'; this.#mostrar('painel', true);
   }
   #hud() {
     const S = this.#S, A = ARMAS[S.arma], ant = S.arma ? ARMAS[S.arma - 1].meta : 0, txt = (n, v) => { const e = this.#q(n); if (e.textContent !== v) e.textContent = v; };
-    this.#q('caminho').style.transform = `scaleX(${Math.min(1, S.d / S.trecho.comprimento)})`; txt('arma', A.nome); this.#q('evolui').style.transform = `scaleX(${A.meta === Infinity ? 1 : Math.max(0, Math.min(1, (S.mortos - ant) / (A.meta - ant)))})`; txt('mortos', `${S.mortos} eliminações`);
+    const DF = S.trecho.defesa; this.#q('caminho').style.transform = `scaleX(${DF ? S.hordaSaiu / DF.horda : Math.min(1, S.d / S.trecho.comprimento)})`; if (DF) txt('horda', `Horda: ${Math.ceil(DF.metros * (1 - S.hordaSaiu / DF.horda))} m`); txt('arma', A.nome); this.#q('evolui').style.transform = `scaleX(${A.meta === Infinity ? 1 : Math.max(0, Math.min(1, (S.mortos - ant) / (A.meta - ant)))})`; txt('mortos', `${S.mortos} eliminações`);
     let e = ''; if (S.esp) { const q = {}; for (const s of S.soldados) if (s.arma) q[s.arma] = (q[s.arma] || 0) + 1; for (const k in q) e += `<span class="e${k}">${q[k]} ${q[k] > 1 ? ARMAS[k].plural : ARMAS[k].nome}</span>`; } if (e !== this.#espTxt) { this.#espTxt = e; this.#q('esp').innerHTML = e; }
     if (S.chefe) { this.#q('vida').style.transform = `scaleX(${S.chefe.vida / S.chefe.max})`; if (S.chefe.T.etapas) txt('etapas', '●'.repeat(S.chefe.T.etapas - S.chefe.etapa) + '○'.repeat(S.chefe.etapa)); this.#q('vida').classList.toggle('frio', S.chefe.frio > 0); this.#q('vida').classList.toggle('duro', !!S.chefe.T.quente && S.chefe.frio <= 0); }
     if (S.trecho.adrenalina) { const a = this.#q('adr'); this.#q('adrk').style.transform = `scaleX(${S.adrT > 0 ? S.adrT / 5 : S.adr})`; a.classList.toggle('ativa', S.adrT > 0); }

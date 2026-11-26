@@ -60,14 +60,9 @@ const JO = (() => {
     let na = null, naFeitas = 0; try { na = JSON.parse(localStorage.getItem('nascente.v2')) || JSON.parse(localStorage.getItem('nascente.v1')); naFeitas = new Set(na ? (na.feitas || [na.concluidas || []]).flat() : []).size; } catch (e) {}
     let cd = null; try { cd = JSON.parse(localStorage.getItem('candeia.v1')); } catch (e) {}
     let hb = null; try { hb = JSON.parse(localStorage.getItem('hushbell.v1')); } catch (e) {}
-    let dl = null; try { dl = JSON.parse(localStorage.getItem('dustline.v1')); } catch (e) {}
-    const dlM = Object.values((dl && dl.melhores) || {}).filter(v => typeof v === 'number');
     let zn = {}; try { const x = JSON.parse(localStorage.getItem('zen.v1')); zn = (x && x.feitas) || {}; } catch (e) {}
     const znJ = j => `${['facil', 'medio', 'dificil'].reduce((a, d) => a + String(zn[j + '/' + d] || '').split('1').length - 1, 0)} de 150`;
-    let kh = null; try { const x = JSON.parse(localStorage.getItem('keepsake.v2')); kh = x ? x.d : JSON.parse(localStorage.getItem('keepsake.v1')); } catch (e) {}
-    let gb = null; try { const x = JSON.parse(localStorage.getItem('glaze-break.v2') || localStorage.getItem('glaze-break.v1')); gb = x ? x.d : null; } catch (e) {}
     let la = null; try { la = JSON.parse(localStorage.getItem('cozinha-da-le.v1')); } catch (e) {}
-    let fl = []; let gm = null; try { const x = JSON.parse(localStorage.getItem('gem-shatter.v2')); gm = x ? x.d : JSON.parse(localStorage.getItem('gem-shatter.v1')); fl = Object.values(gm.estrelas || {}); } catch (e) {}
     const fcn = (n, nome) => { const s = fc && fc.stats && fc.stats[n]; return [nome, s && s.j ? `${s.v} de ${s.j} (${Math.round(100 * s.v / s.j)}%)` : '–']; };
     const pn = (n, nome) => { const s = p && p.stats && p.stats.n && p.stats.n[n]; return [nome, s && s.v ? `${s.v} · melhor ${relogio(s.melhor)}` : '–']; };
     // Caça-Palavras: fases vencidas, estrelas e temas completos.
@@ -83,14 +78,10 @@ const JO = (() => {
       ['Palavras Cruzadas', [['Partidas rápidas', c && c.qn ? Object.values(c.qn).reduce((a, b) => a + b, 0) : 0], ['Grades grandes completas', feitas + ' de ' + ((c && c.total) || 26)]]],
       ['Caça-Palavras', fases(k)],
       ['Galatic Pinball', [['Recorde de pontos', ps && ps.melhor ? ps.melhor.toLocaleString('pt-BR') : 0], ['Partidas', ps ? ps.jogos : 0]]],
-      ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 10` : '0 de 10']]],
+      ['Soldier Survivor', [['Recorde de eliminações', pz ? pz.melhor : 0], ['Vitórias', pz ? `${pz.vitorias || 0} de ${pz.jogos}` : '–'], ['Chefes vencidos', pz && pz.medalhas ? `${Object.keys(pz.medalhas).length} de 13` : '0 de 13']]],
       ['Nascente', [['Fases concluídas', `${naFeitas} de 100`]]],
-      ['Dustline', [['Pistas com tempo', `${dlM.length} de 5`], ['Soma dos melhores', dlM.length ? relogio(Math.round(dlM.reduce((a, b) => a + b, 0))) : '–']]],
       ['Hushbell', [['Monumentos', `${hb && hb.feitos ? Math.min(5, hb.feitos) : 0} de 5`]]],
       ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
-      ['Gem Shatter', [['Fases vencidas', `${fl.length} de 50`], ['Estrelas', `${fl.reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Obras na mina', `${gm && gm.obras ? gm.obras.flat().filter(Boolean).length : 0} de 25`]]],
-      ['Keepsake Hunt', [['Fases vencidas', `${Object.keys((kh && kh.estrelas) || {}).length} de 50`], ['Estrelas', `${Object.values((kh && kh.estrelas) || {}).reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Lembranças', `${Object.keys((kh && kh.lembrancas) || {}).length} de 50`], ['Obras na casa', `${kh && Array.isArray(kh.obras) ? kh.obras.reduce((a, b) => a + (+b || 0), 0) : 0} de 25`]]],
-      ['Glaze Break', [['Fases vencidas', `${Object.keys((gb && gb.estrelas) || {}).length} de 50`], ['Estrelas', `${Object.values((gb && gb.estrelas) || {}).reduce((a, b) => a + (+b || 0), 0)} de 150`], ['Maior veio', `${(gb && gb.tot && gb.tot.maiorVeio) || 0} azulejos`], ['Peças raras', `${Object.keys((gb && gb.raras) || {}).length} de 50`]]],
       ['Cozinha da Le', [['Pedidos servidos', la && la.st ? la.st.pedidos || 0 : 0], ['Nível', la ? la.nivel || 1 : 1], ['Fantasias vistas', `${la && la.st && Array.isArray(la.st.vistas) ? Math.max(0, la.st.vistas.length - 1) : 0} de 11`]]],
       ['Loop Zen', [['Fases concluídas', znJ('loop')]]],
       ['Ricochet Zen', [['Fases concluídas', znJ('okay')]]],

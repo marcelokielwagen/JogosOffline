@@ -73,7 +73,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   function chamar(grupo) {
     const c = S.chefe; for (const [tipo, q0] of grupo) for (let i = 0, q = mais(q0); i < q; i++) {
       if (trecho.lateral && (tipo === 'comum' || tipo === 'corredor') && i % 2) { nascerLado(tipo, S.d + 9 + sorte() * 12, i * .12); continue; }
-      const z = nascer(tipo, limita((sorte() - .5) * 9.4, -PISTA, PISTA), c.d + 1 + sorte() * 6); if (!z) return;
+      const z = nascer(tipo, DEF ? DEF.muro + .8 + sorte() * (PISTA - DEF.muro - .8) : limita((sorte() - .5) * 9.4, -PISTA, PISTA), DEF ? Math.min(c.d - 3, S.d + 50) + sorte() * 6 : c.d + 1 + sorte() * 6); if (!z) return;
       if (tipo === 'escudeiro') { z.guarda = true; z.gx = q > 1 ? (i / (q - 1) - .5) * Math.min(7.6, q * 1.7) : 0; z.x = z.gx; }
     }
     aoEvento('tropa', { c, grupo });
@@ -85,6 +85,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     aoEvento('morte', z);
     if (trecho.adrenalina && S.estado === 'jogando' && S.adrT <= 0 && z.d - S.d - S.frente < 5) { S.adr += .055 * z.T.custo; if (S.adr >= 1) { S.adr = 0; S.adrT = 5; aoEvento('adrenalina'); } }
     if (S.arma < BASICAS - 1 && S.mortos >= ARMAS[S.arma].meta) evoluir('meta');
+    if (DEF && S.mortos >= S.proxBonus && S.estado === 'jogando') { S.proxBonus += 60; S.cadenciaExtra *= 1.06; aoEvento('destruicao'); }
   }
   function evoluir(como) {
     if (S.arma >= BASICAS - 1) { S.cadenciaExtra *= 1.15; aoEvento('cadencia'); return; }
@@ -108,8 +109,15 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   for (const [d0, d1, x0, x1, tipo] of trecho.blocos || []) S.blocos.push({ d0, d1, x0, x1, x: (x0 + x1) / 2, d: (d0 + d1) / 2, tipo, vida: tipo === 'carro' ? 420 : 0, dano: 0, bate: 0 });
   // peças da luta: caixas de reforço, carros arremessados e hidrantes (voltam a ser usados)
   for (let k = 0; k < 2; k++) S.barris.push({ tipo: 'reforco', d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, reforco: 1, alt: 0, raio: .8 });
-  if (trecho.chefe === 'guindaste') for (let k = 0; k < 6; k++) S.barris.push({ tipo: 'carro', d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, alt: 0, raio: 1.25, voa: null });
+  if (trecho.chefe === 'guindaste' || CHEFES[trecho.chefe].carros) for (let k = 0; k < 6; k++) S.barris.push({ tipo: 'carro', d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, alt: 0, raio: 1.25, voa: null });
   if (CHEFES[trecho.chefe].quente) for (let k = 0; k < 2; k++) S.barris.push({ tipo: 'hidrante', d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, raio: .7 });
+  // helicóptero: caixas de paraquedas (passe por cima ou atire) e, na Muralha, bombardeio chamado pelo sinalizador
+  const HELI = trecho.heli, DEF = trecho.defesa;
+  if (HELI) for (const t of HELI.da) { const l = lerPortao(t); S.barris.push({ tipo: 'reforco', heli: true, d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, reforco: l.v, alt: 0, raio: .9, da: l }); }
+  if (DEF) for (const [quando, t] of DEF.bonus) { const l = t === 'sinal' ? { tipo: 'sinal' } : lerPortao(t); S.barris.push({ tipo: l.tipo === 'soma' ? 'gaiola' : 'caixa', d: -50, x: 0, vida: 0, max: 0, vivo: false, dano: 0, raio: .95, da: l, quando, bonus: true, foi: false }); }
+  S.heli = HELI || DEF ? { estado: 'fora', missao: '', x: 0, d: -80, alt: 16, t: 0, prox: HELI ? Math.min(HELI.cada, 10) : 1e9, caixas: 0, bombas: 0, incl: 0, vira: 0 } : null;
+  S.hordaSaiu = 0; S.proxBonus = 60; S.chefeFeito = false; S.muroD0 = 0;
+  if (DEF) { S.muroD0 = 4; S.blocos.push({ d0: 4, d1: 700, x0: DEF.muro - .45, x1: DEF.muro + .45, x: DEF.muro, d: 352, tipo: 'muralha', vida: 0, dano: 0, bate: 0 }); }
   const bom = l => l.tipo === 'soma' || l.tipo === 'tiro' ? l.v >= 0 : l.tipo !== 'divide';
   // divisões do portão: a do meio pode correr de lado
   const borda = (p, i) => i <= 0 ? -5 : i >= p.lados.length ? 5 : -5 + 10 * i / p.lados.length + p.ox;
@@ -126,6 +134,8 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   function passar(p) { const k = ladoDe(p, S.x), l = p.lados[k]; p.usado = k; const q = aplicar(l); aoEvento('portao', { p, k, l, q, bom: bom(l), x: (borda(p, k) + borda(p, k + 1)) / 2, larg: borda(p, k + 1) - borda(p, k) }); }
   function estourar(b) {
     b.vivo = false;
+    if (b.tipo === 'reforco' && b.heli) { const q = aplicar(b.da); if (b.da.tipo === 'especial') aoEvento('caixa', { b, l: b.da, q }); else aoEvento('reforco', { b, q }); return; }
+    if (b.da?.tipo === 'sinal') { S.querBomba = true; aoEvento('sinal', b); return; }
     if (b.tipo === 'reforco') { aoEvento('reforco', { b, q: somar(b.reforco) }); return; }
     if (b.tipo === 'gaiola') { aoEvento('resgate', { b, q: somar(b.da.v) }); return; }
     if (b.tipo === 'caixa') { aoEvento('caixa', { b, l: b.da, q: aplicar(b.da) }); return; }
@@ -160,31 +170,34 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     const t = livresT.pop(); if (!t) return;
     const m = mirar(s, A), a = (m ? limita((m.x - s.x) / Math.max(3, m.d - s.d - .75), -.22, .22) : 0) + (sorte() - .5) * 2 * A.abre;
     Object.assign(t, { x: s.x - .05, d: s.d + .75, x0: s.x, vx: a * A.vel, vel: A.vel, resta: alcance(A) + 2, dano: A.dano * S.multDano * (A.especial ? 1 : porTiro) * (s.vet ? 2 : 1), passa: A.atravessa, morto: false, ultimo: null, arma, nasceu: S.tempo });
+    t.lado = DEF ? (s.x < DEF.muro ? -1 : 1) : 0;
     S.tiros.push(t); s.tiro = S.tempo; s.calor = 1; s.mira = a;
     aoEvento('tiro', { s, arma });
   }
   // lança-chamas: tudo dentro do leque curto à frente queima
   function jato(s, A, arma) {
     const al = alcance(A), m = mirar(s, A); s.tiro = S.tempo; s.calor = 1; s.mira = m ? limita((m.x - s.x) / Math.max(2, m.d - s.d), -.3, .3) : 0;
-    for (const z of miras) { if (z.morto) continue; const dd = z.d - s.d; if (dd < .2 || dd > al) continue; if (Math.abs(z.x - s.x - s.mira * dd) > .5 + dd * A.abre) continue; z.fogo = 2.2; ferir(z, A.dano * S.multDano, 0, true); }
+    for (const z of miras) { if (z.morto || !mesmoLado(s, z)) continue; const dd = z.d - s.d; if (dd < .2 || dd > al) continue; if (Math.abs(z.x - s.x - s.mira * dd) > .5 + dd * A.abre) continue; z.fogo = 2.2; ferir(z, A.dano * S.multDano, 0, true); }
     for (const b of S.barris) if (b.vivo && !(b.alt > 3) && b.d > s.d && b.d - s.d < al && Math.abs(b.x - s.x - s.mira * (b.d - s.d)) < b.raio + (b.d - s.d) * A.abre) { b.vida -= A.dano; b.dano = .4; }
     const c = S.chefe; if (c && S.luta === 'luta' && !c.fora && c.d - c.T.raio - s.d < al && Math.abs(c.x - s.x - s.mira * (c.d - s.d)) < c.T.raio + 1) ferirChefe(A.dano * S.multDano, true);
     aoEvento('tiro', { s, arma });
   }
-  const alcance = A => S.luta && !A.jato ? Math.max(38, A.alcance) : S.luta ? A.alcance + 3 : A.alcance;
+  // muralha: a parede separa os dois lados (até onde ela começa)
+  const mesmoLado = (s, o) => !DEF || o.d < S.muroD0 || (s.x < DEF.muro) === (o.x < DEF.muro);
+  const alcance = A => S.luta && !A.jato ? Math.max(DEF ? 66 : 38, A.alcance) : S.luta ? A.alcance + 3 : A.alcance;
   // ajuda de mira: cada soldado prefere o alvo mais próximo num cone estreito à frente
   function mirar(s, A) {
     let melhor = null, nota = 1e9; const al = alcance(A);
-    for (const z of miras) { if (z.morto) continue; const dd = z.d - s.d; if (dd < .5 || dd > al) continue; const ang = Math.abs(z.x - s.x) / dd; if (ang > .22) continue; const q = dd * (1 + ang * 4); if (q < nota) { nota = q; melhor = z; } }
+    for (const z of miras) { if (z.morto || !mesmoLado(s, z)) continue; const dd = z.d - s.d; if (dd < .5 || dd > al) continue; const ang = Math.abs(z.x - s.x) / dd; if (ang > .22) continue; const q = dd * (1 + ang * 4); if (q < nota) { nota = q; melhor = z; } }
     // carro no ar, hidrante, gaiola e caixa também são alvos, se não houver zumbi mais perto
-    for (const b of caixasPerto) { if (!b.vivo || b.voa && b.voa.t < b.voa.dur * .32) continue; const dd = b.d - s.d; if (dd < 1 || dd > Math.min(al, b.voa ? 34 : 20)) continue; const ang = Math.abs(b.x - s.x) / dd; if (ang > .24) continue; const q = dd * (1 + ang * 4) + (b.voa ? -8 : 2); if (q < nota) { nota = q; melhor = b; } }
-    const c = S.chefe; if (c && S.luta === 'luta' && !c.fora) { const dd = c.d - s.d; if (dd - c.T.raio < al && dd < nota + 2) melhor = { x: c.x + limita(s.x - c.x, -c.T.raio * .7, c.T.raio * .7), d: c.d }; }
+    for (const b of caixasPerto) { if (!b.vivo || b.voa && b.voa.t < b.voa.dur * .32 || !mesmoLado(s, b)) continue; const dd = b.d - s.d; if (dd < 1 || dd > Math.min(al, b.voa ? 34 : 20)) continue; const ang = Math.abs(b.x - s.x) / dd; if (ang > .24) continue; const q = dd * (1 + ang * 4) + (b.voa ? -8 : 2); if (q < nota) { nota = q; melhor = b; } }
+    const c = S.chefe; if (c && S.luta === 'luta' && !c.fora && mesmoLado(s, c)) { const dd = c.d - s.d; if (dd - c.T.raio < al && dd < nota + 2) melhor = { x: c.x + limita(s.x - c.x, -c.T.raio * .7, c.T.raio * .7), d: c.d }; }
     return melhor;
   }
   // a que distância está o alvo mais próximo (só atira se houver algo na frente)
   function verAlvos() {
     if (S.tempo < alvoAte) return; alvoAte = S.tempo + .12; const c = S.d + S.frente; distAlvo = 1e9;
-    miras.length = 0; for (const z of S.zumbis) if (z.d > c - 1.5 && z.d < c + 42) { miras.push(z); if (z.d - c < distAlvo) distAlvo = z.d - c; }
+    miras.length = 0; for (const z of S.zumbis) if (z.d > c - 1.5 && z.d < c + (DEF ? 60 : 42)) { miras.push(z); if (z.d - c < distAlvo) distAlvo = z.d - c; }
     if (miras.length > 48) { miras.sort((a, b) => a.d - b.d); miras.length = 48; }
     for (const p of S.portoes) if (p.usado < 0 && p.d > c && p.lados.some(l => l.tipo === 'tiro')) distAlvo = Math.min(distAlvo, p.d - c + 2);
     caixasPerto.length = 0; for (const b of S.barris) if (b.vivo && b.d > c && b.d < c + 36) { if (b.tipo !== 'barril' && b.tipo !== 'reforco') caixasPerto.push(b); if (Math.abs(b.x - S.x) < (b.tipo === 'barril' ? 2.5 : 4.5)) distAlvo = Math.min(distAlvo, b.d - c + 2); }
@@ -202,7 +215,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   function chegarChefe(meio) {
     const M = meio ? trecho.meio : trecho, id = meio ? M.id : M.chefe, T = CHEFES[id], rel = S.n / M.tropa, vida = Math.round(M.vida * Q.vida * (meio ? limita(.35 + .65 * rel, .5, 2.2) : limita(.5 + .5 * rel, .7, 2.6)));
     S.luta = 'chega'; S.tLuta = 0; if (!meio) { fila.length = 0; proximaHorda = daFrente.length; } proxTropa = 10;
-    S.chefe = { id, T, meio: !!meio, vida, max: vida, x: 0, d: S.d + (meio ? ARENA.meio : ARENA.comeca), alt: 16, estado: 'cai', t: 0, fase: 0, etapa: 0, dano: 0, passo: 0, vel: 0, golpe: null, ultimo: -1, gira: 0, placas: Array.from({ length: T.placas || 0 }, () => ({ vida: vida * .06, viva: true })), vai: 0, fora: false, frio: 0, lado: 1 };
+    S.chefe = { id, T, meio: !!meio, vida, max: vida, x: DEF ? 2.4 : 0, d: S.d + (meio ? ARENA.meio : DEF ? DEF.longe : ARENA.comeca), alt: 16, estado: 'cai', t: 0, fase: 0, etapa: 0, dano: 0, passo: 0, vel: 0, golpe: null, ultimo: -1, gira: 0, placas: Array.from({ length: T.placas || 0 }, () => ({ vida: vida * .06, viva: true })), vai: 0, fora: false, frio: 0, lado: 1 };
     aoEvento('chefeEntra', S.chefe);
   }
   function ferirChefe(dano, leve) {
@@ -220,7 +233,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   function morrerChefe() {
     S.luta = 'morre'; S.tLuta = 0; S.marcas.length = 0; S.buracos.length = 0; S.atordoado = 0; muda('morre', 9); S.mortos += S.chefe.meio ? 12 : 50; aoEvento('chefeMorre', S.chefe); for (const b of S.barris) if (b.tipo === 'carro' || b.tipo === 'hidrante') b.vivo = false;
     if (S.chefe.meio) { const l = lerPortao(trecho.meio.premio); aoEvento('premioMeio', { c: S.chefe, l, q: aplicar(l) }); }
-    for (const z of S.zumbis) if (!z.morto) { z.vida = 0; z.fogo = .3 + sorte() * 1.2; }
+    if (!DEF) for (const z of S.zumbis) if (!z.morto) { z.vida = 0; z.fogo = .3 + sorte() * 1.2; }
   }
   function muda(e, dur) { const c = S.chefe; c.estado = e; c.t = 0; c.dur = dur; }
   const marcar = m => { m.t = 0; S.marcas.push(m); aoEvento('marca', m); };
@@ -229,6 +242,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
   // cada golpe marca o chão agora e bate quando o aviso acaba
   function atacar() {
     const c = S.chefe, L = c.T.golpes[c.fase]; let k = Math.floor(sorte() * L.length); if (L.length > 1 && k === c.ultimo) k = (k + 1) % L.length; c.ultimo = k;
+    if (DEF && L[k] === 'garra' && c.d - S.d > 30) k = L.indexOf('entulho');
     const g = c.golpe = L[k], av = c.T.aviso * [1, .95, .88][c.fase] * pressa, px = limita(S.x, -3.6, 3.6), cen = S.d + S.frente, ate = c.d - c.T.raio;
     let total = av; c.alvo = { x: px, d: cen };
     if (g === 'porrete') faixa(px, 3.3, cen - 5, ate, av, { som: 'pancada' });
@@ -289,6 +303,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
       return;
     }
     if (S.luta === 'morre' && c.meio) { if (S.tLuta > 1.9) { S.luta = ''; S.chefe = null; S.meioFeito = true; aoEvento('meioFim'); } return; }
+    if (S.luta === 'morre' && DEF) { if (S.tLuta > 3) { S.luta = ''; S.chefe = null; S.chefeFeito = true; aoEvento('chefeFim'); } return; }
     if (S.luta === 'morre') { if (S.tLuta > 4.2 && S.estado === 'jogando') { S.estado = 'vitoria'; aoEvento('vitoria'); } return; }
     const ritmo = [1, 1.06, 1.14][c.fase];
     if (c.estado === 'anda') {
@@ -301,27 +316,67 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     else if (c.estado === 'bate') { if (c.vai) { const q = c.vai * Math.sin(Math.min(1, c.t / .55) * Math.PI / 2); c.d -= q - (c.foi || 0); c.foi = q; } if (c.t >= c.dur) { c.volta = c.vai ? c.vai * .72 : 0; c.vai = 0; c.foi = 0; muda('volta', .85); } }
     else if (c.estado === 'volta') { if (c.volta) { const v = Math.min(c.volta, dt * 6.5); c.volta -= v; c.d += v; } if (c.t >= c.dur && !c.volta) muda('anda', T.pausa / ritmo); else if (c.t >= c.dur) c.t = c.dur - .01; }
     else if (c.estado === 'tonto') { if (c.t >= c.dur) muda('anda', .5); }
-    c.d -= anda * dt; c.vel = anda; const p0 = Math.floor(c.passo * 2); c.passo += anda * dt * .3; if (Math.floor(c.passo * 2) !== p0) aoEvento('passoChefe', c); if (!c.fora && c.estado !== 'mergulha' && c.estado !== 'emerge') c.x = limita(c.x, -2.6, 2.6);
+    c.d -= anda * dt; c.vel = anda; const p0 = Math.floor(c.passo * 2); c.passo += anda * dt * .3; if (Math.floor(c.passo * 2) !== p0) aoEvento('passoChefe', c); if (!c.fora && c.estado !== 'mergulha' && c.estado !== 'emerge') c.x = DEF ? limita(c.x, DEF.muro + 2.4, 3.4) : limita(c.x, -2.6, 2.6);
     if (T.quente && S.estado === 'jogando') { proxHid -= dt; if (proxHid <= 0 && c.frio <= 0 && !S.barris.some(b => b.tipo === 'hidrante' && b.vivo)) { proxHid = 5; S.barris.filter(b => b.tipo === 'hidrante').forEach((b, i) => Object.assign(b, { vivo: true, vida: 180 + S.n * 12, max: 180 + S.n * 12, x: (i ? 1 : -1) * (2.6 + sorte() * 1.2), d: S.d + 9 + sorte() * 2, dano: 0 })); aoEvento('hidranteSurge', c); } }
     if (!c.meio) { proxTropa -= dt; if (proxTropa <= 0) { proxTropa = 12; chamar(((trecho.tropas || [])[c.fase] || []).map(([q, n]) => [q, Math.ceil(n * .6)])); } }
     if (c.estado !== 'bate' && c.estado !== 'volta' && c.d - T.raio < frenteMax + .25 && !c.fora && S.estado === 'jogando') { aoEvento('alcancou', c); if (c.meio) { const q = Math.ceil(S.n * .4); for (let k = 0; k < q && S.n > 0; k++) derrubar(S.soldados.length - 1); c.d += 8; muda('tonto', 1.6); S.marcas.length = 0; } else while (S.soldados.length > 0 && S.n > 0) { S.n = S.soldados.length; derrubar(S.soldados.length - 1); } }
+  }
+
+  // ---------- muralha: a horda vem pela esquerda, as caixas de bônus aparecem no meio dela ----------
+  function passoDefesa() {
+    if (S.estado !== 'jogando') return; const D = DEF, quer = Math.floor(D.horda * limita((S.tempo - 2) / D.dur, 0, 1));
+    while (S.hordaSaiu < quer) {
+      const k = ++S.hordaSaiu / D.horda, r = sorte(), tipo = r < .035 + k * .04 ? 'blindado' : r < .2 + k * .12 ? 'corredor' : r < .25 + k * .14 ? 'escudeiro' : 'comum';
+      fila.push([tipo, -PISTA + .2 + sorte() * (D.muro - .7 + PISTA - .2), S.d + 46 + sorte() * 10]);
+    }
+    for (const b of S.barris) if (b.bonus && !b.foi && S.tempo >= b.quando) {
+      b.foi = true; const l = b.da, vida = l.tipo === 'sinal' ? 240 : l.tipo === 'arma' ? 520 : l.tipo === 'soma' ? 220 + l.v * 22 : 380 + (l.v || 1) * 80;
+      Object.assign(b, { vivo: true, vida, max: vida, dano: 0, x: -PISTA + 1 + sorte() * (D.muro - 1.7 + PISTA - 1), d: S.d + 13 + sorte() * 6, nasceu: S.tempo }); aoEvento('bonus', b);
+    }
+    if (S.chefeFeito && S.hordaSaiu >= D.horda && !fila.length && S.zumbis.every(z => z.morto)) { S.estado = 'vitoria'; aoEvento('vitoria'); }
+  }
+  // ---------- helicóptero ----------
+  function passoHeli(dt) {
+    const h = S.heli; h.t += dt; const segue = (x, d, a, k) => { const vx = (x - h.x) * Math.min(1, dt * k), vd = (d - h.d) * Math.min(1, dt * k); h.x += vx; h.d += vd; h.alt += (a - h.alt) * Math.min(1, dt * k * .8); h.incl += (limita(vd / dt * .02, -.35, .35) - h.incl) * Math.min(1, dt * 3); h.vira += (limita(vx / dt * .05, -.4, .4) - h.vira) * Math.min(1, dt * 3); };
+    if (h.estado === 'fora') {
+      h.d = S.d - 80; if (S.estado !== 'jogando' || S.luta === 'morre') return; h.prox -= dt;
+      if (S.querBomba) { S.querBomba = false; h.estado = 'vem'; h.missao = 'bomba'; h.x = (DEF.muro - PISTA) / 2; h.d = S.d - 40; h.alt = 18; h.t = 0; aoEvento('heliVem', h); }
+      else if (h.prox <= 0 && HELI && h.caixas < HELI.da.length) { h.estado = 'vem'; h.missao = 'caixa'; h.x = (sorte() - .5) * 6; h.d = S.d - 40; h.alt = 18; h.t = 0; h.alvo = limita((sorte() - .5) * 6.4, -3.2, 3.2); aoEvento('heliVem', h); }
+      return;
+    }
+    if (h.estado === 'vem') {
+      const bomba = h.missao === 'bomba', td = S.d + (bomba ? 4 : DEF ? 2.5 : 17), tx = bomba ? h.x : h.alvo; segue(tx, td, bomba ? 11 : 8.5, 1.6);
+      if (Math.abs(td - h.d) < 1.6 && Math.abs(tx - h.x) < .6) { h.estado = bomba ? 'bombardeia' : 'paira'; h.t = 0; h.bombas = 0; }
+    } else if (h.estado === 'paira') {
+      segue(h.alvo, S.d + (DEF ? 2.5 : 17), 8.5, 3);
+      if (h.t > .55 && !h.soltou) { const b = S.barris.find(b => b.heli && !b.vivo && !b.usada); if (b) { b.usada = true; Object.assign(b, { vivo: true, vida: 90, max: 90, x: h.x, d: h.d, alt: h.alt - 1.2, dano: 0 }); aoEvento('heliSolta', b); } h.caixas++; h.soltou = true; }
+      if (h.t > 1.3) { h.estado = 'vai'; h.t = 0; h.soltou = false; }
+    } else if (h.estado === 'bombardeia') {
+      h.d += 15 * dt; h.alt += (11 - h.alt) * Math.min(1, dt * 2); h.incl += (.22 - h.incl) * Math.min(1, dt * 3);
+      const prox = S.d + 12 + h.bombas * 5.5; if (h.d >= prox && prox < S.d + 60) { h.bombas++; explodir(limita(h.x + (sorte() - .5) * 3, -PISTA, DEF.muro - .5), h.d + 1.5, 3.6, 260, 'heli'); }
+      if (h.d > S.d + 64) { h.estado = 'vai'; h.t = 0; }
+    } else if (h.estado === 'vai') {
+      h.d += (22 + h.t * 14) * dt; h.alt += dt * 5; h.incl += (.3 - h.incl) * Math.min(1, dt * 2);
+      if (h.d > S.d + 150) { h.estado = 'fora'; h.prox = HELI ? HELI.cada : 1e9; }
+    }
   }
 
   // ---------- passo ----------
   function passo(dt) {
     S.tempo += dt; const fim = trecho.comprimento;
     S.atordoado = Math.max(0, S.atordoado - dt); if (S.adrT > 0) S.adrT = Math.max(0, S.adrT - dt); else S.adr = Math.max(0, S.adr - dt * .012);
-    if (S.estado === 'jogando' && !S.luta) { const para = S.meioFeito ? fim : trecho.meio.d; S.ritmo = Math.min(S.ritmo + dt * 1.6, limita((para - S.d) / 4, .12, 1)); S.d += VELOCIDADE * S.ritmo * dt; if (S.d >= para) chegarChefe(!S.meioFeito); }
+    if (DEF) { S.ritmo = 0; if (S.estado === 'jogando' && !S.chefe && !S.chefeFeito && S.tempo > 1.2) chegarChefe(false); passoDefesa(); }
+    else if (S.estado === 'jogando' && !S.luta) { const para = S.meioFeito ? fim : trecho.meio.d; S.ritmo = Math.min(S.ritmo + dt * 1.6, limita((para - S.d) / 4, .12, 1)); S.d += VELOCIDADE * S.ritmo * dt; if (S.d >= para) chegarChefe(!S.meioFeito); }
     else S.ritmo = Math.max(0, S.ritmo - dt * 3);
     // meia largura do pelotão, para ninguém sair da pista
     let meia = 0; const nv = S.soldados.length; for (let i = 0; i < nv; i++) meia = Math.max(meia, Math.abs(VAGAS[i][0]));
     // muro, carro ou vão ao lado: a formação se espreme no espaço livre
     const centro0 = S.d + S.frente; let lo = -PISTA - .6, hi = PISTA + .6, trE = -9, trD = 9;
-    for (const o of S.blocos) if (o.d1 > centro0 - 3.2 && o.d0 < centro0 + 7) { if (S.x >= o.x1) { lo = Math.max(lo, o.x1); if (o.d0 < centro0 + .6 && o.d1 > centro0 - 1) trE = Math.max(trE, o.x1 + .35); } else if (S.x <= o.x0) { hi = Math.min(hi, o.x0); if (o.d0 < centro0 + .6 && o.d1 > centro0 - 1) trD = Math.min(trD, o.x0 - .35); } }
+    for (const o of S.blocos) if (o.tipo !== 'muralha' && o.d1 > centro0 - 3.2 && o.d0 < centro0 + 7) { if (S.x >= o.x1) { lo = Math.max(lo, o.x1); if (o.d0 < centro0 + .6 && o.d1 > centro0 - 1) trE = Math.max(trE, o.x1 + .35); } else if (S.x <= o.x0) { hi = Math.min(hi, o.x0); if (o.d0 < centro0 + .6 && o.d1 > centro0 - 1) trD = Math.min(trD, o.x0 - .35); } }
     for (const o of S.vaos) if (o.d1 > centro0 - 3.2 && o.d0 < centro0 + 7) { if (S.x >= o.x1) lo = Math.max(lo, o.x1); else if (S.x <= o.x0) hi = Math.min(hi, o.x0); }
     const solto = lo < -PISTA && hi > PISTA, querAp = solto ? 1 : limita((hi - lo - .5) / 2 / Math.max(.6, meia), .3, 1); S.aperto += (querAp - S.aperto) * Math.min(1, dt * 6);
     const lim = Math.max(.9, PISTA + .5 - meia * S.aperto);
-    S.alvoX = limita(limita(S.alvoX, -lim, lim), trE, Math.max(trE, trD)); S.alvoFrente = limita(S.alvoFrente, S.luta ? -5 : TRAS, S.luta ? 5 : FRENTE);
+    S.alvoX = limita(limita(S.alvoX, -lim, lim), trE, Math.max(trE, trD)); S.alvoFrente = DEF ? limita(S.alvoFrente, -3, 0) : limita(S.alvoFrente, S.luta ? -5 : TRAS, S.luta ? 5 : FRENTE);
     for (let i = S.gelos.length - 1; i >= 0; i--) { const g = S.gelos[i]; g.t += dt; if (g.t > g.dur || g.d1 < S.d - 24) S.gelos.splice(i, 1); }
     S.noGelo = S.gelos.some(g => S.x > g.x0 && S.x < g.x1 && centro0 > g.d0 && centro0 < g.d1);
     // chão que escorrega: o pelotão tem embalo e passa do ponto; na placa de gelo quase não freia
@@ -350,10 +405,11 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     moverZumbis(dt, frenteMax, centro);
     moverTiros(dt);
     if (S.chefe) passoChefe(dt, frenteMax);
+    if (S.heli) passoHeli(dt);
     if (S.estado === 'jogando') passoMarcas(dt);
     for (const p of S.portoes) { if (p.anda && p.usado < 0) p.ox = Math.sin(S.tempo * 1.35 + p.d) * p.anda; if (p.usado < 0 && centro >= p.d && S.estado === 'jogando') passar(p); }
     for (let i = S.blocos.length - 1; i >= 0; i--) { const o = S.blocos[i]; o.dano = Math.max(0, o.dano - dt * 5); if (o.tipo === 'escombro' && o.vida <= 0) { S.blocos.splice(i, 1); aoEvento('escombro', o); } else if (o.tipo === 'carro' && o.vida <= 0) { S.blocos.splice(i, 1); aoEvento('carroExplode', { x: o.x, d: o.d, alt: 0 }); explodir(o.x, o.d, 4, 150, 'carro'); } else if (o.d1 < S.d - 24) S.blocos.splice(i, 1); }
-    for (const b of S.barris) { b.dano = Math.max(0, b.dano - dt * 5); if (b.voa) passoCarro(b, dt); else if (b.alt) b.alt = Math.max(0, b.alt - dt * 11); if (b.vivo && b.vida <= 0) estourar(b); if (b.tipo === 'carro' || b.tipo === 'hidrante') continue; if (b.vivo) for (let i = S.soldados.length - 1; i >= 0; i--) { const s = S.soldados[i]; if (Math.abs(s.x - b.x) < b.raio + .2 && Math.abs(s.d - b.d) < b.raio + .2) { if (b.tipo === 'reforco') b.vida = 0; else if (b.tipo === 'barril') { derrubar(i); b.vida -= 60; } else b.vida -= 6; break; } } }
+    for (const b of S.barris) { b.dano = Math.max(0, b.dano - dt * 5); if (b.voa) passoCarro(b, dt); else if (b.alt) b.alt = Math.max(0, b.alt - dt * 11); if (b.vivo && b.vida <= 0) estourar(b); if (b.tipo === 'carro' || b.tipo === 'hidrante') continue; if (b.heli && b.vivo && b.d < S.d - 7) b.vivo = false; if (b.bonus && b.vivo && S.tempo - b.nasceu > 28) b.vivo = false; if (b.vivo && !(b.alt > 1.2)) for (let i = S.soldados.length - 1; i >= 0; i--) { const s = S.soldados[i]; if (Math.abs(s.x - b.x) < b.raio + .2 && Math.abs(s.d - b.d) < b.raio + .2) { if (b.tipo === 'reforco') b.vida = 0; else if (b.tipo === 'barril') { derrubar(i); b.vida -= 60; } else b.vida -= 6; break; } } }
     for (let i = S.caidos.length - 1; i >= 0; i--) { const c = S.caidos[i]; c.t += dt; if (c.vel) { c.d += c.vel * Math.max(0, .5 - c.t) * dt * (c.jeito ? -1 : 2); } if (c.t > 6 || c.d < S.d - 14) { S.caidos[i] = S.caidos[S.caidos.length - 1]; S.caidos.pop(); } }
   }
   function moverZumbis(dt, frenteMax, centro) {
@@ -400,6 +456,7 @@ export function criarSimulacao(trecho, { aoEvento = () => {}, sorte = Math.rando
     const c = S.luta === 'luta' && !S.chefe.fora ? S.chefe : null;
     for (let i = S.tiros.length - 1; i >= 0; i--) {
       const t = S.tiros[i], A = ARMAS[t.arma], d0 = t.d; t.d += t.vel * dt; t.x += t.vx * dt; t.resta -= t.vel * dt;
+      if (t.lado && t.d > S.muroD0 && (t.x < DEF.muro ? -1 : 1) !== t.lado) { aoEvento('faisca', { x: DEF.muro, d: t.d, arma: t.arma }); acertou(t, t.x, t.d); }
       // zumbis no caminho deste passo
       for (let q = d0; q <= t.d + .75 && !t.morto; q += 1.2) perto(t.x, Math.min(q, t.d), z => {
         if (z.morto || z === t.ultimo) return;

@@ -18,10 +18,10 @@ const depois = await D(`(()=>{const F=D.F,f=new D.THREE.Vector3(F.x+Math.sin(F.r
 if (!movel) await p.cmd('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowUp', code: 'ArrowUp', windowsVirtualKeyCode: 38 });
 ok('esquerda vira para a esquerda da tela', depois < antes - .05, antes.toFixed(2) + ' -> ' + depois.toFixed(2));
 await segura('freio', 1200); ok('freia e para (ou começa a ré devagar)', Math.abs(await D('D.F.vf')) < 2.5, (await D('D.F.vf')).toFixed(1));
-await segura('freio', 2500); ok('ré devagar depois de parar', (await D('D.F.vf')) < -1 && (await D('D.F.vf')) >= -5, (await D('D.F.vf')).toFixed(1));
+await segura('freio', 2500); ok('ré devagar depois de parar', (await D('D.F.vf')) < -1 && (await D('D.F.vf')) >= -6.5, (await D('D.F.vf')).toFixed(1));
 ok('carro no chão', Math.abs(await D('D.F.y-D.mundo.altura(D.F.x,D.F.z)')) < .5);
 // 40 s de direção aleatória em tempo simulado: nada de NaN nem sair do mapa
 const r = await D(`(()=>{const F=D.F,e={gas:1,freio:0,virar:0,mao:false};for(let i=0;i<2400;i++){e.virar=Math.sin(i*.013);e.mao=i%300<40;F.passo(1/60,e);}return [F.x,F.z,F.y,F.vf].every(Number.isFinite)&&Math.abs(F.x)<240&&Math.abs(F.z)<240})()`); ok('40 s dirigindo (com freio de mão) sem erro nem sair do mapa', r);
-const dr = await D(`(()=>{const F=D.F;F.colocar(D.mundo.largada());const e={gas:1,freio:0,virar:0,mao:false};for(let i=0;i<150;i++)F.passo(1/60,e);e.mao=true;e.virar=1;let m=0,b=0;for(let i=0;i<70;i++){F.passo(1/60,e);m=Math.max(m,Math.abs(F.vl));b=Math.max(b,Math.abs(Math.atan2(F.vl,Math.max(.1,Math.abs(F.vf))))*57.3);}return [m,b]})()`); ok('freio de mão solta a traseira (derrapa)', dr[0] > 2.5, dr[0].toFixed(1) + ' m/s de lado'); ok('mas não roda: ângulo de derrapagem até 55°', dr[1] < 55, dr[1].toFixed(0) + '°');
+const dr = await D(`(()=>{const F=D.F;F.colocar(D.mundo.largada());const e={gas:1,freio:0,virar:0,mao:false};for(let i=0;i<150;i++)F.passo(1/60,e);e.mao=true;e.virar=1;let m=0,b=0;for(let i=0;i<70;i++){F.passo(1/60,e);m=Math.max(m,Math.abs(F.vl));b=Math.max(b,Math.abs(Math.atan2(F.vl,Math.max(.1,Math.abs(F.vf))))*57.3);}return [m,b]})()`); ok('freio de mão solta a traseira (derrapa)', dr[0] > 2.5, dr[0].toFixed(1) + ' m/s de lado'); ok('mas não roda: ângulo de derrapagem até 63°', dr[1] < 63.5, dr[1].toFixed(0) + '°');
 const s = await D(`(()=>{const M=D.Som;return M.estado})()`); ok('som segue tocando', s === 'running');
 console.log('erros:', [...new Set(p.erros)].join('\n') || 'nenhum'); p.fim();

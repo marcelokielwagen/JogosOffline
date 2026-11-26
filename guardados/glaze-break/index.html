@@ -90,6 +90,31 @@ html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; ba
 .texto { font:italic 400 18px/1.55 var(--serifa) !important; color:var(--osso) !important; text-align:left; margin-top:12px !important; }
 #aCod { width:100%; min-height:48px; margin-top:12px; border-radius:13px; border:1px solid var(--linha); background:#1c1612; color:var(--osso); padding:0 12px; font:15px var(--corpo); user-select:text; -webkit-user-select:text; }
 #aMsg { min-height:20px; font-size:14px; }
+/* Fase 3: moedas, vidas, reforços, loja, missões, diária */
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:10px; } .g3 .bt { margin:0; min-height:50px; font-size:16px; padding:0 4px; }
+.solta { z-index:8; background:rgba(10,7,5,.8); }
+.topo { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
+.chip { min-height:40px; padding:0 12px; border-radius:21px; background:var(--painel); border:1px solid var(--linha); display:flex; align-items:center; gap:6px; color:var(--osso); font:600 16px var(--corpo); }
+button.chip { cursor:pointer; } .chip b { font-weight:600; } .chip small { font:500 12px var(--corpo); color:var(--osso2); } .chip svg { width:20px; height:20px; }
+.moe,.cor,.bg { width:1.15em; height:1.15em; vertical-align:-.2em; stroke-width:1.5; flex:none; } .moe { fill:#e3b457; stroke:#8a5d18; } .moe path { fill:#6d4512; stroke:none; } .cor { fill:#c4683f; stroke:#5e2a14; } .bg { fill:#efe3c8; stroke:#7d6a4c; } .bt .moe { margin:0 4px; }
+.selo { position:absolute; right:-5px; top:-7px; min-width:22px; height:22px; padding:0 5px; border-radius:12px; background:var(--ouro); color:#2a1a08; font:700 13px/22px var(--corpo); text-decoration:none; }
+#ferr { display:flex; gap:8px; justify-content:center; margin-top:6px; } .fe { flex:1 1 0; min-width:0; max-width:150px; height:42px; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:13px; border:1px solid var(--linha); background:var(--painel); color:var(--osso); font:600 14.5px var(--corpo); cursor:pointer; }
+.fe:active { transform:scale(.96); } .fe b { min-width:20px; height:20px; padding:0 5px; border-radius:10px; background:#15100c; color:var(--ouro); font:700 13px/20px var(--corpo); } .fe span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .fe.on { border-color:var(--ouro); }
+.fe svg,.bst>svg,.figp svg,.pm svg { fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; } .fe svg { width:21px; height:21px; flex:none; } .pm .moe,.figp .moe { fill:#e3b457; stroke:#8a5d18; } .pm .cor,.figp .cor { fill:#c4683f; stroke:#5e2a14; } .pm .bg,.figp .bg { fill:#efe3c8; stroke:#7d6a4c; }
+.bsts { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; } .bst { min-width:0; padding:12px 4px; border-radius:16px; border:1px solid var(--linha); background:var(--painel2); color:var(--osso); font:500 14px/1.2 var(--corpo); display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+.bst>svg { width:32px; height:32px; color:var(--ouro); } .bst b { font:700 14px var(--corpo); color:var(--ouro); } .bst.on { border-color:var(--ouro); box-shadow:0 0 0 2px var(--ouro) inset; background:#3b2e22; } .bst:disabled { opacity:.4; cursor:default; }
+.dif { color:#f09a6c !important; font-weight:600; } .caixa p.nota,.nota { font-size:14.5px; color:var(--osso2); text-align:center; margin:8px 4px 0; line-height:1.4; } .nota:empty { display:none; }
+.figp { display:inline-grid; place-items:center; width:46px; height:46px; border-radius:14px; background:#1a1410; border:1px solid var(--linha); color:var(--ouro); flex:none; } .figp svg { width:26px; height:26px; } .figs { display:flex; justify-content:center; gap:8px; margin-bottom:10px; }
+#bDiaria { display:flex; align-items:center; justify-content:center; gap:12px; min-height:48px; font-size:16px; } #bDiaria[hidden] { display:none; } .pm { display:inline-flex; align-items:center; gap:4px; } .pm svg { width:20px; height:20px; } .pm b { font:700 15px var(--corpo); white-space:nowrap; }
+.mc em { font-style:normal; font-weight:700; color:var(--ouro); margin-left:4px; } .mc .figp { width:42px; height:42px; } .bt.mini { width:auto; min-height:42px; margin:0; padding:0 14px; font-size:15.5px; flex:none; white-space:nowrap; } .bt.mini.pri { font-size:16px; min-height:44px; } .mc.pronto { border-bottom-color:rgba(220,174,90,.55); }
+.sec { margin:22px 2px 2px; font:600 20px var(--serifa); display:flex; justify-content:space-between; align-items:baseline; } .sec small { font:400 13.5px var(--corpo); color:var(--osso2); }
+.cal { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; } .dd { border:1px solid var(--linha); border-radius:13px; background:var(--painel); padding:7px 3px 9px; text-align:center; min-height:72px; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.dd small { color:var(--osso2); font-size:12.5px; } .dd.ok { opacity:.45; } .dd.vez { border-color:var(--ouro); box-shadow:0 0 0 2px var(--ouro) inset; } .dd .pm { gap:3px; } .dd .pm svg { width:18px; height:18px; } .dd .pm b { font-size:13.5px; }
+#vMoedas { display:flex; align-items:center; justify-content:center; gap:7px; font:700 22px var(--corpo); color:var(--ouro); margin-top:10px; } #vMoedas[hidden] { display:none; } #bDobro { min-height:46px; font-size:16px; }
+#anuncio { z-index:9; background:#120d0a; } #anuncio .capa { margin:auto; } #anuncio .bt { max-width:380px; margin:24px auto 0; } #nTempo { font:700 84px/1.1 var(--serifa); color:var(--ouro); }
+#loja,#missoes { background:rgba(18,13,10,.97); } .tela .caixa .topo { margin-bottom:12px; }
+@media (max-width:360px) { .fe { gap:3px; padding:0 4px; font-size:13px; } .fe svg { width:18px; height:18px; } .dd .pm b { font-size:12px; } .cal { gap:6px; } .bsts { gap:7px; } .bst { font-size:13px; } }
+@media (orientation:landscape) and (max-height:640px) { #ferr { flex-direction:column; align-items:stretch; margin-top:10px; gap:6px; } .fe { max-width:none; flex:none; height:40px; justify-content:flex-start; } .fe span { flex:1; text-align:left; } #preparo .caixa,#continuar .caixa,#semvida .caixa,#oferta .caixa,#diaria .caixa { max-width:560px; padding:12px 18px; } .bsts { margin-top:8px; } .bst { padding:8px 4px; } }
 @media (prefers-reduced-motion:reduce) { .tela.on,.estrelas svg.on,#aviso { animation:none; } }
 @media (orientation:landscape) and (max-height:640px) { .capa { max-width:560px; } .capa h2 { font-size:46px; } .capa p { margin:6px 0 4px; font-size:16px; } .capa .bt { min-height:46px; margin-top:8px; } .capa .bt.pri { min-height:50px; } .capa a { margin-top:4px; padding:6px; } .bt small { display:inline; margin-left:6px; } }
 </style>
@@ -105,20 +130,29 @@ html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; ba
     </div>
     <div class="placar"><div id="bolas" aria-label="Bolas"></div><div class="meio"><div class="prog" role="progressbar" aria-label="Azulejos quebrados"><i id="barra"></i></div></div><div id="pontos">0<small>pontos</small></div></div>
     <div class="linha3"><span id="esmalte"><i></i><span>Sem esmalte</span></span><span id="dica"></span></div>
+    <div id="ferr" hidden></div>
   </div>
   <div id="area"><canvas id="cv"></canvas></div>
 </div>
 
-<section class="tela" id="abertura"><div class="capa"><h2>Glaze Break</h2><p>A bola pega a cor do esmalte<br>e atravessa os azulejos da mesma cor.</p><button class="bt pri" id="bJogar">Jogar</button><div class="linha2"><button class="bt" id="bMapa">Fases</button><button class="bt" id="bPaineis">Painéis</button></div><div class="linha2"><button class="bt" id="bCaderno">Caderno</button><button class="bt" id="bMarcos">Marcos</button></div><div class="linha2"><button class="bt" id="bDia">Do dia</button><button class="bt" id="bAjustes">Ajustes</button></div><a href="../../index.html">Todos os jogos</a></div></section>
+<section class="tela" id="abertura"><div class="capa"><div class="topo"><button class="chip" data-vidas hidden></button><button class="chip" data-moedas></button></div><h2>Glaze Break</h2><p>A bola pega a cor do esmalte<br>e atravessa os azulejos da mesma cor.</p><button class="bt pri" id="bJogar">Jogar</button><button class="bt" id="bDiaria" hidden></button><div class="g3"><button class="bt" id="bMapa">Fases</button><button class="bt" id="bPaineis">Painéis</button><button class="bt" id="bCaderno">Caderno</button><button class="bt" id="bMarcos">Marcos</button><button class="bt" id="bDia">Do dia</button><button class="bt" id="bMissoes">Missões<u class="selo" hidden></u></button><button class="bt" id="bLoja">Loja</button><button class="bt" id="bAjustes">Ajustes</button></div><a href="../../index.html">Todos os jogos</a></div></section>
 <section class="tela" id="mapa"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Fases<small id="mResumo"></small></h1><span style="width:44px"></span></div><p class="legenda"><i></i>fase difícil<b class="pr"></b>peça rara guardada</p><div id="mLista"></div></div></section>
 <section class="tela" id="paineis"><div class="mapa centro"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Painéis<small id="qResumo"></small></h1><span style="width:44px"></span></div><div class="quadro"><button class="ic" id="qAnt" aria-label="Painel anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><canvas id="qCv" role="img"></canvas><button class="ic" id="qProx" aria-label="Próximo painel"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><h3 id="qNome"></h3><p id="qTxt"></p><button class="bt pri" id="qObra">Restaurar</button></div></section>
 <section class="tela" id="caderno"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Caderno<small id="cResumo"></small></h1><span style="width:44px"></span></div><p class="legenda">Cada fase esconde uma peça rara: quebre o azulejo dourado e pegue a peça com a barra.</p><div id="cLista"></div><div class="info" id="cInfo">Toque numa peça para ver o nome.</div></div></section>
 <section class="tela" id="carta"><div class="caixa"><h2 id="kTit"></h2><p class="texto" id="kTxt"></p><button class="bt" data-volta>Voltar</button></div></section>
 <section class="tela" id="marcos"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Marcos<small id="mkResumo"></small></h1><span style="width:44px"></span></div><p class="legenda">Cada degrau dá bolas guardadas. Quando as bolas acabam numa fase, dá para usar uma e continuar.</p><div id="mkLista"></div></div></section>
-<section class="tela" id="continuar"><div class="caixa"><h2>As bolas acabaram</h2><p id="uTxt"></p><button class="bt pri" id="uSim">Usar bola guardada</button><button class="bt" id="uNao">Não, terminar</button></div></section>
-<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><a class="bt" id="pSair" href="../../index.html" style="display:grid;place-items:center;text-decoration:none">Todos os jogos</a></div></section>
-<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Fase concluída!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><div class="mais" id="vMais"></div><button class="bt" id="vObra" hidden>Restaurar o painel</button><button class="bt pri" id="vProx">Próxima</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Fases</button></div></div></section>
-<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">As bolas acabaram</h2><p id="dTxt"></p><div class="mais" id="dMais"></div><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt" id="dFases">Fases</button></div></section>
+<section class="tela" id="continuar"><div class="caixa"><div class="topo"><span class="chip" data-vidas hidden></span><span class="chip" data-moedas></span></div><h2>As bolas acabaram</h2><p id="uTxt"></p><button class="bt pri" id="uSim">Usar bola guardada</button><button class="bt" id="uMoedas"></button><button class="bt" id="uVideo">Ver vídeo: +1 bola</button><button class="bt" id="uNao">Não, terminar</button><p class="nota" id="uVida"></p></div></section>
+<section class="tela" id="preparo"><div class="caixa"><div class="topo"><span class="chip" data-vidas hidden></span><span class="chip" data-moedas></span></div><h2 id="rTit"></h2><p class="dif" id="rDif"></p><p id="rTxt">Leve um reforço, se quiser.</p><div class="bsts" id="rItens"></div><p class="nota" id="rInfo"></p><p class="nota" id="rAjuda"></p><button class="bt pri" id="brJogar">Jogar</button><button class="bt" id="brFecha">Início</button></div></section>
+<section class="tela" id="semvida"><div class="caixa"><div class="topo"><span class="chip" data-vidas hidden></span><span class="chip" data-moedas></span></div><h2>Sem vidas</h2><p id="wTxt"></p><button class="bt pri" id="bwMoedas"></button><button class="bt" id="bwVideo">Ver vídeo: +1 vida</button><button class="bt" id="bwDia">Jogar o painel do dia</button><button class="bt" id="bwFecha">Início</button></div></section>
+<section class="tela" id="loja"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Loja</h1><span style="width:44px"></span></div><div class="topo" style="margin-top:10px"><span class="chip" data-vidas></span><span class="chip" data-moedas></span></div><div id="lItens"></div><button class="bt" id="blVidas"></button><button class="bt" id="blVideo"></button><p class="nota" id="lVideos"></p><h3 class="sec">Pacotes</h3><p class="nota" id="lNota"></p><div id="lProd"></div><button class="bt" id="blRest" hidden>Restaurar compras</button><p class="nota">Nada é sorteado: você sempre vê o que vai receber.</p></div></section>
+<section class="tela" id="missoes"><div class="mapa"><div class="barra"><button class="ic" data-volta aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Missões</h1><span style="width:44px"></span></div><h3 class="sec">Recompensa diária<small>faltar não zera</small></h3><div class="cal" id="iCal"></div><button class="bt pri" id="iCalB" hidden>Receber a de hoje</button><h3 class="sec">Hoje</h3><div id="iDia"></div><h3 class="sec">Evento da semana<small id="iSemT"></small></h3><div id="iSem"></div></div></section>
+<section class="tela solta" id="diaria"><div class="caixa"><h2>Recompensa de hoje</h2><p id="gTxt"></p><div class="cal" id="gCal"></div><button class="bt pri" id="bgPega">Receber</button><button class="bt" id="bgVideo">Ver vídeo e receber em dobro</button><button class="bt" data-fecha>Depois</button></div></section>
+<section class="tela solta" id="oferta"><div class="caixa"><div class="topo"><span class="chip" data-vidas hidden></span><span class="chip" data-moedas></span></div><div class="figs"><span class="figp" id="fFig"></span></div><h2 id="fTit"></h2><p id="fTxt"></p><button class="bt pri" id="bOferta"></button><button class="bt" data-fecha>Agora não</button></div></section>
+<section class="tela solta" id="aviso2"><div class="caixa"><div class="figs" id="xFig"></div><h2 id="xTit"></h2><p id="xTxt"></p><button class="bt pri" data-fecha>Certo</button></div></section>
+<section class="tela solta" id="anuncio"><div class="capa"><p>Vídeo de teste</p><div id="nTempo">5</div><p class="nota">Aqui no site não há anúncio de verdade: é só uma contagem.</p><button class="bt" id="nFecha"></button></div></section>
+<section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><p class="nota" id="zVida"></p><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><a class="bt" id="pSair" href="../../index.html" style="display:grid;place-items:center;text-decoration:none">Todos os jogos</a></div></section>
+<section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Fase concluída!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><p id="vMoedas" hidden></p><div class="mais" id="vMais"></div><button class="bt" id="bDobro" hidden></button><button class="bt" id="vObra" hidden>Restaurar o painel</button><button class="bt pri" id="vProx">Próxima</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Fases</button></div></div></section>
+<section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">As bolas acabaram</h2><p id="dTxt"></p><div class="mais" id="dMais"></div><p class="nota" id="dAjuda"></p><p class="nota" id="dVida"></p><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt" id="dPacote" hidden></button><button class="bt" id="dFases">Fases</button></div></section>
 <section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" id="aCopia">Copiar código do progresso</button><input id="aCod" placeholder="Cole aqui o código de outro aparelho" autocomplete="off" spellcheck="false" aria-label="Código do progresso"><button class="bt" id="aUsa">Usar código</button><p id="aMsg"></p><button class="bt" data-volta>Voltar</button></div></section>
 <div id="carga">Acendendo o forno…</div>
 
@@ -127,7 +161,7 @@ html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; ba
 // ============================================================ NÚCLEO: campo, fases, física e regras. Sem tela: dá para testar no Node.
 // O campo tem medidas fixas (120 x 180 unidades). A tela só amplia; por isso girar o celular não muda nada no jogo.
 const Nucleo = (() => {
-  const W = 120, H = 180, COLS = 10, LIN = 12, CW = 11.2, CH = 6, X0 = 4, Y0 = 16, PY = 166, PH = 4.2, R = 2, TOTAL = 50;
+  const W = 120, H = 180, COLS = 10, LIN = 12, CW = 11.2, CH = 6, X0 = 4, Y0 = 16, PY = 166, PH = 4.2, R = 2, TOTAL = 50, REDE = 175;
   const LUGARES = ['Ateliê', 'Pátio', 'Fonte', 'Estação', 'Forno'];
   const CORES = ['Terracota', 'Ocre', 'Sálvia', 'Vinho'];                 // esmaltes; -1 = bola sem esmalte (marfim)
   const ITENS = { largo: 'Barra larga', tripla: 'Três bolas', lenta: 'Bola lenta', pincel: 'Pincel' };
@@ -208,6 +242,7 @@ const Nucleo = (() => {
       this.cel = F.cel.map((c, i) => c ? { ...c, rara: opc.rara === false ? 0 : c.rara || 0, i, c: i % COLS, r: (i / COLS) | 0, x: X0 + (i % COLS) * CW, y: Y0 + ((i / COLS) | 0) * CH, vivo: true, max: c.hp, bate: 0 } : null);
       this.total = F.total; this.restam = F.total; this.vidas = 3 + (opc.vidas | 0); this.perdidas = 0; this.pontos = 0; this.tempo = 0; this.fim = null;
       this.quebrados = 0; this.maiorVeio = 0; this.veios = 0; this.bonus = 0; this.lancou = false; this.jarros = 0; this.pegos = 0; this.rara = 0;   // rara: 1 pegou, -1 perdeu
+      this.rede = 0; this.porCor = [0, 0, 0, 0];   // Fase 3: rede de segurança (segundos) e azulejos quebrados de cada esmalte (evento da semana)
       this.rq = { x: W / 2, alvo: W / 2, w: F.raquete * this.mult, larg: opc.largo || 0, sq: 0 }; this.lenta = opc.lenta || 0;
       this.bolas = []; this.itens = []; this.ev = []; this.fila = []; this.mudou = true; this.novaBola();   // fila: eventos de fora do passo (lançar)
     }
@@ -226,9 +261,9 @@ const Nucleo = (() => {
     perdeItens() { if (this.itens.some(it => it.tipo === 'rara' && !it.pego)) { this.rara = -1; this.fila.push({ e: 'rara:perdida' }); } this.itens = []; }
     passo(dt) {
       const ev = this.ev = this.fila; this.fila = []; if (this.fim) return ev; const rq = this.rq;
-      if (rq.larg > 0) rq.larg -= dt; if (this.lenta > 0) this.lenta -= dt;
+      // os efeitos só contam o tempo com bola em jogo (o reforço escolhido antes da fase não se gasta enquanto a bola está presa)
+      if (this.bolas.some(b => !b.presa)) { this.tempo += dt; if (rq.larg > 0) rq.larg -= dt; if (this.lenta > 0) this.lenta -= dt; if (this.rede > 0) this.rede -= dt; }
       rq.w += (this.largura - rq.w) * Math.min(1, dt * 8); rq.alvo = clamp(rq.alvo, rq.w / 2, W - rq.w / 2); rq.x = rq.alvo; rq.sq = Math.max(0, rq.sq - dt * 5);
-      if (this.bolas.some(b => !b.presa)) this.tempo += dt;
       for (const b of this.bolas) {
         if (b.presa) { b.x = rq.x; b.y = PY - PH / 2 - R; continue; }
         const vel = b.v * (this.lenta > 0 ? .72 : 1), k = Math.max(1, Math.ceil(vel * dt / .7)), h = vel * dt / k; b.ocioso += dt; this.puxa(b, dt);
@@ -240,7 +275,7 @@ const Nucleo = (() => {
       const antes = this.bolas.length; this.bolas = this.bolas.filter(b => !b.fora);
       if (antes && !this.bolas.length) {
         this.vidas--; this.perdidas++; ev.push({ e: 'perdeu', vidas: this.vidas });
-        if (this.vidas <= 0) { this.fim = 'derrota'; ev.push({ e: 'derrota' }); } else { this.novaBola(); this.perdeItens(); rq.larg = 0; this.lenta = 0; }
+        if (this.vidas <= 0) { this.fim = 'derrota'; ev.push({ e: 'derrota' }); } else { this.novaBola(); this.perdeItens(); rq.larg = 0; this.lenta = 0; this.rede = 0; }
       }
       if (!this.fim && this.restam <= 0) { this.fim = 'vitoria'; this.bonus = this.vidas * 300 + Math.max(0, Math.round(this.F.par - this.tempo)) * 4; this.pontos += this.bonus; ev.push({ e: 'vitoria', bonus: this.bonus }); }
       return ev;
@@ -275,6 +310,8 @@ const Nucleo = (() => {
         const off = clamp((x - rq.x) / (rq.w / 2 + R * .5), -1, 1), a = off * 1.08; b.dx = Math.sin(a); b.dy = -Math.cos(a); y = topo - R;
         b.v = Math.min(this.F.vel * 1.22, b.v + this.F.vel * .012); b.veio = 0; rq.sq = 1; ev.push({ e: 'raquete', x, off, cor: b.cor });
       }
+      // Fase 3, REDE: enquanto está estendida, a bola que passou da barra rebate e volta para cima
+      if (this.rede > 0 && b.dy > 0 && y + R >= REDE) { y = REDE - R; b.dy = -Math.abs(b.dy); this.angulo(b); ev.push({ e: 'rede', x }); }
       if (y - R > H) { b.fora = true; ev.push({ e: 'caiu', x }); }
       b.x = x; b.y = y;
     }
@@ -301,6 +338,7 @@ const Nucleo = (() => {
     quebra(t, b, passou) {
       t.vivo = false; this.restam--; this.quebrados++; this.mudou = true; b.ocioso = 0; const ev = this.ev, cx = t.x + CW / 2, cy = t.y + CH / 2;
       let pts = 10; if (passou) { b.veio++; pts += 10 * Math.min(b.veio, 8); if (b.veio > this.maiorVeio) this.maiorVeio = b.veio; if (b.veio === 2) this.veios++; }
+      if ((t.k === 'a' || t.k === 'j') && t.cor >= 0) this.porCor[t.cor]++;
       ev.push({ e: 'quebrou', x: cx, y: cy, k: t.k, cor: t.cor, passou, veio: passou ? b.veio : 0, dx: b.dx, dy: b.dy });
       if ((t.k === 'a' || t.k === 'j') && b.cor !== t.cor) { b.cor = t.cor; ev.push({ e: 'cor', cor: t.cor, x: b.x, y: b.y }); }
       if (t.k === 'j') {
@@ -323,17 +361,170 @@ const Nucleo = (() => {
       if (it.tipo === 'largo') rq.larg = 14;
       else if (it.tipo === 'lenta') this.lenta = 10;
       else if (it.tipo === 'tripla') { const base = this.bolas.find(b => !b.presa) || this.bolas[0]; for (const s of [-1, 1]) { const a = s * .45; this.bolas.push({ id: ++this.ids, x: rq.x, y: PY - PH / 2 - R, dx: Math.sin(a), dy: -Math.cos(a), v: this.F.vel, presa: false, cor: base ? base.cor : -1, veio: 0, ocioso: 0 }); } this.lancou = true; }
-      else if (it.tipo === 'pincel') {
-        // pincel: a bola pega a cor que mais tem no painel
-        const q = [0, 0, 0, 0]; for (const t of this.cel) if (t && t.vivo && (t.k === 'a' || t.k === 'j')) q[t.cor]++;
-        const cor = q.indexOf(Math.max(...q)); if (q[cor] > 0) for (const b of this.bolas) b.cor = cor; this.ev.push({ e: 'cor', cor, x: rq.x, y: PY - 6 });
-      }
+      else if (it.tipo === 'pincel') this.pintar(this.ev);
       this.ev.push({ e: 'item', tipo: it.tipo, x: it.x, y: PY - 6 });
     }
+    // pincel: a bola pega a cor que mais tem no painel (falso se não sobrou azulejo esmaltado)
+    pintar(ev) {
+      const q = [0, 0, 0, 0]; for (const t of this.cel) if (t && t.vivo && (t.k === 'a' || t.k === 'j')) q[t.cor]++;
+      const cor = q.indexOf(Math.max(...q)); if (!(q[cor] > 0)) return false; for (const b of this.bolas) b.cor = cor; ev.push({ e: 'cor', cor, x: this.rq.x, y: PY - 6 }); return true;
+    }
+    // Fase 3, FERRAMENTAS (usadas durante a fase, fora do passo): pincel, rede e três bolas. Falso quando não faz efeito (aí não se gasta)
+    ferramenta(id, seg = 15) {
+      if (this.fim) return false; const f = this.fila, rq = this.rq;
+      if (id === 'pincel') { if (!this.pintar(f)) return false; }
+      else if (id === 'rede') { if (this.rede > 0) return false; this.rede = seg; }
+      else if (id === 'tripla') {
+        if (this.bolas.length >= 5) return false; const base = this.bolas.find(b => !b.presa) || this.bolas[0];
+        for (const s of [-1, 1]) { const a = s * .45; this.bolas.push({ id: ++this.ids, x: rq.x, y: PY - PH / 2 - R, dx: Math.sin(a), dy: -Math.cos(a), v: this.F.vel, presa: false, cor: base ? base.cor : -1, veio: 0, ocioso: 0 }); }
+        this.lancou = true;
+      } else return false;
+      f.push({ e: 'ferramenta', id, x: rq.x, y: PY - 6 }); return true;
+    }
   }
-  return { W, H, COLS, LIN, CW, CH, X0, Y0, PY, PH, R, TOTAL, LUGARES, CORES, ITENS, dif, nivel, prever, rng, Partida };
+  return { W, H, COLS, LIN, CW, CH, X0, Y0, PY, PH, R, TOTAL, REDE, LUGARES, CORES, ITENS, dif, nivel, prever, rng, Partida };
 })();
 if (typeof module !== 'undefined') module.exports = Nucleo;
+</script>
+
+<script id="eco">
+'use strict';
+// ============================================================ ECONOMIA (Fase 3): moedas, vidas, reforços, bolas guardadas, diária, missões, evento da semana, limites de anúncio e compras.
+// Sem tela e sem relógio próprio (a hora sempre vem de fora): roda sozinha no Node (ferramentas/glaze-break/eco.mjs). Todos os números do balanceamento ficam aqui em cima.
+const Eco = (() => {
+  const VIDAS = 5, MIN_VIDA = 15 * 60000, FASE_SEM_VIDA = 10, PRECO_VIDAS = 150;       // até a fase 10 e no painel do dia perder não gasta vida
+  const CONTINUAR = [100, 160, 240], RESTA = .35, MAX_CONT = 3, MAX_GUARDADAS = 2;      // moedas e vídeo só quando falta até 35% do painel; no máximo 3 voltas por partida
+  const LIMITE_VIDEOS = 8, VIDEO_MOEDAS = 15, TOPO = 999999, REDE = 15, LARGO = 25, LENTA = 20, AJUDA = [2, 4, 6], AJUDA_BARRA = .05;
+  // 'durante' = ferramentas da fase; 'antes' = escolhidos no preparo. A bola guardada mora em d.bolas (os marcos e o painel do dia também dão bolas)
+  const ITENS = [
+    { id: 'pincel', nome: 'Pincel', preco: 60, fase: 6, quando: 'durante', txt: 'A bola pega o esmalte que mais tem no painel.' },
+    { id: 'rede', nome: 'Rede', preco: 80, fase: 9, quando: 'durante', txt: `Por ${REDE} segundos, a bola que passa da barra rebate e volta.` },
+    { id: 'tripla', nome: 'Três bolas', preco: 100, fase: 12, quando: 'durante', txt: 'Solta mais duas bolas da barra.' },
+    { id: 'largo', nome: 'Barra larga', preco: 60, fase: 8, quando: 'antes', txt: `A barra começa larga por ${LARGO} segundos de jogo.` },
+    { id: 'lenta', nome: 'Bola lenta', preco: 70, fase: 14, quando: 'antes', txt: `A bola começa mais lenta por ${LENTA} segundos de jogo.` },
+    { id: 'bola', nome: 'Bola guardada', preco: 90, fase: 5, quando: 'antes', txt: 'Leve para começar com 4 bolas, ou use quando as bolas acabam.' },
+  ];
+  const item = id => ITENS.find(i => i.id === id);
+  // prêmios: moedas, itens e vidasLivres (minutos sem gastar vida)
+  const DIARIA = [{ moedas: 20 }, { pincel: 1 }, { moedas: 30 }, { largo: 1, rede: 1 }, { moedas: 40 }, { vidasLivres: 30 }, { moedas: 80, bola: 1 }];
+  const MISSOES = [
+    ['quebrados', 'Quebre 150 azulejos', 150], ['fases', 'Vença 3 fases', 3], ['tres', 'Vença 2 fases sem perder bola', 2], ['veios', 'Faça 8 veios', 8], ['veio6', 'Faça um veio de 6 azulejos', 1],
+    ['jarros', 'Quebre 4 jarros de esmalte', 4, 3], ['itens', 'Pegue 5 itens com a barra', 5], ['raras', 'Pegue 1 peça rara', 1], ['pontos', 'Some 8.000 pontos', 8000], ['dia', 'Vença o painel do dia', 1, 6],
+  ].map(([tipo, txt, alvo, fase = 1]) => ({ tipo, txt, alvo, fase })), PREMIO_MISSAO = { moedas: 15 }, PREMIO_TRES = { moedas: 25, pincel: 1 };
+  // evento da semana: quebrar azulejos de um esmalte (os 4 se revezam, muda na segunda-feira)
+  const EVENTOS = ['Terracota', 'Ocre', 'Sálvia', 'Vinho'].map((nome, cor) => ({ nome: 'Semana do ' + (cor === 2 ? 'sálvia' : nome.toLowerCase()), cor, alvos: [60, 180, 400] }));
+  const PREMIO_SEMANA = [{ moedas: 25 }, { moedas: 40, rede: 1 }, { moedas: 60, bola: 1 }];
+  const PRODUTOS = [                                  // o preço de verdade vem da loja do aparelho
+    { id: 'inicial', nome: 'Pacote da oficina', txt: '600 moedas, 3 de cada ferramenta, 5 bolas guardadas e 24 horas sem gastar vida', premio: { moedas: 600, pincel: 3, rede: 3, tripla: 3, bola: 5, vidasLivres: 1440 }, unico: true },
+    { id: 'sem_anuncios', nome: 'Sem anúncios', txt: 'Tira os anúncios entre as fases para sempre', premio: {}, unico: true },
+    { id: 'moedas_500', nome: '500 moedas', txt: '', premio: { moedas: 500 } }, { id: 'moedas_1500', nome: '1.500 moedas', txt: '', premio: { moedas: 1500 } }, { id: 'moedas_4000', nome: '4.000 moedas', txt: '', premio: { moedas: 4000 } },
+  ];
+  const MARCO = [5, 10, 20], PAINEL = 40, CARTA = 15, RARA = 3, DIA = 10;        // moedas por degrau de marco, painel pronto, carta, peça rara nova e painel do dia
+  const INV = ITENS.filter(i => i.id !== 'bola').map(i => i.id);
+
+  const nova = () => ({ moedas: 0, vidas: VIDAS, base: 0, livreAte: 0, inv: Object.fromEntries(INV.map(i => [i, 0])), ganhos: [], diaria: { dia: '', passo: 0 }, missoes: { dia: '', ids: [], prog: [0, 0, 0], rec: [0, 0, 0], bau: 0 }, semana: { id: 0, prog: 0, rec: 0 },
+    videos: { dia: '', n: 0 }, inter: { em: 0, vit: 0 }, compras: [], semAnuncios: false, tent: {}, presente: 0, tot: { ganhas: 0, gastas: 0, videos: 0, continuou: 0 } });
+  const num = (v, a, b, p) => typeof v === 'number' && Number.isFinite(v) ? Math.min(b, Math.max(a, Math.floor(v))) : p, ob = x => x && typeof x === 'object' && !Array.isArray(x) ? x : {}, dia = x => typeof x === 'string' && /^\d{4}-\d\d-\d\d$/.test(x) ? x : '', lista = x => Array.isArray(x) ? x : [];
+  // aceita qualquer coisa e devolve uma economia sempre válida
+  function validar(s) {
+    const e = nova(); s = ob(s); e.moedas = num(s.moedas, 0, TOPO, 0); e.vidas = num(s.vidas, 0, VIDAS, VIDAS); e.base = num(s.base, 0, 9e15, 0); e.livreAte = num(s.livreAte, 0, 9e15, 0);
+    for (const k of INV) e.inv[k] = num(ob(s.inv)[k], 0, 999, 0); e.ganhos = [...new Set(lista(s.ganhos).filter(x => ITENS.some(i => i.id === x)))];
+    e.diaria = { dia: dia(ob(s.diaria).dia), passo: num(ob(s.diaria).passo, 0, 1e6, 0) };
+    const m = ob(s.missoes), ids = lista(m.ids).filter(i => Number.isInteger(i) && MISSOES[i]); if (dia(m.dia) && ids.length === 3 && new Set(ids).size === 3) e.missoes = { dia: m.dia, ids, prog: [0, 1, 2].map(k => num(lista(m.prog)[k], 0, 1e7, 0)), rec: [0, 1, 2].map(k => num(lista(m.rec)[k], 0, 1, 0)), bau: num(m.bau, 0, 1, 0) };
+    const w = ob(s.semana); e.semana = { id: num(w.id, 0, 1e6, 0), prog: num(w.prog, 0, 1e7, 0), rec: num(w.rec, 0, 3, 0) };
+    e.videos = { dia: dia(ob(s.videos).dia), n: num(ob(s.videos).n, 0, 999, 0) }; e.inter = { em: num(ob(s.inter).em, 0, 9e15, 0), vit: num(ob(s.inter).vit, 0, 999, 0) };
+    e.compras = [...new Set(lista(s.compras).filter(x => typeof x === 'string' && x.length < 120))].slice(-200); e.semAnuncios = s.semAnuncios === true;
+    for (const k in ob(s.tent)) { const v = num(s.tent[k], 0, 99, 0); if (/^\d{1,2}$/.test(k) && +k >= 1 && +k <= 50 && v) e.tent[k] = v; }
+    e.presente = num(s.presente, 0, 1, 0); for (const k in e.tot) e.tot[k] = num(ob(s.tot)[k], 0, 1e9, 0); return e;
+  }
+  // junta duas fichas: o que se gasta (moedas, itens, vidas) vem da mais nova, para o código não multiplicar moedas; o que só se recebe uma vez nunca volta atrás
+  function mesclar(a, b, aNova) {
+    const x = validar(a), y = validar(b), r = validar(aNova ? x : y), o = aNova ? y : x; r.compras = [...new Set([...o.compras, ...r.compras])].slice(-200); r.semAnuncios = x.semAnuncios || y.semAnuncios; r.ganhos = [...new Set([...x.ganhos, ...y.ganhos])]; r.presente = x.presente | y.presente;
+    r.diaria = { dia: x.diaria.dia > y.diaria.dia ? x.diaria.dia : y.diaria.dia, passo: Math.max(x.diaria.passo, y.diaria.passo) };
+    if (o.missoes.dia > r.missoes.dia) r.missoes = o.missoes; else if (o.missoes.dia === r.missoes.dia && o.missoes.ids.join() === r.missoes.ids.join()) { r.missoes.prog = r.missoes.prog.map((v, k) => Math.max(v, o.missoes.prog[k])); r.missoes.rec = r.missoes.rec.map((v, k) => v | o.missoes.rec[k]); r.missoes.bau |= o.missoes.bau; }
+    if (o.semana.id > r.semana.id) r.semana = o.semana; else if (o.semana.id === r.semana.id) r.semana = { id: r.semana.id, prog: Math.max(r.semana.prog, o.semana.prog), rec: Math.max(r.semana.rec, o.semana.rec) };
+    if (o.videos.dia === r.videos.dia) r.videos.n = Math.max(r.videos.n, o.videos.n); else if (o.videos.dia > r.videos.dia) r.videos = o.videos;
+    for (const k in r.tot) r.tot[k] = Math.max(x.tot[k], y.tot[k]); return validar(r);
+  }
+
+  // ---------- moedas, itens e prêmios (d é a ficha inteira; d.eco é esta parte) ----------
+  const ganhar = (d, q) => { q = Math.max(0, Math.floor(q)) || 0; d.eco.moedas = Math.min(TOPO, d.eco.moedas + q); d.eco.tot.ganhas += q; return q; };
+  const gastar = (d, q) => { if (!(q >= 0) || d.eco.moedas < q) return false; d.eco.moedas -= q; d.eco.tot.gastas += q; return true; };
+  const qtd = (d, id) => id === 'bola' ? d.bolas : d.eco.inv[id] || 0, por = (d, id, q) => { if (id === 'bola') d.bolas = Math.min(999, Math.max(0, d.bolas + q)); else d.eco.inv[id] = Math.min(999, Math.max(0, d.eco.inv[id] + q)); };
+  function entregar(d, premio, agora, vezes = 1) { for (const k in premio) { const q = premio[k] * vezes; if (k === 'moedas') ganhar(d, q); else if (k === 'vidasLivres') d.eco.livreAte = Math.max(d.eco.livreAte, agora) + q * 60000; else if (item(k)) por(d, k, q); } }
+  const textoPremio = p => Object.entries(p).map(([k, q]) => k === 'moedas' ? `${q} moedas` : k === 'vidasLivres' ? (q >= 60 ? `${q / 60} ${q === 60 ? 'hora' : 'horas'}` : `${q} minutos`) + ' sem gastar vida' : k === 'bola' ? `${q} ${q === 1 ? 'bola guardada' : 'bolas guardadas'}` : `${q} ${item(k).nome.toLowerCase()}`).join(' + ');
+  const aberto = (d, id) => d.fase >= item(id).fase;
+  function comprarItem(d, id) { const i = item(id); if (!i || !aberto(d, id) || qtd(d, id) >= 999 || !gastar(d, i.preco)) return false; por(d, id, 1); return true; }
+  const usarItem = (d, id) => item(id) && qtd(d, id) > 0 ? (por(d, id, -1), true) : false;
+  // item novo: 2 de presente na primeira vez (a bola guardada não: ela já vem dos marcos)
+  function desbloquear(d) { const l = ITENS.filter(i => i.id !== 'bola' && aberto(d, i.id) && !d.eco.ganhos.includes(i.id)); for (const i of l) { d.eco.ganhos.push(i.id); por(d, i.id, 2); } return l; }
+  // chegada: uma vez só. Quem já jogava ganha pelas estrelas que tem
+  const estrelas = d => { let s = 0; for (const k in d.estrelas) s += d.estrelas[k]; return s; };
+  function presente(d) { if (d.eco.presente) return 0; d.eco.presente = 1; return ganhar(d, 100 + estrelas(d) * 2); }
+  // vitória: 8 na primeira vez, 3 por estrela, 1 a cada 10 s abaixo do tempo da fase (até 4). Repetindo: 2 + 3 por estrela nova + até 2
+  const moedasVitoria = (antes, est, folga) => { const s = Math.max(0, Math.floor(folga / 10)) || 0; return antes ? 2 + 3 * Math.max(0, est - antes) + Math.min(2, s) : 8 + 3 * est + Math.min(4, s); };
+
+  // ---------- vidas (n = 0 é o painel do dia, que nunca gasta) ----------
+  function vidas(e, agora) {
+    if (agora < e.base) e.base = agora;                // relógio do aparelho voltou: recomeça a contar daqui
+    if (e.vidas < VIDAS) { if (!e.base) e.base = agora; const q = Math.floor((agora - e.base) / MIN_VIDA); if (q > 0) { e.vidas = Math.min(VIDAS, e.vidas + q); e.base += q * MIN_VIDA; } }
+    if (e.vidas >= VIDAS) e.base = 0;
+    return { n: e.vidas, cheia: e.vidas >= VIDAS, falta: e.vidas >= VIDAS ? 0 : MIN_VIDA - (agora - e.base), livre: Math.max(0, e.livreAte - agora) };
+  }
+  const gastaVida = (e, n, agora) => n > FASE_SEM_VIDA && e.livreAte <= agora;
+  function perderVida(e, n, agora) { const v = vidas(e, agora); if (!gastaVida(e, n, agora) || v.n <= 0) return false; if (v.cheia) e.base = agora; e.vidas--; return true; }
+  function darVida(e, q, agora) { vidas(e, agora); e.vidas = Math.min(VIDAS, e.vidas + q); if (e.vidas >= VIDAS) e.base = 0; }
+  const podeJogar = (e, n, agora) => !gastaVida(e, n, agora) || vidas(e, agora).n > 0;
+  function encherVidas(d, agora) { if (vidas(d.eco, agora).cheia || !gastar(d, PRECO_VIDAS)) return false; darVida(d.eco, VIDAS, agora); return true; }
+
+  // ---------- quem empaca: barra 5%, 10% ou 15% mais larga depois de 2, 4 ou 6 derrotas na fase (e o jogo diz isso) ----------
+  const ajuda = (e, n) => { const t = e.tent[n] || 0; return AJUDA.filter(q => t >= q).length; };
+  const perdeuFase = (e, n) => { if (n >= 1 && n <= 50) e.tent[n] = Math.min(99, (e.tent[n] || 0) + 1); }, venceuFase = (e, n) => { delete e.tent[n]; };
+  // as bolas acabaram: bola guardada (até 2), moedas (100, 160, 240) ou vídeo na primeira vez; moedas e vídeo só se falta até 35% do painel; no máximo 3 voltas
+  const precoContinuar = k => CONTINUAR[Math.min(k, CONTINUAR.length - 1)];
+  const pertinho = (restam, total) => restam <= Math.max(6, Math.ceil(total * RESTA));
+  function continuar(d, c, restam, total, video) { // c: { guardadas, pagas } já usadas nesta partida
+    if (c.guardadas + c.pagas >= MAX_CONT) return null; const perto = pertinho(restam, total), preco = precoContinuar(c.pagas);
+    const r = { guardada: d.bolas > 0 && c.guardadas < MAX_GUARDADAS, preco: perto ? preco : 0, podePagar: perto && d.eco.moedas >= preco, video: perto && !!video && c.pagas === 0 };
+    return r.guardada || r.podePagar || r.video ? r : null;
+  }
+  // pacote com desconto depois de 2 derrotas seguidas na mesma fase: barra larga + bola lenta por 95 (em vez de 130). Só aparece para quem pode pagar
+  const PACOTE = { itens: ['largo', 'lenta'], preco: 95 };
+  const pacote = (d, n) => n >= 1 && n <= 50 && (d.eco.tent[n] || 0) >= 2 && PACOTE.itens.every(i => aberto(d, i)) && d.eco.moedas >= PACOTE.preco ? { ...PACOTE, cheio: PACOTE.itens.reduce((s, i) => s + item(i).preco, 0) } : null;
+
+  // ---------- recompensa diária: anda um passo por dia em que se entra; faltar um dia não zera ----------
+  const temDiaria = (e, hoje) => hoje > e.diaria.dia, diaria = e => ({ passo: e.diaria.passo % 7, premio: DIARIA[e.diaria.passo % 7] });
+  function pegarDiaria(d, hoje, agora, vezes = 1) { const e = d.eco; if (!temDiaria(e, hoje)) return null; const p = diaria(e).premio; entregar(d, p, agora, vezes); e.diaria.dia = hoje; e.diaria.passo++; return p; }
+  // ---------- missões do dia: 3, as mesmas para o dia inteiro ----------
+  const faltaRara = d => { for (let n = 1; n <= Math.min(50, d.fase); n++) if (!d.raras[n]) return true; return false; };
+  function missoes(d, hoje) {
+    const e = d.eco;
+    if (hoje > e.missoes.dia) { let h = 0; for (const c of hoje) h = Math.imul(h ^ c.charCodeAt(0), 2654435761) >>> 0; const ops = MISSOES.map((_, i) => i).filter(i => MISSOES[i].fase <= d.fase && (MISSOES[i].tipo !== 'raras' || faltaRara(d))), ids = []; while (ids.length < 3) { h = (Math.imul(h, 1664525) + 1013904223) >>> 0; ids.push(ops.splice((h >>> 8) % ops.length, 1)[0]); } e.missoes = { dia: hoje, ids, prog: [0, 0, 0], rec: [0, 0, 0], bau: 0 }; }
+    const m = e.missoes; return { l: m.ids.map((id, k) => ({ ...MISSOES[id], k, v: Math.min(MISSOES[id].alvo, m.prog[k]), pronta: m.prog[k] >= MISSOES[id].alvo && !m.rec[k], feita: !!m.rec[k] })), bau: m.ids.length === 3 && m.rec.every(Boolean) && !m.bau, bauFeito: !!m.bau };
+  }
+  function pegarMissao(d, k, agora) { const m = d.eco.missoes; if (!(k in m.ids) || m.rec[k] || m.prog[k] < MISSOES[m.ids[k]].alvo) return null; m.rec[k] = 1; entregar(d, PREMIO_MISSAO, agora); return PREMIO_MISSAO; }
+  function pegarBau(d, agora) { const m = d.eco.missoes; if (m.bau || !m.ids.length || !m.rec.every(Boolean)) return null; m.bau = 1; entregar(d, PREMIO_TRES, agora); return PREMIO_TRES; }
+  // ---------- evento da semana (muda na segunda-feira) ----------
+  const idSemana = hoje => Math.floor((Date.parse(hoje + 'T00:00:00Z') / 864e5 - 4) / 7);
+  function semana(d, hoje) { const e = d.eco, id = idSemana(hoje); if (id > e.semana.id) e.semana = { id, prog: 0, rec: 0 }; const s = e.semana, ev = EVENTOS[s.id % EVENTOS.length], fim = s.rec >= 3; return { ...ev, v: s.prog, rec: s.rec, alvo: ev.alvos[Math.min(2, s.rec)], premio: fim ? null : PREMIO_SEMANA[s.rec], pronta: !fim && s.prog >= ev.alvos[s.rec], fim, dias: 7 - (((Date.parse(hoje + 'T00:00:00Z') / 864e5 - 4) % 7) + 7) % 7 }; }
+  function pegarSemana(d, hoje, agora) { const s = semana(d, hoje); if (!s.pronta) return null; d.eco.semana.rec++; entregar(d, s.premio, agora); return s.premio; }
+  // o que aconteceu na partida anda as missões e o evento. r: { quebrados, fases, tres, veios, veio6, jarros, itens, raras, pontos, dia, porCor: [4 números] }
+  function registrar(d, hoje, r) { missoes(d, hoje); const e = d.eco; e.missoes.ids.forEach((id, k) => { const q = r[MISSOES[id].tipo] || 0; if (q > 0) e.missoes.prog[k] = Math.min(1e7, e.missoes.prog[k] + q); }); if (r.porCor) { const s = semana(d, hoje); e.semana.prog = Math.min(1e7, e.semana.prog + (r.porCor[s.cor] || 0)); } }
+  const avisos = (d, hoje) => { const m = missoes(d, hoje); return m.l.filter(x => x.pronta).length + (m.bau ? 1 : 0) + (semana(d, hoje).pronta ? 1 : 0) + (temDiaria(d.eco, hoje) ? 1 : 0); };
+
+  // ---------- anúncios e compras ----------
+  const videosHoje = (e, hoje) => e.videos.dia === hoje ? e.videos.n : 0, podeVideo = (e, hoje) => hoje >= e.videos.dia && videosHoje(e, hoje) < LIMITE_VIDEOS;
+  function viuVideo(e, hoje) { e.videos = { dia: hoje, n: videosHoje(e, hoje) + 1 }; e.tot.videos++; }
+  // anúncio entre fases: só depois da fase 12, a cada 4 vitórias, com 3 minutos de intervalo, e nunca para quem comprou alguma coisa
+  const podeInter = (e, n, agora) => !e.semAnuncios && !e.compras.length && n >= 12 && e.inter.vit >= 4 && agora - e.inter.em >= 180000, viuInter = (e, agora) => { e.inter = { em: agora, vit: 0 }; };
+  // a mesma compra nunca é entregue duas vezes
+  const temCompra = (e, id) => e.compras.some(c => c.startsWith(id + ':'));
+  function entregarCompra(d, id, transacao, agora) { const e = d.eco, p = PRODUTOS.find(x => x.id === id); if (!p || !transacao) return false; const tr = `${id}:${transacao}`; if (tr.length >= 120 || e.compras.includes(tr) || (p.unico && temCompra(e, id))) return false; e.compras.push(tr); if (id === 'sem_anuncios') e.semAnuncios = true; entregar(d, p.premio, agora); return true; }
+  return { VIDAS, PRECO_VIDAS, REDE, LARGO, LENTA, AJUDA_BARRA, VIDEO_MOEDAS, LIMITE_VIDEOS, FASE_SEM_VIDA, MAX_CONT, MAX_GUARDADAS, ITENS, INV, DIARIA, MISSOES, PREMIO_MISSAO, PREMIO_TRES, EVENTOS, PREMIO_SEMANA, PRODUTOS, MARCO, PAINEL, CARTA, RARA, DIA,
+    item, nova, validar, mesclar, ganhar, gastar, qtd, entregar, textoPremio, comprarItem, usarItem, aberto, desbloquear, presente, moedasVitoria, vidas, gastaVida, perderVida, darVida, podeJogar, encherVidas,
+    ajuda, perdeuFase, venceuFase, precoContinuar, pertinho, continuar, pacote, temDiaria, diaria, pegarDiaria, missoes, pegarMissao, pegarBau, idSemana, semana, pegarSemana, registrar, avisos, videosHoje, podeVideo, viuVideo, podeInter, viuInter, entregarCompra, temCompra };
+})();
+if (typeof module !== 'undefined') module.exports = Eco;
 </script>
 
 <script id="meta">
@@ -444,7 +635,7 @@ const Meta = (() => {
   // ------------------------------------------------------------ ficha v2 (qualquer lixo vira ficha válida)
   const nova = () => ({ fase: 1, estrelas: {}, recordes: {}, tentativas: {}, visto: {}, op: { som: true, ambiente: true, vibra: true },
     tot: { quebrados: 0, veios: 0, maiorVeio: 0, vitorias: 0, derrotas: 0, segundos: 0, jarros: 0, itens: 0, dias: 0 },
-    obras: [0, 0, 0, 0, 0], raras: {}, lidas: {}, marcos: {}, bolas: 0, dia: { ult: 0, total: 0 }, salvo: 0 });
+    obras: [0, 0, 0, 0, 0], raras: {}, lidas: {}, marcos: {}, bolas: 0, dia: { ult: 0, total: 0 }, salvo: 0, eco: Eco.nova() });   // eco: Fase 3
   const int = (v, a, b, p = a) => (typeof v === 'number' || typeof v === 'string') && v !== '' && Number.isFinite(+v) ? Math.max(a, Math.min(b, Math.floor(+v))) : p;
   const obj = x => !!x && typeof x === 'object' && !Array.isArray(x);
   function validar(x) {
@@ -464,7 +655,7 @@ const Meta = (() => {
     for (const f of Object.keys(d.estrelas)) d.fase = Math.max(d.fase, Math.min(TOTAL + 1, +f + 1));
     for (let g = 1; g < 5; g++) if (d.obras[g - 1] < 5) for (let h = g; h < 5; h++) d.obras[h] = 0;
     for (let g = 4; g >= 0; g--) while (d.obras[g] > 0 && livres(d) < 0) d.obras[g]--;
-    d.tot.dias = Math.max(d.tot.dias, d.dia.total);
+    d.tot.dias = Math.max(d.tot.dias, d.dia.total); d.eco = Eco.validar(x.eco);
     return d;
   }
   // a ficha da Fase 1 (glaze-break.v1) vira v2 sem perder nada
@@ -479,6 +670,7 @@ const Meta = (() => {
     for (let g = 0; g < 5; g++) r.obras[g] = Math.max(A.obras[g], B.obras[g]);
     for (const m of MARCOS) { const v = Math.max(A.marcos[m.id] || 0, B.marcos[m.id] || 0); if (v) r.marcos[m.id] = v; }
     r.dia.total = Math.max(A.dia.total, B.dia.total); r.dia.ult = Math.max(A.dia.ult, B.dia.ult);
+    r.eco = Eco.mesclar(A.eco, B.eco, A.salvo >= B.salvo);   // moedas, itens e vidas da mais nova; compras, diária, missões e evento nunca voltam atrás
     return validar(r);
   }
   // conferência: um número tirado do conteúdo; se a ficha foi cortada ou mexida, não bate
@@ -510,7 +702,8 @@ const Ganchos = {
   antesDaFase: async n => ({}),         // reforços escolhidos antes de começar: { vidas, largo (segundos), lenta (segundos) }
   oferecerContinuar: async p => null,   // as bolas acabaram: pode devolver quantas bolas a mais
   entreFases: async n => {},            // espaço entre uma fase e outra
-  premio: (tipo, dados) => {}           // estrela nova, recorde, veio grande
+  premio: (tipo, dados) => {},          // estrela nova, recorde, veio grande
+  fimDaPartida: (p, venceu, antes, ex) => ({})   // Fase 3: moedas e reforços liberados que a partida rendeu
 };
 
 // ============================================================ PROGRESSO (ficha v2 no aparelho, com versão e conferência; as regras ficam no bloco Meta)
@@ -630,6 +823,14 @@ const Som = (() => {
     rara() { if (!pronto()) return; const t = ctx.currentTime; [0, 4, 7, 9, 12].forEach((g, i) => sino(grau(g, BASE[lugar] * 4), t + i * .07, .13, 1.2, (i - 2) * .25)); chiado(t + .1, .6, .05, 6000, { ate: 9000, q: .7, ataque: .1, molhado: .6 }); },
     raraPerdida() { if (!pronto()) return; const t = ctx.currentTime; tom(grau(2, BASE[lugar] * 2), t, .5, .12, { tipo: 'triangle', molhado: .4 }); tom(grau(-1, BASE[lugar] * 2), t + .22, .7, .1, { tipo: 'triangle', molhado: .4 }); },
     obra(i) { if (!pronto()) return; const t = ctx.currentTime; ceramica(grau(i % 10, BASE[lugar] * 4), t, .16, ((i * 7) % 5 - 2) * .2); },
+    // Fase 3: moedas, compra, vida, prêmio, negado, rede rebatendo, ferramenta
+    moedas() { if (!pronto()) return; const t = ctx.currentTime; for (let i = 0; i < 5; i++) { const f = ALEA(2300, 3300); tom(f, t + i * .055, .12, .1, { molhado: .25, pan: ALEA(-.3, .3) }); tom(f * 1.5, t + i * .055, .06, .05, { molhado: .1 }); } },
+    compra() { if (!pronto()) return; const t = ctx.currentTime; tom(grau(0, BASE[lugar] * 2), t, .3, .16, { tipo: 'triangle' }); sino(grau(4, BASE[lugar] * 4), t + .07, .12, .9); sino(grau(7, BASE[lugar] * 4), t + .14, .12, 1); },
+    vida() { if (!pronto()) return; const t = ctx.currentTime; [0, 4, 7].forEach((g, i) => { tom(grau(g, BASE[lugar] * 2), t + i * .08, .35, .14, { tipo: 'triangle', molhado: .3 }); sino(grau(g + 5, BASE[lugar] * 2), t + i * .08, .07, .8); }); },
+    premio() { if (!pronto()) return; const t = ctx.currentTime; [0, 2, 4, 7, 9].forEach((g, i) => sino(grau(g, BASE[lugar] * 4), t + i * .06, .12, 1, (i - 2) * .25)); },
+    negado() { if (!pronto()) return; const t = ctx.currentTime; tom(220, t, .14, .16, { tipo: 'triangle', molhado: .05 }); tom(196, t + .1, .2, .14, { tipo: 'triangle', molhado: .05 }); },
+    rede(pan) { if (!pronto()) return; const t = ctx.currentTime; tom(330, t, .22, .2, { ate: 520, tipo: 'triangle', pan, molhado: .2 }); chiado(t, .12, .12, 1600, { q: 1.2, pan }); },
+    ferramenta(id) { if (!pronto()) return; const t = ctx.currentTime; if (id === 'rede') { chiado(t, .35, .14, 900, { ate: 2400, q: .8, molhado: .3 }); [0, 4, 7].forEach((g, i) => sino(grau(g, BASE[lugar] * 2), t + .05 + i * .07, .1, .9)); } else if (id === 'tripla') [0, 4, 7].forEach((g, i) => { tom(grau(g + 2, BASE[lugar] * 4), t + i * .05, .12, .18, { tipo: 'triangle' }); }); else { chiado(t, .25, .1, 3000, { ate: 1200, q: .9, molhado: .3 }); sino(grau(5, BASE[lugar] * 2), t + .08, .12, 1); } },
     marco() { if (!pronto()) return; const t = ctx.currentTime; for (const [g, d] of [[0, 0], [4, .1], [7, .2], [12, .34]]) sino(grau(g, BASE[lugar] * 2), t + d, .13, 1.4); },
     estrela(i) { if (!pronto()) return; const t = ctx.currentTime; sino(grau(i * 2 + 2) * 2, t, .2, 1.1); tom(grau(i * 2), t, .4, .1); },
     vitoria() { if (!pronto()) return; const t = ctx.currentTime, b = BASE[lugar]; [[0, 0], [2, .12], [4, .24], [5, .36], [7, .52]].forEach(([g, d]) => { sino(grau(g, b * 2), t + d, .17, 1.3); tom(grau(g, b), t + d, .5, .09); }); for (const g of [0, 2, 4]) tom(grau(g, b), t + .55, 1.8, .08, { ataque: .08, molhado: .5 }); chiado(t + .5, .8, .05, 3000, { ate: 7500, q: .6, ataque: .2, molhado: .5 }); },
@@ -784,6 +985,8 @@ const Tela = (() => {
     else if (e.e === 'perdeu') tremor = Math.max(tremor, .3);
     else if (e.e === 'rara:cai') aneis.push({ x: e.x, y: e.y, t: 0, vida: .7, cor: '#e2b964', max: 14 });
     else if (e.e === 'rara') { textos.push({ x: Math.max(26, Math.min(N.W - 26, e.x)), y: e.y - 8, txt: 'Peça rara!', cor: '#f6d78c', t: 0, vida: 1.6, tam: 6 }); aneis.push({ x: e.x, y: e.y, t: 0, vida: .8, cor: '#e2b964', max: 26 }); for (let i = 0; i < 16; i++) { const a = Math.random() * 6.28, v = 20 + Math.random() * 30; parts.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, t: 0, vida: .7, tam: .6, cor: '#ffe3a0', faisca: 1 }); } }
+    else if (e.e === 'rede') { aneis.push({ x: e.x, y: N.REDE, t: 0, vida: .4, cor: '#e8c98c', max: 8 }); }
+    else if (e.e === 'ferramenta') { textos.push({ x: N.W / 2, y: N.PY - 26, txt: { pincel: 'Pincel', rede: 'Rede', tripla: 'Três bolas' }[e.id], cor: '#f3d48a', t: 0, vida: 1.3, tam: 5.5 }); aneis.push({ x: e.x, y: e.y, t: 0, vida: .6, cor: '#e8c98c', max: 18 }); }
     else if (e.e === 'rara:perdida') textos.push({ x: N.W / 2, y: N.PY - 24, txt: 'A peça rara se perdeu', cor: '#bfb29c', t: 0, vida: 1.6, tam: 4.6 });
   }
   // ------------------------------------------------------------ desenho de cada quadro
@@ -804,6 +1007,11 @@ const Tela = (() => {
       else if (it.tipo === 'tripla') { for (const k of [-1, 0, 1]) { g.beginPath(); g.arc(x + k * w * .22, y, h * .17, 0, 7); g.fill(); } }
       else if (it.tipo === 'lenta') { g.beginPath(); g.arc(x, y, h * .3, 0, 7); g.stroke(); g.beginPath(); g.moveTo(x, y - h * .18); g.lineTo(x, y); g.lineTo(x + h * .14, y + h * .08); g.stroke(); }
       else { const q = [0, 0, 0, 0]; for (const t of P.cel) if (t && t.vivo && (t.k === 'a' || t.k === 'j')) q[t.cor]++; g.fillStyle = COR[q.indexOf(Math.max(...q))]; ret(g, x - w * .3, y - h * .2, w * .6, h * .4, h * .2); g.fill(); }
+    }
+    // Fase 3: rede de corda esticada no chão enquanto dura (pisca nos últimos 3 segundos)
+    if (P.rede > 0 && (P.rede > 3 || Math.sin(P.tempo * 14) > -.3)) {
+      const y = Y(N.REDE), x0 = X(1), x1 = X(N.W - 1), u = 4 * s; g.save(); g.globalAlpha = Math.min(1, P.rede * 2); g.strokeStyle = 'rgba(232,201,140,.85)'; g.lineWidth = Math.max(1.5, .7 * s); g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+      g.strokeStyle = 'rgba(232,201,140,.35)'; g.lineWidth = 1; g.beginPath(); for (let x = x0; x <= x1; x += u) { g.moveTo(x, y); g.lineTo(x + u / 2, y + u * .6); g.lineTo(x + u, y); } g.stroke(); g.restore();
     }
     // barra de madeira com pontas de latão
     const rq = P.rq, bw = rq.w * s, bh = N.PH * s * (1 - rq.sq * .22), bx = X(rq.x) - bw / 2, by = Y(N.PY) - bh / 2;
@@ -847,15 +1055,15 @@ const Tela = (() => {
 // ============================================================ JOGO: liga o núcleo, a tela, o som e o dedo
 const Jogo = (() => {
   const N = Nucleo, D = Progresso.d, PASSO = 1 / 120, SENS = 1.25;
-  let dia = 0, ritmo = 1, P = null, n = 1, pausado = true, aberto = 'abertura', ult = 0, acum = 0, dedo = null, teclas = { e: 0, d: 0 }, fimEm = 0, tentativa = 0;
+  let vitr = false, dia = 0, ritmo = 1, P = null, n = 1, pausado = true, aberto = 'abertura', ult = 0, acum = 0, dedo = null, teclas = { e: 0, d: 0 }, fimEm = 0, tentativa = 0;
   const dica = t => { $('dica').textContent = t || ''; };
   // modo.dia: número do dia do painel do dia (usa o desenho de uma fase com outra semente, sem estrelas e sem peça rara)
   async function comecar(k, modo = {}) {
     dia = modo.dia || 0; let F = null;
     if (dia) { const x = Meta.doDia(dia); k = x.base; F = N.nivel(x.base, x.sem); }
-    n = Math.max(1, Math.min(N.TOTAL, k)); const extra = (await Ganchos.antesDaFase(n)) || {};
+    n = Math.max(1, Math.min(N.TOTAL, k)); const extra = (await Ganchos.antesDaFase(n, modo.itens || [], !!dia)) || {}; vitr = false;
     if (dia) tentativa = 1; else { tentativa = (D.tentativas[n] || 0) + 1; D.tentativas[n] = tentativa; Progresso.salvar(); }
-    P = new N.Partida(n, { ...extra, tentativa, F: F || undefined, barra: Meta.barra(D, Math.floor((n - 1) / 10)), rara: !dia && !D.raras[n] }); P.dia = dia; Tela.nova(P); Som.lugar(P.F.lugar); Som.ligar(true); Telas.fechar(); Telas.hud(P); pausado = false; acum = 0; fimEm = 0; dedo = null;
+    P = new N.Partida(n, { ...extra, tentativa, F: F || undefined, barra: Meta.barra(D, Math.floor((n - 1) / 10)) * (1 + (extra.ajuda || 0) * Eco.AJUDA_BARRA), rara: !dia && !D.raras[n] }); P.ajuda = extra.ajuda || 0; P.dia = dia; Tela.nova(P); Som.lugar(P.F.lugar); Som.ligar(true); Telas.fechar(); Telas.hud(P); pausado = false; acum = 0; fimEm = 0; dedo = null;
     const v = $('aviso'); if (v) v.remove();
     if (P.F.dif) { const a = document.createElement('div'); a.id = 'aviso'; a.innerHTML = P.F.dif === 2 ? '<b>Fase muito difícil</b><span>bola rápida, barra curta e muito ferro</span>' : '<b>Fase difícil</b><span>bola mais rápida e azulejos grossos</span>'; $('area').appendChild(a); setTimeout(() => a.remove(), 2900); Som.aviso(P.F.dif); vibra([20, 60, 20]); }
     dica(n === 1 && !D.visto.inicio ? 'Arraste o dedo em qualquer lugar para mover a barra' : P.F.cel.some(c => c && c.k === 'j') && !D.visto.jarro ? 'O jarro espirra o esmalte dele nos vizinhos' : P.F.cel.some(c => c && c.k === 'f') && !D.visto.ferro ? 'Ferro não quebra: use para rebater' : '');
@@ -879,6 +1087,8 @@ const Jogo = (() => {
       case 'rara:cai': Som.raraCai(); if (!D.visto.rara) dica('Peça rara! Pegue com a barra para guardar no caderno'); break;
       case 'rara': Som.rara(); vibra([15, 40, 25]); Eventos.emite('rara', { n }); if (!D.visto.rara) { D.visto.rara = 1; dica(''); } break;
       case 'rara:perdida': Som.raraPerdida(); if (!D.visto.rara) dica('A peça se perdeu: na próxima tentativa ela volta'); break;
+      case 'rede': Som.rede(pan); vibra(10); break;
+      case 'ferramenta': Som.ferramenta(e.id); vibra(15); break;
       case 'perdeu': Som.caiu(); vibra([30, 40, 30]); Eventos.emite('bola:perdida', { vidas: e.vidas }); break;
     }
   }
@@ -899,12 +1109,12 @@ const Jogo = (() => {
     if (p.fim === 'derrota') {
       const mais = await Ganchos.oferecerContinuar(p);
       if (mais > 0 && P === p) { p.continuar(mais); pausado = false; Telas.fechar(); return; }
-      D.tot.derrotas++; const ex = fechar(p, false); Progresso.salvar(); Som.derrota(); Som.ligar(false);
+      D.tot.derrotas++; const ex = fechar(p, false); ex.eco = Ganchos.fimDaPartida(p, false, 0, ex) || {}; Progresso.salvar(); Som.derrota(); Som.ligar(false);
       Eventos.emite('fase:derrota', { n, restam: p.restam, total: p.total, dia: p.dia }); Telas.derrota(n, p, ex); return;
     }
     const e = p.estrelas; let antes = 0, rec = false;
     if (!p.dia) { antes = D.estrelas[n] || 0; rec = (D.recordes[n] || 0) < p.pontos; D.estrelas[n] = Math.max(antes, e); if (rec) D.recordes[n] = p.pontos; D.fase = Math.max(D.fase, Math.min(N.TOTAL + 1, n + 1)); }
-    D.tot.vitorias++; const ex = fechar(p, true); Progresso.salvar();
+    D.tot.vitorias++; const ex = fechar(p, true); ex.eco = Ganchos.fimDaPartida(p, true, antes, ex) || {}; Progresso.salvar();
     if (e > antes && !p.dia) Ganchos.premio('estrela', { n, de: antes, para: e }); if (rec) Ganchos.premio('recorde', { n, pontos: p.pontos }); if (p.maiorVeio >= 6) Ganchos.premio('veio', { n, veio: p.maiorVeio });
     Som.vitoria(); Som.ligar(false); Eventos.emite('fase:vitoria', { n, estrelas: e, pontos: p.pontos, tempo: p.tempo, maiorVeio: p.maiorVeio, dia: p.dia, rara: ex.rara || null }); Telas.vitoria(n, p, e, ex);
   }
@@ -936,20 +1146,27 @@ const Jogo = (() => {
   addEventListener('keyup', e => { if (e.key === 'ArrowLeft') teclas.e = 0; if (e.key === 'ArrowRight') teclas.d = 0; });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (P && !P.fim && !aberto) Telas.abrir('pausa'); Som.dormir(true); } else Som.dormir(false); });
   // vitrine: a abertura mostra o painel da fase atual atrás do título
-  function vitrine() { const k = Math.min(N.TOTAL, D.fase); P = new N.Partida(k); Tela.nova(P); Som.lugar(P.F.lugar); pausado = true; Telas.hud(P); }
+  function vitrine() { const k = Math.min(N.TOTAL, D.fase); vitr = true; P = new N.Partida(k); Tela.nova(P); Som.lugar(P.F.lugar); pausado = true; Telas.hud(P); }
+  // Fase 3: ferramenta durante a fase (o núcleo diz se fez efeito; se não fez, nada se gasta)
+  const ferramenta = id => !!P && !vitr && !pausado && !aberto && !P.fim && P.ferramenta(id, Eco.REDE);
   requestAnimationFrame(quadro);
-  return { comecar, vitrine, get P() { return P; }, get n() { return n; }, get modo() { return dia ? { dia } : {}; }, get pausado() { return pausado; }, pausar(v) { pausado = v; dedo = null; }, set aberto(v) { aberto = v; }, get aberto() { return aberto; }, SENS, set ritmo(v) { ritmo = v; } };
+  return { comecar, vitrine, ferramenta, get naVitrine() { return vitr; }, get P() { return P; }, get n() { return n; }, get modo() { return dia ? { dia } : {}; }, get pausado() { return pausado; }, pausar(v) { pausado = v; dedo = null; }, set aberto(v) { aberto = v; }, get aberto() { return aberto; }, SENS, set ritmo(v) { ritmo = v; } };
 })();
 
 // ============================================================ TELAS
 const Telas = (() => {
   const D = Progresso.d, N = Nucleo, EST = '<svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.9-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5L2.6 9.5l6.5-.9z"/></svg>';
   let pilha = [], ult = {};
-  function mostra(id) { document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === id)); Jogo.aberto = id; if (id) Jogo.pausar(true); }
-  const abrir = id => { pilha.push(id); mostra(id); if (id === 'mapa') mapa(); if (id === 'ajustes') ajustes(); if (id === 'abertura') { Som.ligar(false); marcas(); } if (id === 'paineis') paineis(); if (id === 'caderno') caderno(); if (id === 'marcos') marcos(); }, fechar = () => { pilha = []; mostra(''); }, trocar = id => { pilha = []; abrir(id); };
+  function mostra(id) { document.querySelectorAll('.tela:not(.solta)').forEach(t => t.classList.toggle('on', t.id === id)); Jogo.aberto = id; if (id) Jogo.pausar(true); if (id) Econ.fichas(); if (id === 'loja') Econ.loja(); if (id === 'missoes') Econ.missoes(); if (id === 'pausa') Econ.pausa(); }
+  const abrir = id => { pilha.push(id); mostra(id); const t = $(id); if (t) t.scrollTop = 0; if (id === 'mapa') mapa(); if (id === 'ajustes') ajustes(); if (id === 'abertura') { Som.ligar(false); marcas(); } if (id === 'paineis') paineis(); if (id === 'caderno') caderno(); if (id === 'marcos') marcos(); }, fechar = () => { pilha = []; soltas(); mostra(''); }, trocar = id => { pilha = []; soltas(); abrir(id); };
   function voltar() { pilha.pop(); const id = pilha[pilha.length - 1] || ''; if (!id) inicio(); else { mostra(id); if (id === 'mapa') mapa(); if (id === 'abertura') marcas(); if (id === 'caderno') caderno(); } }
+  // Fase 3: caixas soltas por cima de qualquer tela (diária, oferta, aviso, vídeo)
+  let aoFechar = null; const soltas = () => { document.querySelectorAll('.solta:not(#anuncio)').forEach(t => t.classList.remove('on')); aoFechar = null; };
+  function abrirSolta(id, f) { document.querySelectorAll('.solta:not(#anuncio)').forEach(t => t.classList.toggle('on', t.id === id)); aoFechar = f || null; }
+  function fecharSolta() { const f = aoFechar; aoFechar = null; document.querySelectorAll('.solta:not(#anuncio)').forEach(t => t.classList.remove('on')); if (f) f(); }
+  function aviso(tit, txt, fig = '') { $('xTit').textContent = tit; $('xTxt').innerHTML = txt; $('xFig').innerHTML = fig; $('xFig').hidden = !fig; abrirSolta('aviso2'); }
   function inicio() { trocar('abertura'); Jogo.vitrine(); }
-  function hud(P) { $('tFase').textContent = P.dia ? 'Painel do dia' : 'Fase ' + P.n; $('tLugar').textContent = N.LUGARES[P.F.lugar] + (P.F.dif === 2 ? ' · muito difícil' : P.F.dif ? ' · difícil' : ''); $('dica').textContent = ''; ult = {}; placar(P); somIcone(); }
+  function hud(P) { Eventos.emite('hud', P); $('tFase').textContent = P.dia ? 'Painel do dia' : 'Fase ' + P.n; $('tLugar').textContent = N.LUGARES[P.F.lugar] + (P.F.dif === 2 ? ' · muito difícil' : P.F.dif ? ' · difícil' : ''); $('dica').textContent = ''; ult = {}; placar(P); somIcone(); }
   // placar: só mexe no que mudou
   function placar(P) {
     const b = P.bolas.find(x => !x.presa) || P.bolas[0], cor = b ? b.cor : -1, v = Math.max(3, P.vidas), q = `${P.vidas}/${v}`;
@@ -970,16 +1187,16 @@ const Telas = (() => {
     let h = ''; const bl = k => k + (k === 1 ? ' bola guardada' : ' bolas guardadas');
     if (ex.rara) h += `<p>Peça rara no caderno: <b>${ex.rara}</b></p>`; if (ex.perdeu) h += '<p class="cinza">A peça rara se perdeu. Na próxima tentativa ela volta.</p>';
     if (ex.carta !== undefined) h += '<p>Carta nova da Mestra Olívia no caderno</p>'; if (ex.diaBolas) h += `<p>Painel do dia vencido: +${bl(ex.diaBolas)}</p>`;
-    for (const m of ex.marcos) h += `<p>Marco: ${m.nome} (${m.alvo}) · +${bl(m.bolas)}</p>`; return h;
+    for (const m of ex.marcos) h += `<p>Marco: ${m.nome} (${m.alvo}) · +${bl(m.bolas)} e ${Eco.MARCO[m.degrau - 1]} moedas</p>`; return h;
   }
   function vitoria(n, p, e, ex = { marcos: [] }) {
     $('vTit').textContent = p.dia ? 'Painel do dia vencido!' : n === N.TOTAL ? 'Oficina completa!' : e === 3 ? 'Sem perder nenhuma!' : 'Fase concluída!'; $('vEst').innerHTML = EST.repeat(3); [...$('vEst').children].forEach((s, i) => { if (i < e) setTimeout(() => { s.classList.add('on'); Som.estrela(i); vibra(12); }, 250 + i * 260); });
     $('vTxt').innerHTML = `<b>${p.pontos}</b> pontos · recorde ${D.recordes[n]}<br>${Math.round(p.tempo)} s · maior veio ${p.maiorVeio}${e < 3 ? '<br>3 estrelas: terminar sem perder bola' : ''}`;
     if (p.dia) $('vTxt').innerHTML = `<b>${p.pontos}</b> pontos · ${Math.round(p.tempo)} s · maior veio ${p.maiorVeio}`;
-    $('vMais').innerHTML = mais(ex); $('vObra').hidden = !ex.obra; $('vDeNovo').hidden = !!p.dia;
+    $('vMais').innerHTML = mais(ex) + Econ.telaVitoria(n, p, ex.eco || {}); $('vObra').hidden = !ex.obra; $('vDeNovo').hidden = !!p.dia;
     $('vProx').textContent = p.dia ? 'Início' : n === N.TOTAL ? 'Ver as fases' : 'Próxima'; trocar('vitoria'); if (ex.marcos.length || ex.rara) setTimeout(() => Som.marco(), 1100);
   }
-  function derrota(n, p, ex = { marcos: [] }) { $('dTit').textContent = p.restam <= 3 ? 'Foi por pouco!' : 'As bolas acabaram'; $('dTxt').innerHTML = `Faltaram <b>${p.restam}</b> de ${p.total} azulejos.`; $('dMais').innerHTML = mais(ex); trocar('derrota'); }
+  function derrota(n, p, ex = { marcos: [] }) { $('dTit').textContent = p.restam <= 3 ? 'Foi por pouco!' : 'As bolas acabaram'; $('dTxt').innerHTML = `Faltaram <b>${p.restam}</b> de ${p.total} azulejos.`; $('dMais').innerHTML = mais(ex); Econ.telaDerrota(n, p); trocar('derrota'); }
   // ------------------------------------------------------------ Fase 2: início com marcas, painéis, caderno, cartas, marcos, bolas guardadas
   function marcas() {
     const hoje = Meta.diaDe(), bd = $('bDia'), aberta = [0, 1, 2, 3, 4, 5].some(g => Meta.cartaAberta(D, g) && !D.lidas[g]);
@@ -987,6 +1204,7 @@ const Telas = (() => {
     if (!Meta.diaAberto(D)) { bd.disabled = true; bd.innerHTML = 'Do dia<small>abre na fase 6</small>'; bd.classList.remove('novo'); }
     else if (Meta.diaFeito(D, hoje)) { bd.disabled = true; bd.innerHTML = 'Do dia ✓<small>volte amanhã</small>'; bd.classList.remove('novo'); }
     else { bd.disabled = false; bd.innerHTML = 'Do dia<small>+1 bola guardada</small>'; bd.classList.add('novo'); }
+    Econ.inicio();
   }
   let pg = 0, animando = 0;
   function paineis(focar = true) {
@@ -1018,43 +1236,221 @@ const Telas = (() => {
     const novos = Meta.checarMarcos(D); if (novos.length) { Progresso.salvar(); Som.marco(); for (const m of novos) Eventos.emite('marco', m); }
     $('mkResumo').textContent = `${D.bolas} ${D.bolas === 1 ? 'bola guardada' : 'bolas guardadas'}`; let h = '';
     for (const m of Meta.MARCOS) { const x = Meta.marco(D, m), fim = x.pegos >= 3, pr = fim ? 100 : Math.min(100, x.v / x.alvo * 100);
-      h += `<div class="mc"><div><b>${m.nome}</b><small>${fim ? 'completo · ' + m.deg[2] : `${Math.min(x.v, x.alvo)} de ${x.alvo} · prêmio +${Meta.PREMIO[x.pegos]} ${Meta.PREMIO[x.pegos] === 1 ? 'bola' : 'bolas'}`}</small><div class="prog"><i style="width:${pr}%"></i></div></div><span class="deg">${[0, 1, 2].map(k => `<i class="${k < x.pegos ? 'on' : ''}"></i>`).join('')}</span></div>`; }
+      h += `<div class="mc"><div><b>${m.nome}</b><small>${fim ? 'completo · ' + m.deg[2] : `${Math.min(x.v, x.alvo)} de ${x.alvo} · prêmio +${Meta.PREMIO[x.pegos]} ${Meta.PREMIO[x.pegos] === 1 ? 'bola' : 'bolas'} e ${Eco.MARCO[x.pegos]} moedas`}</small><div class="prog"><i style="width:${pr}%"></i></div></div><span class="deg">${[0, 1, 2].map(k => `<i class="${k < x.pegos ? 'on' : ''}"></i>`).join('')}</span></div>`; }
     $('mkLista').innerHTML = h;
   }
-  function continuar(p, res) { $('uTxt').innerHTML = `Faltam <b>${p.restam}</b> azulejos. Usar uma bola guardada? Você tem <b>${D.bolas}</b>.`; trocar('continuar'); continuar.res = res; continuar.p = p; }
   const b = (id, f) => $(id).addEventListener('click', () => { Som.iniciar(); Som.botao(); f(); });
   const fases = () => { pilha = ['abertura']; abrir('mapa'); Jogo.vitrine(); };
-  b('bJogar', () => Jogo.comecar(Math.min(N.TOTAL, D.fase))); b('bMapa', () => abrir('mapa')); b('bAjustes', () => abrir('ajustes'));
+  const jogar = (n, direto) => Econ.ir(n, direto), deNovo = () => Jogo.modo.dia ? Jogo.comecar(0, Jogo.modo) : jogar(Jogo.n, true);
+  b('bJogar', () => jogar(Math.min(N.TOTAL, D.fase))); b('bMapa', () => abrir('mapa')); b('bAjustes', () => abrir('ajustes'));
   b('bPaineis', () => abrir('paineis')); b('bCaderno', () => abrir('caderno')); b('bMarcos', () => abrir('marcos')); b('bDia', () => { const h = Meta.diaDe(); if (Meta.diaAberto(D) && !Meta.diaFeito(D, h)) Jogo.comecar(0, { dia: h }); });
   b('qAnt', () => { if (pg > 0 && !animando) { pg--; paineis(false); } }); b('qProx', () => { if (pg < 4 && !animando) { pg++; paineis(false); } }); $('qObra').addEventListener('click', () => { Som.iniciar(); restaurar(); });
   b('vObra', () => { pilha = ['abertura']; abrir('paineis'); Jogo.vitrine(); });
   $('cLista').addEventListener('click', e => { const q = e.target.closest('.pc'), c = e.target.closest('.carta');
     if (q) { Som.iniciar(); Som.botao(); document.querySelectorAll('.pc.sel').forEach(x => x.classList.remove('sel')); q.classList.add('sel'); const f = +q.dataset.f; $('cInfo').innerHTML = D.raras[f] ? `Fase ${f}: <b>${Meta.RARAS[f - 1]}</b>` : `Fase ${f}: peça ainda escondida${f > D.fase ? ' (fase fechada)' : ''}`; }
     if (c && !c.disabled) { Som.iniciar(); Som.botao(); const g = +c.dataset.c; D.lidas[g] = 1; Progresso.salvar(); $('kTit').textContent = Meta.CARTAS[g][0]; $('kTxt').textContent = Meta.CARTAS[g][1]; abrir('carta'); } });
-  const resp = k => { const r = continuar.res, p = continuar.p; continuar.res = null; if (!r) return; if (k) { D.bolas--; p.usou = (p.usou || 0) + 1; Progresso.salvar(); } r(k); };
-  b('uSim', () => resp(1)); b('uNao', () => resp(0));
   b('aCopia', () => { const c = Meta.exportar(D), i = $('aCod'); i.value = c; i.select(); try { navigator.clipboard.writeText(c).then(() => { $('aMsg').textContent = 'Código copiado. Cole no outro aparelho, em Ajustes.'; }, () => { $('aMsg').textContent = 'Copie o código do campo acima.'; }); } catch (e) { $('aMsg').textContent = 'Copie o código do campo acima.'; } });
   b('aUsa', () => { const x = Meta.importar($('aCod').value); if (!x) { $('aMsg').textContent = 'Código não reconhecido. Confira se colou inteiro.'; return; } Progresso.juntar(x); $('aMsg').textContent = 'Pronto: o progresso dos dois aparelhos foi juntado.'; somIcone(); ajustes(); });
   const pausa = () => { if (Jogo.P && !Jogo.P.fim && !Jogo.aberto) abrir('pausa'); }; b('bPausa', pausa); b('bVolta', pausa);
-  const continua = () => { fechar(); Jogo.pausar(false); }; b('pContinua', continua); b('pRecomeca', () => Jogo.comecar(Jogo.n, Jogo.modo)); b('pFases', fases); b('pAjustes', () => abrir('ajustes'));
-  b('vProx', async () => { const n = Jogo.n; if (Jogo.modo.dia) return inicio(); await Ganchos.entreFases(n); if (n >= N.TOTAL) fases(); else Jogo.comecar(n + 1); }); b('vDeNovo', () => Jogo.comecar(Jogo.n)); b('vFases', fases); b('dDeNovo', () => Jogo.comecar(Jogo.n, Jogo.modo)); b('dFases', fases);
+  const continua = () => { fechar(); Jogo.pausar(false); }; b('pContinua', continua); b('pRecomeca', () => { Econ.abandonar(); deNovo(); }); b('pFases', () => { Econ.abandonar(); fases(); }); $('pSair').addEventListener('click', () => Econ.abandonar()); b('pAjustes', () => abrir('ajustes'));
+  b('vProx', async () => { const n = Jogo.n; if (Jogo.modo.dia) return inicio(); await Ganchos.entreFases(n); if (n >= N.TOTAL) fases(); else jogar(n + 1, true); }); b('vDeNovo', deNovo); b('vFases', fases); b('dDeNovo', deNovo); b('dFases', fases);
   b('bSom', () => { D.op.som = !D.op.som; Progresso.salvar(); Som.volume(); somIcone(); if (D.op.som) Som.botao(); });
   document.querySelectorAll('[data-volta]').forEach(x => x.addEventListener('click', () => { Som.botao(); voltar(); })); document.querySelectorAll('.op').forEach(x => x.addEventListener('click', () => { D.op[x.dataset.op] = !D.op[x.dataset.op]; Progresso.salvar(); Som.iniciar(); Som.volume(); ajustes(); somIcone(); Som.botao(); if (x.dataset.op === 'vibra') vibra(30); }));
-  $('mLista').addEventListener('click', e => { const q = e.target.closest('.fs'); if (q && !q.disabled) { Som.iniciar(); Som.botao(); Jogo.comecar(+q.dataset.f); } });
-  addEventListener('keydown', e => { if (e.key === 'Escape') { if (Jogo.aberto === 'pausa') continua(); else if (!Jogo.aberto) pausa(); else if (Jogo.aberto && !['abertura', 'vitoria', 'derrota', 'continuar'].includes(Jogo.aberto)) voltar(); } });
+  $('mLista').addEventListener('click', e => { const q = e.target.closest('.fs'); if (q && !q.disabled) { Som.iniciar(); Som.botao(); jogar(+q.dataset.f); } });
+  document.querySelectorAll('[data-fecha]').forEach(x => x.addEventListener('click', () => { Som.iniciar(); Som.botao(); fecharSolta(); }));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !$('anuncio').classList.contains('on')) { const sf = document.querySelector('.solta.on [data-fecha]'); if (sf) return sf.click(); if (Jogo.aberto === 'pausa') continua(); else if (!Jogo.aberto) pausa(); else if (Jogo.aberto && !['abertura', 'vitoria', 'derrota', 'continuar', 'preparo', 'semvida'].includes(Jogo.aberto)) voltar(); } });
   // o navegador só libera som depois de um toque de verdade
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) document.addEventListener(t, () => Som.iniciar(), { passive: true, capture: true });
-  return { abrir, fechar, trocar, voltar, inicio, hud, placar, vitoria, derrota, somIcone, marcas, continuar };
+  return { abrir, fechar, trocar, voltar, inicio, hud, placar, vitoria, derrota, somIcone, marcas, abrirSolta, fecharSolta, aviso, get pilha() { return pilha; } };
 })();
-// Fase 2: quando as bolas acabam, oferece usar uma bola guardada (até 2 por partida)
-Ganchos.oferecerContinuar = p => new Promise(res => { if (Progresso.d.bolas <= 0 || (p.usou || 0) >= 2) return res(0); Telas.continuar(p, res); });
+
+// ============================================================ MONETIZAÇÃO (Fase 3): um só lugar para anúncio e compra. Na loja, o aplicativo liga o provedor dele com Monetizacao.usar({...})
+const Hoje = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
+const Monetizacao = (() => {
+  const D = Progresso.d, agora = () => Date.now();
+  // provedor da web: vídeo de mentira (contagem de 5 s, sem rede nenhuma), sem anúncio entre fases e sem compra
+  const web = { nome: 'web', podeComprar: false,
+    recompensado: () => new Promise(fim => { const c = $('anuncio'), t = $('nTempo'), b = $('nFecha'); let s = 5; c.classList.add('on'); b.textContent = 'Sair sem o prêmio'; t.textContent = s; const r = setInterval(() => { s--; t.textContent = s > 0 ? s : '✓'; if (s <= 0) { clearInterval(r); b.textContent = 'Receber'; } }, 1000); b.onclick = () => { clearInterval(r); c.classList.remove('on'); fim(s <= 0); }; }),
+    intersticial: async () => false, precos: async () => ({}), comprar: async () => ({ ok: false }), restaurar: async () => [] };
+  // loja de faz de conta, só no computador de quem desenvolve (localhost com ?loja=teste)
+  const teste = { ...web, nome: 'teste', podeComprar: true, precos: async () => Object.fromEntries(Eco.PRODUTOS.map(p => [p.id, 'teste'])), comprar: async id => ({ ok: true, transacao: id + '-' + agora() }), restaurar: async () => D.eco.semAnuncios ? [{ id: 'sem_anuncios', transacao: 'restaurada' }] : [] };
+  let prov = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]loja=teste/.test(location.search) ? teste : web, ocupado = false;
+  // vídeo com prêmio. local: continuar, vida, diaria, dobro, moedas. Só devolve verdadeiro se viu até o fim
+  async function video(local) {
+    if (ocupado || !Eco.podeVideo(D.eco, Hoje())) return false; ocupado = true; Eventos.emite('video:inicio', { local }); const deVerdade = prov !== web && prov !== teste;
+    let ok = false; try { if (deVerdade) Som.dormir(true); ok = await prov.recompensado(local) === true; } catch (e) { ok = false; } finally { if (deVerdade) Som.dormir(false); ocupado = false; }
+    if (ok) { Eco.viuVideo(D.eco, Hoje()); Progresso.salvar(); } Eventos.emite('video:fim', { local, ok }); return ok;
+  }
+  async function entreFases(n) { if (!Eco.podeInter(D.eco, n, agora())) return; let ok = false; try { ok = await prov.intersticial() === true; } catch (e) { /* sem anúncio */ } if (ok) { Eco.viuInter(D.eco, agora()); Progresso.salvar(); Eventos.emite('intersticial', { n }); } }
+  async function comprar(id) {
+    if (ocupado || !prov.podeComprar) return false; ocupado = true; let r = null; try { r = await prov.comprar(id); } catch (e) { r = null; } finally { ocupado = false; }
+    if (!r || !r.ok) { Eventos.emite('compra:falhou', { id }); return false; } const ok = Eco.entregarCompra(D, id, r.transacao, agora()); Progresso.salvar(); if (ok) Eventos.emite('compra', { id, transacao: r.transacao }); return ok;
+  }
+  async function restaurar() { let q = 0; try { for (const c of await prov.restaurar()) if (Eco.entregarCompra(D, c.id, c.transacao, agora())) q++; } catch (e) { /* sem loja */ } if (q) Progresso.salvar(); return q; }
+  return { usar(p) { prov = { ...web, ...p }; }, get provedor() { return prov.nome; }, get podeComprar() { return !!prov.podeComprar; }, precos: async () => { try { return await prov.precos() || {}; } catch (e) { return {}; } }, video, entreFases, comprar, restaurar, temVideo: () => Eco.podeVideo(D.eco, Hoje()) };
+})();
+
+// ============================================================ TELAS DA ECONOMIA (Fase 3): preparo, ferramentas, continuar, sem vidas, loja, missões, diária
+const Econ = (() => {
+  const D = Progresso.d, E = () => D.eco, agora = () => Date.now(), plural = (n, a, b) => `${n} ${n === 1 ? a : b}`, sv = c => `<svg viewBox="0 0 24 24">${c}</svg>`;
+  const MOEDA = '<svg class="moe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.5l5.5 5.5-5.5 5.5L6.5 12z"/></svg>', VIDA = '<svg class="cor" viewBox="0 0 24 24"><path d="M12 20.5S3.5 15.4 3.5 9.2A4.6 4.6 0 0112 6.8a4.6 4.6 0 018.5 2.4c0 6.2-8.5 11.3-8.5 11.3z"/></svg>';
+  const FIG = { pincel: sv('<path d="M14.5 3.5l6 6-8.5 8.5-6-6z"/><path d="M6 12c-2.2 0-3.5 1.8-3.5 3.8 0 1.3-.5 2.4-1.5 3.2 3.8.9 7.5-.5 8-3.7"/>'), rede: sv('<path d="M2.5 9h19M2.5 9l4.5 6 5-6 5 6 4.5-6M5 15h14M12 3v3"/>'),
+    tripla: sv('<circle cx="6.5" cy="15.5" r="3"/><circle cx="12" cy="7.5" r="3"/><circle cx="17.5" cy="15.5" r="3"/>'), largo: sv('<rect x="2.5" y="14" width="19" height="4.5" rx="2.2"/><path d="M8 9H3.5M16 9h4.5M5.5 6.8L3.5 9l2 2.2M18.5 6.8l2 2.2-2 2.2"/>'),
+    lenta: sv('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>'), bola: sv('<circle cx="12" cy="12" r="8"/><path d="M8.3 10.2a4.2 4.2 0 013.5-2.7"/>') };
+  const relogio = ms => { const s = Math.ceil(ms / 1000), m = Math.floor(s / 60); return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m}:${String(s % 60).padStart(2, '0')}`; };
+  const premioHtml = p => Object.entries(p).map(([k, q]) => `<span class="pm">${k === 'moedas' ? MOEDA : k === 'vidasLivres' ? VIDA : FIG[k]}<b>${k === 'vidasLivres' ? q >= 60 ? q / 60 + ' h' : q + ' min' : q}</b></span>`).join('');
+
+  // ---------- moedas e vidas no alto das telas (o coração só aparece depois da fase 10) ----------
+  function fichas() {
+    const v = Eco.vidas(E(), agora()), t = v.livre ? relogio(v.livre) : v.cheia ? '' : relogio(v.falta);
+    document.querySelectorAll('[data-moedas]').forEach(e => { e.innerHTML = MOEDA + `<b>${E().moedas.toLocaleString('pt-BR')}</b>`; e.setAttribute('aria-label', E().moedas + ' moedas'); });
+    document.querySelectorAll('[data-vidas]').forEach(e => { e.hidden = D.fase <= Eco.FASE_SEM_VIDA && v.cheia && !v.livre; e.innerHTML = VIDA + `<b>${v.livre ? '∞' : v.n}</b>` + (t ? `<small>${t}</small>` : ''); e.setAttribute('aria-label', v.livre ? 'sem gastar vida' : v.n + ' vidas'); });
+  }
+  setInterval(() => { if (document.hidden || !Jogo.aberto) return; fichas(); if (Jogo.aberto === 'semvida') { if (Eco.podeJogar(E(), alvo, agora())) ir(alvo); else textoSemVida(); } }, 1000);
+
+  // ---------- começar uma fase: aqui se confere a vida e, quando vale a pena, aparece o preparo ----------
+  let alvo = 1, escolhidos = new Set();
+  // direto: "próxima" e "tentar de novo" vão na hora; só as fases difíceis mostram o preparo sozinhas
+  function ir(n, direto, itens) {
+    n = Math.max(1, Math.min(Nucleo.TOTAL, n)); alvo = n; if (Eco.desbloquear(D).length) Progresso.salvar(); if (!Eco.podeJogar(E(), n, agora())) return semVida();
+    if (itens) return Jogo.comecar(n, { itens }); if (!Eco.ITENS.some(i => i.quando === 'antes' && Eco.aberto(D, i.id)) || (direto && !Nucleo.dif(n))) return Jogo.comecar(n); preparo(n);
+  }
+  function preparo(n) {
+    escolhidos = new Set(); const d = Nucleo.dif(n), aj = Eco.ajuda(E(), n), pr = Meta.barra(D, Math.floor((n - 1) / 10)) > 1; $('rTit').textContent = 'Fase ' + n; $('rDif').textContent = d === 2 ? 'Fase muito difícil' : d ? 'Fase difícil' : ''; $('rDif').hidden = !d;
+    $('rAjuda').textContent = [aj ? `Ajuda da oficina: barra ${aj * 5}% mais larga` : '', pr ? 'Painel pronto: barra 6% mais larga' : ''].filter(Boolean).join(' · '); pintarPreparo(); Telas.trocar('preparo'); if (!Jogo.naVitrine) Jogo.vitrine();
+  }
+  function pintarPreparo() {
+    $('rItens').innerHTML = Eco.ITENS.filter(i => i.quando === 'antes').map(i => { const ok = Eco.aberto(D, i.id), q = Eco.qtd(D, i.id), on = escolhidos.has(i.id); return `<button class="bst${on ? ' on' : ''}" data-i="${i.id}" ${ok ? '' : 'disabled'} aria-pressed="${on}">${FIG[i.id]}<span>${i.id === 'bola' ? 'Bola a mais' : i.nome}</span><b>${!ok ? 'fase ' + i.fase : q ? on ? q - 1 + ' ✓' : q : MOEDA + i.preco}</b></button>`; }).join('');
+    $('rInfo').textContent = escolhidos.size ? Eco.item([...escolhidos].pop()).txt : 'Toque para levar um reforço. Pode jogar sem nenhum.'; fichas();
+  }
+  // o jogo chama na hora de montar a fase: gasta o que foi escolhido e devolve os efeitos (o painel do dia vai sem reforço)
+  Ganchos.antesDaFase = async (n, itens = [], dia = false) => {
+    if (dia) return {}; const l = itens.filter(id => Eco.item(id) && Eco.item(id).quando === 'antes' && Eco.usarItem(D, id)), aj = Eco.ajuda(E(), n); if (l.length) { Progresso.salvar(); Eventos.emite('booster', { itens: l, n }); }
+    return { vidas: l.includes('bola') ? 1 : 0, largo: l.includes('largo') ? Eco.LARGO : 0, lenta: l.includes('lenta') ? Eco.LENTA : 0, ajuda: aj };
+  };
+
+  // ---------- ferramentas durante a fase ----------
+  function barra() { const l = Eco.ITENS.filter(i => i.quando === 'durante' && Eco.aberto(D, i.id)), f = $('ferr'), P = Jogo.P; f.hidden = !l.length || Jogo.naVitrine; f.innerHTML = l.map(i => `<button class="fe${i.id === 'rede' && P && P.rede > 0 ? ' on' : ''}" data-i="${i.id}" aria-label="${i.nome}: ${Eco.qtd(D, i.id)}">${FIG[i.id]}<span>${i.nome}</span><b>${Eco.qtd(D, i.id) || '+'}</b></button>`).join(''); }
+  Eventos.on('hud', () => barra());
+  function usar(id) {
+    const P = Jogo.P; if (!P || Jogo.naVitrine || Jogo.aberto || P.fim) return; const i = Eco.item(id);
+    if (!Eco.qtd(D, id)) return oferta(i.nome, i.txt, i.preco, FIG[id], () => { if (Eco.comprarItem(D, id)) { gastou(i.preco, id); barra(); } });
+    if (!Jogo.ferramenta(id)) return Som.negado(); Eco.usarItem(D, id); Progresso.salvar(); Eventos.emite('booster', { itens: [id], n: Jogo.n }); barra(); if (id === 'rede') setTimeout(barra, (Eco.REDE + 1) * 1000);
+  }
+  const gastou = (q, em) => { Progresso.salvar(); Som.compra(); Eventos.emite('gasto', { q, em }); };
+  // caixa de compra rápida com moedas: pausa a partida enquanto está aberta
+  let naOferta = null;
+  function oferta(tit, txt, preco, fig, f) {
+    naOferta = f; const da = E().moedas >= preco, noJogo = Jogo.aberto === '' && Jogo.P && !Jogo.P.fim && !Jogo.naVitrine; $('fTit').textContent = tit; $('fTxt').textContent = txt; $('fFig').innerHTML = fig; $('bOferta').innerHTML = da ? `Comprar por ${MOEDA}${preco}` : `Faltam ${MOEDA}${preco - E().moedas}`; $('bOferta').disabled = !da;
+    if (noJogo) Jogo.pausar(true); fichas(); Telas.abrirSolta('oferta', () => { naOferta = null; if (noJogo && Jogo.aberto === '' && Jogo.P && !Jogo.P.fim) Jogo.pausar(false); });
+  }
+
+  // ---------- as bolas acabaram: bola guardada, moedas ou vídeo ----------
+  let resolve = null, cont = null;
+  Ganchos.oferecerContinuar = p => new Promise(r => {
+    if (!p.cont) p.cont = { guardadas: 0, pagas: 0 }; const o = Eco.continuar(D, p.cont, p.restam, p.total, Monetizacao.temVideo()); if (!o) return r(0); resolve = r; cont = { p, o };
+    $('uTxt').innerHTML = `Faltam <b>${p.restam}</b> de ${p.total} azulejos.` + (o.guardada ? `<br>Você tem <b>${plural(D.bolas, 'bola guardada', 'bolas guardadas')}</b>.` : '');
+    $('uSim').hidden = !o.guardada; $('uMoedas').hidden = !o.preco; $('uMoedas').innerHTML = `+1 bola por ${MOEDA}${o.preco}`; $('uMoedas').disabled = !o.podePagar; $('uVideo').hidden = !o.video;
+    $('uSim').className = 'bt' + (o.guardada ? ' pri' : ''); $('uMoedas').className = 'bt' + (!o.guardada ? ' pri' : '');
+    $('uVida').textContent = !p.dia && Eco.gastaVida(E(), Jogo.n, agora()) ? 'Terminar gasta 1 vida.' : ''; Telas.trocar('continuar'); Som.negado();
+  });
+  function responder(k, como) { const r = resolve; resolve = null; if (!r) return; if (k) { if (como === 'guardada') cont.p.cont.guardadas++; else cont.p.cont.pagas++; E().tot.continuou++; Progresso.salvar(); Som.vida(); Eventos.emite('continuou', { n: Jogo.n, como }); } r(k); }
+
+  // ---------- sem vidas ----------
+  function textoSemVida() { const v = Eco.vidas(E(), agora()); $('wTxt').innerHTML = `A próxima vida chega em <b>${relogio(v.falta)}</b>.<br>As fases 1 a ${Eco.FASE_SEM_VIDA} e o painel do dia não gastam vida.`; }
+  function semVida() { textoSemVida(); $('bwMoedas').innerHTML = `Encher por ${MOEDA}${Eco.PRECO_VIDAS}`; $('bwMoedas').disabled = E().moedas < Eco.PRECO_VIDAS; $('bwVideo').hidden = !Monetizacao.temVideo(); $('bwDia').hidden = !Meta.diaAberto(D) || Meta.diaFeito(D, Meta.diaDe()); Telas.trocar('semvida'); if (!Jogo.naVitrine) Jogo.vitrine(); }
+  // sair ou recomeçar no meio gasta a vida, como perder (a tela de pausa avisa antes)
+  const gastaAoSair = () => { const P = Jogo.P; return !!(P && !Jogo.naVitrine && !P.fim && !P.dia && P.lancou && (P.quebrados > 0 || P.tempo > 5) && Eco.gastaVida(E(), Jogo.n, agora())); };
+  function abandonar() { if (gastaAoSair() && Eco.perderVida(E(), Jogo.n, agora())) { Eco.perdeuFase(E(), Jogo.n); Progresso.salvar(); } }
+  const pausa = () => { $('zVida').textContent = gastaAoSair() ? 'Recomeçar ou sair gasta 1 vida.' : ''; };
+
+  // ---------- fim da partida ----------
+  let ult = 0;
+  Eventos.on('fase:derrota', x => { if (!x.dia) { Eco.perderVida(E(), x.n, agora()); Eco.perdeuFase(E(), x.n); Progresso.salvar(); } });
+  Eventos.on('marco', m => { Eco.ganhar(D, Eco.MARCO[m.degrau - 1] || 0); Progresso.salvar(); });
+  Eventos.on('painel:pronto', () => { Eco.ganhar(D, Eco.PAINEL); Progresso.salvar(); fichas(); });
+  Eventos.on('carta', () => Eco.ganhar(D, Eco.CARTA));
+  // o que a partida rendeu: moedas, reforços liberados agora; e anda as missões e o evento
+  Ganchos.fimDaPartida = (p, venceu, antes, ex) => {
+    const n = Jogo.n, dia = !!p.dia; let q = 0;
+    if (venceu && !dia) { q += Eco.ganhar(D, Eco.moedasVitoria(antes, p.estrelas, p.F.par - p.tempo)); Eco.venceuFase(E(), n); E().inter.vit++; }
+    if (ex.rara) q += Eco.ganhar(D, Eco.RARA); if (ex.diaBolas) q += Eco.ganhar(D, Eco.DIA); if (ex.carta !== undefined) q += Eco.CARTA;
+    Eco.registrar(D, Hoje(), { quebrados: p.quebrados, fases: venceu && !dia ? 1 : 0, tres: venceu && !dia && p.perdidas === 0 ? 1 : 0, veios: p.veios, veio6: p.maiorVeio >= 6 ? 1 : 0, jarros: p.jarros, itens: p.pegos, raras: ex.rara ? 1 : 0, pontos: p.pontos, dia: venceu && dia ? 1 : 0, porCor: p.porCor });
+    ult = venceu && !dia ? q : 0; return { moedas: q, itens: Eco.desbloquear(D) };
+  };
+  Ganchos.entreFases = n => Monetizacao.entreFases(n);
+  function telaVitoria(n, p, r) {
+    $('vMoedas').innerHTML = r.moedas ? MOEDA + '+' + r.moedas : ''; $('vMoedas').hidden = !r.moedas; $('bDobro').hidden = !Monetizacao.temVideo() || !!p.dia || n < 5 || ult < 10; $('bDobro').disabled = false; $('bDobro').innerHTML = `Ver vídeo: ${MOEDA}+${ult}`;
+    if (r.moedas) setTimeout(() => { if (Jogo.aberto === 'vitoria') Som.moedas(); }, 1250);
+    return (r.itens || []).map(i => `<p><b>${i.nome}: liberado.</b> ${i.txt} Você ganhou 2.</p>`).join('');
+  }
+  function telaDerrota(n, p) {
+    const pk = !p.dia && Eco.pacote(D, n), v = Eco.vidas(E(), agora()), a = p.dia ? 0 : Eco.ajuda(E(), n); $('dVida').textContent = !p.dia && n > Eco.FASE_SEM_VIDA ? v.livre ? 'Por enquanto você não gasta vidas.' : `Vidas: ${v.n} de ${Eco.VIDAS}` : '';
+    $('dAjuda').textContent = a && a > (p.ajuda || 0) ? `Na próxima tentativa a oficina ajuda: barra ${a * 5}% mais larga.` : ''; $('dPacote').hidden = !pk || !Eco.podeJogar(E(), n, agora());
+    if (pk) $('dPacote').innerHTML = `Tentar com barra larga e bola lenta<small>${MOEDA}${pk.preco} em vez de ${pk.cheio}</small>`;
+  }
+
+  // ---------- loja ----------
+  async function loja() {
+    $('lItens').innerHTML = Eco.ITENS.map(i => { const ok = Eco.aberto(D, i.id); return `<div class="mc"><span class="figp">${FIG[i.id]}</span><div><b>${i.nome}</b> <em>${Eco.qtd(D, i.id)}</em><small>${ok ? i.txt : 'Abre na fase ' + i.fase}</small></div><button class="bt mini" data-c="${i.id}" ${ok && E().moedas >= i.preco ? '' : 'disabled'}>${MOEDA}${i.preco}</button></div>`; }).join('');
+    const v = Eco.vidas(E(), agora()), q = Monetizacao.temVideo() ? Eco.LIMITE_VIDEOS - Eco.videosHoje(E(), Hoje()) : 0; $('blVidas').innerHTML = v.cheia ? 'Vidas cheias' : `Encher vidas por ${MOEDA}${Eco.PRECO_VIDAS}`; $('blVidas').disabled = v.cheia || E().moedas < Eco.PRECO_VIDAS;
+    $('blVideo').innerHTML = q > 0 ? `Ver vídeo: ${MOEDA}+${Eco.VIDEO_MOEDAS}` : 'Sem vídeos por hoje'; $('blVideo').disabled = q <= 0; $('lVideos').textContent = q > 0 ? `Ainda dá para ver ${plural(q, 'vídeo', 'vídeos')} hoje.` : '';
+    const pode = Monetizacao.podeComprar; $('lNota').textContent = pode ? Monetizacao.provedor === 'teste' ? 'Loja de teste: nada é cobrado.' : '' : 'As compras só existem no aplicativo da loja. Aqui no site nada é vendido.'; $('blRest').hidden = !pode; fichas(); const pr = pode ? await Monetizacao.precos() : {};
+    $('lProd').innerHTML = Eco.PRODUTOS.filter(p => !(p.unico && Eco.temCompra(E(), p.id))).map(p => `<div class="mc"><div><b>${p.nome}</b>${p.txt ? `<small>${p.txt}</small>` : ''}</div><button class="bt mini" data-p="${p.id}" ${pode ? '' : 'disabled'}>${pode ? pr[p.id] || 'Comprar' : 'No app'}</button></div>`).join('');
+  }
+
+  // ---------- missões, evento da semana e diária ----------
+  const linha = (tit, sub, v, a, btn, img = '') => `<div class="mc${btn ? ' pronto' : ''}">${img}<div><b>${tit}</b><small>${sub}</small><div class="prog"><i style="width:${Math.min(100, v / a * 100)}%"></i></div></div>${btn || ''}</div>`, bt = a => `<button class="bt mini pri" ${a}>Receber</button>`, nr = x => Math.floor(x).toLocaleString('pt-BR');
+  function missoes() {
+    const h = Hoje(), m = Eco.missoes(D, h), s = Eco.semana(D, h);
+    $('iDia').innerHTML = m.l.map(x => linha(x.txt, x.feita ? 'Recebida' : `${nr(x.v)} de ${nr(x.alvo)} · ${Eco.textoPremio(Eco.PREMIO_MISSAO)}`, x.v, x.alvo, x.pronta ? bt(`data-k="${x.k}"`) : '')).join('') + linha('As três do dia', m.bauFeito ? 'Recebido' : Eco.textoPremio(Eco.PREMIO_TRES), m.l.filter(x => x.feita).length, 3, m.bau ? bt('data-bau') : '');
+    $('iSem').innerHTML = linha(s.nome + ': quebre azulejos desse esmalte', s.fim ? 'Evento completo' : `${nr(Math.min(s.v, s.alvo))} de ${nr(s.alvo)} · ${Eco.textoPremio(s.premio)}`, s.fim ? 1 : s.v, s.fim ? 1 : s.alvo, s.pronta ? bt('data-sem') : '', `<span class="figp" style="background:${Tela.COR[s.cor]}"></span>`);
+    $('iSemT').textContent = `${s.dias === 1 ? 'último dia' : `${s.dias} dias`} · degrau ${Math.min(3, s.rec + 1)} de 3`; $('iCal').innerHTML = calendario(); $('iCalB').hidden = !Eco.temDiaria(E(), h); fichas();
+  }
+  function calendario() { const t = Eco.temDiaria(E(), Hoje()), q = E().diaria.passo, ini = Math.floor((t ? q : Math.max(0, q - 1)) / 7) * 7; return Eco.DIARIA.map((p, k) => { const feito = ini + k < q, vez = t && ini + k === q; return `<div class="dd${feito ? ' ok' : ''}${vez ? ' vez' : ''}"><small>${feito ? '✓' : 'dia ' + (k + 1)}</small>${premioHtml(p)}</div>`; }).join(''); }
+  function diaria() { if (!Eco.temDiaria(E(), Hoje())) return; $('gCal').innerHTML = calendario(); $('bgVideo').hidden = !Monetizacao.temVideo(); $('gTxt').textContent = 'Hoje: ' + Eco.textoPremio(Eco.diaria(E()).premio); Telas.abrirSolta('diaria'); }
+  function pegarDiaria(x) { const p = Eco.pegarDiaria(D, Hoje(), agora(), x); Telas.fecharSolta(); if (!p) return; Progresso.salvar(); Som.premio(); vibra(15); Eventos.emite('diaria', { passo: E().diaria.passo, dobro: x === 2 }); fichas(); if (Jogo.aberto === 'abertura') inicio(); if (Jogo.aberto === 'missoes') missoes(); }
+  function recebido(p) { if (!p) return; Progresso.salvar(); Som.moedas(); vibra(15); missoes(); Eventos.emite('premio', { p }); }
+
+  // ---------- botões do início ----------
+  function inicio() {
+    fichas(); const n = Eco.avisos(D, Hoje()), e = $('bMissoes').querySelector('.selo'); e.textContent = n > 9 ? '9+' : n; e.hidden = !n;
+    const t = Eco.temDiaria(E(), Hoje()) && D.tot.vitorias > 0; $('bDiaria').hidden = !t; if (t) $('bDiaria').innerHTML = `<span>Recompensa de hoje</span>${premioHtml(Eco.diaria(E()).premio)}`;
+  }
+  // a primeira vez que esta versão abre: presente pelas estrelas que a pessoa já tem (e 2 de cada reforço já liberado)
+  function chegada() {
+    const q = Eco.presente(D), l = Eco.desbloquear(D); if (q || l.length) Progresso.salvar(); inicio(); if (!q || !D.tot.vitorias) return;
+    Telas.aviso('Moedas na oficina', `Você ganhou <b>${q} moedas</b> pelas estrelas que já tem${l.length ? ` e 2 de cada reforço: ${l.map(i => i.nome.toLowerCase()).join(', ')}` : ''}.<br>Na loja dá para trocar moedas por reforços e bolas guardadas. Em Missões tem prêmio todo dia.`, `<span class="figp">${MOEDA}</span>`);
+  }
+
+  // ---------- toques ----------
+  const clica = (id, f) => $(id).addEventListener('click', () => { Som.iniciar(); Som.botao(); f(); }), del = (id, sel, f) => $(id).addEventListener('click', e => { const q = e.target.closest(sel); if (q && !q.disabled) { Som.iniciar(); f(q); } });
+  document.querySelectorAll('button[data-moedas],button[data-vidas]').forEach(e => e.addEventListener('click', () => { if (Jogo.aberto === 'abertura') { Som.iniciar(); Som.botao(); Telas.abrir('loja'); } }));
+  clica('bLoja', () => Telas.abrir('loja')); clica('bMissoes', () => Telas.abrir('missoes')); clica('bDiaria', diaria); clica('iCalB', diaria);
+  clica('brJogar', () => { const l = [...escolhidos]; escolhidos.clear(); ir(alvo, true, l); }); clica('brFecha', () => Telas.inicio());
+  del('rItens', '.bst', q => { const id = q.dataset.i, i = Eco.item(id); Som.botao(); if (escolhidos.has(id)) escolhidos.delete(id); else if (Eco.qtd(D, id) > 0) escolhidos.add(id); else return oferta(i.nome, i.txt, i.preco, FIG[id], () => { if (Eco.comprarItem(D, id)) { escolhidos.add(id); gastou(i.preco, id); pintarPreparo(); } }); pintarPreparo(); });
+  del('ferr', '.fe', q => usar(q.dataset.i)); $('bOferta').addEventListener('click', () => { Som.iniciar(); const f = naOferta; naOferta = null; if (f) f(); Telas.fecharSolta(); fichas(); });
+  clica('uSim', () => { if (resolve && cont.o.guardada && D.bolas > 0) { D.bolas--; responder(1, 'guardada'); } });
+  clica('uMoedas', () => { if (resolve && cont.o.preco && Eco.gastar(D, cont.o.preco)) { Eventos.emite('gasto', { q: cont.o.preco, em: 'continuar' }); responder(1, 'moedas'); } });
+  clica('uVideo', async () => { if (resolve && cont.o.video && await Monetizacao.video('continuar')) responder(1, 'video'); }); clica('uNao', () => responder(0));
+  clica('bwMoedas', () => { if (Eco.encherVidas(D, agora())) { Eventos.emite('gasto', { q: Eco.PRECO_VIDAS, em: 'vidas' }); Progresso.salvar(); Som.vida(); ir(alvo); } });
+  clica('bwVideo', async () => { if (await Monetizacao.video('vida')) { Eco.darVida(E(), 1, agora()); Progresso.salvar(); Som.vida(); if (Jogo.aberto === 'semvida') ir(alvo); } }); clica('bwDia', () => Jogo.comecar(0, { dia: Meta.diaDe() })); clica('bwFecha', () => Telas.inicio());
+  del('lItens', '[data-c]', q => { const id = q.dataset.c; if (Eco.comprarItem(D, id)) { gastou(Eco.item(id).preco, id); loja(); } }); clica('blVidas', () => { if (Eco.encherVidas(D, agora())) { gastou(Eco.PRECO_VIDAS, 'vidas'); loja(); } });
+  clica('blVideo', async () => { if (await Monetizacao.video('moedas')) { Eco.ganhar(D, Eco.VIDEO_MOEDAS); Progresso.salvar(); Som.moedas(); } loja(); });
+  del('lProd', '[data-p]', async q => { q.disabled = true; if (await Monetizacao.comprar(q.dataset.p)) Som.compra(); loja(); }); clica('blRest', async () => { const q = await Monetizacao.restaurar(); loja(); Telas.aviso('Compras', q ? plural(q, 'compra restaurada', 'compras restauradas') + '.' : 'Nenhuma compra para restaurar.'); });
+  del('missoes', '[data-k]', q => recebido(Eco.pegarMissao(D, +q.dataset.k, agora()))); del('missoes', '[data-bau]', () => recebido(Eco.pegarBau(D, agora()))); del('missoes', '[data-sem]', () => recebido(Eco.pegarSemana(D, Hoje(), agora())));
+  clica('bgPega', () => pegarDiaria(1)); clica('bgVideo', async () => { if (await Monetizacao.video('diaria')) pegarDiaria(2); });
+  clica('bDobro', async () => { const q = ult; $('bDobro').disabled = true; if (q && await Monetizacao.video('dobro')) { ult = 0; Eco.ganhar(D, q); Progresso.salvar(); $('vMoedas').innerHTML = MOEDA + '+' + q * 2; $('bDobro').hidden = true; Som.moedas(); } $('bDobro').disabled = false; });
+  clica('dPacote', () => { const n = Jogo.n, p = Eco.pacote(D, n); if (!p || !Eco.gastar(D, p.preco)) return; for (const i of p.itens) E().inv[i]++; gastou(p.preco, 'pacote'); ir(n, true, p.itens); });
+  return { fichas, ir, preparo, barra, usar, semVida, abandonar, pausa, telaVitoria, telaDerrota, loja, missoes, diaria, inicio, chegada, FIG, get continuando() { return !!resolve; } };
+})();
 
 // ============================================================ ABRIR
 (() => {
   try {
     Tela.medir(); addEventListener('resize', () => Tela.medir()); if (window.ResizeObserver) new ResizeObserver(() => Tela.medir()).observe($('area'));
-    Telas.somIcone(); Telas.inicio(); $('carga').remove();
-    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__glaze = { Nucleo, Meta, Arte, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos };
+    Telas.somIcone(); Telas.inicio(); Econ.chegada(); $('carga').remove();
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__glaze = { Nucleo, Eco, Econ, Monetizacao, Hoje, Meta, Arte, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos };
   } catch (e) { console.error(e); $('carga').textContent = 'Não deu para abrir o jogo. Atualize o navegador e tente de novo.'; }
 })();
 </script>

@@ -7,7 +7,7 @@ const sorte2 = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.545
 function ruido(x, y) { const i = Math.floor(x), j = Math.floor(y), f = x - i, g = y - j, u = f * f * (3 - 2 * f), v = g * g * (3 - 2 * g); const a = sorte2(i, j), b = sorte2(i + 1, j), c = sorte2(i, j + 1), d = sorte2(i + 1, j + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
 const fbm = (x, y, n = 4) => { let s = 0, a = .5; for (let k = 0; k < n; k++) { s += a * ruido(x, y); x = x * 2.03 + 7.1; y = y * 2.03 + 3.3; a *= .5; } return s; };
 const suaveP = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-const MAPA = 480, LARGURA = 7.4;
+const MAPA = 480, LARGURA = 8.8;
 let MUNDO = null;
 // sorteio que dá sempre o mesmo resultado para a mesma etapa (a pista não muda de uma vez para outra)
 function sorteador(s) { let a = s * 9301 + 49297; return () => { a = (a * 9301 + 49297) % 233280; return a / 233280; }; }
@@ -18,10 +18,15 @@ function criarMundo(E) {
 
   /* ---------- estrada: pontos de controle de um lado ao outro, amostrados a cada metro ---------- */
   // a estrada nunca passa perto de si mesma (senão daria para cortar caminho): se passar, as curvas ficam mais suaves
-  const sorteios = []; for (let k = 0; k < 40; k++) sorteios.push(rnd() - .5);
+  const sorteios = []; for (let k = 0; k < 60; k++) sorteios.push(rnd() - .5);
   let P = null;
   for (let fator = 1; !P; fator *= .85) {
-    const ctrl = []; let k = 0; for (let x = -180; x <= 180; x += 24) ctrl.push(new THREE.Vector3(x, 0, (Math.sin(x * E.curva.freq + S) * E.curva.amp + sorteios[k++] * E.curva.ruido * 2 + Math.sin(x * .011 + S * 3) * E.curva.amp * .4) * fator));
+    // três trechos de um lado ao outro do mapa, ligados por duas curvas em U (a estrada serpenteia)
+    const ctrl = []; let k = 0;
+    const trecho = (z0, sentido) => { for (let x = -180; x <= 180; x += 24) { const xx = x * sentido, aperta = 1 - Math.pow(Math.abs(xx) / 180, 4) * .75;
+      ctrl.push(new THREE.Vector3(xx, 0, z0 + (Math.sin(xx * E.curva.freq + S + z0) * E.curva.amp + sorteios[k++ % 60] * E.curva.ruido * 2 + Math.sin(xx * .011 + S * 3 + z0) * E.curva.amp * .4) * fator * .5 * aperta)); } };
+    const volta = (x, z0, z1) => { const s = Math.sign(x); ctrl.push(new THREE.Vector3(x + s * 16, 0, z0 + (z1 - z0) * .18), new THREE.Vector3(x + s * 26, 0, (z0 + z1) / 2), new THREE.Vector3(x + s * 16, 0, z0 + (z1 - z0) * .82)); };
+    trecho(-112, 1); volta(194, -112, 0); trecho(0, -1); volta(-194, 0, 112); trecho(112, 1);
     ctrl[0].z = ctrl[1].z; ctrl[ctrl.length - 1].z = ctrl[ctrl.length - 2].z;   // pontas retas
     const curva = new THREE.CatmullRomCurve3(ctrl, false, 'centripetal'), Q = curva.getSpacedPoints(Math.round(curva.getLength()));
     let bom = true; for (let i = 0; i < Q.length && bom; i += 3) for (let j = i + 30; j < Q.length; j += 3) if ((Q[i].x - Q[j].x) ** 2 + (Q[i].z - Q[j].z) ** 2 < 22 * 22) { bom = false; break; }
@@ -97,7 +102,7 @@ function criarMundo(E) {
   }
 
   /* ---------- largada, marcos e chegada ---------- */
-  const ini = 16, fim = P.length - 16, marcos = [.2, .4, .6, .8].map(f => Math.round(ini + (fim - ini) * f));
+  const ini = 16, fim = P.length - 16, marcos = [1, 2, 3, 4, 5, 6].map(f => f / 7).map(f => Math.round(ini + (fim - ini) * f));
   const portais = []; const lado = i => { const t = new THREE.Vector3().subVectors(P[Math.min(P.length - 1, i + 2)], P[Math.max(0, i - 2)]).setY(0).normalize(); return { t, l: new THREE.Vector3(-t.z, 0, t.x) }; };
   const poste = (x, z, h, c) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, h, 8), new THREE.MeshLambertMaterial({ color: c })); m.position.set(x, altura(x, z) + h / 2, z); m.castShadow = true; return m; };
   function portal(i, tipo) {
@@ -114,8 +119,25 @@ function criarMundo(E) {
   }
   portal(ini, 'largada'); marcos.forEach(i => portal(i, 'marco')); portal(fim, 'chegada');
 
+  /* ---------- zonas de drift: as curvas mais fechadas, marcadas por cones dos dois lados (pontos em dobro) ---------- */
+  const curv = P.map((p, i) => { const a = P[Math.max(0, i - 7)], b = P[Math.min(P.length - 1, i + 7)]; let d = Math.atan2(b.x - p.x, b.z - p.z) - Math.atan2(p.x - a.x, p.z - a.z); d -= Math.round(d / 6.2832) * 6.2832; return Math.abs(d) / 14; });
+  const zonas = [], emZona = new Uint8Array(P.length);
+  for (let i = ini + 20; i < fim - 20; i++) {
+    if (curv[i] < .017) continue; let j = i; while (j < fim - 12 && curv[j] >= .012) j++;
+    if (j - i >= 18 && (!zonas.length || i - zonas.at(-1)[1] > 40)) { const z = [Math.max(ini + 8, i - 10), Math.min(fim - 6, j + 8)]; zonas.push(z); for (let k = z[0]; k <= z[1]; k++) emZona[k] = 1; }
+    i = j;
+  }
+  {
+    const lugares = []; for (const [a, b] of zonas) for (let i = a; i <= b; i += 4) { const { l } = lado(i), p = P[i]; for (const s of [-1, 1]) lugares.push([p.x + l.x * (LARGURA / 2 + .7) * s, p.z + l.z * (LARGURA / 2 + .7) * s, (i - a) / 4 % 2]); }
+    if (lugares.length) {
+      const g = new THREE.ConeGeometry(.26, .72, 8).translate(0, .36, 0), m = new THREE.InstancedMesh(g, new THREE.MeshLambertMaterial({ color: '#fff' }), lugares.length), M = new THREE.Matrix4(), c = new THREE.Color();
+      lugares.forEach(([x, z, k], n) => { M.makeTranslation(x, altura(x, z) - .02, z); m.setMatrixAt(n, M); m.setColorAt(n, c.set(k ? '#f4ead8' : '#e3773a')); });
+      m.castShadow = true; grupo.add(m);
+    }
+  }
+
   grupo.add(criarMontanhas(E), criarCeu());
-  return { E, grupo, pontos: P, perto, altura, naEstrada, bateu, molhado, maisPerto, ini, fim, marcos, portais, arvores: arv,
+  return { E, grupo, pontos: P, perto, altura, naEstrada, bateu, molhado, maisPerto, ini, fim, marcos, portais, arvores: arv, zonas, emZona,
     largada: () => { const i = ini - 9, p = P[i], s = P[i + 4]; return { x: p.x, z: p.z, rumo: Math.atan2(s.x - p.x, s.z - p.z) }; },
     descartar() { grupo.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } };
 }

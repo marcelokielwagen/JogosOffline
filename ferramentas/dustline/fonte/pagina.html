@@ -12,15 +12,17 @@
 </style>
 </head>
 <body>
-<canvas id="tela" aria-label="Rali numa estrada de terra, em 3D"></canvas>
+<canvas id="tela" aria-label="Drift numa estrada de terra, em 3D"></canvas>
 <div id="veu"></div>
 
 <!-- tela inicial: escolher pista e modo -->
 <section id="inicio">
   <a id="sair" href="../../index.html" aria-label="Voltar para a coleção de jogos" title="Coleção de jogos"><svg viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></a>
   <div id="titulo"><h1>dustline</h1></div>
+  <div id="cores" role="radiogroup" aria-label="Cor do carro"></div>
   <div id="modos" role="radiogroup" aria-label="Modo">
     <button data-modo="tempo" role="radio" aria-checked="true">contra o relógio</button>
+    <button data-modo="drift" role="radio" aria-checked="false">drift</button>
     <button data-modo="livre" role="radio" aria-checked="false">passeio livre</button>
   </div>
   <div id="pistas" role="list"></div>
@@ -31,12 +33,15 @@
   <button id="bVoltar" aria-label="Voltar para as pistas" title="Pistas"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
   <div id="relogio" aria-live="off"></div>
   <div id="marcos" aria-hidden="true"></div>
+  <div id="placar" hidden></div>
+  <div id="drift" aria-hidden="true"><span class="pts"></span><span class="mult"></span><i></i></div>
+  <div id="dnota" aria-live="polite"></div>
 </div>
 <div id="contagem" aria-live="assertive"></div>
 <div id="aviso" aria-live="polite"></div>
 <section id="fim" hidden>
   <div class="cartao">
-    <p class="nome"></p><p class="tempo"></p><p class="melhor"></p>
+    <p class="nome"></p><p class="tempo"></p><p class="melhor"></p><p class="medalha"></p><p class="extra"></p>
     <div class="acoes">
       <button id="bDeNovo"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4h4"/></svg>de novo</button>
       <button id="bProxima"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>próxima</button>

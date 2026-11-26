@@ -48,6 +48,10 @@ export const CHEFES = {
   guindaste: { nome: 'Guindaste', lema: 'O que ele levanta, ele solta', altura: 8.6, escala: 5, raio: 2.6, vel: 1.65, pausa: 1.6, aviso: 1.5, perda: .5, golpes: [['carro'], ['carro', 'varrida'], ['carros', 'varrida', 'porrete']], premio: { texto: '+3 soldados no começo de toda partida', soldados: 3 } },
   fornalha: { nome: 'Fornalha', lema: 'Só a água abre o ferro em brasa', altura: 7.6, escala: 5, raio: 2.6, vel: 1.65, pausa: 1.6, aviso: 1.45, perda: .5, quente: .3, golpes: [['brasa'], ['brasa', 'bafo'], ['bafo', 'pisao', 'brasa']], premio: { texto: '+10% de dano para sempre', dano: .1 } },
   mae: { nome: 'Mãe da Ponte', lema: 'A ponte inteira é o corpo dela', altura: 9.6, escala: 5.4, raio: 2.6, vel: 1.6, pausa: 1.55, aviso: 1.45, perda: .48, placas: 6, etapas: 3, golpes: [['pente', 'garra'], ['desaba', 'pente', 'convoca'], ['investida', 'desaba', 'ondas', 'pente']], premio: { texto: 'Toda partida começa com 1 metralhadora', metralhadora: 1 } },
+  // chefes novos (26/11/2026): usam o corpo de outro chefe (visual) com cores próprias
+  turbina: { nome: 'Turbina', lema: 'O vento dele derruba tudo', visual: 'operario', altura: 7.8, escala: 5, raio: 2.5, vel: 1.75, pausa: 1.55, aviso: 1.45, perda: .5, golpes: [['varrida'], ['varrida', 'entulho'], ['entulho', 'onda', 'varrida']], premio: { texto: '+3 soldados no começo de toda partida', soldados: 3 } },
+  colosso: { nome: 'Colosso', lema: 'Vem de longe e não para', visual: 'guindaste', carros: true, altura: 8.6, escala: 5.2, raio: 2.6, vel: 2.6, pausa: 1.45, aviso: 1.6, perda: .45, golpes: [['carro'], ['carro', 'entulho'], ['carros', 'entulho', 'garra']], premio: { texto: '+10% de dano para sempre', dano: .1 } },
+  tita: { nome: 'Titã de Pedra', lema: 'A montanha resolveu andar', visual: 'nevasca', altura: 7.8, escala: 5.2, raio: 2.5, vel: 1.7, pausa: 1.55, aviso: 1.45, perda: .5, golpes: [['bolas'], ['bolas', 'raio'], ['raio', 'varrida', 'bolas']], premio: { texto: 'Toda partida começa com mais 1 lança-chamas', chamas: 1 } },
   // meio-chefes: menores, um ou dois golpes, luta curta
   fiscal: { meio: true, nome: 'Fiscal', lema: 'Documentos, por favor', altura: 5, escala: 3.15, raio: 1.4, vel: 2.1, pausa: 1.3, aviso: 1.3, perda: .34, corpo: 'guarda', golpes: [['porrete']] },
   britadeira: { meio: true, nome: 'Britadeira', lema: 'Quebra o chão e quem estiver nele', altura: 4.7, escala: 3.2, raio: 1.6, vel: 2, pausa: 1.25, aviso: 1.3, perda: .36, corpo: 'bruto', golpes: [['buraco', 'porrete']] },
@@ -72,6 +76,9 @@ export const ARENA = { comeca: 25, meio: 18 }; // a que distância o chefe cai (
 // perigos: [d, tipo, x] desaba (lado -1, 0 ou 1), carro (cai do alto em x), fogo (jato na faixa x), meteoro (cai em x e deixa entulho), bola (bola de neve na faixa x)
 // escorrega = a pista inteira desliza; gelo: [d0, d1, x0, x1] placas onde quase não dá para frear. entraY = altura de onde pulam as hordas laterais
 // escolta = tropa que entra com o chefe; tropas = reforços de cada fase
+// heli = helicóptero que passa a cada "cada" segundos e solta caixas de paraquedas (passe por cima para pegar), na ordem de "da"
+// defesa = fase parada atrás da muralha: muro = x da muralha, horda = quantos zumbis vêm pela esquerda em "dur" segundos ("metros" só para mostrar),
+//   longe = onde o chefe cai (m), bonus = [segundo, o que dá] caixas no meio da horda ('sinal' chama o helicóptero para bombardear)
 export const NIVEIS = [
   {
     nome: 'Pedágio', forca: 1, aviso: 1, cenario: 'tarde', chefe: 'cancela', novo: 'Resgate soldados presos nas gaiolas', vida: 41000, tropa: 42, inicio: 3, comprimento: 352,
@@ -159,6 +166,34 @@ export const NIVEIS = [
     hordas: [[36, 'comum', 10, 6, 5], [50, 'corredor', 8, 7, 6], [78, 'comum', 18, 8, 8], [90, 'comum', 8, 'L', 10], [122, 'comum', 30, 9, 10], [138, 'escudeiro', 4, 8, 2], [142, 'atirador', 2, 8, 2], [170, 'comum', 38, 9, 10], [182, 'blindado', 4, 8, 3], [270, 'comum', 66, 9, 12], [280, 'escudeiro', 10, 9, 3], [286, 'comum', 28, 'L', 12], [318, 'corredor', 58, 9, 12], [328, 'atirador', 7, 9, 5], [336, 'comum', 54, 9, 8], [368, 'comum', 86, 9, 14], [376, 'blindado', 8, 9, 5], [420, 'comum', 70, 9, 10], [426, 'corredor', 35, 'L', 14], [434, 'escudeiro', 10, 9, 3], [464, 'comum', 66, 9, 10], [472, 'blindado', 7, 9, 5]],
     perigos: [[92, 'desaba', 1], [130, 'desaba', -1], [146, 'desaba', 0], [276, 'desaba', 1], [292, 'desaba', -1], [324, 'desaba', 0], [344, 'desaba', 1], [380, 'desaba', -1], [396, 'desaba', 1], [436, 'desaba', 0]],
     blocos: [[112, 117, -1.1, 1.1, 'carro']], barris: [[46, -2.6], [126, 3], [274, -3], [372, 3], [470, 0]], caixas: [[72, 3.6, 320, '+8'], [136, 3.6, 600, 'm1'], [264, -3.6, 1900, '+14'], [312, 3.6, 2300, 'b1'], [416, -3.6, 3200, '+18']],
+    escolta: [['comum', 12], ['escudeiro', 5], ['atirador', 2]], tropas: [[['comum', 8], ['escudeiro', 2]], [['blindado', 2], ['atirador', 3], ['comum', 6]], [['corredor', 14], ['escudeiro', 4], ['blindado', 1]]],
+  },
+  // ---------- níveis novos (26/11/2026) ----------
+  {
+    nome: 'Heliponto', forca: 2.15, aviso: .88, cenario: 'manha', chefe: 'turbina', novo: 'O helicóptero solta caixas: passe por cima delas', vida: 150000, tropa: 64, inicio: 4, comprimento: 500, adrenalina: true,
+    heli: { cada: 15, da: ['+6', 'm1', '+8', 'b1', '+10', 'l1', '+12', 'm2', '+14', 'b2', '+16', 'l2'] },
+    meio: { id: 'motoqueiro', d: 212, vida: 21000, tropa: 42, premio: 'm2' },
+    portoes: [{ d: 24, l: ['+9', '+5'] }, { d: 62, l: ['*2', '-6', 'm1'] }, { d: 108, l: ['+10', 'a'], anda: 2.2 }, { d: 156, l: ['b1', 't-12'] }, { d: 252, l: ['+14', '-20', '+10'], anda: 1.2 }, { d: 300, l: ['m2', '+16'] }, { d: 350, l: ['-25', 'a'], anda: 2.6 }, { d: 400, l: ['+20', '/2', 'l2'], anda: 1.3 }, { d: 450, l: ['b2', 't-22'] }],
+    hordas: [[36, 'comum', 9, 6, 5], [50, 'corredor', 7, 7, 6], [78, 'comum', 17, 8, 8], [94, 'blindado', 1, 4, 2], [120, 'comum', 28, 9, 10], [138, 'atirador', 3, 8, 3], [168, 'comum', 36, 9, 10], [180, 'escudeiro', 5, 8, 2], [264, 'comum', 62, 9, 12], [276, 'blindado', 5, 9, 4], [312, 'comum', 69, 9, 12], [320, 'corredor', 28, 9, 8], [328, 'escudeiro', 9, 9, 3], [362, 'corredor', 53, 9, 12], [376, 'atirador', 7, 9, 5], [384, 'comum', 46, 9, 8], [414, 'comum', 76, 9, 12], [426, 'blindado', 8, 9, 5], [464, 'comum', 60, 9, 8], [470, 'escudeiro', 8, 9, 3]],
+    blocos: [[84, 89, -1.1, 1.1, 'carro'], [142, 147, 2.2, 4.6, 'carro'], [282, 287, -4.6, -2.2, 'carro'], [340, 345, 1.4, 3.8, 'carro']],
+    barris: [[46, 2.5], [116, -3.2], [268, 3], [366, -3.2], [458, 2.8]], caixas: [[72, -3.6, 300, '+7'], [128, 3.6, 560, 'b1'], [258, 3.6, 1800, '+12'], [358, 3.6, 2500, 'm2'], [408, -3.6, 3000, '+16']],
+    escolta: [['comum', 12], ['blindado', 2], ['escudeiro', 3]], tropas: [[['comum', 8]], [['blindado', 2], ['atirador', 2], ['comum', 6]], [['corredor', 12], ['escudeiro', 4], ['atirador', 2]]],
+  },
+  {
+    nome: 'Muralha', forca: 1.9, aviso: .92, cenario: 'apocalipse', chefe: 'colosso', novo: 'Parado na muralha: 500 m de horda de um lado e o chefão do outro', vida: 130000, tropa: 60, inicio: 34, comprimento: 120,
+    defesa: { muro: -.9, horda: 520, metros: 500, dur: 118, longe: 104, bonus: [[5, '+8'], [13, 'a'], [22, 'm2'], [31, '+10'], [40, 'sinal'], [49, 'b2'], [58, '+12'], [67, 'a'], [76, 'l2'], [85, 'sinal'], [94, '+14'], [103, 'm2'], [111, 'sinal']] },
+    heli: { cada: 26, da: ['+8', 'b1', '+10', 'm1', '+12', 'l1'] },
+    portoes: [], hordas: [], barris: [], caixas: [], entraY: 3.4,
+    escolta: [], tropas: [[], [['corredor', 6]], [['corredor', 8], ['blindado', 1]]],
+  },
+  {
+    nome: 'Evacuação', forca: 2.2, aviso: .87, cenario: 'noite', chefe: 'tita', novo: 'A ponte cai, eles sobem pelos lados e o helicóptero ajuda', vida: 150000, tropa: 66, inicio: 4, comprimento: 512, adrenalina: true, lateral: true,
+    heli: { cada: 17, da: ['+8', 'l1', '+10', 'm1', '+12', 'b1', '+14', 'm2', '+16', 'b2', '+18', 'l2'] },
+    meio: { id: 'pregador', d: 214, vida: 22000, tropa: 42, premio: 'b3' },
+    portoes: [{ d: 24, l: ['+9', '+6'] }, { d: 62, l: ['*2', '-6', 'b1'], anda: 1.2 }, { d: 108, l: ['+12', 'a'], anda: 2.4 }, { d: 158, l: ['l2', '*2'] }, { d: 258, l: ['/2', '+18', '-30'], anda: 1.4 }, { d: 306, l: ['a', '+18'], anda: 2.6 }, { d: 356, l: ['t-30', 'm3'] }, { d: 408, l: ['+20', '/2'], anda: 3 }, { d: 452, l: ['+22', '-30', 'l3'], anda: 1.4 }, { d: 488, l: ['b2', 'm2'] }],
+    hordas: [[36, 'comum', 10, 6, 5], [50, 'corredor', 8, 7, 6], [78, 'comum', 18, 8, 8], [90, 'comum', 8, 'L', 10], [122, 'comum', 30, 9, 10], [138, 'escudeiro', 4, 8, 2], [142, 'atirador', 2, 8, 2], [170, 'comum', 38, 9, 10], [182, 'blindado', 4, 8, 3], [270, 'comum', 66, 9, 12], [280, 'escudeiro', 10, 9, 3], [286, 'comum', 28, 'L', 12], [318, 'corredor', 58, 9, 12], [328, 'atirador', 7, 9, 5], [336, 'comum', 54, 9, 8], [368, 'comum', 86, 9, 14], [376, 'blindado', 8, 9, 5], [420, 'comum', 70, 9, 10], [426, 'corredor', 35, 'L', 14], [434, 'escudeiro', 10, 9, 3], [468, 'comum', 66, 9, 10], [476, 'blindado', 7, 9, 5]],
+    perigos: [[92, 'desaba', 1], [118, 'meteoro', -2.4], [130, 'desaba', -1], [150, 'meteoro', 2.4], [276, 'desaba', 1], [298, 'meteoro', -2.6], [324, 'desaba', 0], [348, 'meteoro', 2.2], [380, 'desaba', -1], [400, 'meteoro', 0], [436, 'desaba', 0], [456, 'meteoro', -2.2]],
+    barris: [[46, -2.6], [126, 3], [274, -3], [372, 3], [472, 0]], caixas: [[72, 3.6, 320, '+8'], [136, 3.6, 600, 'm1'], [264, -3.6, 1900, '+14'], [312, 3.6, 2300, 'b1'], [416, -3.6, 3200, '+18']],
     escolta: [['comum', 12], ['escudeiro', 5], ['atirador', 2]], tropas: [[['comum', 8], ['escudeiro', 2]], [['blindado', 2], ['atirador', 3], ['comum', 6]], [['corredor', 14], ['escudeiro', 4], ['blindado', 1]]],
   },
 ];

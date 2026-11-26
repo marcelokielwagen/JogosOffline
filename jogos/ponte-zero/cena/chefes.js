@@ -25,6 +25,9 @@ const CORES = {
   motoqueiro: { capacete: '#e8352b', roupa: '#4a48b8', calca: '#34306a', colete: '#262250', couro: '#1c1620', pele: '#8ac05a', visor: '#ffd98a', unha: '#3a4a2a' },
   mergulhador: { capacete: '#d89a2e', roupa: '#1f8f8a', calca: '#17686a', colete: '#c47a24', couro: '#4a3020', pele: '#7ac0d0', visor: '#bdf5e8', metal: '#b8862c', unha: '#2a5a6a' },
   tampa: { pele: '#7fb06a', roupa: '#8a4a30', calca: '#4a3a52', couro: '#3a2a26', metal: '#7d8798', cano: '#545e70', unha: '#3a5a2a' },
+  turbina: { pele: '#8aa6b8', roupa: '#e8902a', calca: '#34424f', cabelo: '#1f2a33', couro: '#3a2a20', unha: '#2a3a4a' },
+  colosso: { pele: '#8a6a54', calca: '#2f3d2c', couro: '#3a3020', amarelo: '#8fd04a', visor: '#ff7a3a', unha: '#3a2a1c' },
+  tita: { pele: '#b89a68', branco: '#f2e2c0', calca: '#5a4232', couro: '#3a2a20', unha: '#5a3a1a', visor: '#ffb04a', vermelho: '#3a8ad0', metal: '#8d97a6', boca: '#4a1a1a' },
   estivador: { pele: '#d0785e', roupa: '#24568c', calca: '#2a3450', couro: '#4a3020', metal: '#c4542e', cano: '#8a3420', unha: '#6a2a1c' },
 };
 const COR = new THREE.Color();
@@ -226,9 +229,9 @@ const ENFEITES = {
 
 export class Chefe {
   constructor(cena, modelos, id, ruido, qual = 2) {
-    this.id = id; this.T = CHEFES[id]; const corpo = this.T.corpo || id, M0 = modelos[corpo]; this.J = M0.juntas; this.grupo = new THREE.Group(); cena.add(this.grupo);
+    this.id = id; this.T = CHEFES[id]; const vis = this.vis = this.T.visual || id, corpo = this.T.corpo || vis, M0 = modelos[corpo]; this.J = M0.juntas; this.grupo = new THREE.Group(); cena.add(this.grupo);
     this.dados = new Float32Array(NB * 3 * 4); this.tex = new THREE.DataTexture(this.dados, NB * 3, 1, THREE.RGBAFormat, THREE.FloatType);
-    this.mat = materialPersonagem(2, this.tex, ruido, paleta(CORES[id])); this.matC = contornoPersonagem(this.tex, this.mat.userData.u.uGiro, .03);
+    this.mat = materialPersonagem(2, this.tex, ruido, paleta(CORES[id] || CORES[vis])); this.matC = contornoPersonagem(this.tex, this.mat.userData.u.uGiro, .03);
     const geo = M0.lods[qual > 0 ? 0 : 1]; this.lixo = [this.tex, this.mat, this.matC];
     const nova = (g, m) => { const b = new THREE.BufferGeometry(); for (const k in g.attributes) b.setAttribute(k, g.attributes[k]); b.setIndex(g.index); b.setAttribute('aAnim', new THREE.InstancedBufferAttribute(new Float32Array(4), 4)); const x = new THREE.InstancedMesh(b, m, 1); x.setMatrixAt(0, new THREE.Matrix4()); x.frustumCulled = false; this.grupo.add(x); this.lixo.push(b, x); return x; };
     this.corpo = nova(geo, this.mat); this.corpo.receiveShadow = true; this.borda = nova(geo, this.matC);
@@ -236,7 +239,7 @@ export class Chefe {
     this.anim = this.corpo.geometry.attributes.aAnim;
     // placas soltas e enfeites
     this.pal = this.mat.userData.u.uPal.value; this.pal0 = this.pal.map(v => v.clone());
-    this.placas = []; const pecas = this.T.placas ? placas(id) : ENFEITES[id]?.().map(([o, g]) => [o, g.pronta ? g.pronta() : g]); if (pecas) { const m = materialDesenho({ side: THREE.DoubleSide }, { ruido }), mc = contorno({ esp: .03 }); this.lixo.push(m, mc); for (const [o, g] of pecas) { const p = new THREE.Mesh(g, m), b = new THREE.Mesh(g, mc); p.frustumCulled = b.frustumCulled = false; p.castShadow = true; p.add(b); p.matrixAutoUpdate = false; this.grupo.add(p); this.lixo.push(g); this.placas.push({ o, p, solta: null }); } }
+    this.placas = []; const pecas = this.T.placas ? placas(id) : ENFEITES[vis]?.().map(([o, g]) => [o, g.pronta ? g.pronta() : g]); if (pecas) { const m = materialDesenho({ side: THREE.DoubleSide }, { ruido }), mc = contorno({ esp: .03 }); this.lixo.push(m, mc); for (const [o, g] of pecas) { const p = new THREE.Mesh(g, m), b = new THREE.Mesh(g, mc); p.frustumCulled = b.frustumCulled = false; p.castShadow = true; p.add(b); p.matrixAutoUpdate = false; this.grupo.add(p); this.lixo.push(g); this.placas.push({ o, p, solta: null }); } }
     // sombra redonda no chão
     const gS = new THREE.CircleGeometry(1, 28).rotateX(-Math.PI / 2), mS = new THREE.MeshBasicMaterial({ color: '#150c1c', transparent: true, opacity: .34, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }); this.chao = new THREE.Mesh(gS, mS); this.chao.renderOrder = 1; cena.add(this.chao); this.lixo.push(gS, mS);
     this.pose = null; this.t = 0; this.M = new THREE.Matrix4(); this.base = new THREE.Vector3(); this.grupo.visible = this.chao.visible = false;
@@ -251,7 +254,7 @@ export class Chefe {
   soltar(i) { const q = this.placas[i]; if (!q || q.solta) return; q.p.matrix.decompose(q.p.position, q.p.quaternion, q.p.scale); q.p.matrixAutoUpdate = true; q.solta = { vx: (i % 2 ? 1 : -1) * (.5 + Math.random() * .5), vy: .9, vz: .5 + Math.random() * .4, t: 0, g: V(Math.random(), Math.random(), Math.random()).multiplyScalar(6) }; }
   atualizar(dt, S) {
     const c = S.chefe; this.grupo.visible = this.chao.visible = !!c && c.id === this.id; if (!this.grupo.visible) { this.pose = null; return; }
-    this.t += dt; const k = c.dur ? limita(c.t / c.dur, 0, 1) : limita(c.t / .85, 0, 1), alvo = POSES[this.id](c, c.passo, this.t, k);
+    this.t += dt; const k = c.dur ? limita(c.t / c.dur, 0, 1) : limita(c.t / .85, 0, 1), alvo = POSES[this.vis](c, c.passo, this.t, k);
     const vel = c.estado === 'bate' ? 20 : c.estado === 'prepara' ? 5 : c.estado === 'morre' ? 4.2 : 6.5; this.pose = this.pose ? chegar(this.pose, alvo, Math.min(1, dt * vel)) : alvo;
     this.#gravar(this.pose);
     const e = this.T.escala, tre = c.estado === 'morre' && c.t < 2.4 ? Math.sin(this.t * 46) * .05 : 0, some = S.luta === 'morre' ? Math.max(0, c.t - 3.4) : 0;
@@ -267,6 +270,6 @@ export class Chefe {
     if (this.T.quente) { alvo(B, c.frio > 0 ? '#4fa8d8' : '#ffb01e'); alvo(P, c.frio > 0 ? '#6a6888' : '#c4382e'); } else { alvo(B, ['#ffd23a', '#ff7a1e', '#ff2a6a'][c.etapa]); alvo(P, ['#b45ad0', '#c4508e', '#d8403f'][c.etapa]); }
   }
   // para a vitrine: mostra uma pose parada
-  teste(estado, k, ang) { const [e, g] = estado.split(':'); const c = { estado: e, golpe: g, t: e === 'morre' ? 2 : 0, vel: e === 'anda' ? 1 : 0 }; this.#gravar(POSES[this.id](c, k, 0, k)); this.grupo.visible = true; this.grupo.rotation.y = ang; this.grupo.scale.setScalar(1); this.grupo.updateMatrixWorld(); }
+  teste(estado, k, ang) { const [e, g] = estado.split(':'); const c = { estado: e, golpe: g, t: e === 'morre' ? 2 : 0, vel: e === 'anda' ? 1 : 0 }; this.#gravar(POSES[this.vis](c, k, 0, k)); this.grupo.visible = true; this.grupo.rotation.y = ang; this.grupo.scale.setScalar(1); this.grupo.updateMatrixWorld(); }
   dispose() { for (const o of this.lixo) o.dispose(); this.grupo.removeFromParent(); this.chao.removeFromParent(); }
 }

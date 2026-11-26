@@ -382,3 +382,14 @@ O roteiro completo das etapas está em `PROMPT.md`.
   neve, outono junto ao lago) contra o relógio ou passeio livre, derrapagem perdoável, poeira, marcas de pneu, batida macia, clima e música por pista, tudo por código. Arquivo único
   com o Three.js dentro (`jogos/dustline/index.html`, fonte em `ferramentas/dustline/fonte`). No menu (Ação), Estatísticas, capa e cache `jogos-offline-v69`. Testado: piloto automático
   corre as 5 pistas, direção e som no PC e celular simulado, suíte com 16 cartões, sem internet. Não testado num celular de verdade.
+- **Quatro jogos guardados, Cruzadas, Cozinha e Soldier Survivor (26/11/2026)**, pedido do dono. Cache `jogos-offline-v78`.
+  - **Guardados** (saíram do menu, das Estatísticas e do uso offline; projeto inteiro e capa em `guardados/<jogo>/`, salvos seguem no aparelho): Gem Shatter,
+    Keepsake Hunt, Dustline e Glaze Break. A política de privacidade do Keepsake continua em `jogos/keepsake-hunt/privacidade.html` (link da ficha da loja) e
+    `lojas/keepsake-hunt/montar.mjs` agora lê o jogo de `guardados/`. Para reativar: devolver a pasta a `jogos/`, a capa a `capas/`, o cartão, a linha em `js/comum.js` e os arquivos em `sw.js`.
+  - **Palavras Cruzadas:** letra errada pisca em vermelho e some sozinha (palavra cheia e errada, ou ao conferir); as certas ficam.
+  - **Cozinha da Le:** as frutas viraram 7 pratos (salmão com tarê, macarrão com camarão, risoto com calabresa, yakissoba, lasanha, feijoada, strogonoff) e as comidas ficaram maiores.
+  - **Soldier Survivor, níveis 11 a 13:** Heliponto (helicóptero solta caixas de paraquedas: passe por cima ou atire), Muralha (pelotão parado, muralha à esquerda separa 500 m de horda
+    do chefão Colosso que vem de longe pela direita; os tiros não atravessam a muralha, caixas de bônus no meio da horda dão arma, especialistas e soldados, a caixa HELI chama
+    bombardeio, a cada 60 eliminações cadência +6%) e Evacuação (ponte cai, laterais, meteoros e helicóptero). Chefes novos Turbina, Colosso e Titã de Pedra (corpo de outro chefe com cores
+    próprias, campo `visual`). Helicóptero em `cena/helicoptero.js`, som de hélice em `audio/realista.js`. Robô da Muralha: `node ferramentas/ponte-zero/muralha.mjs [partidas] [dificuldade]`
+    (Fácil: vence quem alterna os lados; ficar só de um lado perde). Testado no navegador do PC; não testado num celular de verdade.

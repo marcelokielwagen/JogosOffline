@@ -4,8 +4,8 @@ const $ = id => document.getElementById(id), tela = $('tela');
 let R; try { R = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); } catch (e) { $('semgl').hidden = false; throw e; }
 R.outputColorSpace = THREE.LinearSRGBColorSpace; R.toneMapping = THREE.NoToneMapping; R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
 const cena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 1, 2600);
-const salvo = Object.assign({ volume: 1, etapa: 0, modo: 'tempo', melhores: {} }, (() => { try { return JSON.parse(localStorage.getItem('dustline.v1')) || {}; } catch { return {}; } })());
-salvo.melhores = salvo.melhores || {}; salvo.etapa = ETAPAS[salvo.etapa] ? salvo.etapa : 0;
+const salvo = Object.assign({ volume: 1, etapa: 0, modo: 'tempo', melhores: {}, pontos: {}, pintura: 'perola', dicas: 0 }, (() => { try { return JSON.parse(localStorage.getItem('dustline.v1')) || {}; } catch { return {}; } })());
+salvo.melhores = salvo.melhores || {}; salvo.pontos = salvo.pontos || {}; salvo.etapa = ETAPAS[salvo.etapa] ? salvo.etapa : 0;
 const guardar = () => { try { localStorage.setItem('dustline.v1', JSON.stringify(salvo)); } catch {} };
 
 // luz: sol baixo (sombra acompanha o carro) e luz do céu. No Three r170 a intensidade vai vezes π.
@@ -13,11 +13,11 @@ const sol = new THREE.DirectionalLight('#fff', 1), ceuLuz = new THREE.Hemisphere
 sol.castShadow = true; sol.shadow.mapSize.setScalar(Som.pequeno ? 1024 : 2048); sol.shadow.bias = -.0004; sol.shadow.normalBias = .04; sol.shadow.radius = 3;
 Object.assign(sol.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 1, far: 300 }); cena.add(sol, sol.target, ceuLuz);
 cena.fog = new THREE.Fog('#e8e1d2', 30, 250);
-const carro = criarCarro(), F = criarFisica(carro), poeira = criarPoeira(), marcas = criarMarcas(), clima = criarClima();
-cena.add(carro.grupo, poeira.malha, marcas.malha, clima.malha);
+const pintura = () => PINTURAS.find(p => p.id === salvo.pintura) || PINTURAS[0], carro = criarCarro(pintura()), fantasma = criarCarro(PINTURAS[0], { fantasma: true }), F = criarFisica(carro), poeira = criarPoeira(), marcas = criarMarcas(), clima = criarClima();
+cena.add(carro.grupo, fantasma.grupo, poeira.malha, marcas.malha, clima.malha); fantasma.grupo.visible = false;
 
 /* ---------- pista ---------- */
-let progresso = 0, preso = 0, etapa = salvo.etapa, estado = 'inicio', modo = salvo.modo === 'livre' ? 'livre' : 'tempo', relogio = 0, proxMarco = 0, longe = 0, tremor = 0, aoFim = 0;
+let progresso = 0, preso = 0, etapa = salvo.etapa, estado = 'inicio', modo = ['tempo', 'drift', 'livre'].includes(salvo.modo) ? salvo.modo : 'tempo', relogio = 0, proxMarco = 0, longe = 0, tremor = 0, aoFim = 0;
 function construir(i) {
   if (MUNDO) { cena.remove(MUNDO.grupo); MUNDO.descartar(); }
   etapa = i; const E = ETAPAS[i]; MUNDO = criarMundo(E); cena.add(MUNDO.grupo);
@@ -32,21 +32,34 @@ function construir(i) {
 function trocar(i, depois) { $('veu').classList.add('ver'); setTimeout(() => { if (i !== etapa || !MUNDO) construir(i); else { F.colocar(MUNDO.largada()); poeira.limpar(); marcas.limpar(); } mirar(0, true); depois && depois(); setTimeout(() => $('veu').classList.remove('ver'), 120); }, 650); }
 
 /* ---------- tela inicial ---------- */
+const ptsTxt = n => Math.round(n).toLocaleString('pt-BR'), MEDALHA = ['', 'bronze', 'prata', 'ouro'];
+// medalha: bronze por chegar; prata e ouro pelos alvos da pista (tempo: menor é melhor; drift: mais pontos)
+function medalha(E, m, v) { if (v == null) return 0; const [pr, ou] = E.medalhas[m]; return m === 'tempo' ? (v <= ou ? 3 : v <= pr ? 2 : 1) : (v >= ou ? 3 : v >= pr ? 2 : 1); }
 const tempoTxt = s => s == null ? '—' : `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 function listaPistas() {
   const el = $('pistas'); el.innerHTML = '';
   ETAPAS.forEach((E, i) => { const b = document.createElement('button'); b.setAttribute('role', 'listitem'); b.className = i === etapa ? 'atual' : ''; b.style.setProperty('--c', E.chao[1]);
-    b.innerHTML = `<span class="n">${E.nome}</span><span class="t">${modo === 'tempo' ? 'melhor ' + tempoTxt(salvo.melhores[E.id]) : 'passeio livre'}</span>`; b.onclick = () => { Som.botao(); comecar(i); }; el.append(b); });
+    const v = modo === 'tempo' ? salvo.melhores[E.id] : salvo.pontos[E.id], md = modo === 'livre' ? 0 : medalha(E, modo, v);
+    b.innerHTML = `<span class="n">${E.nome}</span><span class="t">${modo === 'tempo' ? 'melhor ' + tempoTxt(v) : modo === 'drift' ? 'recorde ' + (v == null ? '—' : ptsTxt(v)) : 'passeio livre'}</span>${md ? `<span class="med m${md}" title="${MEDALHA[md]}"></span>` : ''}`; b.onclick = () => { Som.botao(); comecar(i); }; el.append(b); });
 }
 for (const b of document.querySelectorAll('#modos button')) b.onclick = () => { modo = b.dataset.modo; salvo.modo = modo; guardar(); Som.botao(); for (const o of document.querySelectorAll('#modos button')) o.setAttribute('aria-checked', o === b); listaPistas(); };
 for (const o of document.querySelectorAll('#modos button')) o.setAttribute('aria-checked', o.dataset.modo === modo);
+function listaCores() {
+  const el = $('cores'); el.innerHTML = '';
+  PINTURAS.forEach(p => { const b = document.createElement('button'); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', p.id === salvo.pintura); b.setAttribute('aria-label', 'Carro ' + p.nome); b.title = p.nome;
+    b.style.background = `linear-gradient(90deg, ${p.lata} 0 38%, ${p.faixa} 38% 62%, ${p.lata} 62%)`; b.onclick = () => { salvo.pintura = p.id; guardar(); carro.pintar(p); Som.botao(); listaCores(); }; el.append(b); });
+}
+listaCores();
 function mostrarInicio() { estado = 'inicio'; $('inicio').classList.remove('some'); $('painel').hidden = true; $('fim').hidden = true; document.body.classList.remove('dirigindo'); aviso(''); listaPistas(); }
 function irInicio() { if (estado === 'inicio') return; trocar(etapa, mostrarInicio); }
 function comecar(i) {
   $('inicio').classList.add('some'); $('fim').hidden = true; estado = 'pausa';
   trocar(i, () => {
     document.body.classList.add('dirigindo');
+    zerarDrift(); gravacao = []; fant = null; fantasma.grupo.visible = false; $('placar').hidden = modo !== 'drift'; $('relogio').classList.toggle('pequeno', modo === 'drift');
     if (modo === 'livre') { estado = 'livre'; $('painel').hidden = false; $('relogio').textContent = ''; $('marcos').innerHTML = ''; aviso(ETAPAS[etapa].nome, 2600); return; }
+    if (modo === 'tempo') { try { fant = JSON.parse(localStorage.getItem('dustline.fantasma.' + ETAPAS[etapa].id)); } catch {} if (fant && fant.length > 6) { fantasma.grupo.visible = true; colocarFantasma(0); } else fant = null; }
+    if (salvo.dicas < 4) { salvo.dicas++; guardar(); setTimeout(() => aviso(Som.pequeno ? 'drift: freio de mão + virar na curva' : 'drift: espaço (freio de mão) + seta na curva', 4200), 900); }
     estado = 'contagem'; relogio = 0; proxMarco = 0; progresso = MUNDO.ini - 9; $('painel').hidden = false; $('relogio').textContent = tempoTxt(0);
     $('marcos').innerHTML = MUNDO.marcos.map(() => '<i></i>').join('');
     let n = 3; const passo = () => { if (estado !== 'contagem') return; const c = $('contagem'); c.textContent = n || ''; c.classList.add('ver'); Som.contagem(n); setTimeout(() => c.classList.remove('ver'), n ? 600 : 300);
@@ -56,10 +69,65 @@ function comecar(i) {
 }
 let relAviso = 0; function aviso(t, ms = 2400) { const a = $('aviso'); a.textContent = t; a.classList.toggle('ver', !!t); clearTimeout(relAviso); if (t) relAviso = setTimeout(() => a.classList.remove('ver'), ms); }
 function chegou() {
-  estado = 'fim'; const E = ETAPAS[etapa], antes = salvo.melhores[E.id], recorde = antes == null || relogio < antes; if (recorde) { salvo.melhores[E.id] = Math.round(relogio * 10) / 10; guardar(); }
+  if (D.ativa) guardarDrift(); $('drift').classList.remove('ver');
+  estado = 'fim'; const E = ETAPAS[etapa], c = $('fim'), drift = modo === 'drift', valor = drift ? D.total : Math.round(relogio * 10) / 10;
+  const lista = drift ? salvo.pontos : salvo.melhores, antes = lista[E.id], recorde = antes == null || (drift ? valor > antes : valor < antes);
+  if (recorde) { lista[E.id] = valor; guardar(); if (!drift) try { localStorage.setItem('dustline.fantasma.' + E.id, JSON.stringify(gravacao)); } catch {} }
+  const md = medalha(E, modo, valor), mdAntes = medalha(E, modo, antes);
   Som.chegada(recorde); aoFim = 1.4;
-  const c = $('fim'); c.querySelector('.nome').textContent = E.nome; c.querySelector('.tempo').textContent = tempoTxt(relogio);
-  c.querySelector('.melhor').textContent = recorde ? (antes == null ? 'primeiro tempo nesta pista' : 'novo melhor tempo!') : 'melhor: ' + tempoTxt(antes);
+  c.querySelector('.nome').textContent = E.nome; c.querySelector('.tempo').textContent = drift ? ptsTxt(valor) + ' pts' : tempoTxt(relogio);
+  c.querySelector('.melhor').textContent = recorde ? (antes == null ? (drift ? 'primeiro recorde nesta pista' : 'primeiro tempo nesta pista') : (drift ? 'novo recorde!' : 'novo melhor tempo!')) : (drift ? 'recorde: ' + ptsTxt(antes) : 'melhor: ' + tempoTxt(antes));
+  const [pr, ou] = E.medalhas[modo], alvo = md === 3 ? 'o máximo!' : `${md === 2 ? 'ouro' : 'prata'} com ${drift ? ptsTxt(md === 2 ? ou : pr) + ' pts' : tempoTxt(md === 2 ? ou : pr)}`;
+  c.querySelector('.medalha').className = 'medalha m' + md; c.querySelector('.medalha').textContent = (md > mdAntes ? 'nova medalha de ' : 'medalha de ') + MEDALHA[md] + ' · ' + alvo;
+  c.querySelector('.extra').textContent = drift ? 'tempo ' + tempoTxt(relogio) + (D.melhor ? ' · maior drift ' + ptsTxt(D.melhor) : '') : (D.melhor ? 'maior drift ' + ptsTxt(D.melhor) : '');
+  listaPistas();
+}
+
+/* ---------- drift: pontos por ângulo e velocidade, multiplicador que sobe com drifts encadeados ----------
+   Cada drift guarda seus pontos (× multiplicador) quando termina. O multiplicador sobe a cada 1,6 s de drift e
+   continua se o próximo drift começar até 1,6 s depois. Zonas de cones valem o dobro.
+   Bater forte ou sair muito da estrada perde só o drift atual (e zera o multiplicador). Saindo de um drift longo, turbo. */
+const D = { pts: 0, mult: 1, t: 0, folga: 0, fora: 0, ativa: false, total: 0, melhor: 0 };
+let relNota = 0;
+function zerarDrift() { Object.assign(D, { pts: 0, mult: 1, t: 0, folga: 9, fora: 0, ativa: false, total: 0, melhor: 0 }); $('placar').textContent = '0 pts'; $('drift').classList.remove('ver', 'zona'); }
+function notaDrift(txt, classe) { const n = $('dnota'); n.textContent = txt; n.className = 'ver ' + (classe || ''); clearTimeout(relNota); relNota = setTimeout(() => n.className = '', 1600); }
+function guardarDrift() {
+  const v = Math.round(D.pts * D.mult); D.ativa = false; D.pts = 0;
+  if (v < 60) return; D.total += v; D.melhor = Math.max(D.melhor, v); $('placar').textContent = ptsTxt(D.total) + ' pts';
+  const q = v >= 9000 ? 'lendário!' : v >= 4000 ? 'incrível!' : v >= 1600 ? 'ótimo drift' : v >= 500 ? 'bom drift' : 'drift';
+  notaDrift(`+${ptsTxt(v)} · ${q}`); Som.drift(v);
+}
+function perderDrift(porque) { if (D.pts * D.mult > 150) { notaDrift(porque, 'perdeu'); Som.perdeu(); } Object.assign(D, { ativa: false, pts: 0, mult: 1, t: 0, folga: 9 }); $('drift').classList.remove('ver'); }
+function drift(dt) {
+  if (estado !== 'correndo' && estado !== 'livre') return;
+  if (F.saiu > .8) { Som.turbo(); if (!D.ativa || D.folga > 0) notaDrift('turbo', 'turbo'); }
+  const e = MUNDO.perto(F.x, F.z), zona = !!(e && e.d < 12 && MUNDO.emZona[e.i]);
+  if (F.deriva && F.vel > 8) {
+    if (!D.ativa) { if (D.folga > 1.6) Object.assign(D, { mult: 1, t: 0 }); Object.assign(D, { ativa: true, pts: 0 }); }
+    D.pts += dt * Math.abs(F.ang) * 57.3 * F.vel * .25 * (zona ? 2 : 1); D.t += dt; D.folga = 0;
+    const m = Math.min(5, 1 + Math.floor(D.t / 1.6)); if (m > D.mult) { D.mult = m; Som.combo(m); }
+  } else { if (D.ativa) guardarDrift(); D.folga += dt; }
+  if (D.ativa) {
+    if (F.batida && F.batida.forca > 5) perderDrift('bateu · perdeu o drift');
+    else if (!e || e.d > LARGURA / 2 + 4) { D.fora += dt; if (D.fora > 1.5) perderDrift('fora da estrada · perdeu o drift'); } else D.fora = 0;
+  }
+  const el = $('drift');
+  const mostra = D.ativa || (D.t > 0 && D.folga < 1.6); el.classList.toggle('ver', mostra);
+  if (mostra) { el.classList.toggle('zona', zona && D.ativa); el.classList.toggle('espera', !D.ativa); el.querySelector('.pts').textContent = D.ativa ? ptsTxt(D.pts) : ''; el.querySelector('.mult').textContent = '×' + D.mult; el.style.setProperty('--folga', D.ativa ? 1 : 1 - D.folga / 1.6); }
+}
+
+/* ---------- fantasma: o carro da sua melhor volta, transparente (só contra o relógio) ---------- */
+let gravacao = [], fant = null;
+function colocarFantasma(t) {
+  const f = t * 15, i = Math.floor(f), u = f - i, n = fant.length / 3; if (i + 1 >= n) { fantasma.grupo.visible = false; return; }
+  const a = i * 3, b = a + 3, x = fant[a] + (fant[b] - fant[a]) * u, z = fant[a + 1] + (fant[b + 1] - fant[a + 1]) * u; let dr = fant[b + 2] - fant[a + 2]; dr -= Math.round(dr / (2 * Math.PI)) * 2 * Math.PI;
+  fantasma.grupo.position.set(x, MUNDO.altura(x, z) + .02, z); fantasma.grupo.rotation.set(0, fant[a + 2] + dr * u, 0);
+  const perto = Math.hypot(x - F.x, z - F.z); fantasma.M.lata.opacity = Math.min(.26, Math.max(.06, (perto - 2) * .05));
+}
+function fantasmaQuadro() {
+  if (estado !== 'correndo' || modo !== 'tempo') return;
+  const k = Math.floor(relogio * 15); while (gravacao.length / 3 <= k) gravacao.push(Math.round(F.x * 100) / 100, Math.round(F.z * 100) / 100, Math.round(F.rumo * 1000) / 1000);
+  if (fant && fantasma.grupo.visible) colocarFantasma(relogio);
 }
 $('bDeNovo').onclick = () => { Som.botao(); comecar(etapa); }; $('bProxima').onclick = () => { Som.botao(); comecar((etapa + 1) % ETAPAS.length); }; $('bPistas').onclick = () => { Som.botao(); irInicio(); };
 $('bVoltar').onclick = () => { Som.botao(); irInicio(); };
@@ -100,9 +168,9 @@ function medir() { const w = innerWidth, h = innerHeight; R.setPixelRatio(Math.m
 function mirar(dt, ja) {
   const ini = estado === 'inicio'; Cam.orbita += dt * .12;
   let d = F.rumo - Cam.rumo; d -= Math.round(d / (2 * Math.PI)) * 2 * Math.PI; Cam.rumo += d * Math.min(1, ja ? 1 : dt * .9);
-  const v = Math.min(Math.abs(F.vf), 30), lx = innerWidth < innerHeight ? 1.25 : 1, dist = (ini ? .72 : 1 + v * .006) * lx;
-  const a = ini ? F.rumo + Math.PI * .75 + Cam.orbita : Cam.rumo, frente = ini ? new THREE.Vector3() : new THREE.Vector3(Math.sin(F.rumo), 0, Math.cos(F.rumo)).multiplyScalar(v * .35);
-  const alvo = new THREE.Vector3(F.x, F.y + 1, F.z).add(frente), pos = alvo.clone().add(new THREE.Vector3(-Math.sin(a) * 38 * dist, (ini ? 26 : 41) * dist, -Math.cos(a) * 38 * dist));
+  const v = Math.min(Math.abs(F.vf), 30), lx = innerWidth < innerHeight ? 1.25 : 1, dist = (ini ? .62 : 1 + v * .007) * lx;
+  const a = ini ? F.rumo + Math.PI * .75 + Cam.orbita : Cam.rumo, frente = ini ? new THREE.Vector3() : new THREE.Vector3(Math.sin(F.rumo), 0, Math.cos(F.rumo)).multiplyScalar(v * .3);
+  const alvo = new THREE.Vector3(F.x, F.y + 1, F.z).add(frente), hz = (ini ? 30 : 27) * dist, pos = alvo.clone().add(new THREE.Vector3(-Math.sin(a) * hz, (ini ? 17 : 29) * dist, -Math.cos(a) * hz));
   if (ja) { Cam.alvo.copy(alvo); Cam.pos.copy(pos); } else { Cam.alvo.lerp(alvo, Math.min(1, dt * 4)); Cam.pos.lerp(pos, Math.min(1, dt * (ini ? 1.2 : 2.5))); }
   cam.position.copy(Cam.pos); if (tremor > 0) cam.position.add(new THREE.Vector3((Math.random() - .5) * tremor, (Math.random() - .5) * tremor, (Math.random() - .5) * tremor)); cam.lookAt(Cam.alvo);
   sol.position.copy(Cam.alvo).addScaledVector(CEU.dir, 140); sol.target.position.copy(Cam.alvo);
@@ -151,7 +219,7 @@ function corrida(dt) {
 let t0 = 0, T = 0, primeiro = 2;
 function passo(dt) {
   T += dt; lerEntrada(); if (!MUNDO) return;
-  F.passo(dt, ent); efeitos(dt); corrida(dt); poeira.quadro(dt); MUNDO.arvores.quadro(dt); mirar(dt);
+  F.passo(dt, ent); efeitos(dt); corrida(dt); drift(dt); fantasmaQuadro(); poeira.quadro(dt); MUNDO.arvores.quadro(dt); mirar(dt);
   const escala = innerHeight / (2 * Math.tan(cam.fov * Math.PI / 360));
   clima.quadro(T, Cam.alvo, escala * .24); poeira.malha.material.uniforms.uEscala.value = escala * .2;
   Som.carro({ rpm: F.rpm, carga: F.carga, vel: Math.abs(F.vf), derrapa: F.derrapa, superficie: F.superficie });
@@ -161,4 +229,4 @@ medir(); construir(etapa); mirar(0, true); mostrarInicio(); requestAnimationFram
 addEventListener('resize', medir); addEventListener('orientationchange', () => setTimeout(medir, 200));
 tela.addEventListener('webglcontextlost', e => e.preventDefault()); tela.addEventListener('webglcontextrestored', () => { primeiro = 2; });
 if (['localhost', '127.0.0.1'].includes(location.hostname)) window.__dustline = { THREE, R, cena, cam, F, Som, ent, teclas, toque, ETAPAS, passo, comecar, irInicio, voltarEstrada, construir, salvo,
-  get mundo() { return MUNDO; }, get estado() { return estado; }, get relogio() { return relogio; }, get proxMarco() { return proxMarco; }, get etapa() { return etapa; } };
+  drift: D, fantasma, carro, get modo() { return modo; }, get mundo() { return MUNDO; }, get estado() { return estado; }, get relogio() { return relogio; }, get proxMarco() { return proxMarco; }, get etapa() { return etapa; } };

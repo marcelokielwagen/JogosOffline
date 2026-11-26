@@ -10,6 +10,7 @@ import { Chefe } from './chefes.js';
 import { criarCenario, CLIMAS } from './ponte.js';
 import { criarEfeitos } from './efeitos.js';
 import { criarPortoes } from './portoes.js';
+import { criarHeli } from './helicoptero.js';
 import { ARMAS } from '../dados/balanco.js';
 import { MAX_TIROS, MAX_ZUMBIS } from '../nucleo/simulacao.js';
 
@@ -38,7 +39,7 @@ export class Cena {
     this.zum = new Multidao(this.cena, M.zumbi, 'zumbi', { max: MAX_ZUMBIS + 80, tipo: 1, ruido: r, lods, limites: lz, comContorno: qual > 0 ? 1 : 0, esp, pal: { brilho: '#9dff3a', azul: '#2d8bd0' } });
     this.gor = new Multidao(this.cena, M.gordo, 'gordo', { max: 60, tipo: 1, ruido: r, lods, limites: lz.map(x => x + 8), comContorno: qual > 0 ? 2 : 0, esp, pal: { metal: '#9aa6b8' } });
     MODELOS.forEach(f => this.sold.acessorio(f(), qual > 0)); ACESSORIOS_Z.forEach(f => this.zum.acessorio(f(), qual > 0)); if (qual < 2) this.sold.maxBordaArma = 18;
-    this.fx = criarEfeitos(this.cena, r, MAX_TIROS);
+    this.fx = criarEfeitos(this.cena, r, MAX_TIROS); this.heli = criarHeli(this.cena, r);
     this.portoes = null; this.chefe = null; this.meio = null; this.nomes = []; this.t = 0; this.camX = 0; this.camD = 0; this.zoom = 1; this.tremor = 0; this.luta = 0; this.V = new THREE.Vector3(); this.comPos = qual > 0; this.espera = [];
     this.#posproc(); this.medir();
   }
@@ -105,6 +106,8 @@ export class Cena {
       case 'placaCaiu': { corpo.soltar(d.i); V.copy(corpo.ponto(2, 0, .95, .45)); fx.explosao(V.x, V.z + 1, 2.2, V.y); this.tremor = .25; break; }
       case 'chefeMorre': { const c = d, nE = c.meio ? 5 : 9, dt = c.meio ? .16 : .26; this.tremor = .5; for (let i = 0; i < nE; i++) this.espera.push([i * dt, () => { fx.explosao(c.x + (Math.random() - .5) * c.T.raio * 1.6, -c.d + 1 + Math.random() * 1.5, (c.meio ? 1.6 : 2.6) + Math.random() * 1.2, .8 + Math.random() * c.T.altura * .6); this.tremor = Math.min(.4, this.tremor + .14); }]); if (c.meio) { this.espera.push([.9, () => { fx.explosao(c.x, -c.d, 4, 1); fx.anel(c.x, -c.d, 5, [1, .72, .12], .8); this.tremor = .35; }]); break; }
         this.espera.push([2.5, () => { fx.explosao(c.x, -c.d, 6.5, 1.4); fx.pouso(c.x, -c.d, 2); this.tremor = .6; }], [2.9, () => fx.confete(this.S.x, 4, -(this.S.d + 3), 90)], [4.2, () => fx.confete(this.S.x, 4, -(this.S.d + 2), 90)]); break; }
+      case 'sinal': fx.anel(d.x, -d.d, 3, [1, .35, .1], .7); fx.faisca(d.x, 1.2, -d.d, 16, [1, .5, .2]); break;
+      case 'heliSolta': fx.nuvem(d.x, d.alt, -d.d, 3, [.85, .85, .8], .6, 1); break;
       case 'alcancou': this.tremor = .6; fx.pouso(d.x, -d.d + 2, 2.4); break;
     }
   }
@@ -145,7 +148,7 @@ export class Cena {
       else m.por(c.x, -afunda, -c.d, c.ang || 0, c.esc, c.esc, m.quadro(c.jeito ? 'morre1' : 'morre0', Math.min(1, c.t / .75), false), c.semente, 0, dz, (VAR[c.tipo] || 0) + (c.fogo ? .5 : 0), c.t < 1.2);
     }
     so.fechar(); zu.fechar(); go.fechar();
-    this.atualizarChefes(dt, S); this.#ambienteChefe(dt, S); this.fx.atualizar(dt, S); this.portoes.atualizar(dt, this.t, S.d);
+    this.atualizarChefes(dt, S); this.heli.atualizar(dt, S); this.#ambienteChefe(dt, S); this.fx.atualizar(dt, S); this.portoes.atualizar(dt, this.t, S.d);
     this.R.info.reset();
     if (this.comp) this.comp.render(dt); else this.R.render(this.cena, cam);
   }
@@ -160,7 +163,7 @@ export class Cena {
   // posição na tela de um ponto da pista
   naTela(x, y, d) { this.V.set(x, y, -d).project(this.cam); return [(this.V.x * .5 + .5) * this.w, (-this.V.y * .5 + .5) * this.h]; }
   dispose() {
-    this.portoes?.dispose(); this.chefe?.dispose(); this.meio?.dispose(); this.#veteranos({ soldados: [] }); this.fx.dispose(); this.sold.dispose(); this.zum.dispose(); this.gor.dispose(); this.cenario.dispose(); this.sol.shadow.map?.dispose(); this.sol.dispose();
+    this.portoes?.dispose(); this.chefe?.dispose(); this.meio?.dispose(); this.heli.dispose(); this.#veteranos({ soldados: [] }); this.fx.dispose(); this.sold.dispose(); this.zum.dispose(); this.gor.dispose(); this.cenario.dispose(); this.sol.shadow.map?.dispose(); this.sol.dispose();
     if (this.comp) { this.bloom.dispose(); this.out.dispose(); this.comp.dispose(); }
     const R = this.R; R.renderLists.dispose(); R.dispose(); this.restou = { ...R.info.memory }; R.forceContextLoss(); R.domElement.remove(); this.R = null;
   }
