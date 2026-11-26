@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f6c9b8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Cozinha da Le: empilhe pratos de comida e sirva o balcão com dois cachorros fantasiados.">
+<link rel="icon" href="../../icones/icone-192.png">
+<title>Cozinha da Le</title>
+<script src="../../js/suite.js"></script>
+<style>
+/* ============================================================ APARÊNCIA */
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; position:fixed; inset:0; width:100%;
+  background:radial-gradient(120% 90% at 50% 20%,#fbe3d6,#e9d3ea 60%,#d6e6ea); font-family:"Trebuchet MS",system-ui,sans-serif;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; color:#4a3226; }
+#palco { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); overflow:hidden; touch-action:none;
+  box-shadow:0 0 40px rgba(90,50,40,.25); --u:1px; }
+#cv { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.voltar { position:absolute; left:2.2%; top:6.5%; width:calc(var(--u)*40); height:calc(var(--u)*40); border-radius:50%;
+  background:#fff; border:calc(var(--u)*3) solid #7a4a36; display:grid; place-items:center; text-decoration:none; }
+.voltar svg { width:60%; height:60%; fill:none; stroke:#7a4a36; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+</head>
+<body>
+<div id="palco">
+  <canvas id="cv" role="img" aria-label="Balcão da Cozinha da Le com três personagens fantasiados"></canvas>
+  <a class="voltar jo-sair" href="../../index.html" aria-label="Voltar ao menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+</div>
+<script>
+'use strict';
+/* =====================================================================
+   COZINHA DA LE — Fase 1: balcão, personagens e camarim. Fase 2: tabuleiro de pilhas. Fase 3: entregas, moedas e ajudas. Fase 4: som, salvar e polimento.
+   Tudo desenhado em Canvas 2D (sem imagens), tamanho lógico 540 x 960.
+   ===================================================================== */
+const W = 540, H = 960, YB = 410, ESC = 1.12, TAU = Math.PI * 2, OUT = '#4a3226';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const palco = document.getElementById('palco');
+let esc = 1, dpr = 1, T = 0;
+
+function medir() {
+  const w = Math.min(innerWidth, innerHeight * W / H), h = w * H / W;
+  palco.style.width = w + 'px'; palco.style.height = h + 'px';
+  dpr = Math.min(2.5, devicePixelRatio || 1);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  esc = w / W; palco.style.setProperty('--u', esc + 'px');
+}
+addEventListener('resize', medir); medir();
+
+/* ------------------------------------------------------------ ajudantes de desenho */
+function rnd(seed) { let x = seed; return () => { x = (x * 16807) % 2147483647; return (x - 1) / 2147483646; }; }
+function el(x, y, rx, ry, c, rot = 0) { ctx.beginPath(); ctx.ellipse(x, y, Math.max(.1, rx), Math.max(.1, ry), rot, 0, TAU); if (c) { ctx.fillStyle = c; ctx.fill(); } }
+function linha(c, w) { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); }
+// silhueta: contorno escuro por fora + preenchimento (peças de várias partes ficam com um contorno só)
+function sil(path, fill, w = 3, cor = OUT) { ctx.beginPath(); path(); ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.lineWidth = w * 2; ctx.strokeStyle = cor; ctx.stroke(); ctx.fillStyle = fill; ctx.fill(); }
+const easeIn = u => u * u * u, easeOut = u => 1 - Math.pow(1 - u, 3);
+const back = u => { const c = 1.6; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
+function brilho4(x, y, r, c) { ctx.beginPath(); ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r); ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fillStyle = c; ctx.fill(); }
+function estrela5(x, y, r, c, rot = 0) { ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = rot - Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fillStyle = c; ctx.fill(); linha(OUT, 1.4); }
+function coracao(x, y, s, c) { ctx.save(); ctx.translate(x, y); ctx.scale(s / 10, s / 10); ctx.beginPath(); ctx.moveTo(0, 5); ctx.bezierCurveTo(-11, -3, -7, -13, 0, -6); ctx.bezierCurveTo(7, -13, 11, -3, 0, 5); ctx.fillStyle = c; ctx.fill(); linha(OUT, 1.5); ctx.restore(); }
+function flor(x, y, r, cp, cc) { for (let i = 0; i < 5; i++) { const a = i * TAU / 5; el(x + Math.cos(a) * r * .55, y + Math.sin(a) * r * .55, r * .55, r * .4, cp, a); } el(x, y, r * .32, r * .32, cc); }
+function pontos(n, seed, fx, fy) { const r = rnd(seed), a = []; for (let i = 0; i < n; i++) a.push([fx(r()), fy(r()), r(), .7 + r() * 1.1]); return a; }
+
+/* ------------------------------------------------------------ COMIDAS (também usadas na Fase 2) */
+function dAbacate(r) {
+  ctx.rotate(-.35);
+  sil(() => ctx.ellipse(0, 0, r * .74, r * .98, 0, 0, TAU), '#4e7f2e', 2);
+  el(0, r * .06, r * .6, r * .82, '#c9e27a'); el(0, r * .12, r * .46, r * .64, '#e6f3a6');
+  sil(() => ctx.ellipse(0, r * .24, r * .3, r * .3, 0, 0, TAU), '#8b5a30', 1.6);
+  el(-r * .1, r * .14, r * .1, r * .07, 'rgba(255,255,255,.55)');
+}
+function dAbacaxi(r) {
+  for (const [a, l] of [[-.6, .62], [-.28, .85], [0, 1], [.28, .85], [.6, .62]]) {
+    ctx.save(); ctx.translate(0, -r * .32); ctx.rotate(a);
+    sil(() => { ctx.moveTo(-r * .14, 0); ctx.quadraticCurveTo(-r * .05, -r * l * .6, 0, -r * l); ctx.quadraticCurveTo(r * .05, -r * l * .6, r * .14, 0); ctx.closePath(); }, '#62b04a', 1.4);
+    ctx.restore();
+  }
+  const corpo = () => ctx.ellipse(0, r * .3, r * .6, r * .7, 0, 0, TAU);
+  sil(corpo, '#f4b62f', 2);
+  ctx.save(); ctx.beginPath(); corpo(); ctx.clip(); ctx.strokeStyle = '#c98a1e'; ctx.lineWidth = r * .06;
+  for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(-r + k * r * .32, -r * .5); ctx.lineTo(r + k * r * .32, r * 1.1); ctx.moveTo(r - k * r * .32, -r * .5); ctx.lineTo(-r - k * r * .32, r * 1.1); ctx.stroke(); }
+  el(-r * .25, r * .05, r * .12, r * .2, 'rgba(255,255,255,.4)'); ctx.restore();
+}
+function dPimentao(r) {
+  sil(() => { ctx.ellipse(-r * .32, r * .12, r * .42, r * .66, -.15, 0, TAU); ctx.moveTo(r * .74, r * .12); ctx.ellipse(r * .32, r * .12, r * .42, r * .66, .15, 0, TAU); ctx.moveTo(r * .45, r * .18); ctx.ellipse(0, r * .18, r * .45, r * .7, 0, 0, TAU); }, '#f7c52e', 2);
+  for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * r * .13, -r * .3); ctx.quadraticCurveTo(s * r * .22, r * .3, s * r * .1, r * .78); linha('rgba(200,130,20,.55)', r * .07); }
+  el(-r * .34, -r * .02, r * .09, r * .22, 'rgba(255,255,255,.55)', -.2);
+  el(0, -r * .44, r * .28, r * .11, '#6db04a');
+  sil(() => { ctx.moveTo(-r * .08, -r * .46); ctx.quadraticCurveTo(-r * .04, -r * .8, r * .2, -r * .86); ctx.lineTo(r * .22, -r * .72); ctx.quadraticCurveTo(r * .06, -r * .7, r * .1, -r * .46); ctx.closePath(); }, '#5a9a3e', 1.4);
+}
+function dCastanha(r) {
+  const um = (x, y, s, rot) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+    const path = () => { ctx.moveTo(0, -r * .62); ctx.quadraticCurveTo(r * .72, -r * .38, r * .6, r * .22); ctx.quadraticCurveTo(r * .5, r * .6, 0, r * .6); ctx.quadraticCurveTo(-r * .5, r * .6, -r * .6, r * .22); ctx.quadraticCurveTo(-r * .72, -r * .38, 0, -r * .62); };
+    sil(path, '#7b4527', 2);
+    ctx.save(); ctx.beginPath(); path(); ctx.clip(); el(0, r * .64, r * .72, r * .3, '#d8b48a'); ctx.restore();
+    el(-r * .22, -r * .18, r * .1, r * .22, 'rgba(255,255,255,.35)', -.4);
+    ctx.beginPath(); ctx.moveTo(0, -r * .62); ctx.lineTo(0, -r * .76); linha('#5a3018', 2.4);
+    ctx.restore();
+  };
+  um(-r * .36, r * .1, .74, -.3); um(r * .36, r * .04, .74, .3);
+}
+function dUva(r) {
+  const g = [[-.36, -.25], [0, -.27], [.36, -.25], [-.18, .07], [.18, .07], [0, .4]];
+  sil(() => { for (const [x, y] of g) { ctx.moveTo(x * r + r * .26, y * r); ctx.arc(x * r, y * r, r * .26, 0, TAU); } }, '#9a5bb8', 1.8);
+  for (const [x, y] of g) { ctx.beginPath(); ctx.arc(x * r, y * r, r * .26, 0, TAU); linha('rgba(90,40,110,.5)', 1.2); el(x * r - r * .08, y * r - r * .08, r * .07, r * .06, 'rgba(255,255,255,.7)'); }
+  ctx.beginPath(); ctx.moveTo(0, -r * .5); ctx.lineTo(r * .05, -r * .78); linha('#6b4a2a', r * .09);
+  sil(() => ctx.ellipse(r * .3, -r * .62, r * .26, r * .14, -.4, 0, TAU), '#62b04a', 1.4);
+}
+function dMilho(r) {
+  for (const s of [-1, 1]) sil(() => { ctx.moveTo(0, r * .9); ctx.quadraticCurveTo(s * r * .7, r * .5, s * r * .38, -r * .5); ctx.quadraticCurveTo(s * r * .3, r * .2, 0, r * .9); }, '#6cb34e', 1.6);
+  const cob = () => ctx.ellipse(0, -r * .05, r * .34, r * .8, 0, 0, TAU);
+  sil(cob, '#f6cf3e', 2);
+  ctx.save(); ctx.beginPath(); cob(); ctx.clip();
+  for (let yy = -6; yy <= 6; yy++) for (let xx = -2; xx <= 2; xx++) el(xx * r * .15 + (yy % 2 ? r * .075 : 0), yy * r * .13, r * .06, r * .055, '#fde68a');
+  ctx.restore();
+  for (const s of [-1, 1]) sil(() => { ctx.moveTo(s * r * .05, r * .9); ctx.quadraticCurveTo(s * r * .55, r * .55, s * r * .3, r * .05); ctx.quadraticCurveTo(s * r * .25, r * .5, s * r * .05, r * .9); }, '#7cc45e', 1.4);
+}
+function dCenoura(r) {
+  ctx.rotate(.55);
+  for (const a of [-.5, 0, .5]) { ctx.save(); ctx.translate(0, -r * .6); ctx.rotate(a); sil(() => ctx.ellipse(0, -r * .28, r * .11, r * .3, 0, 0, TAU), '#62b04a', 1.4); ctx.restore(); }
+  sil(() => { ctx.moveTo(-r * .36, -r * .55); ctx.quadraticCurveTo(0, -r * .72, r * .36, -r * .55); ctx.quadraticCurveTo(r * .2, r * .3, 0, r * .95); ctx.quadraticCurveTo(-r * .2, r * .3, -r * .36, -r * .55); }, '#f2852b', 2);
+  for (const y of [-.25, .05, .35]) { ctx.beginPath(); ctx.moveTo(-r * .2, y * r); ctx.lineTo(-r * .05, y * r + r * .04); linha('#c55e16', r * .05); }
+  el(-r * .14, -r * .3, r * .05, r * .2, 'rgba(255,255,255,.45)');
+}
+function dMorango(r) {
+  const corpo = () => { ctx.moveTo(0, r * .9); ctx.bezierCurveTo(-r * .95, r * .2, -r * .8, -r * .62, 0, -r * .45); ctx.bezierCurveTo(r * .8, -r * .62, r * .95, r * .2, 0, r * .9); };
+  sil(corpo, '#e8473f', 2);
+  for (const [x, y] of [[-.3, -.15], [.05, -.2], [.35, -.1], [-.2, .2], [.18, .18], [0, .5], [-.42, .1], [.42, .15]]) el(x * r, y * r, r * .04, r * .06, '#ffe08a');
+  el(-r * .3, -r * .22, r * .1, r * .16, 'rgba(255,255,255,.45)', -.3);
+  sil(() => { for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + (i - 2) * .55; ctx.moveTo(0, -r * .45); ctx.lineTo(Math.cos(a) * r * .45, -r * .45 + Math.sin(a) * r * .3 + r * .15); } }, '#5aa646', 2.5, '#3f7a32');
+}
+const COMIDAS = {
+  abacate: { nome: 'Abacate', cor: '#a7d684', esc: '#6aa64c', d: dAbacate },
+  abacaxi: { nome: 'Abacaxi', cor: '#ffd75e', esc: '#d9a92e', d: dAbacaxi },
+  pimentao: { nome: 'Pimentão', cor: '#ffb347', esc: '#d98a22', d: dPimentao },
+  castanha: { nome: 'Castanha', cor: '#c4936a', esc: '#8a5f3e', d: dCastanha },
+  uva: { nome: 'Uva', cor: '#cfa2e4', esc: '#9467b0', d: dUva },
+  milho: { nome: 'Milho', cor: '#fff0a0', esc: '#dcc25a', d: dMilho },
+  cenoura: { nome: 'Cenoura', cor: '#ffa070', esc: '#d9693c', d: dCenoura },
+  morango: { nome: 'Morango', cor: '#ffa4b4', esc: '#d9677e', d: dMorango },
+};
+function comida(nome, x, y, r) { ctx.save(); ctx.translate(x, y); COMIDAS[nome].d(r); ctx.restore(); }
+
+/* ------------------------------------------------------------ OS 3 PERSONAGENS
+   Âncoras (coordenadas locais; 0,0 = topo do balcão no centro do personagem):
+   hy = centro da cabeça; top = topo da cabeça; neck = gola; bw = meia largura do tronco. */
+const ANC = {
+  humano: { hy: -128, top: -57, rx: 50, eyeY: -2, eyeDx: 19, neck: -76, bw: 60 },
+  cocker: { hy: -110, top: -47, rx: 44, eyeY: -6, eyeDx: 19, neck: -66, bw: 48 },
+  preto:  { hy: -110, top: -46, rx: 46, eyeY: -9, eyeDx: 19, neck: -66, bw: 48 },
+};
+const PELE = '#f4c0a3', PELE2 = '#e49d82';
+const CK = { branco: '#fbf5ea', laranja: '#d98a3a', laranja2: '#eba75a' };      // cocker ruivo e branco
+const PT = { preto: '#26282c', cinza: '#8d8f92', foc: '#cfcbc3' };              // preto grisalho
+const BARBA = pontos(190, 7, v => v * 96 - 48, v => v * 60 - 2);
+const SAL_PT = pontos(90, 11, v => v * 92 - 46, v => v * 92 - 46);
+const SAL_FOC = pontos(60, 13, v => v * 60 - 30, v => v * 44);
+const SAL_CORPO = pontos(70, 17, v => v * 90 - 45, v => v * 140 - 66);
+
+/* olho genérico: piscar, olhar para os lados, brilho de vontade e olho fechado de alegria */
+function olho(x, y, rx, ry, e, cfg) {
+  if (e.feliz || e.pisca > .85) {
+    ctx.beginPath();
+    if (e.feliz) { ctx.moveTo(x - rx, y + 2); ctx.quadraticCurveTo(x, y - ry * 1.3, x + rx, y + 2); }
+    else { ctx.moveTo(x - rx, y + 1); ctx.quadraticCurveTo(x, y + ry * .5, x + rx, y + 1); }
+    linha(OUT, 3); return;
+  }
+  const ix = x + e.ox * rx * .32, iy = y + e.oy * ry * .28;
+  ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU);
+  if (cfg.branco) {
+    ctx.fillStyle = '#fff'; ctx.fill(); ctx.clip();
+    el(ix, iy, rx * .72, ry * .82, cfg.iris); el(ix, iy, rx * .36, ry * .42, '#1c120c');
+  } else { ctx.fillStyle = cfg.iris; ctx.fill(); ctx.clip(); el(ix, iy + ry * .1, rx * .6, ry * .62, cfg.pupila || '#140c08'); }
+  if (e.brilho) { brilho4(ix - rx * .2, iy - ry * .25, rx * .62, '#fff'); el(ix + rx * .32, iy + ry * .32, rx * .16, rx * .16, '#fff'); }
+  else { el(ix - rx * .28, iy - ry * .3, rx * .3, rx * .3, '#fff'); el(ix + rx * .28, iy + ry * .28, rx * .13, rx * .13, 'rgba(255,255,255,.8)'); }
+  if (e.pisca > 0) {
+    const yy = y - ry - 1 + (ry * 2 + 2) * e.pisca;
+    ctx.fillStyle = cfg.palp; ctx.fillRect(x - rx - 2, y - ry - 2, rx * 2 + 4, yy - (y - ry - 2));
+    ctx.beginPath(); ctx.moveTo(x - rx, yy); ctx.lineTo(x + rx, yy); linha(OUT, 2.4);
+  }
+  ctx.restore();
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); linha(OUT, 2.2);
+}
+function sobrancelha(sd, x, y, len, w, cor, e) {
+  const sob = e.sobr * 4, inY = y - sob - (e.triste ? 5 : 0), outY = y - 2 - sob + (e.triste ? 3 : 0);
+  ctx.beginPath(); ctx.moveTo(x - sd * len * .5, inY); ctx.quadraticCurveTo(x, Math.min(inY, outY) - 4, x + sd * len * .5, outY); linha(cor, w);
+}
+
+/* ---------- PERSONAGEM DO MEIO: rosto redondo e cheio, pele clara rosada de sol, barba e bigode curtos
+   ruivos (queixo esbranquiçado), sorrisão largo com dentes, óculos escuros de armação escura com ponte dupla,
+   boné verde com "Brooklyn" bordado em amarelo, camiseta branca e correntinha dourada.
+   Fantasia com chapéu tira o boné (aparece o cabelo castanho-claro curto); fantasia com óculos ou máscara
+   própria tira os óculos escuros (aparecem os olhos). */
+function bone(A) {
+  const t = A.top, w = A.rx;
+  sil(() => { ctx.moveTo(-w * 1.04, t + 27); ctx.bezierCurveTo(-w * 1.07, t - 32, w * 1.07, t - 32, w * 1.04, t + 27); ctx.closePath(); }, '#5f8f5b', 2.6);
+  ctx.beginPath(); ctx.moveTo(0, t - 17); ctx.quadraticCurveTo(-w * .5, t - 6, -w * .62, t + 25); ctx.moveTo(0, t - 17); ctx.quadraticCurveTo(w * .5, t - 6, w * .62, t + 25); linha('rgba(40,80,40,.45)', 1.6);
+  el(0, t - 17, 4.5, 3, '#4c7849'); linha(OUT, 1.2);
+  ctx.save(); ctx.translate(0, t + 8); ctx.rotate(-.06); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '800 5.5px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#f4b733'; ctx.fillText('NEW YORK', -6, -10);
+  ctx.font = 'italic 800 18px "Brush Script MT","Segoe Script","Comic Sans MS",cursive'; ctx.lineWidth = 3; ctx.strokeStyle = '#a8741c'; ctx.strokeText('Brooklyn', 0, 1); ctx.fillStyle = '#f6bb36'; ctx.fillText('Brooklyn', 0, 1);
+  ctx.restore();
+  sil(() => { ctx.moveTo(-w * 1.13, t + 24); ctx.quadraticCurveTo(0, t + 11, w * 1.13, t + 24); ctx.quadraticCurveTo(w * 1.02, t + 41, 0, t + 43); ctx.quadraticCurveTo(-w * 1.02, t + 41, -w * 1.13, t + 24); }, '#527f4f', 2.6);
+  ctx.beginPath(); ctx.moveTo(-w * .95, t + 27); ctx.quadraticCurveTo(0, t + 17, w * .95, t + 27); linha('rgba(255,255,255,.18)', 2);
+}
+function oculosEscuros(A, e) {
+  const y = A.eyeY - (e.feliz ? 2 : 0), dx = A.eyeDx;
+  ctx.beginPath(); ctx.moveTo(-A.rx + 1, y - 6); ctx.lineTo(-dx - 15, y - 7); ctx.moveTo(A.rx - 1, y - 6); ctx.lineTo(dx + 15, y - 7); linha('#151716', 3);
+  for (const sd of [-1, 1]) {
+    const lente = () => ctx.roundRect(sd * dx - 15, y - 11, 30, 23, [9, 9, 11, 11]);
+    sil(lente, '#262a29', 1.8, '#121413');
+    ctx.save(); ctx.beginPath(); lente(); ctx.clip();
+    const g = ctx.createLinearGradient(sd * dx - 15, y - 11, sd * dx + 15, y + 12); g.addColorStop(0, 'rgba(255,255,255,.22)'); g.addColorStop(.45, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(120,140,130,.25)');
+    ctx.fillStyle = g; ctx.fillRect(sd * dx - 16, y - 12, 32, 25);
+    ctx.beginPath(); ctx.moveTo(sd * dx - 9, y + 6); ctx.lineTo(sd * dx + 3, y - 8); linha('rgba(255,255,255,.35)', 2.4);
+    ctx.restore();
+    if (e.brilho) brilho4(sd * dx + 6, y - 4, 7, '#fff');
+  }
+  ctx.beginPath(); ctx.moveTo(-dx + 15, y - 9); ctx.lineTo(dx - 15, y - 9); linha('#151716', 2.2);   // ponte de cima (metal)
+  ctx.beginPath(); ctx.moveTo(-dx + 14, y - 3); ctx.quadraticCurveTo(0, y - 7, dx - 14, y - 3); linha('#151716', 2.6);
+}
+function cabecaHumano(e, p) {
+  const A = ANC.humano, R = ROUPAS[p.roupa];
+  for (const sd of [-1, 1]) { el(sd * 50, 6, 9, 13, PELE); linha(OUT, 3); el(sd * 50, 6, 4, 7, PELE2); }
+  ctx.beginPath(); ctx.ellipse(0, 2, 50, 54, 0, 0, TAU); ctx.fillStyle = PELE; ctx.fill(); linha(OUT, 3);
+  el(-30, 15, 11, 7, 'rgba(232,105,95,.38)'); el(30, 15, 11, 7, 'rgba(232,105,95,.38)');   // bochechas coradas de sol
+  el(0, -30, 26, 8, 'rgba(240,120,100,.18)');
+  // barba curta ruiva com o queixo esbranquiçado
+  const barba = () => { ctx.moveTo(-49, 4); ctx.bezierCurveTo(-50, 40, -32, 58, 0, 59); ctx.bezierCurveTo(32, 58, 50, 40, 49, 4); ctx.lineTo(43, 7); ctx.bezierCurveTo(41, 24, 31, 30, 18, 30); ctx.lineTo(-18, 30); ctx.bezierCurveTo(-31, 30, -41, 24, -43, 7); ctx.closePath(); };
+  ctx.save(); ctx.beginPath(); ctx.ellipse(0, 2, 50, 54, 0, 0, TAU); ctx.clip();
+  ctx.beginPath(); barba(); ctx.fillStyle = 'rgba(190,124,78,.82)'; ctx.fill(); ctx.clip();
+  el(0, 51, 19, 11, 'rgba(240,232,220,.9)'); el(0, 42, 7, 5, 'rgba(206,150,100,.8)');
+  for (const [x, y, k, r] of BARBA) el(x, y + 3, r * .55, r * .55, k < .45 ? 'rgba(240,215,180,.75)' : y > 42 ? 'rgba(250,246,238,.8)' : 'rgba(130,78,44,.55)');
+  ctx.restore();
+  // nariz arredondado
+  el(0, 15, 11, 8, '#eeaf94'); el(-6, 18, 3, 2, '#b16d55'); el(6, 18, 3, 2, '#b16d55'); el(-2, 11, 4, 2.2, 'rgba(255,255,255,.55)');
+  ctx.beginPath(); ctx.ellipse(0, 15, 11, 8, 0, .15, Math.PI - .15); linha('#bd7a5e', 1.6);
+  bocaHumano(e, 18);
+  // bigode ruivo
+  sil(() => { ctx.moveTo(-22, 30); ctx.quadraticCurveTo(-13, 21, 0, 24); ctx.quadraticCurveTo(13, 21, 22, 30); ctx.quadraticCurveTo(11, 27, 0, 29); ctx.quadraticCurveTo(-11, 27, -22, 30); }, '#b0703f', 1, '#8a5530');
+  for (let i = -18; i <= 18; i += 4) el(i, 26.5 + Math.abs(i) * .08, .9, .9, 'rgba(240,205,160,.9)');
+  // sobrancelhas claras, quase escondidas pelo boné
+  for (const sd of [-1, 1]) sobrancelha(sd, sd * 19, -17, 20, 4.5, '#a8774f', e);
+  // olhos: óculos escuros (marca dele) ou olhos castanho-esverdeados quando a fantasia tem óculos/máscara própria
+  if (R.semOculos) for (const sd of [-1, 1]) { olho(sd * 19, -2, 7, 7.5, e, { branco: true, iris: '#6e6440', palp: PELE }); if (!e.triste && !e.feliz) el(sd * 19, 8, 10, 4, PELE); }
+  else oculosEscuros(A, e);
+  // boné ou cabelo
+  if (!R.chapeu) bone(A);
+  else {
+    const cabelo = () => { ctx.moveTo(-50, -6); ctx.bezierCurveTo(-55, -44, -30, -60, 0, -59); ctx.bezierCurveTo(30, -60, 55, -44, 50, -6); ctx.lineTo(46, -8); ctx.quadraticCurveTo(42, -32, 22, -40); ctx.quadraticCurveTo(0, -36, -22, -40); ctx.quadraticCurveTo(-42, -32, -46, -8); ctx.closePath(); };
+    sil(cabelo, '#8d6c4f', 2.2);
+  }
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sd * 48, -14); ctx.lineTo(sd * 48, 2); linha('#9a7454', 5); }
+  if (p.humor === 'fome') suor(A);
+}
+function bocaHumano(e, w0 = 15) {
+  const C = '#4a2a22';
+  if (e.boca === 'triste') { ctx.beginPath(); ctx.moveTo(-12, 39); ctx.quadraticCurveTo(0, 31, 12, 39); linha(C, 3); return; }
+  if (e.boca === 'mastiga') { const k = (Math.sin(T * 16) + 1) / 2; el(0, 37, 9 + k * 3, 2 + k * 5, '#7a2f2f'); linha(C, 2.4); el(-24, 20, 10, 7, 'rgba(236,120,110,.35)'); el(24, 20, 10, 7, 'rgba(236,120,110,.35)'); return; }
+  const h = e.boca === 'aberta' ? 52 : 44, w = e.boca === 'aberta' ? w0 + 2 : w0;
+  const path = () => { ctx.moveTo(-w, 30); ctx.quadraticCurveTo(0, 34, w, 30); ctx.quadraticCurveTo(w - 2, h, 0, h + 1); ctx.quadraticCurveTo(-w + 2, h, -w, 30); };
+  ctx.beginPath(); path(); ctx.fillStyle = '#7a2f2f'; ctx.fill();
+  ctx.save(); ctx.clip(); ctx.fillStyle = '#fffdf8'; ctx.fillRect(-w, 28, w * 2, 9); ctx.fillRect(-w * .6, h - 5, w * 1.2, 5); el(0, h, 9, 5, '#e98080'); ctx.restore();
+  ctx.beginPath(); path(); linha(C, 2.6);
+  if (e.boca === 'lambe') { const lx = Math.sin(T * 5) * 9; el(lx, h - 1, 6.5, 5.5, '#ef8a90'); linha(C, 1.6); }
+}
+function suor(A) { const y = A.top + 22 + (T * 18 % 10); ctx.beginPath(); ctx.moveTo(A.rx * .72, y - 9); ctx.quadraticCurveTo(A.rx * .72 + 7, y + 2, A.rx * .72, y + 4); ctx.quadraticCurveTo(A.rx * .72 - 7, y + 2, A.rx * .72, y - 9); ctx.fillStyle = '#a8e0ee'; ctx.fill(); linha(OUT, 1.5); }
+
+/* ---------- CACHORRO 1 (esquerda): cocker spaniel inglês ruivo e branco. Cabeça branca com manchas
+   laranja em volta dos olhos e no alto, listra branca no meio da testa, orelhas compridas e cacheadas
+   cor de cobre, focinho branco, nariz marrom-fígado grande, olhos castanhos grandes e caídos (ar pidão). */
+function orelha(sd, ang, cor, cor2, fofa) {
+  ctx.save(); ctx.translate(sd * (fofa ? 36 : 34), -26); ctx.rotate(sd * ang);
+  const L = fofa ? 66 : 70, Wd = fofa ? 26 : 22;
+  sil(() => {
+    ctx.moveTo(0, -8); ctx.bezierCurveTo(sd * Wd, -12, sd * (Wd + 4), L * .45, sd * (Wd - 2), L * .85);
+    ctx.quadraticCurveTo(sd * (Wd - 8), L * 1.02, sd * (Wd * .3), L * .92); ctx.quadraticCurveTo(sd * -2, L * 1.06, sd * -9, L * .9);
+    ctx.quadraticCurveTo(sd * -17, L * .92, sd * -15, L * .72); ctx.bezierCurveTo(sd * -15, L * .4, sd * -10, 8, 0, -8);
+  }, cor, 3);
+  for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(sd * (2 + (i % 2) * 7), 14 + i * 13, 6, sd > 0 ? .3 : Math.PI - 2.6, sd > 0 ? 2.6 : Math.PI - .3); linha(cor2, 2.2); }
+  ctx.restore();
+}
+function cabecaCocker(e, p) {
+  const A = ANC.cocker;
+  ctx.beginPath(); ctx.ellipse(0, 0, 44, 46, 0, 0, TAU); ctx.fillStyle = CK.branco; ctx.fill();
+  ctx.save(); ctx.clip();
+  el(-24, -12, 21, 20, CK.laranja2); el(24, -12, 21, 20, CK.laranja2);
+  el(-30, -34, 22, 16, CK.laranja); el(30, -34, 22, 16, CK.laranja);
+  el(0, -22, 8, 32, CK.branco);                                             // listra branca da testa
+  ctx.restore();
+  ctx.beginPath(); ctx.ellipse(0, 0, 44, 46, 0, 0, TAU); linha(OUT, 3);
+  el(0, 20, 27, 20, CK.branco); ctx.beginPath(); ctx.ellipse(0, 20, 27, 20, 0, .3, Math.PI - .3); linha('rgba(74,50,38,.3)', 1.8);
+  for (const [x, y] of [[-12, 22], [-16, 27], [-9, 28], [12, 22], [16, 27], [9, 28]]) el(x, y, 1.2, 1.2, 'rgba(160,110,80,.6)');
+  for (const sd of [-1, 1]) {
+    olho(sd * 19, -6, 9, 10, e, { iris: '#3b2417', pupila: '#1a0e08', palp: CK.laranja2 });
+    if (!e.feliz) { ctx.beginPath(); ctx.moveTo(sd * 19 - 8, 5); ctx.quadraticCurveTo(sd * 19, 10, sd * 19 + 8, 5); linha('rgba(190,110,80,.7)', 1.6); }
+    sobrancelha(sd, sd * 18, -21, 13, 5, '#f6c88c', e);
+  }
+  bocaCocker(e);
+  sil(() => { ctx.moveTo(-12, 6); ctx.quadraticCurveTo(0, 1, 12, 6); ctx.quadraticCurveTo(13, 15, 0, 19); ctx.quadraticCurveTo(-13, 15, -12, 6); }, '#7a4f3e', 1.4);
+  el(-4, 7, 4, 2.3, 'rgba(255,255,255,.55)'); el(-5, 13, 2.3, 1.6, '#4a2c22'); el(5, 13, 2.3, 1.6, '#4a2c22');
+  if (e.boca === 'lambe') { const lx = Math.sin(T * 6) * 7; el(lx, 21, 6, 6.5, '#ef8a95'); linha(OUT, 1.5); }
+  const a = orelhaAng(p);
+  orelha(-1, a.e, CK.laranja, '#f3b670', false); orelha(1, a.d, CK.laranja, '#f3b670', false);
+  if (p.humor === 'fome') suor(A);
+}
+function bocaCocker(e) {
+  if (e.boca === 'aberta' || e.boca === 'mastiga') {
+    const k = e.boca === 'mastiga' ? (Math.sin(T * 16) + 1) / 2 : 1;
+    const path = () => { ctx.moveTo(-12, 25); ctx.quadraticCurveTo(0, 30, 12, 25); ctx.quadraticCurveTo(10, 30 + 12 * k, 0, 31 + 13 * k); ctx.quadraticCurveTo(-10, 30 + 12 * k, -12, 25); };
+    ctx.beginPath(); path(); ctx.fillStyle = '#8a3a3a'; ctx.fill(); ctx.save(); ctx.clip(); el(0, 30 + 12 * k, 7, 6, '#ef8a95'); ctx.restore(); ctx.beginPath(); path(); linha(OUT, 2.2); return;
+  }
+  ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, 25);
+  if (e.boca === 'triste') { ctx.moveTo(-10, 31); ctx.quadraticCurveTo(0, 23, 10, 31); }
+  else { ctx.moveTo(-11, 24); ctx.quadraticCurveTo(-5, 31, 0, 25); ctx.quadraticCurveTo(5, 31, 11, 24); }
+  linha(OUT, 2.2);
+}
+
+/* ---------- CACHORRO 2 (direita): preto grisalho de pelo comprido e ondulado, focinho largo cinza-claro
+   (idade), nariz preto bem grande, boca aberta sorrindo com língua rosa, bigodes longos, orelhas pretas
+   onduladas, sobrancelhas cinza, pintinhas grisalhas na cabeça e no peito. */
+function cabecaPreto(e, p) {
+  const A = ANC.preto;
+  ctx.beginPath(); ctx.ellipse(0, 0, 46, 45, 0, 0, TAU); ctx.fillStyle = PT.preto; ctx.fill();
+  ctx.save(); ctx.clip();
+  for (const [x, y, k, r] of SAL_PT) if (k < .6) el(x, y, r * 1.1, r * 1.1, 'rgba(160,162,165,.7)');
+  el(-19, -12, 14, 11, 'rgba(120,122,125,.45)'); el(19, -12, 14, 11, 'rgba(120,122,125,.45)');
+  ctx.restore();
+  ctx.beginPath(); ctx.ellipse(0, 0, 46, 45, 0, 0, TAU); linha(OUT, 3);
+  // focinho grisalho + barbinha
+  const foc = () => { ctx.ellipse(0, 22, 30, 22, 0, 0, TAU); ctx.moveTo(-22, 38); ctx.lineTo(-14, 50); ctx.lineTo(-7, 42); ctx.lineTo(0, 52); ctx.lineTo(7, 42); ctx.lineTo(14, 50); ctx.lineTo(22, 38); ctx.closePath(); };
+  ctx.beginPath(); foc(); ctx.fillStyle = PT.foc; ctx.fill();
+  ctx.save(); ctx.clip(); for (const [x, y, k, r] of SAL_FOC) el(x, y, r * .6, r * .6, k < .5 ? 'rgba(130,127,121,.7)' : '#efece6'); ctx.restore();
+  for (const sd of [-1, 1]) {
+    olho(sd * 19, -9, 7.5, 8.5, e, { iris: '#2a1c14', pupila: '#0d0806', palp: PT.preto });
+    ctx.beginPath(); ctx.ellipse(sd * 19, -9, 9.5, 10.5, 0, 0, TAU); linha('rgba(150,150,150,.5)', 1.5);
+    sobrancelha(sd, sd * 18, -24, 14, 6, '#a9abac', e);
+  }
+  bocaPreto(e);
+  sil(() => { ctx.moveTo(-15, 6); ctx.quadraticCurveTo(0, 0, 15, 6); ctx.quadraticCurveTo(16, 17, 0, 21); ctx.quadraticCurveTo(-16, 17, -15, 6); }, '#141416', 1.2);
+  el(-5, 6, 5, 2.6, 'rgba(255,255,255,.45)'); el(-6, 14, 2.6, 1.8, '#000'); el(6, 14, 2.6, 1.8, '#000');
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sd * 18, 24); ctx.quadraticCurveTo(sd * 36, 20, sd * 52, 24); ctx.moveTo(sd * 18, 29); ctx.quadraticCurveTo(sd * 34, 30, sd * 50, 36); linha('rgba(236,234,229,.9)', 1.2); }
+  const a = orelhaAng(p);
+  orelha(-1, a.e, PT.preto, '#5f6164', true); orelha(1, a.d, PT.preto, '#5f6164', true);
+  if (p.humor === 'fome') suor(A);
+}
+function bocaPreto(e) {
+  if (e.boca === 'triste') { ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, 26); ctx.moveTo(-11, 32); ctx.quadraticCurveTo(0, 24, 11, 32); linha(OUT, 2.4); return; }
+  let k = 1, lin = 0;
+  if (e.boca === 'mastiga') k = .3 + (Math.sin(T * 16) + 1) / 2 * .7;
+  if (e.boca === 'base') lin = Math.sin(T * 7) * 1.6;                        // ofegante feliz
+  const h = e.boca === 'aberta' ? 50 : 45;
+  const path = () => { ctx.moveTo(-16, 24); ctx.quadraticCurveTo(0, 30, 16, 24); ctx.quadraticCurveTo(14, 24 + (h - 24) * k, 0, 25 + (h - 23) * k); ctx.quadraticCurveTo(-14, 24 + (h - 24) * k, -16, 24); };
+  ctx.beginPath(); path(); ctx.fillStyle = '#5a2028'; ctx.fill();
+  ctx.save(); ctx.clip(); ctx.beginPath(); ctx.moveTo(-13, 26); ctx.lineTo(-10, 33); ctx.lineTo(-8, 26); ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore();
+  ctx.beginPath(); path(); linha(OUT, 2.2);
+  if (k > .5 && e.boca !== 'lambe') { sil(() => ctx.ellipse(0, 24 + (h - 22) * k + lin, 9, 9, 0, 0, Math.PI), '#f08a98', 1.2); ctx.beginPath(); ctx.moveTo(0, 30 + (h - 30) * k + lin); ctx.lineTo(0, 24 + (h - 16) * k + lin); linha('#c8606e', 1.4); }
+  if (e.boca === 'lambe') { const lx = Math.sin(T * 6) * 9; sil(() => ctx.ellipse(lx, 22, 7, 8, 0, 0, TAU), '#f08a98', 1.2); }
+}
+
+function orelhaAng(p) {
+  let base = Math.sin(T * 1.6 + p.ph) * .05, amp = 0;
+  if (p.humor === 'animado') amp = Math.sin(T * 18) * .12;
+  if (p.fase === 'festa') amp = Math.sin(T * 14) * .2;
+  if (p.humor === 'fome') base += .12;
+  return { e: base + amp + (p.flickLado < 0 ? p.flick * .35 : 0), d: base - amp * .7 + (p.flickLado > 0 ? p.flick * .35 : 0) };
+}
+
+/* ---------- TRONCOS (sem fantasia: camiseta vinho / pelagem com coleira) */
+function caminhoTronco(tipo) {
+  if (tipo === 'humano') { ctx.moveTo(-60, 140); ctx.lineTo(-62, -36); ctx.quadraticCurveTo(-60, -70, -26, -76); ctx.lineTo(26, -76); ctx.quadraticCurveTo(60, -70, 62, -36); ctx.lineTo(60, 140); ctx.closePath(); }
+  else { ctx.moveTo(-46, 140); ctx.lineTo(-50, -24); ctx.quadraticCurveTo(-46, -64, 0, -66); ctx.quadraticCurveTo(46, -64, 50, -24); ctx.lineTo(46, 140); ctx.closePath(); }
+}
+const BASE = {
+  humano: { corpo: '#f7f5ef', marcas() { ctx.beginPath(); ctx.moveTo(-30, -20); ctx.quadraticCurveTo(-26, 10, -32, 40); ctx.moveTo(30, -20); ctx.quadraticCurveTo(26, 10, 32, 40); linha('rgba(0,0,0,.08)', 2); } },
+  cocker: { corpo: CK.branco, marcas() { el(-46, -24, 18, 34, CK.laranja2); el(46, -24, 18, 34, CK.laranja2); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(-10 + i * 7, -30 + i * 9, 6, .5, 2.6); linha('rgba(200,170,140,.5)', 1.4); } } },
+  preto: { corpo: PT.preto, marcas() { el(0, -20, 20, 40, 'rgba(150,150,150,.4)'); for (const [x, y, k, r] of SAL_CORPO) if (k < .5) el(x, y, r * .7, r * .7, 'rgba(175,177,180,.6)'); } },
+};
+function colarBase(tipo, A) {
+  if (tipo === 'humano') { ctx.beginPath(); ctx.moveTo(-17, A.neck + 4); ctx.quadraticCurveTo(-4, A.neck + 34, 3, A.neck + 32); ctx.quadraticCurveTo(12, A.neck + 26, 17, A.neck + 4); linha('#d9b04a', 1.8); return; }
+  const cor = tipo === 'cocker' ? '#d9453a' : '#5fae6a';
+  ctx.beginPath(); ctx.moveTo(-34, A.neck + 8); ctx.quadraticCurveTo(0, A.neck + 18, 34, A.neck + 8); linha(OUT, 11); ctx.beginPath(); ctx.moveTo(-34, A.neck + 8); ctx.quadraticCurveTo(0, A.neck + 18, 34, A.neck + 8); linha(cor, 7);
+  el(0, A.neck + 22, 6, 6, '#f2c544'); linha(OUT, 1.6);
+}
+function tronco(p, R, A) {
+  const cor = R.camisa || BASE[p.tipo].corpo;
+  sil(() => caminhoTronco(p.tipo), cor, 3);
+  ctx.save(); ctx.beginPath(); caminhoTronco(p.tipo); ctx.clip();
+  if (!R.camisa) BASE[p.tipo].marcas(); else if (R.estampa) R.estampa(A, p.tipo);
+  if (p.tipo === 'humano') { ctx.beginPath(); ctx.ellipse(0, -76, 18, 10, 0, 0, Math.PI); ctx.fillStyle = PELE; ctx.fill(); linha('rgba(0,0,0,.25)', 2); }
+  ctx.restore();
+  if (R.corpo) R.corpo(A, p.tipo, p); else if (!R.camisa) colarBase(p.tipo, A);
+}
+function rabo(p) {
+  const sd = p.i === 0 ? -1 : 1;
+  const vel = { calmo: 3, animado: 13, festa: 17, fome: 1.2 }[p.fase === 'festa' ? 'festa' : p.humor] || 3;
+  const caido = p.humor === 'fome' ? .55 : 0, amp = p.humor === 'fome' ? .08 : .42;
+  ctx.save(); ctx.translate(sd * 38, 28); ctx.rotate(sd * (.5 + caido) + Math.sin(T * vel + p.ph) * amp);
+  const cor = p.tipo === 'cocker' ? CK.laranja2 : PT.preto, ponta = p.tipo === 'cocker' ? CK.branco : '#a0a2a4';
+  sil(() => { ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-14, -42, -3, -80); ctx.quadraticCurveTo(10, -86, 13, -72); ctx.quadraticCurveTo(10, -36, 8, 0); ctx.closePath(); }, cor, 3);
+  el(3, -74, 8, 10, ponta);
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(-9, -20 - i * 18); ctx.lineTo(-15, -26 - i * 18); linha(cor, 4); }
+  ctx.restore();
+}
+/* braços e patas apoiados no balcão (desenhados por cima do balcão) */
+function bracos(p, R) {
+  const fome = p.humor === 'fome' && p.fase === 'balcao', bate = p.i === 2 ? -1 : 1;
+  const tap = fome ? -Math.abs(Math.sin(T * 7)) * 13 : 0;
+  for (const sd of [-1, 1]) {
+    const dy = sd === bate ? tap : 0;
+    if (p.tipo === 'humano') {
+      const pele = R.camisa ? R.camisa : PELE;
+      ctx.beginPath(); ctx.moveTo(sd * 54, -38); ctx.quadraticCurveTo(sd * 62, -10, sd * 52, 8 + dy); linha(OUT, 22); ctx.beginPath(); ctx.moveTo(sd * 54, -38); ctx.quadraticCurveTo(sd * 62, -10, sd * 52, 8 + dy); linha(pele, 16);
+      sil(() => ctx.ellipse(sd * 55, -44, 13, 15, 0, 0, TAU), R.camisa || BASE.humano.corpo, 2.2);
+      sil(() => ctx.ellipse(sd * 50, 12 + dy, 14, 10, 0, 0, TAU), PELE, 2.2);
+      ctx.beginPath(); for (let k = -1; k <= 1; k++) { ctx.moveTo(sd * 50 + k * 5, 16 + dy); ctx.lineTo(sd * 50 + k * 5, 20 + dy); } linha('#c48c6c', 1.4);
+    } else {
+      const pelo = p.tipo === 'cocker' ? CK.branco : PT.preto, dedo = p.tipo === 'cocker' ? '#e6d2bb' : '#9a9c9e';
+      ctx.beginPath(); ctx.moveTo(sd * 28, -34); ctx.lineTo(sd * 38, 6 + dy); linha(OUT, 26); ctx.beginPath(); ctx.moveTo(sd * 28, -34); ctx.lineTo(sd * 38, 6 + dy); linha(pelo, 20);
+      if (p.tipo === 'cocker') { ctx.beginPath(); ctx.moveTo(sd * 36, -20); ctx.lineTo(sd * 44, -8); linha(CK.laranja2, 4); }
+      sil(() => ctx.ellipse(sd * 39, 10 + dy, 15, 10, 0, 0, TAU), pelo, 2.2);
+      ctx.beginPath(); for (let k = -1; k <= 1; k++) { ctx.moveTo(sd * 39 + k * 5, 13 + dy); ctx.lineTo(sd * 39 + k * 5, 18 + dy); } linha(dedo, 1.6);
+    }
+    if (fome && sd === bate && Math.abs(Math.sin(T * 7)) < .18) { ctx.beginPath(); ctx.moveTo(sd * 45 - 16, 20); ctx.lineTo(sd * 45 - 22, 24); ctx.moveTo(sd * 45 + 16, 20); ctx.lineTo(sd * 45 + 22, 24); linha('#b57a2c', 2); }
+  }
+}
+
+/* ------------------------------------------------------------ GUARDA-ROUPA (11 fantasias + casual)
+   cabeca(A): desenhada no espaço da cabeça (0,0 = centro da cabeça).
+   corpo / estampa / fundo: espaço do tronco. Servem para o personagem do meio e para os cachorros. */
+function capa(A, cor, borda) {
+  const w = Math.sin(T * 2.2) * 6;
+  sil(() => { ctx.moveTo(-A.bw * .85, A.neck + 8); ctx.quadraticCurveTo(-A.bw * 1.75 + w, A.neck + 80, -A.bw * 1.6 + w, 150); ctx.lineTo(A.bw * 1.6 + w, 150); ctx.quadraticCurveTo(A.bw * 1.75 + w, A.neck + 80, A.bw * .85, A.neck + 8); ctx.closePath(); }, cor, 3);
+  ctx.beginPath(); ctx.moveTo(-A.bw * 1.2 + w, A.neck + 50); ctx.quadraticCurveTo(-A.bw * 1.3 + w, A.neck + 100, -A.bw * 1.25 + w, 150); ctx.moveTo(A.bw * 1.2 + w, A.neck + 50); ctx.quadraticCurveTo(A.bw * 1.3 + w, A.neck + 100, A.bw * 1.25 + w, 150); linha(borda, 2);
+}
+function triLenco(A, cor, bolinha) {
+  sil(() => { ctx.moveTo(-26, A.neck + 4); ctx.quadraticCurveTo(0, A.neck + 12, 26, A.neck + 4); ctx.lineTo(0, A.neck + 34); ctx.closePath(); }, cor, 2.2);
+  if (bolinha) for (const [x, y] of [[-12, 9], [0, 13], [12, 9], [-5, 21], [6, 21], [0, 28]]) el(x, A.neck + y, 1.8, 1.8, '#fff');
+  el(0, A.neck + 8, 6, 5, cor); linha(OUT, 1.8);
+}
+const ROUPAS = [
+  { id: 'casual', nome: 'Casual', emoji: '🙂' },
+  { id: 'chef', chapeu: true, nome: 'Chef de Cozinha', emoji: '👨‍🍳', camisa: '#fbf8f1',
+    estampa(A) { for (const sd of [-1, 1]) for (let i = 0; i < 4; i++) el(sd * 14, A.neck + 34 + i * 20, 3.4, 3.4, '#cfc6b4'); ctx.beginPath(); ctx.moveTo(-26, A.neck + 4); ctx.lineTo(18, A.neck + 120); linha('#e4dccd', 2); },
+    corpo(A) { triLenco(A, '#d94a3a'); },
+    cabeca(A) { const y = A.top + 4, w = A.rx * .8;
+      sil(() => { ctx.rect(-w, y - 14, w * 2, 18); for (const [x, yy, r] of [[-w * .5, y - 30, 20], [w * .5, y - 30, 20], [0, y - 44, 24]]) { ctx.moveTo(x + r, yy); ctx.arc(x, yy, r, 0, TAU); } }, '#fffdf8', 2.5);
+      ctx.beginPath(); ctx.moveTo(-w, y - 14); ctx.lineTo(w, y - 14); for (let k = -2; k <= 2; k++) { ctx.moveTo(k * w * .38, y - 12); ctx.lineTo(k * w * .38, y + 2); } linha('#e2d9c8', 1.8); } },
+  { id: 'cowboy', chapeu: true, nome: 'Cowboy', emoji: '🤠', camisa: '#c98a55',
+    estampa() { ctx.fillStyle = 'rgba(120,60,30,.28)'; for (let x = -70; x < 70; x += 22) ctx.fillRect(x, -90, 8, 240); for (let y = -90; y < 150; y += 22) ctx.fillRect(-70, y, 140, 8); },
+    corpo(A) { triLenco(A, '#d23f3f', true); },
+    cabeca(A) { ctx.save(); ctx.rotate(-.08); const y = A.top + 8, w = A.rx;
+      sil(() => ctx.ellipse(0, y, w * 1.55, 12, 0, 0, TAU), '#9a6236', 2.5);
+      sil(() => { ctx.moveTo(-w * .62, y); ctx.bezierCurveTo(-w * .72, y - 46, -w * .2, y - 42, 0, y - 34); ctx.bezierCurveTo(w * .2, y - 42, w * .72, y - 46, w * .62, y); ctx.closePath(); }, '#ab6e3d', 2.5);
+      ctx.beginPath(); ctx.moveTo(-w * .63, y - 5); ctx.quadraticCurveTo(0, y + 1, w * .63, y - 5); linha('#5a3820', 7);
+      ctx.beginPath(); ctx.ellipse(0, y + 2, w * 1.45, 8, 0, .2, Math.PI - .2); linha('rgba(255,255,255,.25)', 2); ctx.restore(); } },
+  { id: 'inverno', chapeu: true, nome: 'Touca de Inverno', emoji: '🧣', camisa: '#8fae6a',
+    estampa(A) { for (const y of [A.neck + 40, A.neck + 70]) { ctx.beginPath(); for (let x = -70; x <= 70; x += 10) ctx.lineTo(x, y + ((x / 10) % 2 ? 6 : 0)); linha('#f4ead2', 3); } },
+    corpo(A) { sil(() => ctx.roundRect(-A.bw * .72, A.neck - 6, A.bw * 1.44, 18, 9), '#e2704a', 2.2);
+      sil(() => ctx.roundRect(14, A.neck + 4, 16, 62, 5), '#e2704a', 2.2);
+      ctx.fillStyle = '#fbeedd'; for (let k = 0; k < 3; k++) ctx.fillRect(14, A.neck + 16 + k * 16, 16, 6);
+      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(16 + k * 4, A.neck + 66); ctx.lineTo(16 + k * 4, A.neck + 73); linha('#e2704a', 2); } },
+    cabeca(A) { const y = A.top + 20, w = A.rx * 1.03;
+      const domo = () => { ctx.moveTo(-w, y); ctx.bezierCurveTo(-w, y - 56, w, y - 56, w, y); ctx.closePath(); };
+      sil(domo, '#e8ab3e', 2.5); ctx.save(); ctx.beginPath(); domo(); ctx.clip(); ctx.fillStyle = '#e2704a'; ctx.fillRect(-w, y - 26, w * 2, 7); ctx.fillRect(-w, y - 40, w * 2, 5); ctx.restore();
+      sil(() => ctx.roundRect(-w - 3, y - 8, w * 2 + 6, 16, 8), '#e2704a', 2.2);
+      ctx.beginPath(); for (let x = -w + 4; x < w; x += 7) { ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5); } linha('rgba(120,40,20,.35)', 1.6);
+      sil(() => ctx.arc(0, y - 44, 12, 0, TAU), '#fbeedd', 2.2); } },
+  { id: 'chefao', semOculos: true, nome: 'Chefão (óculos e corrente)', emoji: '😎', camisa: '#2a2a30',
+    corpo(A) { ctx.beginPath(); ctx.moveTo(-28, A.neck + 4); ctx.quadraticCurveTo(0, A.neck + 70, 28, A.neck + 4); ctx.setLineDash([5, 3]); linha('#a8781c', 7); ctx.beginPath(); ctx.moveTo(-28, A.neck + 4); ctx.quadraticCurveTo(0, A.neck + 70, 28, A.neck + 4); linha('#f4c542', 4.5); ctx.setLineDash([]);
+      sil(() => ctx.arc(0, A.neck + 42, 11, 0, TAU), '#f4c542', 2); estrela5(0, A.neck + 42, 7, '#ffe07a'); },
+    cabeca(A) { const y = A.eyeY, dx = A.eyeDx;
+      ctx.beginPath(); ctx.moveTo(-A.rx, y - 5); ctx.lineTo(-dx - 13, y - 5); ctx.moveTo(A.rx, y - 5); ctx.lineTo(dx + 13, y - 5); ctx.moveTo(-dx + 12, y - 4); ctx.quadraticCurveTo(0, y - 8, dx - 12, y - 4); linha('#1e1e24', 3.2);
+      for (const sd of [-1, 1]) { sil(() => ctx.roundRect(sd * dx - 14, y - 10, 28, 19, 8), '#1e1e24', 2); ctx.beginPath(); ctx.moveTo(sd * dx - 8, y + 3); ctx.lineTo(sd * dx + 2, y - 7); linha('rgba(255,255,255,.55)', 2.5); } } },
+  { id: 'heroi', semOculos: true, nome: 'Super-Herói', emoji: '🦸', camisa: '#d94a4a',
+    fundo(A) { capa(A, '#f2b13c', '#c98a1e'); },
+    estampa(A) { sil(() => ctx.arc(0, A.neck + 44, 17, 0, TAU), '#ffd95a', 2); sil(() => { ctx.moveTo(4, A.neck + 30); ctx.lineTo(-7, A.neck + 46); ctx.lineTo(1, A.neck + 46); ctx.lineTo(-4, A.neck + 58); ctx.lineTo(8, A.neck + 41); ctx.lineTo(0, A.neck + 41); ctx.closePath(); }, '#d94a4a', 1); },
+    cabeca(A) { const y = A.eyeY, dx = A.eyeDx;
+      ctx.beginPath(); ctx.roundRect(-A.rx * .86, y - 11, A.rx * 1.72, 21, 10); ctx.ellipse(-dx, y, 10, 9.5, 0, 0, TAU); ctx.ellipse(dx, y, 10, 9.5, 0, 0, TAU);
+      ctx.fillStyle = '#d23f3f'; ctx.fill('evenodd'); linha(OUT, 2.2);
+      const w = Math.sin(T * 4) * 3; for (const k of [0, 1]) { ctx.beginPath(); ctx.moveTo(-A.rx * .84, y - 2); ctx.quadraticCurveTo(-A.rx - 10, y + 4 + k * 8 + w, -A.rx - 18, y + 10 + k * 10 + w); linha('#d23f3f', 5); } } },
+  { id: 'pirata', chapeu: true, semOculos: true, nome: 'Pirata', emoji: '🏴‍☠️', camisa: '#fbf6ee',
+    estampa() { ctx.fillStyle = '#d9534a'; for (let y = -84; y < 150; y += 20) ctx.fillRect(-80, y, 160, 9); },
+    corpo(A) { triLenco(A, '#2a2420'); },
+    cabeca(A) { const y = A.eyeY, dx = A.eyeDx, t = A.top;
+      ctx.beginPath(); ctx.moveTo(-A.rx * .98, y + 4); ctx.lineTo(A.rx * .82, t + 14); linha('#1b1b1f', 2.6);
+      sil(() => ctx.ellipse(-dx, y, 11, 10, 0, 0, TAU), '#1b1b1f', 1.6);
+      sil(() => ctx.ellipse(0, t + 2, A.rx * .78, 20, 0, Math.PI, TAU), '#2a2420', 2.4);
+      sil(() => { ctx.moveTo(-A.rx * 1.25, t + 8); ctx.quadraticCurveTo(-A.rx * .6, t - 42, 0, t - 14); ctx.quadraticCurveTo(A.rx * .6, t - 42, A.rx * 1.25, t + 8); ctx.quadraticCurveTo(0, t + 18, -A.rx * 1.25, t + 8); }, '#2a2420', 2.5);
+      ctx.beginPath(); ctx.moveTo(-A.rx * 1.18, t + 5); ctx.quadraticCurveTo(-A.rx * .6, t - 36, 0, t - 10); ctx.quadraticCurveTo(A.rx * .6, t - 36, A.rx * 1.18, t + 5); linha('#e8b84a', 2.2);
+      ctx.beginPath(); ctx.moveTo(-8, t + 6); ctx.lineTo(8, t - 6); ctx.moveTo(8, t + 6); ctx.lineTo(-8, t - 6); linha('#fff', 2.6);
+      el(0, t - 2, 6.5, 6, '#fff'); el(-2.3, t - 2.5, 1.6, 1.6, '#2a2420'); el(2.3, t - 2.5, 1.6, 1.6, '#2a2420'); } },
+  { id: 'astronauta', nome: 'Astronauta', emoji: '🚀', camisa: '#eef0ee',
+    estampa(A) { sil(() => ctx.roundRect(-17, A.neck + 32, 34, 24, 5), '#c9cdd0', 1.6); el(-8, A.neck + 44, 3.5, 3.5, '#e2504a'); el(1, A.neck + 44, 3.5, 3.5, '#f2c544'); el(10, A.neck + 44, 3.5, 3.5, '#5fae6a');
+      sil(() => ctx.rect(-A.bw * .8, A.neck + 22, 14, 10), '#5fae6a', 1); ctx.fillStyle = '#f2c544'; ctx.fillRect(-A.bw * .8 + 4, A.neck + 25, 6, 4); },
+    corpo(A) { sil(() => ctx.ellipse(0, A.neck + 2, A.bw * .66, 10, 0, 0, TAU), '#c9cdd0', 2.2); },
+    cabeca(A) { const R = A.rx * 1.42, cy = 6;
+      ctx.beginPath(); ctx.arc(0, cy, R, 0, TAU); ctx.fillStyle = 'rgba(205,236,238,.2)'; ctx.fill(); linha('#f4f6f4', 5);
+      ctx.beginPath(); ctx.arc(0, cy, R + 2.8, 0, TAU); linha(OUT, 1.6);
+      ctx.beginPath(); ctx.arc(0, cy, R - 9, -2.6, -1.8); linha('rgba(255,255,255,.8)', 5); el(R * .38, cy - R * .62, 3, 3, 'rgba(255,255,255,.8)'); } },
+  { id: 'havaiano', nome: 'Turista Havaiano', emoji: '🌺', camisa: '#3fb59d',
+    estampa() { for (const [x, y, c] of [[-38, -50, '#f9e27a'], [22, -40, '#f27a8a'], [-12, -6, '#fff3d6'], [36, 10, '#f9e27a'], [-40, 30, '#f27a8a'], [10, 46, '#fff3d6']]) flor(x, y, 9, c, '#e2704a'); },
+    corpo(A) { for (let i = 0; i <= 8; i++) { const u = i / 8, x = (1 - u) * (1 - u) * -30 + 2 * (1 - u) * u * 0 + u * u * 30, y = A.neck + 2 + 2 * (1 - u) * u * 44; flor(x, y, 7, ['#f05a78', '#ffd34a', '#ff8f4a'][i % 3], '#fff4c8'); } },
+    cabeca(A) { flor(-A.rx * .8, A.top + 20, 13, '#f0627a', '#ffd94a'); ctx.beginPath(); ctx.moveTo(-A.rx * .8, A.top + 20); ctx.lineTo(-A.rx * .8 + 9, A.top + 11); linha('#ffd94a', 2); } },
+  { id: 'rei', chapeu: true, nome: 'Rei', emoji: '👑', camisa: '#7b4396',
+    fundo(A) { capa(A, '#b8283c', '#8a1a2a'); },
+    corpo(A) { sil(() => { ctx.moveTo(-A.bw - 4, A.neck + 26); ctx.quadraticCurveTo(-A.bw * .5, A.neck - 8, 0, A.neck - 2); ctx.quadraticCurveTo(A.bw * .5, A.neck - 8, A.bw + 4, A.neck + 26); ctx.quadraticCurveTo(0, A.neck + 26, -A.bw - 4, A.neck + 26); }, '#fbf7ee', 2.2);
+      for (const x of [-34, -16, 2, 20, 36]) { ctx.beginPath(); ctx.moveTo(x, A.neck + 9); ctx.lineTo(x, A.neck + 17); linha('#1b1b1f', 2.6); }
+      sil(() => ctx.arc(0, A.neck + 22, 6, 0, TAU), '#f4c542', 1.6); },
+    cabeca(A) { const y = A.top + 6, w = A.rx * .72;
+      sil(() => { ctx.moveTo(-w, y); ctx.lineTo(-w, y - 24); ctx.lineTo(-w * .5, y - 11); ctx.lineTo(0, y - 32); ctx.lineTo(w * .5, y - 11); ctx.lineTo(w, y - 24); ctx.lineTo(w, y); ctx.closePath(); }, '#f4c542', 2.5);
+      ctx.fillStyle = '#d9a52c'; ctx.fillRect(-w, y - 7, w * 2, 7);
+      el(0, y - 4, 4, 4, '#d9344a'); el(-w * .55, y - 4, 3.3, 3.3, '#3fae6a'); el(w * .55, y - 4, 3.3, 3.3, '#3fae6a');
+      for (const [x, yy] of [[-w, y - 26], [0, y - 34], [w, y - 26]]) { el(x, yy, 3.6, 3.6, '#ffe27a'); linha(OUT, 1.4); } } },
+  { id: 'ninja', chapeu: true, nome: 'Ninja', emoji: '🥷', camisa: '#2f2f38',
+    estampa(A) { sil(() => { ctx.moveTo(-A.bw * .6, A.neck); ctx.lineTo(8, A.neck + 70); ctx.lineTo(20, A.neck + 62); ctx.lineTo(-A.bw * .35, A.neck - 2); ctx.closePath(); }, '#4a4a58', 1); ctx.beginPath(); ctx.moveTo(A.bw * .6, A.neck); ctx.lineTo(4, A.neck + 52); linha('#4a4a58', 9); },
+    cabeca(A) { const y = A.eyeY - 23;
+      ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, A.rx + 2.5, -A.top + 3, 0, 0, TAU); ctx.clip();
+      ctx.beginPath(); ctx.moveTo(-A.rx - 5, y - 2); ctx.quadraticCurveTo(0, y - 12, A.rx + 5, y - 2); ctx.lineTo(A.rx + 5, y + 12); ctx.quadraticCurveTo(0, y + 2, -A.rx - 5, y + 12); ctx.closePath(); ctx.fillStyle = '#2c2c34'; ctx.fill(); linha(OUT, 2);
+      ctx.restore();
+      sil(() => ctx.roundRect(-14, y - 9, 28, 14, 3), '#bfc4c8', 1.6); ctx.beginPath(); ctx.arc(0, y - 2, 4, 0, TAU); linha('#7a8086', 1.6);
+      const wv = Math.sin(T * 5) * 4, wv2 = Math.sin(T * 5 + 1) * 4;
+      for (const [k, ww] of [[0, wv], [1, wv2]]) { ctx.beginPath(); ctx.moveTo(A.rx - 2, y + 4); ctx.bezierCurveTo(A.rx + 14, y - 4 + ww, A.rx + 24, y + 10 + ww, A.rx + 38, y + 6 + k * 12 + ww); linha(OUT, 10); ctx.beginPath(); ctx.moveTo(A.rx - 2, y + 4); ctx.bezierCurveTo(A.rx + 14, y - 4 + ww, A.rx + 24, y + 10 + ww, A.rx + 38, y + 6 + k * 12 + ww); linha('#2c2c34', 6); }
+      sil(() => ctx.ellipse(A.rx - 1, y + 4, 7, 6, 0, 0, TAU), '#2c2c34', 1.6); } },
+  { id: 'festa', chapeu: true, nome: 'Aniversário', emoji: '🎉',
+    corpo(A) { sil(() => { ctx.moveTo(0, A.neck + 8); ctx.lineTo(-18, A.neck - 2); ctx.lineTo(-18, A.neck + 18); ctx.closePath(); ctx.moveTo(0, A.neck + 8); ctx.lineTo(18, A.neck - 2); ctx.lineTo(18, A.neck + 18); ctx.closePath(); }, '#e0505a', 2); sil(() => ctx.arc(0, A.neck + 8, 5, 0, TAU), '#c23a44', 1.4); },
+    cabeca(A) { ctx.save(); ctx.translate(A.rx * .28, A.top + 6); ctx.rotate(.22);
+      const cone = () => { ctx.moveTo(-17, 0); ctx.lineTo(0, -46); ctx.lineTo(17, 0); ctx.quadraticCurveTo(0, 6, -17, 0); };
+      sil(cone, '#ff8fa3', 2.5); ctx.save(); ctx.beginPath(); cone(); ctx.clip(); for (let k = -3; k < 4; k++) { ctx.beginPath(); ctx.moveTo(-20, -8 + k * 12); ctx.lineTo(20, -20 + k * 12); linha('#ffe08a', 4); } ctx.restore();
+      sil(() => ctx.arc(0, -48, 7, 0, TAU), '#ffe08a', 2); ctx.restore(); } },
+];
+
+/* ------------------------------------------------------------ ESTADO DOS PERSONAGENS */
+const NOMES = ['Cão 1', 'Chef', 'Cão 2'];
+function novoP(i, tipo, x) {
+  return { i, tipo, x, roupa: 0, pedido: null, pratos: 0, humor: 'calmo', humorT: 0, fase: 'balcao', faseT: 0,
+    pisca: 0, piscaT: 1 + Math.random() * 3, piscaDur: 0, ox: 0, oy: 0, ax: 0, ay: 0, olharT: 0, ph: Math.random() * 6,
+    espera: 0, tagT: 0, bolhaK: 0, flick: 0, flickT: 2 + Math.random() * 4, flickLado: 1, toque: 0, comeu: false, partT: 0 };
+}
+const pers = [novoP(0, 'cocker', 95), novoP(1, 'humano', 270), novoP(2, 'preto', 445)];
+function novoPedido(p) { const ocup = pers.filter(q => q !== p).map(q => q.pedido); const op = Object.keys(COMIDAS).filter(k => !ocup.includes(k) && k !== p.pedido); return op[Math.floor(Math.random() * op.length)]; }
+function novaRoupa(p) { const ocup = pers.filter(q => q !== p).map(q => q.roupa); const op = []; for (let k = 1; k < ROUPAS.length; k++) if (k !== p.roupa && !ocup.includes(k)) op.push(k); return op[Math.floor(Math.random() * op.length)]; }
+pers.forEach(p => { p.pedido = novoPedido(p); });
+function setFase(p, f) { p.fase = f; p.faseT = 0; }
+
+/* ações (os botões de teste chamam estas; na Fase 3 o tabuleiro chama as mesmas) */
+const Acao = {
+  certo(p) { if (p.fase !== 'balcao') return; p.humor = 'animado'; p.humorT = 2.4; p.espera = 0; brilhoCabeca(p, 5); },
+  demora(p) { if (p.fase !== 'balcao') return; p.humor = 'fome'; p.humorT = 0; },
+  prato(p) { if (p.fase !== 'balcao') return; p.pratos++; p.humor = 'animado'; p.humorT = 1.5; p.espera = 0; if (p.pratos >= 10) Acao.completa(p); },
+  completa(p) { if (p.fase !== 'balcao') return; p.pratos = 10; p.comeu = false; p.humor = 'animado'; setFase(p, 'festa'); premio(p); Som.festa(p.tipo); solta(cabecaXY(p), 18, 'confete'); solta(cabecaXY(p), 14, 'estrela'); },
+  roupa(p) { if (p.fase !== 'balcao') return; p.humor = 'animado'; setFase(p, 'saindo'); },
+  carinho(p) { if (p.fase !== 'balcao') return; Som.carinho(p.tipo); p.toque = 1; p.humor = 'animado'; p.humorT = 1.3; p.espera = 0; solta(cabecaXY(p), 4, 'coracao'); },
+};
+
+/* posição na tela: sai pelo lado (cachorros) ou afunda atrás do balcão (centro) */
+function pos(p) {
+  let k = 0;
+  if (p.fase === 'saindo') k = easeIn(Math.min(1, p.faseT / .65));
+  else if (p.fase === 'camarim') k = 1;
+  else if (p.fase === 'voltando') k = 1 - back(Math.min(1, p.faseT / .85));
+  const fora = [[-240, 0], [0, 290], [240, 0]][p.i];
+  let j = 0;
+  if (p.fase === 'festa' && !(p.faseT > .55 && p.faseT < 1.5)) j = -Math.abs(Math.sin(T * 7)) * 26;
+  else if (p.humor === 'animado' && p.fase === 'balcao') j = -Math.abs(Math.sin(T * 9 + p.ph)) * 9;
+  if (p.toque > 0) j -= Math.sin((1 - p.toque) * Math.PI) * 10;
+  return { x: p.x + fora[0] * k, y: YB + fora[1] * k + j };
+}
+function cabecaXY(p) { const P = pos(p); return { x: P.x, y: P.y + ANC[p.tipo].hy * ESC }; }
+function expressao(p) {
+  const e = { pisca: p.pisca, ox: p.ox, oy: p.oy, brilho: false, feliz: false, boca: 'base', sobr: 0, triste: false };
+  if (p.humor === 'animado') { e.brilho = true; e.boca = 'lambe'; e.sobr = 1; }
+  if (p.humor === 'fome') { e.triste = true; e.boca = 'triste'; e.sobr = -.3; }
+  if (p.fase === 'festa') { e.brilho = false; e.feliz = true; e.sobr = 1; e.boca = (p.faseT > .55 && p.faseT < 1.5) ? 'mastiga' : 'aberta'; }
+  if (p.toque > .2) { e.feliz = true; e.boca = 'aberta'; }
+  if (p.fase === 'saindo' || p.fase === 'voltando') { e.boca = 'aberta'; e.brilho = true; }
+  return e;
+}
+function inclina(p) {
+  let a = Math.sin(T * .9 + p.ph) * .035;
+  if (p.humor === 'animado') a += Math.sin(T * 5) * .05;
+  if (p.humor === 'fome') a += (p.i === 2 ? -1 : 1) * .07;
+  if (p.fase === 'festa') a += Math.sin(T * 8) * .06;
+  return a;
+}
+
+/* ------------------------------------------------------------ ATUALIZAÇÃO */
+let demo = false, demoT = 0;
+function atualiza(dt) {
+  for (const p of pers) {
+    if (p.piscaDur > 0) { p.piscaDur -= dt; const u = Math.max(0, p.piscaDur / .15); p.pisca = 1 - Math.abs(2 * u - 1); if (p.piscaDur <= 0) p.pisca = 0; }
+    else { p.piscaT -= dt; if (p.piscaT <= 0) { p.piscaDur = .15; p.piscaT = Math.random() < .2 ? .25 : 1.8 + Math.random() * 3.5; } }
+    p.olharT -= dt; if (p.olharT <= 0) { p.olharT = 1.2 + Math.random() * 2.8; p.ax = Math.random() * 2 - 1; p.ay = Math.random() * .8 - .3; }
+    let tx = p.ax, ty = p.ay; if (p.humor === 'animado' || p.humor === 'fome') { tx = 0; ty = 1; }
+    p.ox += (tx - p.ox) * Math.min(1, dt * 8); p.oy += (ty - p.oy) * Math.min(1, dt * 8);
+    if (p.humorT > 0) { p.humorT -= dt; if (p.humorT <= 0 && p.humor !== 'fome') p.humor = 'calmo'; }
+    p.flickT -= dt; if (p.flickT <= 0) { p.flick = 1; p.flickLado = Math.random() < .5 ? -1 : 1; p.flickT = 3 + Math.random() * 5; } p.flick = Math.max(0, p.flick - dt * 3);
+    p.toque = Math.max(0, p.toque - dt * 1.7); p.tagT = Math.max(0, p.tagT - dt);
+    p.bolhaK = p.fase === 'balcao' ? Math.min(1, p.bolhaK + dt * 3) : 0;
+    if (p.fase === 'balcao') { p.espera += dt; if (p.espera > 24 && p.humor === 'calmo') { p.humor = 'fome'; Som.fome(p.tipo); } }
+    p.faseT += dt;
+    if (p.fase === 'festa') {
+      p.humor = 'animado';
+      if (p.faseT > .55 && !p.comeu) { p.comeu = true; p.pratos = 0; }
+      if (p.faseT > .55 && p.faseT < 1.7) { p.partT -= dt; if (p.partT <= 0) { p.partT = .1; solta(cabecaXY(p), 2, Math.random() < .5 ? 'coracao' : 'estrela'); } }
+      if (p.faseT >= 1.9) setFase(p, 'saindo');
+    } else if (p.fase === 'saindo' && p.faseT >= .65) {
+      setFase(p, 'camarim'); p.roupa = novaRoupa(p); p.pedido = novoPedido(p); p.pratos = 0; p.humor = 'calmo';
+    } else if (p.fase === 'camarim' && p.faseT >= 1.3) setFase(p, 'voltando');
+    else if (p.fase === 'voltando' && p.faseT >= .85) {
+      setFase(p, 'balcao'); p.humor = 'animado'; p.humorT = 1.3; p.tagT = 2.4; p.espera = 0; brilhoCabeca(p, 10); Som.tada(); marcaFantasia(p.roupa);
+    }
+  }
+  if (demo) { demoT -= dt; if (demoT <= 0) { demoT = 1.1; const livres = pers.filter(p => p.fase === 'balcao'); if (livres.length) { const p = livres[Math.floor(Math.random() * livres.length)], r = Math.random(); if (r < .62) Acao.prato(p); else if (r < .75) Acao.certo(p); else if (r < .85) Acao.demora(p); else if (r < .93) Acao.carinho(p); else Acao.roupa(p); } } }
+  for (let k = parts.length - 1; k >= 0; k--) { const q = parts[k]; q.vida += dt; if (q.vida >= q.max) { parts.splice(k, 1); continue; }
+    if (q.alvo) { if (q.vida < 0) continue; const u = easeIn(q.vida / q.max); q.x = q.x0 + (q.alvo.x - q.x0) * u + Math.sin(u * Math.PI) * q.curva; q.y = q.y0 + (q.alvo.y - q.y0) * u; continue; } q.vy += q.g * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.rot += q.vr * dt; }
+  nuvens.forEach(n => { n.x += n.v * dt; if (n.x > W + 90) n.x = -90; });
+}
+
+/* ------------------------------------------------------------ PARTÍCULAS */
+const parts = [];
+function solta(o, n, tipo) {
+  for (let k = 0; k < n; k++) {
+    const t = tipo === 'misto' ? (Math.random() < .5 ? 'coracao' : 'estrela') : tipo;
+    const sobe = t === 'coracao';
+    parts.push({ x: o.x + (Math.random() * 2 - 1) * 30, y: o.y - 20 + (Math.random() * 2 - 1) * 20, vx: (Math.random() * 2 - 1) * (sobe ? 40 : 150), vy: sobe ? -50 - Math.random() * 60 : -120 - Math.random() * 140,
+      g: sobe ? -10 : 260, vida: 0, max: .9 + Math.random() * .7, tipo: t, tam: 8 + Math.random() * 7, rot: Math.random() * 6, vr: (Math.random() * 2 - 1) * 4,
+      cor: t === 'coracao' ? ['#ff7b95', '#ff9fb4', '#f25a7a'][k % 3] : t === 'estrela' ? ['#ffd34a', '#ffe58a', '#ffb347'][k % 3] : t === 'confete' ? ['#ff8fa3', '#ffd34a', '#8fd06a', '#ffb347', '#c99ae0'][k % 5] : '#fff' });
+  }
+}
+function brilhoCabeca(p, n) { solta(cabecaXY(p), n, 'brilho'); }
+function desenhaParticulas() {
+  for (const q of parts) {
+    if (q.vida < 0) continue;
+    if (q.tipo === 'moeda') { el(q.x, q.y, 7, 7, '#f6c343'); linha('#b57f1c', 1.6); continue; }
+    if (q.tipo === 'confete') { ctx.globalAlpha = Math.min(1, (q.max - q.vida) / .3); ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillStyle = q.cor; ctx.fillRect(-4, -2.5, 8, 5); ctx.restore(); continue; }
+    ctx.globalAlpha = Math.min(1, (q.max - q.vida) / .3);
+    if (q.tipo === 'coracao') coracao(q.x, q.y, q.tam, q.cor);
+    else if (q.tipo === 'estrela') estrela5(q.x, q.y, q.tam * .8, q.cor, q.rot);
+    else { brilho4(q.x, q.y, q.tam * .7, '#fff8d8'); }
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ------------------------------------------------------------ CENÁRIO */
+const nuvens = [{ x: 60, y: 150, s: 1.1, v: 6 }, { x: 300, y: 115, s: .8, v: 4 }, { x: 470, y: 205, s: 1.3, v: 7 }, { x: 180, y: 260, s: .9, v: 5 }, { x: 420, y: 320, s: .7, v: 3 }];
+function ceu() {
+  const g = ctx.createLinearGradient(0, 0, 0, YB + 20); g.addColorStop(0, '#fbd3e0'); g.addColorStop(.45, '#eadcf6'); g.addColorStop(1, '#d4ecf0');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, YB + 30);
+  ctx.fillStyle = 'rgba(255,240,180,.75)'; for (const [x, y, r] of [[40, 120, 5], [500, 140, 4], [250, 230, 3.5], [110, 330, 3], [380, 260, 4], [520, 380, 3]]) brilho4(x, y, r * 1.6, 'rgba(255,236,170,.8)');
+  for (const n of nuvens) { ctx.save(); ctx.translate(n.x, n.y); ctx.scale(n.s, n.s); ctx.fillStyle = 'rgba(255,255,255,.88)';
+    ctx.beginPath(); for (const [x, y, r] of [[-40, 6, 22], [-14, -8, 30], [18, -4, 26], [44, 8, 20], [0, 12, 26]]) { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); } ctx.fill(); ctx.restore(); }
+}
+function toldo() {
+  const lw = 45, h = 44;
+  for (let i = 0; i * lw < W; i++) { ctx.fillStyle = i % 2 ? '#fff4e0' : '#f59f7c'; ctx.fillRect(i * lw, 0, lw, h); ctx.beginPath(); ctx.arc(i * lw + lw / 2, h, lw / 2, 0, Math.PI); ctx.fill(); }
+  ctx.beginPath(); for (let i = 0; i * lw < W; i++) ctx.arc(i * lw + lw / 2, h, lw / 2, 0, Math.PI); linha('rgba(150,80,50,.35)', 2);
+  ctx.fillStyle = 'rgba(150,80,50,.12)'; ctx.fillRect(0, 0, W, 8);
+}
+function hud() {
+  const y = 64, pill = (x, w) => { ctx.beginPath(); ctx.roundRect(x, y, w, 30, 15); ctx.fillStyle = '#fff'; ctx.fill(); linha('#7a4a36', 2.5); };
+  ctx.font = '800 17px "Trebuchet MS",system-ui,sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#5a3a2a';
+  pill(66, 128); el(80, y + 15, 14, 14, '#f6c343'); linha('#b57f1c', 2.4); estrela5(80, y + 15, 7, '#ffe48a');
+  ctx.fillStyle = '#5a3a2a'; ctx.fillText(moedas.toLocaleString('pt-BR'), 100, y + 16);
+  el(180, y + 15, 9, 9, '#ffb347'); linha('#b5701c', 2); ctx.fillStyle = '#fff'; ctx.fillText('+', 175, y + 16);
+  pill(206, 104); ctx.beginPath(); ctx.moveTo(214, y + 11); ctx.lineTo(220, y + 4); ctx.lineTo(234, y + 4); ctx.lineTo(240, y + 11); ctx.lineTo(227, y + 27); ctx.closePath(); ctx.fillStyle = '#4fd1a8'; ctx.fill(); linha('#2a8a6a', 2);
+  ctx.fillStyle = '#5a3a2a'; ctx.fillText(String(gemas), 248, y + 16);
+  ctx.beginPath(); ctx.roundRect(340, y + 6, 166, 18, 9); ctx.fillStyle = '#fff'; ctx.fill(); linha('#7a4a36', 2.5);
+  ctx.beginPath(); ctx.roundRect(343, y + 9, Math.max(12, 160 * Math.min(1, xp / xpPara())), 12, 6); ctx.fillStyle = '#8fd06a'; ctx.fill();
+  for (const [x, n] of [[334, nivel], [512, nivel + 1]]) { el(x, y + 15, 16, 16, n === nivel ? '#a8d98a' : '#f4e2c4'); linha('#7a4a36', 2.5); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.fillText(n, x, y + 16); ctx.textAlign = 'left'; }
+}
+function balcao() {
+  const y = YB - 6;
+  ctx.fillStyle = '#f6d36f'; ctx.fillRect(0, y, W, 58);
+  ctx.strokeStyle = 'rgba(214,160,60,.35)'; ctx.lineWidth = 1.2; ctx.beginPath();
+  for (let x = 18; x < W; x += 36) { ctx.moveTo(x, y + 6); ctx.lineTo(x - (x - W / 2) * .06, y + 58); } ctx.moveTo(0, y + 30); ctx.lineTo(W, y + 30); ctx.stroke();
+  ctx.fillStyle = '#fde59a'; ctx.fillRect(0, y, W, 6);
+  ctx.fillStyle = '#e7aa45'; ctx.fillRect(0, y + 58, W, 24);
+  ctx.fillStyle = 'rgba(120,70,20,.25)'; ctx.fillRect(0, y + 82, W, 7);
+  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.moveTo(0, y + 58); ctx.lineTo(W, y + 58); linha('#b57a2c', 2);
+}
+function pratoServico(p) {
+  const x = p.x, y0 = YB + 30, cf = COMIDAS[p.pedido];
+  brilhoCliente(p);
+  el(x, y0 + 2, 42, 13, 'rgba(120,70,20,.25)');
+  sil(() => ctx.ellipse(x, y0, 40, 12.5, 0, 0, TAU), '#fffaf2', 1.4, '#9a6a3a'); el(x, y0, 28, 8, '#f3eadb');
+  const n = p.fase === 'festa' && !p.comeu ? 10 : p.pratos;
+  for (let k = 0; k < n; k++) { const yy = y0 - 3 - k * 4; el(x, yy + 2, 34, 10, cf.esc); el(x, yy, 34, 10, cf.cor); ctx.beginPath(); ctx.ellipse(x, yy, 34, 10, 0, 0, TAU); linha('rgba(90,50,20,.4)', 1); }
+  if (n > 0) comida(p.pedido, x, y0 - 3 - (n - 1) * 4 - 6, 15);
+  for (let k = 0; k < 10; k++) { const tx = x - 31 + k * 7; ctx.beginPath(); ctx.roundRect(tx - 2.5, YB + 59, 5, 13, 2.5); ctx.fillStyle = k < p.pratos || (p.fase === 'festa' && !p.comeu) ? cf.esc : 'rgba(255,240,210,.55)'; ctx.fill(); linha('rgba(120,70,20,.5)', 1); }
+}
+/* ------------------------------------------------------------ TABULEIRO (Fase 2)
+   Cada vaga guarda uma pilha de pratos (de baixo para cima); cada prato tem uma comida.
+   Toque numa pilha e depois noutra (ou arraste): os pratos do topo com a mesma comida voam
+   para lá, se o topo de destino tiver a mesma comida ou a vaga estiver vazia.
+   10 pratos iguais no topo = pedido pronto (na Fase 3 vai para o cliente certo). */
+const ALT = 5, MAXP = 14, PRONTO = 10;
+const vagas = [
+  { x: 75, y: 600 }, { x: 205, y: 600, preco: '26k' }, { x: 335, y: 600, preco: '30k' }, { x: 465, y: 600 },
+  { x: 140, y: 715 }, { x: 270, y: 715 }, { x: 400, y: 715, preco: '18k' },
+  { x: 75, y: 830 }, { x: 205, y: 830 }, { x: 335, y: 830 }, { x: 465, y: 830 },
+].map(v => ({ ...v, bloq: !!v.preco, pilha: [], escondidos: 0, pulo: 0, treme: 0, pronto: 0 }));
+let moedas = 12000, servidas = 0, sel = null, arrasto = null, cestaK = 0, jogadas = 0;
+const voando = [], textos = [];
+
+function topo(v) { const p = v.pilha; if (!p.length) return null; const f = p[p.length - 1]; let n = 0; for (let k = p.length - 1; k >= 0 && p[k] === f; k--) n++; return { f, n }; }
+function livre(v) { return !v.bloq && v.escondidos === 0 && v.pronto === 0; }
+function podeIr(a, b) { if (!a || !b || a === b || b.bloq || b.pronto) return false; const ta = topo(a), tb = topo(b); return !!ta && (!tb || tb.f === ta.f) && b.pilha.length < MAXP; }
+
+/* comidas que aparecem: os 3 pedidos do balcão + reservas, até 5 tipos */
+function poolComidas() { const s = new Set(pers.map(p => p.pedido)); for (const k of ['abacate', 'milho', 'uva', 'morango', 'cenoura']) { if (s.size >= 5) break; s.add(k); } return [...s]; }
+function gerarPilha(pool) {
+  const total = 3 + Math.floor(Math.random() * 4), pil = []; let ult = null;
+  while (pil.length < total) { let f; do f = pool[Math.floor(Math.random() * pool.length)]; while (f === ult && pool.length > 1); const n = Math.min(total - pil.length, 1 + Math.floor(Math.random() * 3)); for (let k = 0; k < n; k++) pil.push(f); ult = f; }
+  return pil;
+}
+function servir() {
+  cestaK = 1;
+  const vazias = vagas.filter(v => livre(v) && !v.pilha.length);
+  if (!vazias.length) { vagas.forEach(v => { if (!v.bloq) v.treme = .6; }); texto(470, 860, 'mesa cheia', '#fff4e0'); Som.erro(); return; }
+  servidas++; sel = null; Som.servir();
+  const pool = poolComidas();
+  vazias.forEach((v, i) => gerarPilha(pool).forEach((f, k) => { v.pilha.push(f); v.escondidos++; voando.push({ f, de: { x: 470, y: 896 }, v, idx: v.pilha.length - 1, t: -(i * .12 + k * .05), dur: .45 }); }));
+}
+function mover(a, b, de) {
+  if (!podeIr(a, b)) { const tb = topo(b); return tb && topo(a) && tb.f !== topo(a).f ? 'diferente' : 'nao'; }
+  const ta = topo(a), n = Math.min(ta.n, MAXP - b.pilha.length);
+  for (let k = 0; k < n; k++) {
+    const idx = a.pilha.length - 1; a.pilha.pop();
+    b.pilha.push(ta.f); b.escondidos++;
+    voando.push({ f: ta.f, de: de ? { x: de.x, y: de.y - k * ALT } : { x: a.x, y: a.y - idx * ALT - 16 }, v: b, idx: b.pilha.length - 1, t: -k * .06, dur: .32 });
+  }
+  jogadas++; reagir(ta.f);
+  return 'ok';
+}
+/* quem pediu essa comida fica todo animado */
+function reagir(f) { for (const p of pers) if (p.pedido === f && p.fase === 'balcao') Acao.certo(p); }
+function texto(x, y, txt, cor) { textos.push({ x, y, txt, cor, t: 0 }); }
+
+function atualizaMesa(dt) {
+  cestaK = Math.max(0, cestaK - dt * 4);
+  for (const v of vagas) {
+    v.pulo = Math.max(0, v.pulo - dt * 5); v.treme = Math.max(0, v.treme - dt * 2.5);
+    if (v.pronto > 0) {
+      v.pronto += dt;
+      if (v.pronto >= .8) {
+        despachaPronta(v);
+      }
+    }
+  }
+  for (let k = voando.length - 1; k >= 0; k--) {
+    const q = voando[k]; q.t += dt;
+    if (q.t >= q.dur) { voando.splice(k, 1); q.v.escondidos--; q.v.pulo = 1; Som.clack(q.idx); if (!q.v.escondidos) confere(q.v); }
+  }
+  for (let k = textos.length - 1; k >= 0; k--) { textos[k].t += dt; if (textos[k].t > 1.2) textos.splice(k, 1); }
+}
+function confere(v) { const tp = topo(v); if (tp && tp.n >= PRONTO && !v.pronto) { v.pronto = .001; if (sel === v) sel = null; } }
+
+/* ---------- desenho */
+function prato(x, y, f, comComida) {
+  const c = COMIDAS[f];
+  el(x, y + 3, 40, 13, c.esc); ctx.beginPath(); ctx.ellipse(x, y + 3, 40, 13, 0, 0, Math.PI); linha('rgba(80,40,10,.35)', 1.2);
+  el(x, y, 40, 13, c.cor); ctx.beginPath(); ctx.ellipse(x, y, 40, 13, 0, 0, TAU); linha('rgba(80,40,10,.4)', 1.2);
+  if (comComida) { el(x, y, 29, 9, 'rgba(255,255,255,.35)'); comida(f, x, y - 8, 19); }
+}
+function desenhaPilha(v) {
+  const tp = topo(v), tx = v.treme > 0 ? Math.sin(T * 60) * 4 * v.treme : 0, sq = Math.sin(v.pulo * Math.PI) * .25;
+  const n = v.pilha.length - v.escondidos;
+  const nSel = tp && (sel === v || (arrasto && arrasto.ativo && arrasto.v === v)) ? tp.n : 0;
+  if (v.pronto > 0) { const k = .5 + .5 * Math.sin(T * 12); el(v.x, v.y - n * ALT / 2, 50 + k * 4, 22 + n * ALT / 2 + k * 3, 'rgba(255,226,120,' + (.35 + k * .25) + ')'); }
+  for (let k = 0; k < n; k++) {
+    const noSel = k >= v.pilha.length - nSel;
+    if (noSel && arrasto && arrasto.ativo && arrasto.v === v) continue;
+    const lift = noSel ? -16 - Math.abs(Math.sin(T * 6)) * 4 : 0;
+    const topoVisivel = k === n - 1 || (nSel && k === v.pilha.length - nSel - 1);
+    prato(v.x + tx, v.y - k * ALT * (1 - sq) + lift, v.pilha[k], topoVisivel);
+  }
+}
+function mesa() {
+  const y = YB + 76;
+  const g = ctx.createLinearGradient(0, y, 0, H); g.addColorStop(0, '#d39a63'); g.addColorStop(1, '#bf8550'); ctx.fillStyle = g; ctx.fillRect(0, y, W, H - y); ctx.fillStyle = 'rgba(120,70,20,.25)'; ctx.fillRect(0, y, W, 7);
+  ctx.strokeStyle = 'rgba(120,70,30,.22)'; ctx.lineWidth = 2; ctx.beginPath(); for (let yy = y + 70; yy < 880; yy += 80) { ctx.moveTo(0, yy); ctx.lineTo(W, yy); } ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,70,30,.12)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let k = 0; k < 14; k++) { const yy = y + 20 + k * 27, x0 = (k * 97) % 400; ctx.moveTo(x0, yy); ctx.quadraticCurveTo(x0 + 60, yy - 6, x0 + 130, yy); } ctx.stroke();
+  const alvoArr = arrasto && arrasto.ativo ? vagaEm(arrasto.x, arrasto.y) : null, origem = arrasto && arrasto.ativo ? arrasto.v : sel;
+  for (const v of vagas) {
+    const { x, y: yy, preco } = v;
+    el(x, yy + 6, 48, 18, 'rgba(90,50,20,.25)');
+    if (preco) { sil(() => ctx.ellipse(x, yy, 46, 17, 0, 0, TAU), '#b9b6b0', 1.4, '#7a7570'); el(x, yy - 2, 34, 11, '#cfccc6'); el(x - 14, yy - 3, 8, 8, '#f6c343'); linha('#b57f1c', 1.6); ctx.font = '800 14px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#5a5550'; ctx.textBaseline = 'middle'; ctx.fillText(preco, x - 3, yy - 2); el(x + 30, yy - 12, 5, 5, '#e2504a'); continue; }
+    el(x, yy, 46, 17, 'rgba(110,60,25,.22)'); ctx.beginPath(); ctx.ellipse(x, yy, 46, 17, 0, 0, TAU); linha('rgba(110,60,25,.3)', 2);
+    if (origem && podeIr(origem, v)) { const k = .5 + .5 * Math.sin(T * 7); ctx.beginPath(); ctx.ellipse(x, yy, 49 + k * 3, 19 + k * 2, 0, 0, TAU); linha(v === alvoArr ? '#fff' : 'rgba(255,250,220,.75)', v === alvoArr ? 4.5 : 3); }
+  }
+  for (const v of vagas) if (!v.bloq) desenhaPilha(v);
+  if (modo === 'limpar' || !jogadas) {
+    ctx.font = '800 15px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const txt = modo === 'limpar' ? 'Toque na pilha que quer limpar' : sel ? 'Agora toque onde a comida combina (ou em quem pediu)' : 'Toque numa pilha e depois noutra com a mesma comida';
+    const w = ctx.measureText(txt).width + 26; sil(() => ctx.roundRect(W / 2 - w / 2, 500, w, 30, 15), 'rgba(255,249,236,.94)', 1.2, '#b98a5a');
+    ctx.fillStyle = '#5a3a2a'; ctx.fillText(txt, W / 2, 516); ctx.textAlign = 'left';
+  }
+}
+function desenhaVoando() {
+  for (const q of voando) {
+    if (q.t < 0) continue;
+    const u = easeOut(Math.min(1, q.t / q.dur)), x1 = q.v.x, y1 = q.v.y - q.idx * ALT;
+    prato(q.de.x + (x1 - q.de.x) * u, q.de.y + (y1 - q.de.y) * u - Math.sin(Math.PI * u) * 46, q.f, true);
+  }
+  if (arrasto && arrasto.ativo) { const tp = topo(arrasto.v); if (tp) for (let k = 0; k < tp.n; k++) prato(arrasto.x, arrasto.y - k * ALT, tp.f, k === tp.n - 1); }
+  ctx.font = '800 18px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const q of textos) { ctx.globalAlpha = Math.min(1, (1.2 - q.t) / .4); ctx.lineWidth = 4; ctx.strokeStyle = '#6a3a22'; ctx.strokeText(q.txt, q.x, q.y - q.t * 30); ctx.fillStyle = q.cor; ctx.fillText(q.txt, q.x, q.y - q.t * 30); }
+  ctx.globalAlpha = 1; ctx.textAlign = 'left';
+}
+function vagaEm(x, y) {
+  let melhor = null, dm = 1e9;
+  for (const v of vagas) {
+    if (v.bloq) continue;
+    const h = v.pilha.length * ALT;
+    if (Math.abs(x - v.x) < 60 && y > v.y - h - 46 && y < v.y + 26) { const d = Math.hypot(x - v.x, y - (v.y - h / 2)); if (d < dm) { dm = d; melhor = v; } }
+  }
+  return melhor;
+}
+/* mesa inicial: algumas pilhas já servidas */
+(() => { const pool = poolComidas(); for (const i of [0, 3, 4, 5, 8, 9]) vagas[i].pilha = gerarPilha(pool); })();
+function barraInferior() {
+  const y = 878;
+  ctx.fillStyle = '#8f5534'; ctx.fillRect(0, y, W, H - y); ctx.fillStyle = '#a8673f'; ctx.fillRect(0, y, W, 6);
+  const itens = [['Limpar', 70], ['Organizar', 170], ['Entregar', 270]];
+  ctx.font = '800 13px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center';
+  for (const [nome, x] of itens) {
+    ctx.save(); ctx.translate(x, y + 34 - (modo === 'limpar' && nome === 'Limpar' ? 7 : 0)); ctx.rotate(-.06); sil(() => ctx.roundRect(-30, -26, 60, 44, 8), '#f8ecd8', 1.6, '#6a3a22'); ctx.restore();
+    if (nome === 'Limpar') { ctx.beginPath(); ctx.moveTo(x - 14, y + 44); ctx.lineTo(x + 4, y + 26); linha('#8a5a32', 5); sil(() => { ctx.moveTo(x + 2, y + 24); ctx.lineTo(x + 16, y + 14); ctx.lineTo(x + 20, y + 22); ctx.lineTo(x + 8, y + 32); ctx.closePath(); }, '#c9cdd0', 1.4); }
+    if (nome === 'Organizar') sil(() => { ctx.roundRect(x - 12, y + 18, 22, 26, 9); ctx.moveTo(x + 18, y + 26); ctx.ellipse(x + 12, y + 28, 7, 5, -.6, 0, TAU); }, '#ffd34a', 1.6);
+    if (nome === 'Entregar') { sil(() => { ctx.moveTo(x - 14, y + 42); ctx.quadraticCurveTo(x - 12, y + 18, x, y + 18); ctx.quadraticCurveTo(x + 12, y + 18, x + 14, y + 42); ctx.closePath(); }, '#f4c542', 1.6); el(x, y + 44, 4, 4, '#b57f1c'); ctx.beginPath(); ctx.moveTo(x, y + 18); ctx.lineTo(x, y + 12); linha('#8a5a32', 3); }
+    el(x + 26, y + 10, 10, 10, '#ff9a3a'); linha('#fff', 2); ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(rotuloAjuda(nome), x + 26, y + 11);
+    ctx.fillStyle = '#fff4e0'; ctx.fillText(nome, x, y + 68);
+  }
+  // cesta "Servir" (afunda um pouco ao tocar)
+  ctx.save(); const ck = 1 - Math.sin(cestaK * Math.PI) * .1; ctx.translate(470, y + 30); ctx.scale(ck, ck); ctx.translate(-470, -(y + 30));
+  sil(() => { ctx.moveTo(420, y + 6); ctx.lineTo(520, y + 6); ctx.lineTo(510, y + 52); ctx.lineTo(430, y + 52); ctx.closePath(); }, '#c98a4a', 1.6, '#6a3a22');
+  ctx.beginPath(); for (let k = 0; k < 5; k++) { ctx.moveTo(428 + k * 20, y + 8); ctx.lineTo(434 + k * 18, y + 50); } linha('rgba(110,60,25,.4)', 1.5);
+  comida('cenoura', 440, y - 2, 13); comida('abacate', 470, y - 6, 13); comida('morango', 498, y - 2, 13);
+  sil(() => ctx.roundRect(432, y + 34, 76, 24, 10), '#4fbf7a', 1.4, '#2a7a4a'); ctx.fillStyle = '#fff'; ctx.fillText('Servir', 470, y + 47);
+  ctx.restore(); ctx.textAlign = 'left';
+}
+function bolha(p) {
+  if (p.bolhaK <= 0) return;
+  const P = pos(p), A = ANC[p.tipo], meio = p.tipo === 'humano', bx = P.x + (meio ? 70 : 54), by = P.y + (A.hy - (meio ? 76 : 64)) * ESC;
+  let s = back(p.bolhaK), rot = 0;
+  if (p.humor === 'animado') s *= 1 + Math.sin(T * 10) * .06;
+  if (p.humor === 'fome') rot = Math.sin(T * 22) * .1 * (Math.sin(T * 2) > 0 ? 1 : 0);
+  if (p.nega > 0) rot = Math.sin(T * 30) * .2 * p.nega;
+  ctx.save(); ctx.translate(bx, by); ctx.rotate(rot); ctx.scale(s, s);
+  sil(() => { ctx.arc(0, 0, 30, 0, TAU); ctx.moveTo(-14, 24); ctx.lineTo(-30, 40); ctx.lineTo(-2, 29); }, '#fff', 2.5, '#7a4a36');
+  el(0, 0, 25, 25, '#fff8ec'); comida(p.pedido, 0, 1, 18);
+  ctx.restore();
+}
+function etiqueta(p) {
+  if (p.tagT <= 0) return;
+  const P = pos(p), A = ANC[p.tipo], R = ROUPAS[p.roupa], y = P.y + (A.hy - 110) * ESC;
+  ctx.globalAlpha = Math.min(1, p.tagT / .4, (2.4 - p.tagT) / .2 + .2);
+  ctx.font = '800 14px "Trebuchet MS",sans-serif'; const txt = R.emoji + ' ' + R.nome, w = ctx.measureText(txt).width + 20;
+  const x = Math.max(w / 2 + 4, Math.min(W - w / 2 - 4, P.x));
+  sil(() => ctx.roundRect(x - w / 2, y - 14, w, 28, 14), '#fff4c8', 1.4, '#c9902c'); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + 1); ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
+}
+function camarim(p) {
+  if (p.fase !== 'camarim') return;
+  const x = p.x, y = YB - 70, pts = '.'.repeat(1 + Math.floor(T * 3) % 3);
+  ctx.font = '800 14px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  sil(() => ctx.roundRect(x - 62, y - 30, 124, 52, 14), 'rgba(255,248,236,.92)', 1.2, '#c9a27a');
+  ctx.beginPath(); ctx.moveTo(x, y - 24); ctx.lineTo(x, y - 18); ctx.moveTo(x - 14, y - 6); ctx.lineTo(x, y - 18); ctx.lineTo(x + 14, y - 6); ctx.closePath(); linha('#8a5a32', 2.4);
+  ctx.fillStyle = '#5a3a2a'; ctx.fillText('no camarim' + pts, x, y + 8); ctx.textAlign = 'left';
+}
+function comidaVoando(p) {
+  if (p.fase !== 'festa' || p.faseT > .55) return;
+  const u = easeOut(p.faseT / .55), P = pos(p), A = ANC[p.tipo];
+  const x0 = p.x, y0 = YB + 30 - 9 * 4 - 8, x1 = P.x, y1 = P.y + (A.hy + 30) * ESC;
+  comida(p.pedido, x0 + (x1 - x0) * u, y0 + (y1 - y0) * u - Math.sin(Math.PI * u) * 40, 16 - 4 * u);
+}
+
+/* ------------------------------------------------------------ DESENHO DO PERSONAGEM */
+function desenhaPersonagem(p) {
+  const P = pos(p), A = ANC[p.tipo], R = ROUPAS[p.roupa], e = expressao(p), br = Math.sin(T * 2.2 + p.ph);
+  ctx.save(); ctx.translate(P.x, P.y); ctx.scale(ESC, ESC);
+  if (p.tipo !== 'humano') rabo(p);
+  if (R.fundo) R.fundo(A, p.tipo);
+  ctx.save(); ctx.translate(0, 140); ctx.scale(1 + br * .006, 1 + br * .012); ctx.translate(0, -140); tronco(p, R, A); ctx.restore();
+  ctx.save(); ctx.translate(0, A.hy - br * 2.4 + (p.humor === 'fome' ? 2 : 0)); ctx.rotate(inclina(p));
+  if (p.tipo === 'humano') cabecaHumano(e, p); else if (p.tipo === 'cocker') cabecaCocker(e, p); else cabecaPreto(e, p);
+  if (R.cabeca) R.cabeca(A, p.tipo);
+  ctx.restore();
+  ctx.restore();
+}
+function desenhaBracos(p) {
+  const P = pos(p);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, YB + 52); ctx.clip();
+  ctx.translate(P.x, P.y); ctx.scale(ESC, ESC); bracos(p, ROUPAS[p.roupa]); ctx.restore();
+}
+
+function desenha() {
+  ctx.setTransform(esc * dpr, 0, 0, esc * dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ceu();
+  for (const p of pers) desenhaPersonagem(p);
+  balcao();
+  for (const p of pers) desenhaBracos(p);
+  for (const p of pers) pratoServico(p);
+  mesa(); barraInferior(); desenhaVoando(); desenhaFase3();
+  toldo(); hud(); botoesSom();
+  for (const p of pers) { bolha(p); camarim(p); comidaVoando(p); }
+  for (const p of pers) etiqueta(p);
+  desenhaParticulas();
+}
+
+/* ------------------------------------------------------------ LAÇO PRINCIPAL */
+let antes = performance.now();
+function quadro(agora) {
+  const dt = Math.min(.05, (agora - antes) / 1000); antes = agora;
+  if (!document.hidden) { T += dt; atualiza(dt); atualizaMesa(dt); atualizaFase3(dt); desenha(); }
+  requestAnimationFrame(quadro);
+}
+requestAnimationFrame(quadro);
+
+/* ------------------------------------------------------------ FASE 3: balcão ↔ mesa, economia e ajudas
+   - Pratos da mesa vão para quem pediu aquela comida (toque/arraste no personagem ou no prato dele);
+     cada prato que chega acende um tracinho do medidor; com 10 ele comemora e vai ao camarim.
+   - Pilha com 10 iguais no topo vai sozinha para quem pediu; se ninguém quer, vira moedas.
+   - Pedido completo: +3.000 moedas e +1 de experiência (nível sobe e dá gemas).
+   - Lugares trancados abrem com moedas. Ajudas: Limpar, Organizar e Entregar (3 de cada;
+     sem estoque, cada uso custa 10 gemas). */
+let gemas = 40, nivel = 1, xp = 0, modo = null;
+const pw = { Limpar: 3, Organizar: 3, Entregar: 3 }, CUSTO_GEMAS = 10, PREMIO = 3000;
+const PRECOS = { '18k': 18000, '26k': 26000, '30k': 30000 };
+const voandoCli = [], voandoFora = [];
+const xpPara = () => 2 + nivel;
+const fmt = n => n.toLocaleString('pt-BR');
+
+function capacidade(p) { return p.fase === 'balcao' ? 10 - p.pratos - (p.aCaminho || 0) : 0; }
+function enviarCliente(v, p, n, de) {
+  const f = topo(v).f;
+  for (let k = 0; k < n; k++) {
+    const idx = v.pilha.length - 1; v.pilha.pop(); p.aCaminho = (p.aCaminho || 0) + 1;
+    voandoCli.push({ f, de: de ? { x: de.x, y: de.y - k * ALT } : { x: v.x, y: v.y - idx * ALT - 16 }, p, t: -k * .07, dur: .42 });
+  }
+}
+function entregar(v, p, de) {
+  const tp = topo(v);
+  if (!tp || p.fase !== 'balcao') return false;
+  if (p.pedido !== tp.f || capacidade(p) <= 0) { p.nega = 1; Som.erro(); return false; }
+  enviarCliente(v, p, Math.min(tp.n, capacidade(p)), de); jogadas++; Acao.certo(p);
+  return true;
+}
+function premio(p) {
+  moedas += PREMIO; xp++; st.pedidos++; const c = cabecaXY(p); texto(c.x, c.y - 70, '+' + fmt(PREMIO), '#ffe48a'); moedasPara(c.x, c.y - 40, 8); setTimeout(() => Som.moeda(), 700);
+  if (xp >= xpPara()) { xp = 0; nivel++; gemas += 5; texto(W / 2, 300, 'Nível ' + nivel + '! +5 gemas', '#c8f5a0'); setTimeout(() => Som.nivel(), 900); solta({ x: 420, y: 100 }, 14, 'estrela'); }
+}
+function clienteEm(x, y) { return pers.find(p => p.fase === 'balcao' && Math.abs(x - p.x) < 75 && y > YB - 215 && y < YB + 78) || null; }
+function trancadaEm(x, y) { return vagas.find(v => v.bloq && Math.abs(x - v.x) < 50 && Math.abs(y - v.y) < 26) || null; }
+function desbloquear(v) {
+  const custo = PRECOS[v.preco];
+  if (moedas < custo) { v.treme = 1; texto(v.x, v.y - 34, 'faltam ' + fmt(custo - moedas), '#fff4e0'); Som.erro(); return; }
+  moedas -= custo; v.bloq = false; v.preco = null; solta({ x: v.x, y: v.y - 10 }, 14, 'estrela'); texto(v.x, v.y - 34, 'aberto!', '#ffe48a'); Som.abrir();
+}
+/* paga a ajuda: usa o estoque ou 10 gemas; devolve false se não deu */
+function pagar(nome) {
+  if (pw[nome] > 0) { pw[nome]--; return true; }
+  if (gemas >= CUSTO_GEMAS) { gemas -= CUSTO_GEMAS; return true; }
+  texto(W / 2, 850, 'faltam gemas', '#fff4e0'); return false;
+}
+function temAjuda(nome) { return pw[nome] > 0 || gemas >= CUSTO_GEMAS; }
+function limpar(v) {
+  if (!livre(v) || !v.pilha.length || !pagar('Limpar')) return;
+  v.pilha.forEach((f, k) => voandoFora.push({ f, x: v.x, y: v.y - k * ALT, vx: (Math.random() - .5) * 340, vy: -160 - Math.random() * 220, rot: 0, t: 0 }));
+  v.pilha = []; if (sel === v) sel = null; modo = null; jogadas++; Som.limpa();
+  solta({ x: v.x, y: v.y - 20 }, 8, 'brilho');
+}
+function organizar() {
+  if (!temAjuda('Organizar')) { texto(W / 2, 850, 'faltam gemas', '#fff4e0'); return; }
+  const usadas = new Set(); let mov = 0; sel = null;
+  // 1) quem tem pedido recebe primeiro
+  for (const p of pers) for (const v of vagas) { const tp = topo(v); if (livre(v) && tp && tp.f === p.pedido && capacidade(p) > 0 && !usadas.has(v)) { enviarCliente(v, p, Math.min(tp.n, capacidade(p))); usadas.add(v); mov++; } }
+  // 2) junta as pilhas com a mesma comida no topo na maior delas
+  for (const f of Object.keys(COMIDAS)) {
+    const cand = vagas.filter(v => livre(v) && !usadas.has(v) && topo(v) && topo(v).f === f);
+    if (cand.length < 2) continue;
+    cand.sort((a, b) => topo(b).n - topo(a).n || a.pilha.length - b.pilha.length);
+    const alvo = cand[0]; usadas.add(alvo);
+    for (const s of cand.slice(1)) { if (alvo.pilha.length >= MAXP) break; if (mover(s, alvo) === 'ok') { mov++; usadas.add(s); } }
+  }
+  if (!mov) { vagas.forEach(v => { if (!v.bloq) v.treme = .6; }); texto(W / 2, 850, 'nada para juntar', '#fff4e0'); return; }
+  pagar('Organizar'); jogadas++; Som.luva();
+}
+function sino() {
+  const cands = pers.filter(p => p.fase === 'balcao');
+  if (!cands.length) { texto(W / 2, 850, 'ninguém no balcão', '#fff4e0'); return; }
+  if (!pagar('Entregar')) return;
+  cands.sort((a, b) => (b.pratos + (b.aCaminho || 0)) - (a.pratos + (a.aCaminho || 0)));
+  const p = cands[0]; solta({ x: p.x, y: YB + 10 }, 10, 'brilho'); Som.ding(); Acao.completa(p);
+}
+function ajuda(nome) {
+  if (nome === 'Limpar') { modo = modo === 'limpar' ? null : (temAjuda('Limpar') ? 'limpar' : (texto(W / 2, 850, 'faltam gemas', '#fff4e0'), null)); sel = null; }
+  else if (nome === 'Organizar') { modo = null; organizar(); }
+  else { modo = null; sino(); }
+}
+function rotuloAjuda(nome) { return pw[nome] > 0 ? String(pw[nome]) : '+'; }
+
+/* pilha pronta (10 iguais): vai para quem pediu; o que sobrar vira moedas */
+function despachaPronta(v) {
+  const f = v.pilha[v.pilha.length - 1], yy = v.y - v.pilha.length * ALT;
+  const p = pers.find(q => q.pedido === f && capacidade(q) > 0);
+  let n = PRONTO;
+  if (p) { const m = Math.min(PRONTO, capacidade(p)); enviarCliente(v, p, m); n -= m; }
+  if (n > 0) { v.pilha.splice(v.pilha.length - n, n); moedas += 250 * n; solta({ x: v.x, y: yy }, 10, 'estrela'); texto(v.x, yy - 10, '+' + fmt(250 * n), '#ffe48a'); moedasPara(v.x, yy, 4); Som.moeda(); }
+  v.pronto = 0;
+}
+function atualizaFase3(dt) {
+  for (const p of pers) p.nega = Math.max(0, (p.nega || 0) - dt * 2);
+  for (let k = voandoCli.length - 1; k >= 0; k--) {
+    const q = voandoCli[k]; q.t += dt;
+    if (q.t >= q.dur) {
+      voandoCli.splice(k, 1); q.p.aCaminho = Math.max(0, (q.p.aCaminho || 0) - 1); Som.clack(q.p.pratos + 2);
+      if (q.p.fase === 'balcao') Acao.prato(q.p); else { moedas += 250; texto(q.p.x, YB + 10, '+250', '#ffe48a'); }
+    }
+  }
+  for (let k = voandoFora.length - 1; k >= 0; k--) { const q = voandoFora[k]; q.t += dt; q.vy += 700 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.rot += dt * 6; if (q.t > 1.2) voandoFora.splice(k, 1); }
+}
+function desenhaFase3() {
+  for (const q of voandoCli) {
+    if (q.t < 0) continue;
+    const u = easeOut(Math.min(1, q.t / q.dur)), x1 = q.p.x, y1 = YB + 30 - 3 - q.p.pratos * 4;
+    prato(q.de.x + (x1 - q.de.x) * u, q.de.y + (y1 - q.de.y) * u - Math.sin(Math.PI * u) * 60, q.f, true);
+  }
+  for (const q of voandoFora) { ctx.save(); ctx.globalAlpha = Math.max(0, 1 - q.t / 1.2); ctx.translate(q.x, q.y); ctx.rotate(q.rot); prato(0, 0, q.f, false); ctx.restore(); }
+}
+/* origem atual (pilha escolhida ou arrastada) e brilho no prato de quem quer aquela comida */
+function origemAtual() { return arrasto && arrasto.ativo ? arrasto.v : sel; }
+function brilhoCliente(p) {
+  const o = origemAtual(), tp = o && topo(o);
+  if (!tp || tp.f !== p.pedido || capacidade(p) <= 0) return;
+  const k = .5 + .5 * Math.sin(T * 7), sobre = arrasto && arrasto.ativo && clienteEm(arrasto.x, arrasto.y) === p;
+  ctx.beginPath(); ctx.ellipse(p.x, YB + 30, 47 + k * 3, 17 + k * 2, 0, 0, TAU); linha(sobre ? '#fff' : 'rgba(255,250,220,.85)', sobre ? 5 : 3.5);
+}
+
+/* ------------------------------------------------------------ TOQUE: carinho, Servir, ajudas, tocar e arrastar */
+function coord(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width * W, y: (ev.clientY - r.top) / r.height * H }; }
+cv.addEventListener('pointerdown', ev => {
+  Som.iniciar();
+  const { x, y } = coord(ev);
+  if (x > 488 && y > 98 && y < 180) { Som.alterna(y < 139 ? 'ligado' : 'musica'); salvar(); return; }
+  if (y > 870) {
+    if (x > 415 && x < 528) { modo = null; servir(); return; }
+    for (const [nome, bx] of [['Limpar', 70], ['Organizar', 170], ['Entregar', 270]]) if (Math.abs(x - bx) < 40) { ajuda(nome); return; }
+    return;
+  }
+  const c = clienteEm(x, y);
+  if (c) { if (sel) { entregar(sel, c); sel = null; } else Acao.carinho(c); return; }
+  const tr = trancadaEm(x, y); if (tr) { desbloquear(tr); return; }
+  const v = vagaEm(x, y);
+  if (modo === 'limpar') { if (v) limpar(v); else modo = null; return; }
+  if (!v) { sel = null; return; }
+  arrasto = { v, x0: x, y0: y, x, y, ativo: false, ok: livre(v) && v.pilha.length > 0 };
+  try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
+});
+cv.addEventListener('pointermove', ev => {
+  if (!arrasto) return;
+  const { x, y } = coord(ev); arrasto.x = x; arrasto.y = y;
+  if (!arrasto.ativo && arrasto.ok && Math.hypot(x - arrasto.x0, y - arrasto.y0) > 12) { arrasto.ativo = true; sel = null; Som.pega(); reagir(topo(arrasto.v).f); }
+});
+function solta2() {
+  if (!arrasto) return;
+  const a = arrasto; arrasto = null;
+  if (a.ativo) {
+    const c = clienteEm(a.x, a.y); if (c) { entregar(a.v, c, { x: a.x, y: a.y }); return; }
+    const alvo = vagaEm(a.x, a.y); if (alvo && alvo !== a.v) { if (mover(a.v, alvo, { x: a.x, y: a.y }) !== 'ok' && alvo.pilha.length >= MAXP) alvo.treme = 1; }
+    return;
+  }
+  const v = a.v;
+  if (sel && sel !== v) {
+    const r = mover(sel, v);
+    if (r === 'ok') sel = null;
+    else if (r === 'diferente' && a.ok) { sel = v; reagir(topo(v).f); }
+    else { v.treme = 1; sel = null; Som.erro(); }
+  } else if (sel === v) sel = null;
+  else if (a.ok) { sel = v; reagir(topo(v).f); Som.pega(); }
+}
+cv.addEventListener('pointerup', solta2);
+cv.addEventListener('pointercancel', () => { arrasto = null; });
+/* ------------------------------------------------------------ FASE 4: SOM (100% Web Audio, nada de arquivo)
+   Cerâmica que sobe de tom a cada prato, sino, latidos, "oba!", moedas e uma trilha leve.
+   Botões no canto direito do céu: alto-falante (tudo) e nota (só a música). */
+const Som = (() => {
+  let a = null, mestre = null, musGain = null, ruidoBuf = null, ultimoClack = 0, prox = 0, passo = 0, relogio = null;
+  const S = { ligado: true, musica: true };
+  function iniciar() {
+    if (a) { if (a.state === 'suspended') a.resume(); return; }
+    try { a = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    mestre = a.createGain(); mestre.gain.value = S.ligado ? .8 : 0; mestre.connect(a.destination);
+    musGain = a.createGain(); musGain.gain.value = S.musica ? 1 : 0; musGain.connect(mestre);
+    ruidoBuf = a.createBuffer(1, a.sampleRate * .5, a.sampleRate); const d = ruidoBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    prox = a.currentTime + .2; relogio = setInterval(trilha, 120);
+  }
+  const ok = () => a && S.ligado && a.state === 'running';
+  function tom(f, t, dur, tipo = 'sine', vol = .1, f2 = null, destino = mestre, ataque = .006) {
+    const o = a.createOscillator(), g = a.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + ataque); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(destino); o.start(t); o.stop(t + dur + .05); return o;
+  }
+  function ruido(t, dur, freq, q, vol, f2 = null) {
+    const s = a.createBufferSource(), b = a.createBiquadFilter(), g = a.createGain(); s.buffer = ruidoBuf; b.type = 'bandpass'; b.frequency.setValueAtTime(freq, t); if (f2) b.frequency.exponentialRampToValueAtTime(f2, t + dur); b.Q.value = q;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(b); b.connect(g); g.connect(mestre); s.start(t); s.stop(t + dur + .05);
+  }
+  // prato de cerâmica pousando: "clack" curtinho que sobe de tom conforme a pilha cresce
+  function clack(k = 0) {
+    if (!ok()) return; const t = a.currentTime; if (t - ultimoClack < .028) return; ultimoClack = t;
+    const f = 1050 * Math.pow(1.06, Math.min(k, 16));
+    ruido(t, .035, 3800, 5, .22); tom(f, t, .1, 'sine', .11); tom(f * 2.76, t, .05, 'sine', .035);
+  }
+  function latido(t, base) {
+    for (let i = 0; i < 2; i++) {
+      const t0 = t + i * .19, o = a.createOscillator(), b = a.createBiquadFilter(), g = a.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(base * 1.35, t0); o.frequency.exponentialRampToValueAtTime(base * .72, t0 + .11);
+      b.type = 'bandpass'; b.frequency.value = base * 2.2; b.Q.value = 2.5;
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.16, t0 + .008); g.gain.exponentialRampToValueAtTime(.0001, t0 + .13);
+      o.connect(b); b.connect(g); g.connect(mestre); o.start(t0); o.stop(t0 + .16); ruido(t0, .06, base * 3, 2, .05);
+    }
+  }
+  function oba(t) { tom(330, t, .13, 'triangle', .1, 470); tom(440, t + .13, .2, 'triangle', .1, 690); tom(880, t + .13, .16, 'sine', .025, 1300); }
+  function voz(tipo, t) { if (tipo === 'humano') oba(t); else latido(t, tipo === 'cocker' ? 640 : 430); }
+  function ding(t, f = 1320, vol = .12) { tom(f, t, 1.3, 'sine', vol); tom(f * 2.01, t, .7, 'sine', vol * .35); tom(f * 3.02, t, .35, 'sine', vol * .15); }
+  return {
+    S, iniciar, clack, estado: () => (a ? a.state : 'sem'),
+    alterna(qual) { S[qual] = !S[qual]; if (a) { mestre.gain.value = S.ligado ? .8 : 0; musGain.gain.value = S.musica ? 1 : 0; } },
+    pega() { if (!ok()) return; const t = a.currentTime; tom(620, t, .09, 'sine', .06, 900); ruido(t, .05, 1800, 3, .04); },
+    erro() { if (!ok()) return; const t = a.currentTime; tom(260, t, .16, 'triangle', .08, 200); },
+    servir() { if (!ok()) return; const t = a.currentTime; ruido(t, .35, 900, 1.5, .08, 3200); for (let i = 0; i < 4; i++) tom(700 + i * 120, t + .1 + i * .06, .08, 'sine', .05); },
+    festa(tipo) { if (!ok()) return; const t = a.currentTime; ding(t, 1320, .1); [0, 4, 7, 12].forEach((s, i) => tom(660 * Math.pow(2, s / 12), t + .08 + i * .07, .25, 'triangle', .06)); voz(tipo, t + .35); },
+    carinho(tipo) { if (!ok()) return; const t = a.currentTime; if (tipo === 'humano') oba(t); else latido(t, tipo === 'cocker' ? 700 : 470); },
+    tada() { if (!ok()) return; const t = a.currentTime; [0, 7, 12].forEach((s, i) => tom(523 * Math.pow(2, s / 12), t + i * .08, .3, 'triangle', .07)); ruido(t, .3, 5000, 1, .03, 9000); },
+    fome(tipo) { if (!ok()) return; const t = a.currentTime; if (tipo === 'humano') tom(220, t, .5, 'triangle', .05, 160); else tom(tipo === 'cocker' ? 900 : 700, t, .55, 'sine', .05, tipo === 'cocker' ? 600 : 450); },
+    moeda() { if (!ok()) return; const t = a.currentTime; tom(1568, t, .12, 'square', .03); tom(2093, t + .07, .25, 'square', .03); },
+    nivel() { if (!ok()) return; const t = a.currentTime; [0, 4, 7, 12, 16].forEach((s, i) => tom(523 * Math.pow(2, s / 12), t + i * .09, .4, 'triangle', .07)); },
+    abrir() { if (!ok()) return; const t = a.currentTime; [0, 4, 7].forEach(s => tom(392 * Math.pow(2, s / 12), t, 1, 'sine', .06)); ding(t + .15, 1568, .06); },
+    limpa() { if (!ok()) return; const t = a.currentTime; ruido(t, .4, 3000, 1.2, .1, 500); },
+    luva() { if (!ok()) return; const t = a.currentTime; for (let i = 0; i < 3; i++) ruido(t + i * .09, .12, 1500 + i * 400, 2, .06); },
+    ding() { if (!ok()) return; ding(a.currentTime, 1760, .14); },
+  };
+  // trilha: dedilhado pentatônico calmo + um acorde de fundo a cada 2 compassos (84 batidas por minuto)
+  function trilha() {
+    if (!a || a.state !== 'running') return;
+    const passoDur = 60 / 84 / 2, notas = [0, 4, 7, 9, 12, 9, 7, 4, 2, 7, 9, 12, 14, 12, 9, 7], acordes = [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]];
+    while (prox < a.currentTime + .4) {
+      const t = prox, n = notas[passo % 16], comp = Math.floor(passo / 16) % 4;
+      if (passo % 2 === 0 || Math.random() < .35) tom(392 * Math.pow(2, (n + acordes[comp][0]) / 12) * (passo % 16 === 0 ? .5 : 1), t, .55, 'triangle', .022, null, musGain, .01);
+      if (passo % 32 === 0) acordes[comp].forEach(s => tom(196 * Math.pow(2, s / 12), t, passoDur * 30, 'sine', .016, null, musGain, 1.2));
+      passo++; prox += passoDur;
+    }
+  }
+})();
+function botoesSom() {
+  for (const [y, qual] of [[118, 'ligado'], [160, 'musica']]) {
+    const on = Som.S[qual];
+    el(510, y, 17, 17, 'rgba(255,255,255,.92)'); linha('#7a4a36', 2.4);
+    ctx.fillStyle = '#7a4a36'; ctx.strokeStyle = '#7a4a36';
+    if (qual === 'ligado') { ctx.beginPath(); ctx.moveTo(500, y - 4); ctx.lineTo(505, y - 4); ctx.lineTo(511, y - 9); ctx.lineTo(511, y + 9); ctx.lineTo(505, y + 4); ctx.lineTo(500, y + 4); ctx.closePath(); ctx.fill(); if (on) { ctx.beginPath(); ctx.arc(512, y, 6, -.8, .8); ctx.moveTo(516, y - 8); ctx.arc(512, y, 10, -.8, .8); linha('#7a4a36', 2); } }
+    else { el(505, y + 6, 4.5, 3.5, '#7a4a36'); el(515, y + 4, 4.5, 3.5, '#7a4a36'); ctx.beginPath(); ctx.moveTo(509, y + 6); ctx.lineTo(509, y - 8); ctx.lineTo(519, y - 10); ctx.lineTo(519, y + 4); linha('#7a4a36', 2.2); }
+    if (!on) { ctx.beginPath(); ctx.moveTo(498, y - 11); ctx.lineTo(522, y + 11); linha('#d9453a', 3); }
+  }
+}
+
+/* ------------------------------------------------------------ partículas extras: confete e moedas que voam até o placar */
+function moedasPara(x, y, n) {
+  for (let k = 0; k < n; k++) parts.push({ x, y, x0: x + (Math.random() - .5) * 40, y0: y + (Math.random() - .5) * 30, alvo: { x: 80, y: 79 }, curva: (Math.random() - .5) * 120, vx: 0, vy: 0, g: 0, vida: -k * .06, max: .8, tipo: 'moeda', tam: 9, rot: 0, vr: 0 });
+}
+
+/* ------------------------------------------------------------ SALVAR NO APARELHO (localStorage) */
+const CHAVE = 'cozinha-da-le.v1';
+const st = { pedidos: 0, vistas: [0] };
+function marcaFantasia(r) { if (!st.vistas.includes(r)) st.vistas.push(r); }
+function salvar() {
+  try {
+    localStorage.setItem(CHAVE, JSON.stringify({ v: 1, moedas, gemas, nivel, xp, pw, st, som: Som.S.ligado, mus: Som.S.musica,
+      vagas: vagas.map(v => ({ b: v.bloq ? 1 : 0, s: v.pilha })),
+      pers: pers.map(p => ({ r: p.roupa, o: p.pedido, n: Math.min(9, p.pratos + (p.aCaminho || 0)) })) }));
+  } catch (e) {}
+}
+function carregarJogo() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) {}
+  if (!d || d.v !== 1) return false;
+  const num = (x, pad) => (typeof x === 'number' && isFinite(x) && x >= 0 ? Math.floor(x) : pad);
+  moedas = num(d.moedas, moedas); gemas = num(d.gemas, gemas); nivel = Math.max(1, num(d.nivel, 1)); xp = num(d.xp, 0);
+  for (const k of Object.keys(pw)) pw[k] = num(d.pw && d.pw[k], pw[k]);
+  if (d.st) { st.pedidos = num(d.st.pedidos, 0); if (Array.isArray(d.st.vistas)) st.vistas = d.st.vistas.filter(r => ROUPAS[r]); }
+  Som.S.ligado = d.som !== false; Som.S.musica = d.mus !== false;
+  if (Array.isArray(d.vagas) && d.vagas.length === vagas.length) d.vagas.forEach((s, i) => {
+    const v = vagas[i]; if (!s.b && v.bloq) { v.bloq = false; v.preco = null; }
+    v.pilha = Array.isArray(s.s) ? s.s.filter(f => COMIDAS[f]).slice(0, MAXP) : [];
+  });
+  if (Array.isArray(d.pers)) d.pers.forEach((s, i) => { const p = pers[i]; if (!p || !s) return; if (ROUPAS[s.r]) p.roupa = s.r; if (COMIDAS[s.o]) p.pedido = s.o; p.pratos = Math.min(9, num(s.n, 0)); });
+  // garante pedidos diferentes entre os três
+  pers.forEach(p => { if (pers.some(q => q !== p && q.pedido === p.pedido)) p.pedido = novoPedido(p); });
+  if (jogadas === 0 && st.pedidos > 0) jogadas = 1;
+  return true;
+}
+carregarJogo();
+setInterval(salvar, 2000);
+addEventListener('pagehide', salvar);
+document.addEventListener('visibilitychange', () => { if (document.hidden) salvar(); });
+window.__le = { pers, vagas, Acao, servir, salvar, Som, get estado() { return { moedas, gemas, nivel, xp, pw, st }; } };
+</script>
+</body>
+</html>
