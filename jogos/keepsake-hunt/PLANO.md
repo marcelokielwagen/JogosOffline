@@ -6,7 +6,7 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
 |---|---|---|
 | 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v59) em 25/11/2026 |
 | 2 | Casa, álbum, acervo, marcos, mesa do dia e ficha segura | pronta e publicada (v63) em 25/11/2026 |
-| 3 | Moedas, vidas, reforços, dificuldade, diária, missões, evento, gavetas, ganchos de anúncio e compra | pronta, aguardando o dono (25/11/2026) |
+| 3 | Moedas, vidas, reforços, dificuldade, diária, missões, evento, gavetas, ganchos de anúncio e compra | pronta e publicada (v67) em 26/11/2026 |
 | 4 | Preparação para as lojas | falta |
 
 ## Como é
@@ -67,7 +67,7 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
 
 ## Ferramentas (`ferramentas/keepsake-hunt`)
 - `node eco.mjs` confere a economia, as ferramentas nas 50 fases, a curva e o ritmo das moedas; `node economia.mjs pasta` testa as telas da Fase 3 com toque simulado (180
-  conferências, 5 tamanhos). `node registrar3.mjs` só sobe a versão do `sw.js` (rodar na hora de publicar).
+  conferências, 5 tamanhos). `node registrar3.mjs` só sobe a versão do `sw.js` (já rodado, v67).
 - `node gerar-arte.mjs --k=26` refaz as folhas (objetos em `objetos3d.js`) e o `atlas.json`; depois `node montar.mjs` põe a lista no jogo. `--prova=pasta` só mostra os objetos.
 - `node gerar-fundos.mjs` mesas; `node capa.mjs` capa; `node fotos.mjs pasta 1,20` fotografa fases.
 - `node jogar.mjs 1-50 [--lento|--pc|--deitado]` robô com toque simulado; `node telas.mjs pasta` telas e gestos; `node som.mjs [--pc]` mede os sons.
