@@ -13,9 +13,9 @@ const CLIMAS = {
     nevoa: '#f7e7d3', perto: 180, longe: 700, agua: '#88d9cf', montanhas: ['#ead8d2', '#dfdae6', '#ecdfcd', '#dbe4e3'],
   },
   tarde: {      // tarde dourada (reservado para a Fase 2)
-    ceuTopo: '#f2c7a0', ceuHoriz: '#ffe6bf', ceuBaixo: '#f5d2ad', solDir: [-0.7, 0.32, 0.25], solCor: '#ffd9a0',
-    solLuz: '#ffe2bb', solInt: 2.6, hemiCeu: '#ffe9d2', hemiChao: '#f1cfae', hemiInt: 1.5,
-    nevoa: '#fbe1c4', perto: 140, longe: 620, agua: '#8fd6c8', montanhas: ['#f0cdbb', '#e8c9c9', '#f3dcc2', '#e6d2c6'],
+    ceuTopo: '#a9d3e6', ceuHoriz: '#ffe9cc', ceuBaixo: '#f7dfc0', solDir: [-0.62, 0.5, 0.3], solCor: '#ffdcaa',
+    solLuz: '#fff0d8', solInt: 2.6, hemiCeu: '#fff4e6', hemiChao: '#f6e4ca', hemiInt: 1.75,
+    nevoa: '#fcebd6', perto: 170, longe: 680, agua: '#8fd6c8', montanhas: ['#f0cdbb', '#e8c9c9', '#f3dcc2', '#e6d2c6'],
   },
   montanha: {   // brisa de montanha (reservado para a Fase 3)
     ceuTopo: '#a6d6ec', ceuHoriz: '#eef4ee', ceuBaixo: '#e3ecdf', solDir: [0.3, 0.7, -0.5], solCor: '#fff8e2',
@@ -280,8 +280,9 @@ function construirVale(ctx) {
 }
 
 const FASES = [
-  { id: 'vale', nome: 'Vale da Brisa', det: 'manhã cristalina · prismas de luz, estrada panorâmica e térmicas', cor: '#8fd3b8', clima: 'manha', pronta: true,
+  { id: 'vale', nome: 'Vale da Brisa', ola: 'Bem-vindo ao Vale da Brisa', det: 'manhã cristalina · prismas de luz, estrada panorâmica e térmicas', cor: '#8fd3b8', clima: 'manha', pronta: true,
     elos: [{ id: 'luz', nome: 'Luz' }, { id: 'vento', nome: 'Vento' }, { id: 'ceu', nome: 'Céu' }], construir: construirVale },
-  { id: 'aquedutos', nome: 'Aquedutos do Sol', det: 'tarde dourada · canais d’água e comportas', cor: '#f0b866', clima: 'tarde', pronta: false },
+  { id: 'aquedutos', nome: 'Aquedutos do Sol', ola: 'Bem-vindo aos Aquedutos do Sol', det: 'tarde dourada · canais d’água, cisterna, aquedutos e espelhos de sol', cor: '#f0b866', clima: 'tarde', pronta: true,
+    elos: [{ id: 'agua', nome: 'Água' }, { id: 'aqueduto', nome: 'Aqueduto' }, { id: 'sol', nome: 'Sol' }], construir: construirAquedutos },
   { id: 'arquipelago', nome: 'Arquipélago de Vento', det: 'brisa de montanha · ilhas, correntes e ricochetes', cor: '#9ccfdf', clima: 'montanha', pronta: false },
 ];

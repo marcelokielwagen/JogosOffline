@@ -96,8 +96,9 @@ function jogar(i) {
   $('#fases').hidden = true; $('#hud').hidden = false; modoTela = 'jogo'; atualizarModos(); atualizarAjuda();
   if (!estado.jogou.has(i)) {
     estado.jogou.add(i);
-    aviso(`Bem-vindo ao ${FASES[i].nome} ☀`, 3);
-    aviso('Acenda os três elos: Luz, Vento e Céu. Os feixes de luz no horizonte mostram onde.', 6);
+    const nomes = FASES[i].elos.map(e => e.nome);
+    aviso(`${FASES[i].ola || 'Bem-vindo: ' + FASES[i].nome} ☀`, 3);
+    aviso(`Acenda os três elos: ${nomes.slice(0, -1).join(', ')} e ${nomes.at(-1)}. Os feixes de luz no horizonte mostram onde.`, 6);
   }
 }
 $('#bComecar').onclick = () => { Som.iniciar(); Som.clique(); abrirFases(); };

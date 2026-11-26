@@ -7,7 +7,7 @@ const i = three.lastIndexOf('export{'), fim = three.indexOf('}', i);
 const nomes = three.slice(i + 7, fim).split(',').map(s => { const [a, b] = s.trim().split(' as '); return `${b || a}:${a}`; });
 three = `const THREE=(()=>{${three.slice(0, i)};return{${nomes.join(',')}};})();`.replace(/<\/script/g, '<\\/script');
 // ordem importa: cada parte usa o que as anteriores definiram
-const partes = ['som.js', 'mundo.js', 'jogador.js', 'elementos.js', 'fases.js', 'jogo.js'].map(n => `/* ===== ${n} ===== */\n${f(n)}`).join('\n');
+const partes = ['som.js', 'mundo.js', 'jogador.js', 'elementos.js', 'fases.js', 'fase2.js', 'jogo.js'].map(n => `/* ===== ${n} ===== */\n${f(n)}`).join('\n');
 const html = f('pagina.html').replace('/*ESTILO*/', () => f('estilo.css')).replace('/*THREE*/', () => three).replace('/*JOGO*/', () => partes);
 mkdirSync(path.join(RAIZ, 'jogos/aetherdrift'), { recursive: true });
 writeFileSync(path.join(RAIZ, 'jogos/aetherdrift/index.html'), html); console.log('jogos/aetherdrift/index.html', (html.length / 1024).toFixed(0) + ' KB');

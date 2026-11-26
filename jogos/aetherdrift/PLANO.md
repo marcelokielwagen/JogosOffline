@@ -13,16 +13,22 @@ Sem cronômetro, sem game over (cair na água = volta suave ao último chão fir
    - Elo do Céu: torre com elevador → planar → 2 correntes de ar quente → ilha flutuante com cristal.
      4 anéis do céu (opcionais) abrem uma ponte de luz da ilha até o portal.
    - Três elos acesos abrem o portal no terraço do morro (norte). Degraus flutuantes até um mirante perto do início.
-2. Fase 2 — Aquedutos do Sol (tarde dourada): canais d'água e comportas.
+2. **FEITA (26/11/2026)** Fase 2 — Aquedutos do Sol (tarde dourada clara): terra de mesas com estratos, cânion com água turquesa.
+   - Elo da Água: grade 4×5 de canais de pedra (grade girada 180°) → canal enche a cisterna → balsa sobe com a água
+     até o topo da mesa → placa verde abre a comporta → cascata desce até o cânion.
+   - Elo do Aqueduto: 5 arcos na estrada (2 sobre os aquedutos que cruzam o cânion, com calha de água corrente) + 2 rampas.
+   - Elo do Sol: Torre do Sol com elevador → planar → 3 térmicas → 4 espelhos dourados mandam feixes ao cristal da torre.
+   - Portal no terraço ao norte. Passarela de pedra sobre o cânion para quem anda.
+   - Geral: barrancos muito íngremes (paredes de mesa e cânion) não se sobem a pé nem de carro.
 3. Fase 3 — Arquipélago de Vento (brisa de montanha): ilhas, correntes e ricochetes.
 4. Mais fases, clima, detalhes de cenário e polimento.
-5. Menu da suíte, capa, modo offline (sw.js) — só com autorização do dono.
+5. ~~Menu da suíte, capa, modo offline~~ feito com autorização (v70); a cada mudança, subir a versão do sw.js (v71 na Fase 2).
 
 ## Como funciona
 - Editar em `ferramentas/aetherdrift/fonte/` e rodar `node ferramentas/aetherdrift/montar.mjs`
   (gera `jogos/aetherdrift/index.html`, arquivo único com o Three.js dentro; abre sem internet).
 - `som.js` áudio · `mundo.js` terreno/céu/decoração/superfícies (chão) · `jogador.js` três formas e física ·
-  `elementos.js` peças reutilizáveis (GradeFluxo, Arcos, Termica, Elevador, PonteGiratoria, Pedestal, Farol, Portal, rampaBrisa) ·
-  `fases.js` CLIMAS + FASES (cada fase = uma função construir) · `jogo.js` laço, câmera, controles, interface.
-- **Nova fase:** escrever `construirXxx(ctx)` em `fases.js` reaproveitando as peças e trocar `pronta: false` por `true` com `construir`.
+  `elementos.js` peças reutilizáveis (GradeFluxo com tema luz/água, Arcos, Termica, Elevador, PonteGiratoria, Pedestal, Farol, Portal, rampaBrisa, CanalAgua, Cisterna, Comporta, Espelhos) ·
+  `fases.js` CLIMAS + FASES + Fase 1 · `fase2.js` Fase 2 e ajudantes de estrada (estradaLaco, fitaEstrada, arcadas) · `jogo.js` laço, câmera, controles, interface.
+- **Nova fase:** arquivo `faseN.js` com `construirXxx(ctx)` (incluir em `montar.mjs`) reaproveitando as peças e trocar `pronta: false` por `true` com `construir`.
 - Teste rápido no console: `__ad` (jogador, fase, estado, acenderElo, jogar, pedirModo).

@@ -475,10 +475,10 @@ class Cisterna {
     // água e balsa
     this.agua = new THREE.Mesh(new THREE.BoxGeometry(L * 2, 1, L * 2), new THREE.MeshLambertMaterial({ map: texturaAgua(), color: '#ffffff', emissive: '#7fd6cf', emissiveIntensity: 0.25, transparent: true, opacity: 0.85 }));
     this.agua.position.set(x, baixo, z); raiz.add(this.agua);
-    this.sup = new Superficie({ tipo: 'caixa', x, z, hx: L - 0.9, hz: L - 0.9, topo: baixo + 0.3, movel: true });
+    this.sup = new Superficie({ tipo: 'caixa', x, z, hx: L - 0.12, hz: L - 0.12, topo: baixo + 0.3, movel: true });
     this.balsa = new THREE.Group(); this.balsa.position.set(x, baixo + 0.3, z); raiz.add(this.balsa);
-    const tabuas = new THREE.Mesh(new THREE.BoxGeometry((L - 0.9) * 2, 0.4, (L - 0.9) * 2), MAT('#f6e7cc')); tabuas.position.y = -0.2; tabuas.castShadow = tabuas.receiveShadow = true;
-    const borda = new THREE.Mesh(new THREE.BoxGeometry((L - 0.9) * 2 + 0.2, 0.15, (L - 0.9) * 2 + 0.2), MAT('#9fd8c0')); borda.position.y = -0.38;
+    const tabuas = new THREE.Mesh(new THREE.BoxGeometry((L - 0.12) * 2, 0.4, (L - 0.12) * 2), MAT('#f6e7cc')); tabuas.position.y = -0.2; tabuas.castShadow = tabuas.receiveShadow = true;
+    const borda = new THREE.Mesh(new THREE.BoxGeometry((L - 0.3) * 2, 0.15, (L - 0.3) * 2), MAT('#9fd8c0')); borda.position.y = -0.38;
     this.balsa.add(tabuas, borda);
   }
   ativar() { this.ativa = true; }
