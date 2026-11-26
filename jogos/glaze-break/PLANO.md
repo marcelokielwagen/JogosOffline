@@ -5,10 +5,35 @@ regras são próprios: nenhum jogo existente foi copiado.
 
 | Fase | O que é | Estado |
 |---|---|---|
-| 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta em 26/11/2026, **sem commit e fora do menu** (falta o sim do dono) |
-| 2 | Progressão e retenção (sem perder o salvo) | falta |
+| 1 | Protótipo: mecânica, efeitos, som, 50 fases | publicada em 26/11/2026 (v73, no menu em Ação) |
+| 2 | Progressão e retenção (sem perder o salvo) | publicada em 26/11/2026 (v75) |
 | 3 | Economia, reforços, dificuldade, diária, ganchos de anúncio e compra | falta |
 | 4 | Preparação para as lojas | falta |
+
+## Fase 2 (progressão)
+- **Painéis:** um mural de azulejos por lugar (Vaso de flores, Limoeiro, Fonte dos peixes, Relógio da estação, Sol do forno), 11 x 13 azulejos desenhados por código
+  (`Meta.mural`). Cada um volta em 5 obras pagas com estrelas (2, 3, 4, 5 e 6: 100 das 150), sempre na ordem dos lugares; os azulejos entram um a um, do centro para
+  fora, com som de cerâmica. Painel pronto: barra 6% mais larga nas 10 fases do lugar (`Meta.barra`; as estrelas continuam pelas bolas perdidas).
+- **Peça rara:** cada fase tem um azulejo com moldura dourada (de preferência no alto). Quebrado, solta uma peça que cai devagar (24 por segundo, mais lenta que os itens);
+  pegue com a barra (+300 pontos). Fica guardada mesmo perdendo a fase. Se cair no chão ou a bola for perdida enquanto ela cai, some e volta na próxima tentativa. Peça
+  já guardada não aparece mais.
+- **Caderno:** as 50 peças (10 desenhos x cores, moldura dourada), com nome e fase; 10 peças de um lugar abrem uma carta da Mestra Olívia, as 50 abrem a última (6 cartas).
+- **Marcos:** 10 x 3 degraus (azulejos, veios, maior veio, jarros, itens, fases sem perder bola, peças, obras, painéis do dia, fases vencidas). Cada degrau dá bolas
+  guardadas (1, 1, 2). **Bola guardada:** quando as bolas acabam, o jogo oferece usar uma e continuar (até 2 por partida; a nova volta presa na barra).
+- **Painel do dia:** abre na fase 6; o desenho e a dificuldade de uma fase de 11 a 49 (nunca as muito difíceis) com outra semente (`Nucleo.nivel(base, 1000 + dia)`),
+  igual para todo mundo no mesmo dia. Sem estrelas e sem peça rara. Vencer dá 1 bola guardada, e mais 3 a cada 7 painéis; faltar um dia não zera nada.
+- **Início:** Jogar, Fases, Painéis, Caderno, Marcos, Do dia e Ajustes; ponto dourado quando dá para restaurar, quando há carta nova e quando o do dia está esperando.
+  Vitória e derrota mostram a peça guardada, carta nova, marcos e o botão "Restaurar o painel" quando há estrelas para isso.
+- **Salvo:** `glaze-break.v2` = {v, soma, d} com conferência e cópia em `glaze-break.v2.copia`. Na primeira abertura a ficha da Fase 1 (`glaze-break.v1`) vira v2 sem
+  perder nada e **fica intocada**. Tudo passa por `Meta.validar` (obras na ordem e nunca gastando mais estrelas do que existem). Ajustes têm **código do progresso**
+  (`GB2-...`) para levar a outro aparelho; o código se junta com a ficha de lá por `Meta.mesclar` (o que se conquista fica; o que se gasta vem da mais nova). Campo novo
+  na Fase 3: pôr em `Meta.nova`, `validar` e `mesclar`.
+- Eventos novos: `rara, obra, painel:pronto, carta, marco, dia`; `fase:vitoria` traz `dia` e `rara`.
+- **Ritmo medido (jogador médio simulado):** primeira obra na fase 1; painel do Ateliê pronto antes da fase 10; termina as 50 com os 5 painéis, ~30 peças e ~20 bolas
+  guardadas (a Fase 3 deve dar uso a elas e talvez reduzir).
+- Ferramentas novas: `node meta.mjs` (56 mil conferências: ficha, migração, junção, código, painéis, marcos, painel do dia, peça rara na física, ritmo);
+  `node telas2.mjs pasta` (55 conferências das telas novas com toque simulado, fotos em pé e deitado); `node registrar2.mjs` (Estatísticas leem a v2 e mostram as peças
+  raras; sobe o sw.js; **rodar só na hora de publicar**).
 
 ## Como é
 - Oficina de azulejos esmaltados: terracota, ocre, sálvia e vinho, sobre fundos escuros e quentes (nada de azul). Barra de madeira com pontas de latão, bola de cerâmica.
@@ -47,7 +72,7 @@ regras são próprios: nenhum jogo existente foi copiado.
 - `node telas.mjs pasta`: telas, toque, giro, 5 tamanhos, derrota, vitória, salvo e ficha estragada, com fotos. `node som.mjs [--pc]`: mede os sons contra o fundo.
 - `node fotos.mjs pasta 0,1,10 [--pc|--deitado]`; `node capa.mjs` refaz `capas/glaze-break.webp`.
 - `node offline.mjs [pasta]`: copia o site, roda o `registrar.mjs` **na cópia**, guarda tudo, corta a rede e joga.
-- `node registrar.mjs`: liga o jogo ao menu (Ação), às Estatísticas e ao modo offline e sobe a versão do `sw.js`. **Ainda não rodado no site.** Rodar só na hora de
+- `node registrar.mjs`: liga o jogo ao menu (Ação), às Estatísticas e ao modo offline e sobe a versão do `sw.js`. Já rodado (v73). Rodar só na hora de
   publicar, depois de `git fetch`/atualizar e conferindo a versão que ele mostra.
 
 ## Ritmo medido (26/11/2026, estimativa)

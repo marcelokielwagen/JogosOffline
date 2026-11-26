@@ -56,9 +56,9 @@ ok(await E("@Progresso.d.estrelas[1]") === 3 && await E("@Progresso.d.fase") >= 
 await c('#vProx'); await dorme(500); ok(await E("@Jogo.n") === 2 && await E("@Jogo.aberto") === '', 'próxima é na hora');
 // mudo, salvar e recarregar
 await c('#bSom'); ok(await E("@Progresso.d.op.som") === false, 'mudo'); await c('#bSom');
-const fic = await E("JSON.parse(localStorage.getItem('glaze-break.v1'))"); ok(fic && fic.v === 1 && typeof fic.soma === 'string' && fic.d.estrelas[1] === 3, 'ficha com versão e conferência');
+const fic = await E("JSON.parse(localStorage.getItem('glaze-break.v2'))"); ok(fic && fic.v === 2 && typeof fic.soma === 'string' && fic.d.estrelas[1] === 3, 'ficha com versão e conferência');
 await p.recarregar(); for (let i = 0; i < 40; i++) { await dorme(200); if (await E("!!window.__glaze").catch(() => 0)) break; } await dorme(400); ok(await E("@Progresso.d.estrelas[1]") === 3 && await E("@Progresso.d.fase") >= 2, 'salva e volta igual');
 // ficha mexida (conferência não bate): usa a cópia anterior; ficha quebrada: recomeça sem travar
-await E("(()=>{const x=JSON.parse(localStorage.getItem('glaze-break.v1'));x.d.estrelas[1]=3;x.d.fase=50;localStorage.setItem('glaze-break.v1',JSON.stringify(x));})()"); await p.recarregar(); await dorme(2200); ok(await E("@Progresso.d.fase") < 50 && await E("@Progresso.d.fase") >= 1, 'ficha mexida não vale');
-await E("localStorage.clear();localStorage.setItem('glaze-break.v1','{quebrado')"); await p.recarregar(); await dorme(2200); ok(await E("@Progresso.d.fase") === 1 && await E("@Jogo.aberto") === 'abertura', 'ficha estragada recomeça sem travar');
+await E("(()=>{const x=JSON.parse(localStorage.getItem('glaze-break.v2'));x.d.estrelas[1]=3;x.d.fase=50;localStorage.setItem('glaze-break.v2',JSON.stringify(x));})()"); await p.recarregar(); await dorme(2200); ok(await E("@Progresso.d.fase") < 50 && await E("@Progresso.d.fase") >= 1, 'ficha mexida não vale');
+await E("localStorage.clear();localStorage.setItem('glaze-break.v2','{quebrado')"); await p.recarregar(); await dorme(2200); ok(await E("@Progresso.d.fase") === 1 && await E("@Jogo.aberto") === 'abertura', 'ficha estragada recomeça sem travar');
 console.log('certos', bons, 'falhas', ruins, 'erros de código', p.erros.slice(0, 4)); p.fim();
