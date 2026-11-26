@@ -113,6 +113,9 @@ button.lem { width:100%; color:var(--osso); font-family:var(--corpo); text-align
 @media (max-height:640px) and (orientation:portrait) { .fe { height:38px; } #app { gap:6px; } #abertura .capa h2 { font-size:min(10.500vw,44px) !important; white-space:nowrap; } #abertura .qd { margin-top:8px; } #abertura .qd img { max-height:17vh; } #abertura .bt { margin-top:8px; min-height:42px; } #abertura .g3 { gap:7px; margin-top:8px; } #abertura .g3 .bt { margin:0; font-size:14.5px; } #abertura #bJogar { min-height:50px; } #abertura .capa a { margin-top:0; padding:6px; } }
 @media (max-height:700px) { .capa h2 { font-size:44px !important; } .qd img { max-height:24vh; } .g3 .bt { min-height:48px; } }
 @media (orientation:landscape) and (max-height:640px) { .capa { max-width:640px; } .qd img { max-height:34vh; } .g3 { grid-template-columns:repeat(5,1fr); } .g3 .bt { font-size:14px; } .mapa { max-width:640px; } .palco { max-width:420px; margin:0 auto; } }
+a.bt.lk { display:grid; place-items:center; text-decoration:none; }
+/* tablet em pé (iPad e parecidos): tudo um pouco maior, para não ficar miúdo na tela grande */
+@media (min-width:760px) and (min-height:1000px) { .tela>* { zoom:1.3; } #abertura .capa h2 { white-space:nowrap; font-size:52px; } #lado,#ferr,.bandeja { zoom:1.4; } }
 .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 #carga { position:absolute; inset:0; z-index:9; display:grid; place-items:center; background:var(--tinta); font:400 18px var(--corpo); color:var(--osso2); text-align:center; padding:24px; }
 :focus-visible { outline:3px solid var(--ouro); outline-offset:2px; }
@@ -146,7 +149,7 @@ button.lem { width:100%; color:var(--osso); font-family:var(--corpo); text-align
 <section class="tela" id="pausa"><div class="caixa"><h2>Pausa</h2><p class="nota" id="zVida"></p><button class="bt pri" id="pContinua">Continuar</button><button class="bt" id="pRecomeca">Recomeçar</button><button class="bt" id="pFases">Fases</button><button class="bt" id="pAjustes">Ajustes</button><button class="bt" id="pSair">Início</button></div></section>
 <section class="tela" id="vitoria"><div class="caixa"><h2 id="vTit">Achou tudo!</h2><div class="estrelas" id="vEst"></div><p id="vTxt"></p><p id="vMoedas" hidden></p><div id="vAch"></div><button class="bt pri" id="vProx">Próxima</button><button class="bt" id="bDobro" hidden></button><button class="bt ouro" id="vCasa">Restaurar a casa</button><div class="linha2"><button class="bt" id="vDeNovo">De novo</button><button class="bt" id="vFases">Início</button></div></div></section>
 <section class="tela" id="derrota"><div class="caixa"><h2 id="dTit">O tempo acabou</h2><p id="dTxt"></p><p class="nota" id="dAjuda"></p><p class="nota" id="dVida"></p><button class="bt pri" id="dDeNovo">Tentar de novo</button><button class="bt ouro" id="dPacote" hidden></button><button class="bt" id="dFases">Início</button></div></section>
-<section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" id="bCodigo">Levar para outro aparelho</button><button class="bt" data-volta>Voltar</button></div></section>
+<section class="tela" id="ajustes"><div class="caixa"><h2>Ajustes</h2><button class="op" data-op="som">Sons<b></b></button><button class="op" data-op="ambiente">Som de fundo<b></b></button><button class="op" data-op="vibra">Vibração<b></b></button><button class="bt" id="bCodigo">Levar para outro aparelho</button><a class="bt lk" href="privacidade.html">Privacidade</a><button class="bt" data-volta>Voltar</button></div></section>
 <section class="tela solta" id="objeto"><div class="caixa"><small class="sub" id="oSub"></small><h2 id="oTit"></h2><canvas id="oTela"></canvas><p id="oTxt"></p><button class="bt pri" data-fecha>Fechar</button></div></section>
 <section class="tela solta" id="carta"><div class="caixa papel"><h2 id="kTit"></h2><p id="kTxt"></p><button class="bt" data-fecha id="kBt">Guardar a carta</button></div></section>
 <section class="tela solta" id="aviso"><div class="caixa"><div class="figs" id="vsFig"></div><img id="vsImg" alt="" width="1000" height="711"><h2 id="vsTit"></h2><p id="vsTxt"></p><button class="bt pri" data-fecha>Certo</button></div></section>
@@ -1310,7 +1313,7 @@ const Econ = (() => {
 
 // ============================================================ ABRIR
 (async () => {
-  try { await Tela.carregar(); Telas.somIcone(); Econ.chegada(Progresso.origem === 'v1'); Telas.trocar('abertura'); await Jogo.vitrine(); $('carga').remove(); if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__keepsake = { Nucleo, Eco, Meta, Econ, Monetizacao, Hoje, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos }; }
+  try { await Tela.carregar(); Telas.somIcone(); Econ.chegada(Progresso.origem === 'v1'); Telas.trocar('abertura'); await Jogo.vitrine(); $('carga').remove(); if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && !window.Capacitor) window.__keepsake = { Nucleo, Eco, Meta, Econ, Monetizacao, Hoje, Progresso, Som, Tela, Jogo, Telas, Eventos, Ganchos }; }
   catch (e) { console.error(e); $('carga').textContent = e.message === 'sem-webgl' ? 'Este navegador não consegue desenhar o jogo. Atualize o navegador e tente de novo.' : 'Não deu para abrir as imagens do jogo. Confira a internet e recarregue a página.'; }
 })();
 </script>

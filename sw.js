@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v67';
+const VERSAO = 'jogos-offline-v68';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js', './js/suite.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',
@@ -28,7 +28,7 @@ const ARQUIVOS = [
   './jogos/gem-shatter/arte/g2-0.webp', './jogos/gem-shatter/arte/g2-1.webp', './jogos/gem-shatter/arte/g2-2.webp', './jogos/gem-shatter/arte/g2-3.webp', './jogos/gem-shatter/arte/g2-4.webp', './jogos/gem-shatter/arte/g2-5.webp',
   './jogos/gem-shatter/arte/g3-0.webp', './jogos/gem-shatter/arte/g3-1.webp', './jogos/gem-shatter/arte/g3-2.webp', './jogos/gem-shatter/arte/g3-3.webp', './jogos/gem-shatter/arte/g3-4.webp', './jogos/gem-shatter/arte/g3-5.webp',
   './jogos/gem-shatter/arte/g4-0.webp', './jogos/gem-shatter/arte/g4-1.webp', './jogos/gem-shatter/arte/g4-2.webp', './jogos/gem-shatter/arte/g4-3.webp', './jogos/gem-shatter/arte/g4-4.webp', './jogos/gem-shatter/arte/g4-5.webp',
-  './jogos/keepsake-hunt/index.html', './jogos/keepsake-hunt/arte/cor.webp', './jogos/keepsake-hunt/arte/nor.webp', './jogos/keepsake-hunt/arte/sombra.webp', './jogos/keepsake-hunt/arte/m0.webp', './jogos/keepsake-hunt/arte/m1.webp', './jogos/keepsake-hunt/arte/m2.webp', './jogos/keepsake-hunt/arte/m3.webp', './jogos/keepsake-hunt/arte/m4.webp',
+  './jogos/keepsake-hunt/index.html', './jogos/keepsake-hunt/privacidade.html', './jogos/keepsake-hunt/arte/cor.webp', './jogos/keepsake-hunt/arte/nor.webp', './jogos/keepsake-hunt/arte/sombra.webp', './jogos/keepsake-hunt/arte/m0.webp', './jogos/keepsake-hunt/arte/m1.webp', './jogos/keepsake-hunt/arte/m2.webp', './jogos/keepsake-hunt/arte/m3.webp', './jogos/keepsake-hunt/arte/m4.webp',
   './jogos/keepsake-hunt/arte/c0-0.webp', './jogos/keepsake-hunt/arte/c0-1.webp', './jogos/keepsake-hunt/arte/c0-2.webp', './jogos/keepsake-hunt/arte/c0-3.webp', './jogos/keepsake-hunt/arte/c0-4.webp', './jogos/keepsake-hunt/arte/c0-5.webp',
   './jogos/keepsake-hunt/arte/c1-0.webp', './jogos/keepsake-hunt/arte/c1-1.webp', './jogos/keepsake-hunt/arte/c1-2.webp', './jogos/keepsake-hunt/arte/c1-3.webp', './jogos/keepsake-hunt/arte/c1-4.webp', './jogos/keepsake-hunt/arte/c1-5.webp',
   './jogos/keepsake-hunt/arte/c2-0.webp', './jogos/keepsake-hunt/arte/c2-1.webp', './jogos/keepsake-hunt/arte/c2-2.webp', './jogos/keepsake-hunt/arte/c2-3.webp', './jogos/keepsake-hunt/arte/c2-4.webp', './jogos/keepsake-hunt/arte/c2-5.webp',

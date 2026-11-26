@@ -1,0 +1,12 @@
+# gerado por montar.mjs e pelo Capacitor
+www/
+node_modules/
+android/
+ios/
+# chaves de assinatura e de serviços nunca vão para o GitHub
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist

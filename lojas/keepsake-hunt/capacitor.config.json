@@ -1,0 +1,11 @@
+{
+  "appId": "io.github.marcelokielwagen.keepsakehunt",
+  "appName": "Keepsake Hunt",
+  "webDir": "www",
+  "backgroundColor": "#101816",
+  "android": { "allowMixedContent": false, "captureInput": true },
+  "ios": { "contentInset": "never", "backgroundColor": "#101816" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#101816", "showSpinner": false }
+  }
+}

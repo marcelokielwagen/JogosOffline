@@ -7,7 +7,7 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
 | 1 | Protótipo: mecânica, efeitos, som, 50 fases | pronta e publicada (v59) em 25/11/2026 |
 | 2 | Casa, álbum, acervo, marcos, mesa do dia e ficha segura | pronta e publicada (v63) em 25/11/2026 |
 | 3 | Moedas, vidas, reforços, dificuldade, diária, missões, evento, gavetas, ganchos de anúncio e compra | pronta e publicada (v67) em 26/11/2026 |
-| 4 | Preparação para as lojas | falta |
+| 4 | Preparação para as lojas: app (Capacitor), privacidade, ficha, imagens, provedor de teste | pronta e publicada (v68) em 26/11/2026; lojas dependem do dono |
 
 ## Como é
 - **Ideia própria:** a mesa é uma pilha de objetos soltos. Tocar pega; **arrastar remexe** (quem está por cima anda mais, e o que está embaixo aparece). Segurar abre a lupa;
@@ -65,7 +65,20 @@ Nome confirmado pelo dono em 25/11/2026. Regras da série em `jogos/gem-shatter/
   voltam atrás.
 - Eventos novos: `booster, gasto, continuou, video:inicio, video:fim, intersticial, compra, compra:falhou, diaria, premio`. `fase:inicio` traz `itens` e `ajuda`.
 
+## Fase 4
+- Tudo em `lojas/keepsake-hunt/` (ver `LEIAME.md` lá: o que está pronto e a lista do que só o dono pode fazer, como contas, AdMob, RevenueCat, assinatura e Mac para iPhone).
+- **App:** Capacitor, pacote `io.github.marcelokielwagen.keepsakehunt`, versão 1.0.0. `node lojas/keepsake-hunt/montar.mjs` copia o jogo para `www/`, tira o que é só do site
+  (suíte, "Todos os jogos") e põe `provedor-capacitor.js`, que liga AdMob (vídeo e intersticial **não personalizados**, consentimento quando a lei pede) e RevenueCat (compras) ao
+  `Monetizacao.usar`, e o botão Voltar do Android (fecha, pausa, volta; no início deixa o app em segundo plano). Está em modo de teste (IDs de teste do Google, sem chave do RevenueCat).
+- **Privacidade:** `jogos/keepsake-hunt/privacidade.html` (pt-BR, LGPD), com link nos Ajustes. No app, o jogo não se expõe (`window.__keepsake` só no localhost do navegador).
+- **Ficha:** `ficha-da-loja.md` com nome, descrições, palavras-chave, 5 produtos (`keepsake.*`), classificação e respostas de segurança de dados. Público 13+, classificação livre.
+- **Imagens:** ícone (medalhão modelado em alta: `node ferramentas/keepsake-hunt/icone.mjs`), gráfico 1024x500 e 8 capturas em 1080x1920, 1290x2796 e 2048x2732
+  (`node ferramentas/keepsake-hunt/lojas.mjs`). Em tablet em pé a interface fica 30% maior.
+- Nada foi instalado, nenhuma conta criada, nenhum dinheiro envolvido.
+
 ## Ferramentas (`ferramentas/keepsake-hunt`)
+- `node app.mjs` monta o app e testa com um Capacitor simulado (anúncio, compra, Voltar, privacidade); `node jogar.mjs 1-50 --tablet` joga no tamanho de iPad;
+  `node registrar4.mjs` põe a privacidade no offline e sobe a versão do `sw.js` (já rodado, v68).
 - `node eco.mjs` confere a economia, as ferramentas nas 50 fases, a curva e o ritmo das moedas; `node economia.mjs pasta` testa as telas da Fase 3 com toque simulado (180
   conferências, 5 tamanhos). `node registrar3.mjs` só sobe a versão do `sw.js` (já rodado, v67).
 - `node gerar-arte.mjs --k=26` refaz as folhas (objetos em `objetos3d.js`) e o `atlas.json`; depois `node montar.mjs` põe a lista no jogo. `--prova=pasta` só mostra os objetos.
