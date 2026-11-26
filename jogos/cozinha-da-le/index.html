@@ -694,15 +694,15 @@ function toldo() {
 }
 function hud() {
   const y = 64, pill = (x, w) => { ctx.beginPath(); ctx.roundRect(x, y, w, 30, 15); ctx.fillStyle = '#fff'; ctx.fill(); linha('#7a4a36', 2.5); };
-  ctx.font = '800 17px "Trebuchet MS",system-ui,sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#5a3a2a';
-  pill(66, 128); el(80, y + 15, 14, 14, '#f6c343'); linha('#b57f1c', 2.4); estrela5(80, y + 15, 7, '#ffe48a');
-  ctx.fillStyle = '#5a3a2a'; ctx.fillText(moedas.toLocaleString('pt-BR'), 100, y + 16);
-  el(180, y + 15, 9, 9, '#ffb347'); linha('#b5701c', 2); ctx.fillStyle = '#fff'; ctx.fillText('+', 175, y + 16);
+  ctx.font = '800 22px "Trebuchet MS",system-ui,sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#5a3a2a';
+  pill(64, 136); el(79, y + 15, 14, 14, '#f6c343'); linha('#b57f1c', 2.4); estrela5(79, y + 15, 7, '#ffe48a');
+  ctx.fillStyle = '#5a3a2a'; ctx.fillText(moedas.toLocaleString('pt-BR'), 97, y + 16);
+  el(186, y + 15, 10, 10, '#ffb347'); linha('#b5701c', 2); ctx.fillStyle = '#fff'; ctx.save(); ctx.font = '800 17px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+', 186, y + 16); ctx.restore(); ctx.font = '800 22px "Trebuchet MS",system-ui,sans-serif';
   pill(206, 104); ctx.beginPath(); ctx.moveTo(214, y + 11); ctx.lineTo(220, y + 4); ctx.lineTo(234, y + 4); ctx.lineTo(240, y + 11); ctx.lineTo(227, y + 27); ctx.closePath(); ctx.fillStyle = '#4fd1a8'; ctx.fill(); linha('#2a8a6a', 2);
   ctx.fillStyle = '#5a3a2a'; ctx.fillText(String(gemas), 248, y + 16);
   ctx.beginPath(); ctx.roundRect(340, y + 6, 166, 18, 9); ctx.fillStyle = '#fff'; ctx.fill(); linha('#7a4a36', 2.5);
   ctx.beginPath(); ctx.roundRect(343, y + 9, Math.max(12, 160 * Math.min(1, xp / xpPara())), 12, 6); ctx.fillStyle = '#8fd06a'; ctx.fill();
-  for (const [x, n] of [[334, nivel], [512, nivel + 1]]) { el(x, y + 15, 16, 16, n === nivel ? '#a8d98a' : '#f4e2c4'); linha('#7a4a36', 2.5); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.fillText(n, x, y + 16); ctx.textAlign = 'left'; }
+  for (const [x, n] of [[334, nivel], [512, nivel + 1]]) { el(x, y + 15, 19, 19, n === nivel ? '#a8d98a' : '#f4e2c4'); linha('#7a4a36', 2.5); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.font = '800 ' + (n > 99 ? 16 : n > 9 ? 19 : 22) + 'px "Trebuchet MS",sans-serif'; ctx.fillText(n, x, y + 16); ctx.textAlign = 'left'; }
 }
 function balcao() {
   const y = YB - 6;
@@ -820,15 +820,15 @@ function mesa() {
   for (const v of vagas) {
     const { x, y: yy, preco } = v;
     el(x, yy + 6, 48, 18, 'rgba(90,50,20,.25)');
-    if (preco) { sil(() => ctx.ellipse(x, yy, 46, 17, 0, 0, TAU), '#b9b6b0', 1.4, '#7a7570'); el(x, yy - 2, 34, 11, '#cfccc6'); el(x - 14, yy - 3, 8, 8, '#f6c343'); linha('#b57f1c', 1.6); ctx.font = '800 14px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#5a5550'; ctx.textBaseline = 'middle'; ctx.fillText(preco, x - 3, yy - 2); el(x + 30, yy - 12, 5, 5, '#e2504a'); continue; }
+    if (preco) { sil(() => ctx.ellipse(x, yy, 46, 17, 0, 0, TAU), '#b9b6b0', 1.4, '#7a7570'); el(x, yy - 2, 34, 11, '#cfccc6'); el(x - 14, yy - 3, 8, 8, '#f6c343'); linha('#b57f1c', 1.6); ctx.font = '800 19px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#4a4540'; ctx.textBaseline = 'middle'; ctx.fillText(preco, x - 3, yy - 2); el(x + 30, yy - 12, 5, 5, '#e2504a'); continue; }
     el(x, yy, 46, 17, 'rgba(110,60,25,.22)'); ctx.beginPath(); ctx.ellipse(x, yy, 46, 17, 0, 0, TAU); linha('rgba(110,60,25,.3)', 2);
     if (origem && podeIr(origem, v)) { const k = .5 + .5 * Math.sin(T * 7); ctx.beginPath(); ctx.ellipse(x, yy, 49 + k * 3, 19 + k * 2, 0, 0, TAU); linha(v === alvoArr ? '#fff' : 'rgba(255,250,220,.75)', v === alvoArr ? 4.5 : 3); }
   }
   for (const v of vagas) if (!v.bloq) desenhaPilha(v);
   if (modo === 'limpar' || !jogadas) {
-    ctx.font = '800 15px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const txt = modo === 'limpar' ? 'Toque na pilha que quer limpar' : sel ? 'Agora toque onde a comida combina (ou em quem pediu)' : 'Toque numa pilha e depois noutra com a mesma comida';
-    const w = ctx.measureText(txt).width + 26; sil(() => ctx.roundRect(W / 2 - w / 2, 500, w, 30, 15), 'rgba(255,249,236,.94)', 1.2, '#b98a5a');
+    ctx.font = '800 19px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const txt = modo === 'limpar' ? 'Toque na pilha que quer limpar' : sel ? 'Toque onde combina (ou em quem pediu)' : 'Toque numa pilha e depois na igual';
+    const w = ctx.measureText(txt).width + 26; sil(() => ctx.roundRect(W / 2 - w / 2, 497, w, 38, 19), 'rgba(255,249,236,.94)', 1.2, '#b98a5a');
     ctx.fillStyle = '#5a3a2a'; ctx.fillText(txt, W / 2, 516); ctx.textAlign = 'left';
   }
 }
@@ -839,7 +839,7 @@ function desenhaVoando() {
     prato(q.de.x + (x1 - q.de.x) * u, q.de.y + (y1 - q.de.y) * u - Math.sin(Math.PI * u) * 46, q.f, true);
   }
   if (arrasto && arrasto.ativo) { const tp = topo(arrasto.v); if (tp) for (let k = 0; k < tp.n; k++) prato(arrasto.x, arrasto.y - k * ALT, tp.f, k === tp.n - 1); }
-  ctx.font = '800 18px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '800 25px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const q of textos) { ctx.globalAlpha = Math.min(1, (1.2 - q.t) / .4); ctx.lineWidth = 4; ctx.strokeStyle = '#6a3a22'; ctx.strokeText(q.txt, q.x, q.y - q.t * 30); ctx.fillStyle = q.cor; ctx.fillText(q.txt, q.x, q.y - q.t * 30); }
   ctx.globalAlpha = 1; ctx.textAlign = 'left';
 }
@@ -858,21 +858,21 @@ function barraInferior() {
   const y = 878;
   ctx.fillStyle = '#8f5534'; ctx.fillRect(0, y, W, H - y); ctx.fillStyle = '#a8673f'; ctx.fillRect(0, y, W, 6);
   const itens = [['Limpar', 70], ['Organizar', 170], ['Entregar', 270]];
-  ctx.font = '800 13px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center';
+  ctx.textAlign = 'center';
   for (const [nome, x] of itens) {
     ctx.save(); ctx.translate(x, y + 34 - (modo === 'limpar' && nome === 'Limpar' ? 7 : 0)); ctx.rotate(-.06); sil(() => ctx.roundRect(-30, -26, 60, 44, 8), '#f8ecd8', 1.6, '#6a3a22'); ctx.restore();
     if (nome === 'Limpar') { ctx.beginPath(); ctx.moveTo(x - 14, y + 44); ctx.lineTo(x + 4, y + 26); linha('#8a5a32', 5); sil(() => { ctx.moveTo(x + 2, y + 24); ctx.lineTo(x + 16, y + 14); ctx.lineTo(x + 20, y + 22); ctx.lineTo(x + 8, y + 32); ctx.closePath(); }, '#c9cdd0', 1.4); }
     if (nome === 'Organizar') sil(() => { ctx.roundRect(x - 12, y + 18, 22, 26, 9); ctx.moveTo(x + 18, y + 26); ctx.ellipse(x + 12, y + 28, 7, 5, -.6, 0, TAU); }, '#ffd34a', 1.6);
     if (nome === 'Entregar') { sil(() => { ctx.moveTo(x - 14, y + 42); ctx.quadraticCurveTo(x - 12, y + 18, x, y + 18); ctx.quadraticCurveTo(x + 12, y + 18, x + 14, y + 42); ctx.closePath(); }, '#f4c542', 1.6); el(x, y + 44, 4, 4, '#b57f1c'); ctx.beginPath(); ctx.moveTo(x, y + 18); ctx.lineTo(x, y + 12); linha('#8a5a32', 3); }
-    el(x + 26, y + 10, 10, 10, '#ff9a3a'); linha('#fff', 2); ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(rotuloAjuda(nome), x + 26, y + 11);
-    ctx.fillStyle = '#fff4e0'; ctx.fillText(nome, x, y + 68);
+    el(x + 26, y + 10, 13, 13, '#ff9a3a'); linha('#fff', 2); ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.font = '800 17px "Trebuchet MS",sans-serif'; ctx.fillText(rotuloAjuda(nome), x + 26, y + 11);
+    ctx.font = '800 18px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#fff4e0'; ctx.fillText(nome, x, y + 66);
   }
   // cesta "Servir" (afunda um pouco ao tocar)
   ctx.save(); const ck = 1 - Math.sin(cestaK * Math.PI) * .1; ctx.translate(470, y + 30); ctx.scale(ck, ck); ctx.translate(-470, -(y + 30));
   sil(() => { ctx.moveTo(420, y + 6); ctx.lineTo(520, y + 6); ctx.lineTo(510, y + 52); ctx.lineTo(430, y + 52); ctx.closePath(); }, '#c98a4a', 1.6, '#6a3a22');
   ctx.beginPath(); for (let k = 0; k < 5; k++) { ctx.moveTo(428 + k * 20, y + 8); ctx.lineTo(434 + k * 18, y + 50); } linha('rgba(110,60,25,.4)', 1.5);
   comida('lasanha', 442, y - 2, 15); comida('macarrao', 470, y - 7, 16); comida('salmao', 498, y - 2, 15);
-  sil(() => ctx.roundRect(432, y + 34, 76, 24, 10), '#4fbf7a', 1.4, '#2a7a4a'); ctx.fillStyle = '#fff'; ctx.fillText('Servir', 470, y + 47);
+  sil(() => ctx.roundRect(427, y + 32, 86, 30, 12), '#4fbf7a', 1.4, '#2a7a4a'); ctx.font = '800 19px "Trebuchet MS",sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('Servir', 470, y + 48);
   ctx.restore(); ctx.textAlign = 'left';
 }
 function bolha(p) {
@@ -891,18 +891,18 @@ function etiqueta(p) {
   if (p.tagT <= 0) return;
   const P = pos(p), A = ANC[p.tipo], R = ROUPAS[p.roupa], y = P.y + (A.hy - 110) * ESC;
   ctx.globalAlpha = Math.min(1, p.tagT / .4, (2.4 - p.tagT) / .2 + .2);
-  ctx.font = '800 14px "Trebuchet MS",sans-serif'; const txt = R.emoji + ' ' + R.nome, w = ctx.measureText(txt).width + 20;
+  ctx.font = '800 19px "Trebuchet MS",sans-serif'; const txt = R.emoji + ' ' + R.nome, w = ctx.measureText(txt).width + 24;
   const x = Math.max(w / 2 + 4, Math.min(W - w / 2 - 4, P.x));
-  sil(() => ctx.roundRect(x - w / 2, y - 14, w, 28, 14), '#fff4c8', 1.4, '#c9902c'); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + 1); ctx.textAlign = 'left';
+  sil(() => ctx.roundRect(x - w / 2, y - 18, w, 36, 18), '#fff4c8', 1.4, '#c9902c'); ctx.fillStyle = '#5a3a2a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + 1); ctx.textAlign = 'left';
   ctx.globalAlpha = 1;
 }
 function camarim(p) {
   if (p.fase !== 'camarim') return;
   const x = p.x, y = YB - 70, pts = '.'.repeat(1 + Math.floor(T * 3) % 3);
-  ctx.font = '800 14px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  sil(() => ctx.roundRect(x - 62, y - 30, 124, 52, 14), 'rgba(255,248,236,.92)', 1.2, '#c9a27a');
+  ctx.font = '800 18px "Trebuchet MS",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  sil(() => ctx.roundRect(x - 72, y - 30, 144, 56, 14), 'rgba(255,248,236,.92)', 1.2, '#c9a27a');
   ctx.beginPath(); ctx.moveTo(x, y - 24); ctx.lineTo(x, y - 18); ctx.moveTo(x - 14, y - 6); ctx.lineTo(x, y - 18); ctx.lineTo(x + 14, y - 6); ctx.closePath(); linha('#8a5a32', 2.4);
-  ctx.fillStyle = '#5a3a2a'; ctx.fillText('no camarim' + pts, x, y + 8); ctx.textAlign = 'left';
+  ctx.fillStyle = '#5a3a2a'; ctx.fillText('no camarim' + pts, x, y + 10); ctx.textAlign = 'left';
 }
 function comidaVoando(p) {
   if (p.fase !== 'festa' || p.faseT > .55) return;
