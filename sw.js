@@ -1,12 +1,12 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v68';
+const VERSAO = 'jogos-offline-v70';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js', './js/suite.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',
   './icones/icone-192.png', './icones/icone-512.png',
   './capas/velha.webp', './capas/resta-um.webp', './capas/paciencia.webp', './capas/freecell.webp', './capas/cruzadas.webp', './capas/caca-palavras.webp',
-  './capas/pinball-show.webp', './capas/ponte-zero.webp', './capas/nascente.webp', './capas/candeia.webp', './capas/hushbell.webp', './capas/gem-shatter.webp', './capas/keepsake-hunt.webp', './capas/zen-loop.webp', './capas/zen-ricochet.webp',
+  './capas/pinball-show.webp', './capas/ponte-zero.webp', './capas/nascente.webp', './capas/candeia.webp', './capas/hushbell.webp', './capas/aetherdrift.webp', './capas/dustline.webp', './capas/gem-shatter.webp', './capas/keepsake-hunt.webp', './capas/zen-loop.webp', './capas/zen-ricochet.webp',
   './jogos/velha/index.html', './jogos/velha/jogo.css', './jogos/velha/jogo.js',
   './jogos/resta-um/index.html', './jogos/resta-um/jogo.css', './jogos/resta-um/jogo.js',
   './jogos/paciencia/index.html', './jogos/paciencia/jogo.css', './jogos/paciencia/jogo.js', './jogos/paciencia/sorteio.js',
@@ -22,6 +22,8 @@ const ARQUIVOS = [
   './jogos/nascente/index.html',
   './jogos/candeia/index.html',
   './jogos/hushbell/index.html',
+  './jogos/aetherdrift/index.html',
+  './jogos/dustline/index.html',
   './jogos/gem-shatter/index.html', './jogos/gem-shatter/arte/minerais.webp',
   './jogos/gem-shatter/arte/g0-0.webp', './jogos/gem-shatter/arte/g0-1.webp', './jogos/gem-shatter/arte/g0-2.webp', './jogos/gem-shatter/arte/g0-3.webp', './jogos/gem-shatter/arte/g0-4.webp', './jogos/gem-shatter/arte/g0-5.webp',
   './jogos/gem-shatter/arte/g1-0.webp', './jogos/gem-shatter/arte/g1-1.webp', './jogos/gem-shatter/arte/g1-2.webp', './jogos/gem-shatter/arte/g1-3.webp', './jogos/gem-shatter/arte/g1-4.webp', './jogos/gem-shatter/arte/g1-5.webp',

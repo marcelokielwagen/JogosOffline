@@ -378,3 +378,7 @@ O roteiro completo das etapas está em `PROMPT.md`.
   que giram, ponte levadiça, roda, escada que gira, triângulo impossível), 4 horas do dia, música e sons por código. Arquivo único com o Three.js dentro (`jogos/hushbell/index.html`,
   fonte em `ferramentas/hushbell/fonte`, `montar.mjs`). No menu (Para relaxar), Estatísticas, capa e cache `jogos-offline-v66` com autorização do dono em 26/11/2026. Testado: níveis
   provados por `resolver.mjs`, campanha jogada por toque e teclado, suíte (`ferramentas/suite/testes.mjs`, 15 cartões), sem internet. Não testado num celular de verdade. Publicado com autorização do dono em 26/11/2026.
+- **Dustline (26/11/2026)**, pedido do dono (jogo 2 da série 3D relaxante, 5 fases): rali na terra visto de cima, 5 pistas (pinhal na névoa, serra ao entardecer, cerejeiras,
+  neve, outono junto ao lago) contra o relógio ou passeio livre, derrapagem perdoável, poeira, marcas de pneu, batida macia, clima e música por pista, tudo por código. Arquivo único
+  com o Three.js dentro (`jogos/dustline/index.html`, fonte em `ferramentas/dustline/fonte`). No menu (Ação), Estatísticas, capa e cache `jogos-offline-v69`. Testado: piloto automático
+  corre as 5 pistas, direção e som no PC e celular simulado, suíte com 16 cartões, sem internet. Não testado num celular de verdade.
