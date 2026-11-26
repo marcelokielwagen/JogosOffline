@@ -1,34 +1,46 @@
 # AetherDrift: Solar Valley — plano e ponto de parada
 
-Jogo 3D relaxante e claro: andar, dirigir e planar no mesmo cenário, com quebra-cabeças de fluxo de luz/água/vento.
-Sem cronômetro, sem game over (cair na água = volta suave ao último chão firme).
+Jogo 3D contemplativo e claro, **só de voo**: o planador salta de um cume e desce devagar por vales grandes
+(rio em degraus, lagos, cachoeiras, florestas, montanhas, névoa no fundo do vale), sobe em espirais de vento
+e chega à coroa de luz do próximo cume. Arcos de luz pelo caminho são opcionais.
+Sem relógio e sem queda: o vento de baixo nunca deixa o planador encostar no chão ou na água.
 
-## Etapas
-1. **FEITA (26/11/2026)** Núcleo jogável: céu em degradê, sol com sombras, névoa, pólen, nuvens, água turquesa;
-   três formas (1 andar, 2 carro, 3 voo) com troca a qualquer momento; câmera que segue e gira arrastando;
-   teclado + mouse + toque (joystick e botão de pulo); som procedural (pad lídio em Lá 432, brisa, motor, efeitos);
-   seletor de fases com progresso salvo; **Fase 1 — Vale da Brisa** completa:
-   - Elo da Luz: grade 4×4 de prismas na praça branca (girar peças; cada peça acesa sobe uma nota) → gira a ponte do rio.
-   - Elo do Vento: 5 arcos de brisa na estrada panorâmica (só de carro) + 2 rampas verdes de pulo.
-   - Elo do Céu: torre com elevador → planar → 2 correntes de ar quente → ilha flutuante com cristal.
-     4 anéis do céu (opcionais) abrem uma ponte de luz da ilha até o portal.
-   - Três elos acesos abrem o portal no terraço do morro (norte). Degraus flutuantes até um mirante perto do início.
-2. **FEITA (26/11/2026)** Fase 2 — Aquedutos do Sol (tarde dourada clara): terra de mesas com estratos, cânion com água turquesa.
-   - Elo da Água: grade 4×5 de canais de pedra (grade girada 180°) → canal enche a cisterna → balsa sobe com a água
-     até o topo da mesa → placa verde abre a comporta → cascata desce até o cânion.
-   - Elo do Aqueduto: 5 arcos na estrada (2 sobre os aquedutos que cruzam o cânion, com calha de água corrente) + 2 rampas.
-   - Elo do Sol: Torre do Sol com elevador → planar → 3 térmicas → 4 espelhos dourados mandam feixes ao cristal da torre.
-   - Portal no terraço ao norte. Passarela de pedra sobre o cânion para quem anda.
-   - Geral: barrancos muito íngremes (paredes de mesa e cânion) não se sobem a pé nem de carro.
-3. Fase 3 — Arquipélago de Vento (brisa de montanha): ilhas, correntes e ricochetes.
-4. Mais fases, clima, detalhes de cenário e polimento.
-5. ~~Menu da suíte, capa, modo offline~~ feito com autorização (v70); a cada mudança, subir a versão do sw.js (v71 na Fase 2).
+## Histórico
+- 26–27/11/2026: versão antiga (andar, carro e voo; 3 fases com quebra-cabeças). Marcelo não gostou do boneco andando
+  nem do carro e pediu só o voo contemplativo, com cenário mais bonito (inspirado no Nascente), começando por saltar de montanhas.
+- **27/11/2026 — refeito do zero (só voo).** Arquivos antigos (`jogador.js`, `elementos.js`, `fases.js`, `fase2.js`, `fase3.js`) apagados;
+  estão no Git até o commit 12f8e9c (fase3.js nunca foi para o Git).
+
+- **27/11/2026 (2ª rodada)** — pedido dele: salto do cume, passar por baixo da cachoeira, cenário igual ao Nascente, com corredeiras e aquedutos.
+  Feito: aquedutos de pedra creme cruzando o vale (vão central largo sobre o rio, água correndo em cima e cortina de água caindo do arco central;
+  atravessar dá respingos na tela e som), corredeiras (degrau com 'c': descida longa com espuma e pedras no rio), 1º vale virou **Vale das Fontes**
+  no estilo Nascente (terra clara, verde só perto da água, oliveiras e ciprestes). 2 aquedutos e 2 corredeiras em cada vale.
+
+## O que existe agora
+- **3 voos (vales), todos abertos desde o início:**
+  1. Vale das Fontes — estilo Nascente: terra clara, oliveiras e ciprestes, 3 cachoeiras, 2 corredeiras, 2 aquedutos, Arco de Pedra, Oliveira Anciã, Lago Espelho.
+  2. Desfiladeiro do Entardecer — mesas de arenito em degraus, árvores de outono, 4 cachoeiras, Janela do Desfiladeiro, Bordo Dourado.
+  3. Lagos do Céu — picos com neve, lagos turquesa largos, mar de nuvens baixo, Portal de Gelo e Pedra, Lariço Antigo.
+- Cada voo: 4 cumes (salta do 1º; passa pela coroa de luz do 2º, 3º e 4º). Cada trecho: mergulho até o rio, arcos de luz
+  baixinho sobre a água, espiral de vento perto do próximo cume (sobe sozinha girando), coroa de luz no topo.
+- Lugares para descobrir (cachoeiras e especiais): aviso com nome e frase.
+- Controles: ← → curva · ↑ mergulha · ↓ sobe · Espaço segurado sobe com o vento · V "deixar o vento levar" (piloto pela rota)
+  · arrastar gira a câmera · roda do mouse aproxima · M som · Esc voos. Toque: joystick + botão de subir + botão do vento.
+- Progresso em `localStorage['aetherdrift-voos']` = { id: { feito, arcos, lugares } }.
 
 ## Como funciona
 - Editar em `ferramentas/aetherdrift/fonte/` e rodar `node ferramentas/aetherdrift/montar.mjs`
   (gera `jogos/aetherdrift/index.html`, arquivo único com o Three.js dentro; abre sem internet).
-- `som.js` áudio · `mundo.js` terreno/céu/decoração/superfícies (chão) · `jogador.js` três formas e física ·
-  `elementos.js` peças reutilizáveis (GradeFluxo com tema luz/água, Arcos, Termica, Elevador, PonteGiratoria, Pedestal, Farol, Portal, rampaBrisa, CanalAgua, Cisterna, Comporta, Espelhos) ·
-  `fases.js` CLIMAS + FASES + Fase 1 · `fase2.js` Fase 2 e ajudantes de estrada (estradaLaco, fitaEstrada, arcadas) · `jogo.js` laço, câmera, controles, interface.
-- **Nova fase:** arquivo `faseN.js` com `construirXxx(ctx)` (incluir em `montar.mjs`) reaproveitando as peças e trocar `pronta: false` por `true` com `construir`.
-- Teste rápido no console: `__ad` (jogador, fase, estado, acenderElo, jogar, pedirModo).
+- `som.js` áudio (pad lídio 432 Hz, brisa, cachoeira, sinos) · `mundo.js` relevo 2 km (rio com degraus e lagos, campo de distância ao rio,
+  cumes em cone), malha do terreno com cor por vértice, água animada, vegetação em blocos instanciados, pedras, flores, nuvens
+  (um desenho só, sempre de frente), cordilheiras ao longe, pássaros, pólen, névoa do vale (`comNeblina`) ·
+  `planador.js` modelo e voo (chão macio, térmica em espiral, borda que traz de volta, rastros) · `dados.js` os 3 vales (VOOS) ·
+  `voos.js` peças (ArcoLuz, Termica, Cume com coroa e coluna de luz, borrifo de cachoeira, arco de pedra, árvore anciã),
+  posição dos cumes e rota de cada trecho · `jogo.js` laço, câmera, controles, telas, piloto do vento.
+- **Novo vale:** um item a mais em `VOOS` (dados.js): pontos do rio, degraus (t, nível, 'c' = corredeira), lagos, cumes (t, lado, altura, nome), aquedutos (nomes; a posição é escolhida sozinha perto do fim do 1º e do último trecho, num trecho reto do rio), cores (`aridez: 1` = estilo Nascente).
+- Teste no console: `__ad` e `sim(segundos, entrada)`; `__ad.alternarPiloto(true); sim(200)` faz o voo inteiro sozinho.
+- Capa: `node ferramentas/aetherdrift/capa.mjs`. A cada mudança, subir a versão do `sw.js`.
+
+## Próximos passos possíveis (só com o OK do Marcelo)
+- Testar no celular (desempenho: 300 segmentos de relevo e ~6.500 árvores no toque).
+- Mais vales; hora do dia mudando devagar; modo foto.

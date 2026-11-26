@@ -12,8 +12,8 @@
 </style>
 </head>
 <body>
-<canvas id="tela" aria-label="Vale ensolarado em 3D"></canvas>
-<div id="veu"></div>
+<canvas id="tela" aria-label="Vale com montanhas e rio em 3D, visto do planador"></canvas>
+<div id="veu"><p id="veuTexto">Preparando o vale…</p></div>
 
 <!-- abertura: o mundo já aparece ao fundo, girando devagar -->
 <section id="abertura">
@@ -21,7 +21,7 @@
   <div class="titulo">
     <h1>AetherDrift</h1>
     <p class="sub">Solar Valley</p>
-    <p class="lema">ande, dirija e plane por vales de sol</p>
+    <p class="lema">salte dos cumes e plane devagar pelos vales</p>
   </div>
   <button id="bComecar" class="grande">começar</button>
   <p class="nota">melhor com som · fones deixam a brisa mais bonita</p>
@@ -30,9 +30,9 @@
 <!-- seletor de fases (os cartões são criados pelo jogo a partir da lista FASES) -->
 <section id="fases" hidden>
   <div class="painel">
-    <h2>Fases</h2>
+    <h2>Voos</h2>
     <div id="cartoes" role="list"></div>
-    <p class="nota">1 andar · 2 carro · 3 voo — troque quando quiser</p>
+    <p class="nota">sem relógio e sem queda · o vento sempre segura você</p>
   </div>
 </section>
 
@@ -40,30 +40,29 @@
 <div id="hud" hidden>
   <div id="topoEsq">
     <div id="nomeFase"></div>
-    <div id="elos"></div>
+    <div id="alvo"><svg id="seta" viewBox="0 0 24 24"><path d="M12 4l6 14-6-4-6 4z"/></svg><span id="alvoNome"></span><span id="alvoDist"></span></div>
+    <div id="contas"><span title="Cumes">▲ <b id="cntCumes"></b></span><span title="Arcos de luz">◯ <b id="cntArcos"></b></span><span title="Lugares descobertos">✦ <b id="cntLugares"></b></span></div>
   </div>
   <div id="topoDir">
     <button id="bSom" class="redondo" aria-label="Volume" title="Volume (M)"><svg viewBox="0 0 24 24"><path d="M5 10v4h3l4 3.5v-11L8 10z"/><path class="o1" d="M15 9.5a3.6 3.6 0 0 1 0 5"/><path class="o2" d="M17.4 7.2a7 7 0 0 1 0 9.6"/><path class="ox" d="m15.5 10 4 4m0-4-4 4"/></svg></button>
-    <button id="bMenu" class="redondo" aria-label="Fases" title="Fases"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
+    <button id="bMenu" class="redondo" aria-label="Voos" title="Voos"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
     <div id="volume" hidden><input id="rVolume" type="range" min="0" max="100" aria-label="Volume"><button id="bMudo">sem som</button></div>
   </div>
-  <div id="modos" role="radiogroup" aria-label="Forma">
-    <button data-modo="andar" role="radio"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 8v6m0 0-3 6m3-6 3 6M8 11h8"/></svg><span>andar</span><b>1</b></button>
-    <button data-modo="carro" role="radio"><svg viewBox="0 0 24 24"><path d="M4 15h16v-3l-2-4H8l-3 4zM7 15v2m10-2v2"/><circle cx="8" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></svg><span>carro</span><b>2</b></button>
-    <button data-modo="voo" role="radio"><svg viewBox="0 0 24 24"><path d="M2 12c4-1 7-3 10-6 3 3 6 5 10 6-4 1-7 2-10 2s-6-1-10-2z"/><path d="M12 14v4"/></svg><span>voo</span><b>3</b></button>
-  </div>
+  <button id="bPiloto" aria-label="Deixar o vento levar" title="Deixar o vento levar (V)"><svg viewBox="0 0 24 24"><path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h8"/></svg><span>deixar o vento levar</span></button>
+  <button id="bSaltar" class="grande" hidden>saltar do cume</button>
   <div id="joy" aria-hidden="true"><div id="joyBase"><div id="joyPino"></div></div></div>
-  <button id="bPulo" class="redondo grande" aria-label="Pular"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
-  <div id="ajuda"></div>
+  <button id="bSopro" class="redondo grande" aria-label="Subir com o vento"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+  <div id="ajuda">← → curva · ↑ mergulha · ↓ sobe · Espaço segurado: sobe com o vento · V: o vento leva · arraste para olhar</div>
 </div>
 <div id="aviso" aria-live="polite"></div>
+<div id="respingo" aria-hidden="true"></div>
 
 <section id="concluida" hidden>
   <div class="painel">
     <p class="selo">✦</p>
     <h2 id="cTitulo"></h2>
     <p id="cTexto"></p>
-    <div class="acoes"><button id="bExplorar">continuar explorando</button><button id="bOutras" class="grande">fases</button></div>
+    <div class="acoes"><button id="bExplorar">continuar voando</button><button id="bOutras">voos</button><button id="bProximo" class="grande">próximo vale</button></div>
   </div>
 </section>
 

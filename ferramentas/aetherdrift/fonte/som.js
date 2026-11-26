@@ -2,13 +2,13 @@
    SOM — tudo gerado na hora com a Web Audio API, sem arquivos.
    - Pad ambiente em Lá lídio, afinado em 432 Hz, atrás de um filtro
      passa-baixa bem macio (não cansa o ouvido).
-   - Notinhas soltas de vez em quando (pentatônica), brisa e motor.
-   - Efeitos curtos: girar peça, trocar de forma, arcos, elos, portal.
+   - Notinhas soltas de vez em quando (pentatônica), brisa e cachoeiras.
+   - Efeitos curtos: salto, arcos de luz, descobertas, cumes.
    Cada conexão sobe uma nota dentro da escala.
    ===================================================================== */
 const Som = (() => {
   let ctx = null, mestre = null, seco = null, envio = null, padFiltro = null;
-  let ventoG = null, ventoF = null, motorG = null, motorO1 = null, motorO2 = null;
+  let ventoG = null, ventoF = null, aguaG = null, aguaF = null;
   const lerNum = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : +v; } catch (e) { return d; } };
   let volume = lerNum('aetherdrift-vol', 0.7), mudo = lerNum('aetherdrift-mudo', 0) === 1;
 
@@ -60,11 +60,11 @@ const Som = (() => {
     ventoG = ctx.createGain(); ventoG.gain.value = 0;
     ruido.connect(ventoF); ventoF.connect(ventoG); ventoG.connect(seco); ventoG.connect(envio); ruido.start();
 
-    // motor do carro: ronronar grave e baixinho
-    motorO1 = osc('triangle', 46); motorO2 = osc('sine', 92.6);
-    const mf = ctx.createBiquadFilter(); mf.type = 'lowpass'; mf.frequency.value = 340;
-    motorG = ctx.createGain(); motorG.gain.value = 0;
-    motorO1.connect(mf); motorO2.connect(mf); mf.connect(motorG); motorG.connect(seco);
+    // água de cachoeira: ruído largo, mais alto quando se passa perto
+    const rAgua = ctx.createBufferSource(); rAgua.buffer = bufRuido(4); rAgua.loop = true;
+    aguaF = ctx.createBiquadFilter(); aguaF.type = 'lowpass'; aguaF.frequency.value = 1400;
+    aguaG = ctx.createGain(); aguaG.gain.value = 0;
+    rAgua.connect(aguaF); aguaF.connect(aguaG); aguaG.connect(seco); aguaG.connect(envio); rAgua.start();
 
     proximoAcorde(); melodia();
     document.addEventListener('visibilitychange', () => { if (ctx) document.hidden ? ctx.suspend() : ctx.resume(); });
@@ -122,29 +122,19 @@ const Som = (() => {
     get volume() { return volume; }, get mudo() { return mudo; },
     definirVolume(v) { volume = v; mudo = v <= 0.001; guardar(); aplicar(); },
     alternarMudo() { mudo = !mudo; if (!mudo && volume < 0.05) volume = 0.6; guardar(); aplicar(); },
-    girar(g) { tok(); sino(grauHz(g, 12), 0.04, 0.9); },
-    conectar(g, atraso = 0) { sino(grauHz(g, 12), 0.06, 1.8, atraso); },
-    troca(modo) {
-      if (modo === 'voo') { sopro(260, 1500, 0.7, 0.09); sino(grauHz(7, 12), 0.05, 1.6, 0.1); sino(grauHz(9, 12), 0.035, 1.6, 0.22); }
-      else if (modo === 'carro') { sopro(180, 700, 0.45, 0.07); sino(grauHz(2, 12), 0.05, 1.3, 0.05); sino(grauHz(4, 12), 0.035, 1.3, 0.14); }
-      else { sopro(1100, 300, 0.4, 0.05); sino(grauHz(0, 12), 0.05, 1.3, 0.05); }
-    },
-    pulo() { sopro(500, 1400, 0.22, 0.035); },
-    pouso() { sopro(900, 180, 0.3, 0.05); },
+    salto() { sopro(260, 1500, 0.9, 0.1); sino(grauHz(4, 12), 0.05, 2, 0.15); sino(grauHz(7, 12), 0.04, 2, 0.3); },
     arco(i) { sino(grauHz(i + 3, 12), 0.08, 2.6); sino(grauHz(i + 5, 12), 0.045, 2.4, 0.09); sopro(400, 1800, 0.5, 0.05); },
-    impulso() { sopro(220, 1900, 0.65, 0.1); sino(grauHz(5, 12), 0.05, 1.4, 0.05); },
-    elo() { [0, 2, 4, 5, 7, 9].forEach((g, i) => sino(grauHz(g, 12), 0.07, 3.2, i * 0.13)); },
-    portal() { [0, 4, 7, 9, 11, 14].forEach((g, i) => sino(grauHz(g, 0), 0.07, 5.5, i * 0.18)); sopro(150, 1200, 3, 0.07); },
-    agua() { sopro(1300, 220, 0.8, 0.12); },
+    descoberta() { [0, 4, 7].forEach((g, i) => sino(grauHz(g, 12), 0.05, 3, i * 0.22)); },
+    cume() { [0, 2, 4, 5, 7, 9].forEach((g, i) => sino(grauHz(g, 12), 0.07, 3.2, i * 0.13)); sopro(200, 1400, 1.4, 0.06); },
+    fim() { [0, 4, 7, 9, 11, 14].forEach((g, i) => sino(grauHz(g, 0), 0.07, 5.5, i * 0.18)); sopro(150, 1200, 3, 0.07); },
+    respingo() { sopro(1600, 260, 1.1, 0.14); sopro(900, 3000, 0.5, 0.05, 0.1); [2, 4, 7].forEach((g, i) => sino(grauHz(g, 12), 0.04, 1.6, 0.15 + i * 0.1)); },
     clique() { sino(grauHz(4, 12), 0.04, 0.8); },
-    ponte() { sopro(200, 600, 2.2, 0.05); [0, 2, 4].forEach((g, i) => sino(grauHz(g, 0), 0.06, 2.5, i * 0.35)); },
-    // chamado a cada quadro: brisa e motor acompanham o movimento
-    atualizar(modo, vel) {
+    cachoeira(v) { if (ctx) aguaG.gain.setTargetAtTime(v * v * 0.09, ctx.currentTime, 0.4); },
+    // a cada quadro: a brisa acompanha a velocidade; o sopro e o voo rasante deixam o vento mais presente
+    atualizar(vel, sopro = 0, rasante = 0) {
       if (!ctx) return; const t = ctx.currentTime;
-      const vento = modo === 'voo' ? 0.05 + Math.min(vel / 26, 1) * 0.08 : modo === 'carro' ? Math.min(vel / 28, 1) * 0.05 : 0.012;
-      ventoG.gain.setTargetAtTime(vento, t, 0.3); ventoF.frequency.setTargetAtTime(330 + vel * 26, t, 0.3);
-      motorG.gain.setTargetAtTime(modo === 'carro' ? 0.028 + Math.min(Math.abs(vel) / 28, 1) * 0.03 : 0, t, 0.15);
-      motorO1.frequency.setTargetAtTime(42 + Math.abs(vel) * 2.2, t, 0.1); motorO2.frequency.setTargetAtTime(84.6 + Math.abs(vel) * 4.5, t, 0.1);
+      const vento = vel ? 0.04 + Math.min(vel / 40, 1) * 0.07 + sopro * 0.04 + rasante * 0.03 : 0.012;
+      ventoG.gain.setTargetAtTime(vento, t, 0.3); ventoF.frequency.setTargetAtTime(300 + vel * 22 + sopro * 300, t, 0.3);
     },
   };
   function guardar() { try { localStorage.setItem('aetherdrift-vol', volume); localStorage.setItem('aetherdrift-mudo', mudo ? 1 : 0); } catch (e) {} }

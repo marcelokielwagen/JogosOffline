@@ -1,0 +1,177 @@
+/* =====================================================================
+   DADOS DOS VOOS — cada vale: céu, luz, relevo, rio (degraus viram
+   cachoeiras; com 'c' viram corredeiras; alargamentos viram lagos), cumes, aquedutos, cores e lugares.
+   Tudo claro e quente: nada de fundo escuro nem neon.
+   ===================================================================== */
+const VOOS = [
+  {
+    id: 'fontes', nome: 'Vale das Fontes', det: 'Terra clara, oliveiras, aquedutos de pedra e corredeiras', cor: '#c9c08a', semente: 11,
+    ola: 'Bem-vindo ao Vale das Fontes',
+    ceu: { topo: '#a9cfdc', horiz: '#f6eedf', baixo: '#eee6d6', sol: [-0.55, 0.4, -0.62], solCor: '#ffe6c0' },
+    luz: { sol: '#fff2de', solInt: 2.6, hemiCeu: '#eef3f0', hemiChao: '#e2d2b4', hemiInt: 1.4 },
+    fog: { cor: '#efeadf', perto: 380, longe: 2300 },
+    neblina: { cor: '#f7f4ec', topo: 80, esp: 55, forca: 0.5 },
+    vento: [0.6, 0.8],
+    rio: {
+      pts: [[-780, -720], [-570, -530], [-520, -300], [-330, -150], [-120, -220], [60, -80], [90, 140], [280, 260], [380, 470], [600, 600], [820, 780]],
+      degraus: [[0, 150], [0.17, 118], [0.37, 88, 'c'], [0.55, 60], [0.75, 36, 'c'], [0.9, 18]],
+      lagos: [[0.11, 0.17, 40], [0.48, 0.55, 46], [0.84, 0.9, 32], [0.94, 1.01, 62]],
+      largura: 9,
+    },
+    vale: { raio: 300, chao: 26, largo: 185 },
+    relevo: { base: 60, amp: 300, escala: 480, borda: 200 },
+    cumesDef: [
+      { t: 0.1, lado: -1, h: 360, nome: 'Cume do Primeiro Voo' },
+      { t: 0.39, lado: 1, h: 340, nome: 'Cume das Oliveiras' },
+      { t: 0.63, lado: -1, h: 330, nome: 'Cume do Vento Manso' },
+      { t: 0.88, lado: 1, h: 340, nome: 'Cume das Fontes' },
+    ],
+    coresCumes: ['#f6c1a8', '#f7d98c', '#b9dcc8', '#f2b9c6'],
+    cachoeiras: [
+      ['Cachoeira do Primeiro Sol', 'A água cai devagar, cheia de luz.'],
+      ['Véu das Pedras Claras', 'Um véu branco entre as rochas cor de areia.'],
+      ['Cascata Mansa', 'A última descida antes do lago.'],
+    ],
+    corredeiras: [
+      ['Corredeira das Seixos', 'A água corre ligeira entre as pedras redondas.'],
+      ['Corredeira Cantante', 'Dá para ouvir o rio rindo sozinho.'],
+    ],
+    aquedutos: [
+      { t: 0.27, nome: 'Aqueduto Velho', frase: 'Passe por baixo: a água cai dos arcos como chuva de luz.' },
+      { t: 0.79, nome: 'Aqueduto das Fontes', frase: 'Os antigos levavam a água de um morro ao outro.' },
+    ],
+    lugares: [
+      { tipo: 'arco', t: 0.45, nome: 'Arco de Pedra', frase: 'O vento levou séculos para abrir esta janela.' },
+      { tipo: 'arvore', t: 0.66, lado: 1, nome: 'Oliveira Anciã', frase: 'Dá azeitonas desde muito antes dos mapas.' },
+      { tipo: 'lago', t: 0.975, nome: 'Lago Espelho', frase: 'O céu inteiro cabe na água parada.' },
+    ],
+    termicasExtras: 4,
+    cores: {
+      grama: ['#b4c487', '#9fb57c'], prado: '#c8cf96', seco: '#d8c79c', secoQto: 0.3, alpino: '#d9c9a6',
+      arido: ['#e3d0a8', '#d6bf94'], aridez: 1,
+      rocha: ['#d8c6a8', '#c3ae91'], pedraDe: 0.36, neve: '#fbfaf6', linhaNeve: 900, linhaArvore: 260,
+      areia: '#eadcbf', tronco: '#8f7562', aguaRasa: '#a6ddd3', aguaFunda: '#4ea7a6', aguaCeu: '#e2eeec', aqueduto: '#ece1ca',
+    },
+    vegetacao: {
+      mata: 0.5, pinheiroAcima: 900, pinheiroQto: 0.3, escala: 1, estreito: true,
+      pinheiros: ['#6f8a62', '#7b9468', '#647f5c'], folhas: ['#a7ae86', '#9aa37a', '#b3b98f', '#a3b282'],
+      flores: ['#fff8f0', '#ffe39a', '#f2c9b8', '#ffffff'],
+    },
+    anciao: '#a3ab80',
+    nuvens: { qtd: 60, baixas: 0.25, alt: [400, 520], altBaixa: [100, 150], luz: '#ffffff', sombra: '#eadfd2', vento: 2.2 },
+    longe: [[1500, 180, 400, '#cbc6b6', '#cbc6b6'], [2100, 240, 560, '#d6d3c6', '#d6d3c6'], [2900, 300, 760, '#e0ded4', '#e0ded4']],
+    passaros: { cor: '#fffaf2', bandos: [[-300, 210, -200, 120], [200, 170, 300, 150], [500, 260, 600, 110], [-500, 300, -500, 90]] },
+  },
+  {
+    id: 'entardecer', nome: 'Desfiladeiro do Entardecer', det: 'Mesas de arenito, luz dourada e um arco de pedra', cor: '#f0b58a', semente: 23,
+    ola: 'Bem-vindo ao Desfiladeiro do Entardecer',
+    ceu: { topo: '#a6cbe0', horiz: '#ffe1c2', baixo: '#f4dcc6', sol: [0.72, 0.24, 0.3], solCor: '#ffcf96' },
+    luz: { sol: '#ffe5c2', solInt: 2.7, hemiCeu: '#f3ecff', hemiChao: '#eccaa8', hemiInt: 1.4 },
+    fog: { cor: '#f9e2cb', perto: 400, longe: 2300 },
+    neblina: { cor: '#fde9d6', topo: 72, esp: 50, forca: 0.45 },
+    vento: [-0.8, 0.5],
+    rio: {
+      pts: [[800, -740], [580, -560], [480, -330], [250, -260], [60, -380], [-140, -260], [-200, -40], [-60, 130], [-220, 330], [-430, 420], [-570, 640], [-800, 780]],
+      degraus: [[0, 140], [0.2, 112], [0.4, 84, 'c'], [0.6, 58], [0.8, 32, 'c']],
+      lagos: [[0.14, 0.2, 38], [0.54, 0.6, 42], [0.93, 1.01, 58]],
+      largura: 9,
+    },
+    vale: { raio: 300, chao: 22, largo: 150 },
+    relevo: { base: 50, amp: 310, escala: 420, borda: 250, plato: 36 },
+    cumesDef: [
+      { t: 0.09, lado: 1, h: 350, nome: 'Mesa do Sol Poente' },
+      { t: 0.37, lado: -1, h: 335, nome: 'Torre de Arenito' },
+      { t: 0.64, lado: 1, h: 320, nome: 'Mesa das Andorinhas' },
+      { t: 0.89, lado: -1, h: 330, nome: 'Cume Dourado' },
+    ],
+    coresCumes: ['#f7c48a', '#f2a98c', '#f7dd9c', '#e9b4a4'],
+    cachoeiras: [
+      ['Cachoeira Cor de Mel', 'O sol da tarde pinta a água de dourado.'],
+      ['Queda das Andorinhas', 'Elas passam rente à água, brincando.'],
+    ],
+    corredeiras: [
+      ['Corredeira de Arenito', 'A água pula entre pedras cor de tijolo.'],
+      ['Corredeira do Fim de Tarde', 'Espuma dourada, céu quase cor-de-rosa.'],
+    ],
+    aquedutos: [
+      { t: 0.29, nome: 'Aqueduto do Poente', frase: 'Os arcos ficam cor de mel quando o sol desce.' },
+      { t: 0.71, nome: 'Aqueduto das Andorinhas', frase: 'Elas fazem ninho entre as pedras.' },
+    ],
+    lugares: [
+      { tipo: 'arco', t: 0.5, nome: 'Janela do Desfiladeiro', frase: 'Passe por dentro: a pedra guarda o calor do dia.' },
+      { tipo: 'arvore', t: 0.71, lado: -1, nome: 'Bordo Dourado', frase: 'As folhas dele parecem pequenas brasas.' },
+      { tipo: 'lago', t: 0.97, nome: 'Lago do Poente', frase: 'O sol se deita na água todo fim de tarde.' },
+    ],
+    termicasExtras: 4,
+    cores: {
+      grama: ['#c7c084', '#b2b27a'], prado: '#dccf96', seco: '#e3c58e', secoQto: 0.6, alpino: '#dcc9a0',
+      rocha: ['#e2ad8e', '#cf957a'], pedraDe: 0.3, neve: '#fff8f0', linhaNeve: 900, linhaArvore: 210,
+      areia: '#f0dcbc', tronco: '#8a6a58', aguaRasa: '#a3dcd0', aguaFunda: '#3f9ea0', aguaCeu: '#efe8dc',
+    },
+    vegetacao: {
+      mata: 0.6, pinheiroAcima: 200, pinheiroQto: 0.25, escala: 1,
+      pinheiros: ['#7c9670', '#8aa27a', '#6f8a68'], folhas: ['#e9a85f', '#f0c167', '#d98f5c', '#c9b66e', '#efd08a'],
+      flores: ['#fff4e0', '#ffd27a', '#f5b08a', '#ffffff'],
+    },
+    anciao: '#f0b04e',
+    nuvens: { qtd: 45, baixas: 0.12, alt: [400, 540], altBaixa: [100, 140], luz: '#fff6ea', sombra: '#f2cbb6', vento: 1.8 },
+    longe: [[1500, 170, 360, '#e3bba2', '#e3bba2'], [2100, 220, 520, '#eac9b3', '#eac9b3'], [2900, 280, 700, '#f0d7c6', '#f0d7c6']],
+    passaros: { cor: '#fff3e6', bandos: [[300, 200, -300, 120], [-200, 170, 100, 140], [-500, 240, 500, 100]] },
+  },
+  {
+    id: 'lagos', nome: 'Lagos do Céu', det: 'Picos nevados, lagos turquesa e um mar de nuvens', cor: '#8fcbd0', semente: 37,
+    ola: 'Bem-vindo aos Lagos do Céu',
+    ceu: { topo: '#92c3e0', horiz: '#f1ede6', baixo: '#e8e6e0', sol: [-0.3, 0.45, 0.72], solCor: '#fff0d0' },
+    luz: { sol: '#fff3e2', solInt: 2.8, hemiCeu: '#e6eefa', hemiChao: '#cfc6b6', hemiInt: 1.2 },
+    fog: { cor: '#eef0ee', perto: 380, longe: 2200 },
+    neblina: { cor: '#fbfbf8', topo: 200, esp: 60, forca: 0.55 },
+    vento: [0.9, -0.3],
+    rio: {
+      pts: [[-800, 180], [-600, 40], [-410, 170], [-210, 30], [-20, 170], [170, 10], [350, 130], [480, -90], [650, -170], [820, -420]],
+      degraus: [[0, 200], [0.2, 172, 'c'], [0.42, 146], [0.62, 120, 'c'], [0.82, 96]],
+      lagos: [[0.32, 0.42, 66], [0.72, 0.82, 64], [0.92, 1.01, 70]],
+      largura: 8,
+    },
+    vale: { raio: 300, chao: 24, largo: 170 },
+    relevo: { base: 100, amp: 400, escala: 520, borda: 300 },
+    cumesDef: [
+      { t: 0.08, lado: 1, h: 420, nome: 'Pico da Partida' },
+      { t: 0.36, lado: -1, h: 410, nome: 'Pico do Gelo Fino' },
+      { t: 0.61, lado: 1, h: 400, nome: 'Pico das Nuvens' },
+      { t: 0.88, lado: -1, h: 430, nome: 'Pico do Céu' },
+    ],
+    coresCumes: ['#b9dcd8', '#f6c9d4', '#f7e0a0', '#c9c4ec'],
+    cachoeiras: [
+      ['Cachoeira de Vidro', 'Água tão limpa que parece não estar ali.'],
+      ['Cascata das Nuvens', 'A névoa sobe e se mistura com o céu.'],
+    ],
+    corredeiras: [
+      ['Corredeira do Degelo', 'A neve lá de cima vira música aqui embaixo.'],
+      ['Corredeira Turquesa', 'A espuma fica azul-clara entre as pedras.'],
+    ],
+    aquedutos: [
+      { t: 0.29, nome: 'Aqueduto do Gelo Fino', frase: 'A água fria cai dos arcos como cortina de vidro.' },
+      { t: 0.71, nome: 'Aqueduto das Nuvens', frase: 'Às vezes as nuvens passam por baixo dele.' },
+    ],
+    lugares: [
+      { tipo: 'arco', t: 0.5, nome: 'Portal de Gelo e Pedra', frase: 'Do outro lado, o vale parece outro.' },
+      { tipo: 'arvore', t: 0.27, lado: 1, nome: 'Lariço Antigo', frase: 'Ele já viu mil invernos e continua aqui.' },
+      { tipo: 'lago', t: 0.96, nome: 'Lago do Céu', frase: 'Lá no alto, o lago parece um pedaço do céu caído.' },
+    ],
+    termicasExtras: 5,
+    cores: {
+      grama: ['#9fbf8c', '#86aa7e'], prado: '#bccd96', seco: '#cfc390', secoQto: 0.25, alpino: '#cacbb2',
+      rocha: ['#bdb3a8', '#a0978f'], pedraDe: 0.33, neve: '#f4f3ef', linhaNeve: 300, linhaArvore: 250,
+      areia: '#e2dccb', tronco: '#7d6a5c', aguaRasa: '#9fe0dc', aguaFunda: '#38a5b2', aguaCeu: '#e1f1f3',
+    },
+    vegetacao: {
+      mata: 0.5, pinheiroAcima: 150, pinheiroQto: 0.6, escala: 1.05,
+      pinheiros: ['#5f8a6e', '#6e9878', '#7ea585'], folhas: ['#a7c487', '#c2d49a', '#e8d27c'],
+      flores: ['#ffffff', '#d6cdf5', '#fff1a8', '#f6c9d8'],
+    },
+    anciao: '#e9cf72',
+    nuvens: { qtd: 95, baixas: 0.55, alt: [460, 580], altBaixa: [215, 250], luz: '#ffffff', sombra: '#e2e3e8', vento: 1.6 },
+    longe: [[1500, 240, 520, '#b8c3ca', '#ffffff'], [2100, 300, 700, '#c8d1d6', '#ffffff'], [2900, 360, 900, '#d7dde0', '#fbfbfb']],
+    passaros: { cor: '#ffffff', bandos: [[-200, 300, 100, 120], [300, 280, -100, 140], [600, 330, -300, 90]] },
+  },
+];
