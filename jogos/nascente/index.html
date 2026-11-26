@@ -1441,28 +1441,40 @@ const Part = (() => {
 // Quatro modos: 'iso' (encaixa nas 4 diagonais), 'frente' (encaixa nos 4 lados, bom no celular em pé), 'livre' e 'alto' (quase de cima).
 const Cam = {
   modo: 'iso', az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0, raio: 5, meioX: 4, meioZ: 4, altoMedio: .5, topo: .6,
-  quer: { az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0 }, deriva: 0,
+  quer: { az: Math.PI / 4, el: .66, zoom: 1, px: 0, pz: 0, dy: 0 }, deriva: 0, dy: 0, intro: null,
+  CAMPOS: ['az', 'el', 'zoom', 'px', 'pz', 'dy'],
+  // abertura de cada fase: começa perto da nascente e se afasta devagar até ver o tabuleiro todo
+  abrir(c) {
+    const q = this.quer, p = c.raiz.position, de = { az: q.az - .38, el: Math.max(.3, q.el - .16), zoom: .26, px: p.x, pz: p.z, dy: p.y - this.altoMedio + .05 };
+    Object.assign(this, de); this.intro = { de, t: 0, segura: CALMO ? .3 : .8, dur: CALMO ? 1.8 : 3.6 };
+  },
+  parar() { this.intro = null; },
   NOMES: { iso: 'Visão em diagonal', frente: 'Visão de frente', livre: 'Visão livre: arraste para girar e inclinar', alto: 'Visão do alto' },
   trocar(modo, avisar) {
-    this.modo = modo; const q = this.quer; q.zoom = 1; q.px = q.pz = 0;
+    this.parar(); this.modo = modo; const q = this.quer; q.zoom = 1; q.px = q.pz = q.dy = 0;
     if (modo === 'iso') { q.el = .7; this.encaixar(); } else if (modo === 'frente') { q.el = .92; this.encaixar(); } else if (modo === 'alto') { q.el = 1.42; this.encaixar(); } else { q.el = .5; q.az += .25; }
     if (avisar) { salvo.camera = modo; salvar(); aviso(this.NOMES[modo], 2); }
   },
   encaixar() { const q = Math.PI / 2; this.quer.az = this.modo === 'iso' ? Math.round((this.quer.az - q / 2) / q) * q + q / 2 : Math.round(this.quer.az / q) * q; },
   arrastar(dx, dy) {
-    const q = this.quer; q.az -= dx * .0062; this.deriva = 0;
+    this.parar(); const q = this.quer; q.az -= dx * .0062; this.deriva = 0;
     if (this.modo === 'livre') q.el = limitar(q.el + dy * .005, .24, 1.45);
   },
   soltar() { if (this.modo !== 'livre') this.encaixar(); },
-  mover(dx, dy) { const q = this.quer, k = this.dist * .0011, s = Math.sin(q.az), c = Math.cos(q.az), m = this.raio * .9; q.px = limitar(q.px - (dx * c + dy * s) * k, -m, m); q.pz = limitar(q.pz - (-dx * s + dy * c) * k, -m, m); },
-  aproximar(f) { this.quer.zoom = limitar(this.quer.zoom * f, .35, 1.7); },
+  mover(dx, dy) { this.parar(); const q = this.quer, k = this.dist * .0011, s = Math.sin(q.az), c = Math.cos(q.az), m = this.raio * .9; q.px = limitar(q.px - (dx * c + dy * s) * k, -m, m); q.pz = limitar(q.pz - (-dx * s + dy * c) * k, -m, m); },
+  aproximar(f) { this.parar(); this.quer.zoom = limitar(this.quer.zoom * f, .35, 1.7); },
   quadro(dt) {
     const q = this.quer, k = 1 - Math.exp(-dt * 7); if (this.deriva) q.az += this.deriva * dt;
-    for (const n of ['az', 'el', 'zoom', 'px', 'pz']) this[n] += (q[n] - this[n]) * k;
+    const a = this.intro;
+    if (a) {   // abertura: fica um instante na nascente e depois abre a vista com início e fim bem suaves
+      a.t += dt; const s = limitar((a.t - a.segura) / a.dur), e = s < .5 ? 4 * s * s * s : 1 - Math.pow(-2 * s + 2, 3) / 2;
+      for (const n of this.CAMPOS) this[n] = a.de[n] + (q[n] - a.de[n]) * e;
+      if (s >= 1) this.intro = null;
+    } else for (const n of this.CAMPOS) this[n] += (q[n] - this[n]) * k;
     // encaixa o retângulo do tabuleiro (visto deste ângulo) na tela, com folga para o cabeçalho e os botões
     const t = Math.tan(camera.fov * Math.PI / 360), ca = Math.abs(Math.cos(this.az)), sa = Math.abs(Math.sin(this.az)), hx = this.meioX * ca + this.meioZ * sa, hz = this.meioX * sa + this.meioZ * ca, se = Math.sin(this.el), ce = Math.cos(this.el);
     this.dist = Math.max((hx + .15) / (t * camera.aspect), (hz * se + this.topo * ce) / (t * (innerHeight < 430 ? .93 : .8))) * 1.0 + hz * ce * .55; this.dist *= this.zoom;
-    const ch = ce * this.dist, y = this.altoMedio + .1;
+    const ch = ce * this.dist, y = this.altoMedio + .1 + this.dy;
     camera.position.set(this.px + Math.sin(this.az) * ch, y + se * this.dist, this.pz + Math.cos(this.az) * ch); camera.lookAt(this.px, y - this.dist * .03, this.pz);
     cena.fog.near = this.dist * 1.02; cena.fog.far = this.dist * 1.02 + 46;
   },
@@ -1579,6 +1591,7 @@ async function abrirFase(indice, { texto = '' } = {}) {
   salvo.fase = indice; salvar();
   montar(indice); $('nome').textContent = FASES[indice].n; $('onde').textContent = `${MUNDOS[J.F.mundo].nome}, ${indice % 10 + 1} de 10`; mostrarDestinos(true); atualizarBotoes(); document.title = `${FASES[indice].n} · Nascente`;
   $('barra').classList.remove('some'); Cam.trocar(cameraPadrao());
+  const fonte = J.F.celulas.find(c => c.tipo === 'nascente' && c.agua === 1) || J.F.celulas.find(c => c.tipo === 'nascente'); if (fonte) Cam.abrir(fonte);
   R.compile(cena, camera);
   await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));
   $('veu').style.opacity = 0; J.estado = 'jogando';
