@@ -1,6 +1,6 @@
 // Funcionamento offline: guarda todos os arquivos no aparelho na primeira visita.
 // IMPORTANTE: aumente o número abaixo sempre que qualquer arquivo mudar.
-const VERSAO = 'jogos-offline-v84'; // ache-me: teto sem piscar, câmera não atravessa móveis, olhar para cima; v83: coroa do minhoca (ex-tico's crown)
+const VERSAO = 'jogos-offline-v85'; // coroa do minhoca: canhão com mira assistida e tiro mais reto; v84: ache-me teto sem piscar
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/base.css', './css/inicio.css', './js/comum.js', './js/suite.js', './js/cartas.js', './js/tabuleiro3d.js', './js/cenarios3d.js', './js/sons-palavras.js', './js/fases.js', './css/palavras.css',

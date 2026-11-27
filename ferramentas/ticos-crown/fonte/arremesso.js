@@ -129,7 +129,8 @@ const Arremesso = (() => {
   }
   function montarPrateleira() { for (const o of [...prateleira.children].slice(1)) prateleira.remove(o); st.fila.slice(1).forEach((t, i) => { const m = meshBola(t); m.scale.setScalar(.7); m.position.set(0, .72, -1.0 + i * .5); prateleira.add(m); }); }
   function trajetoria(alvo) {
-    const O = boca(), d = alvo.clone().sub(O), dist = d.length(), Tt = clamp(dist / 17, .32, .8);
+    // tiro mais reto e rápido: a bola segue quase a linha do olhar, então acerta onde o dedo tocou
+    const O = boca(), d = alvo.clone().sub(O), dist = d.length(), Tt = clamp(dist / 23, .24, .6);
     const v = d.divideScalar(Tt); v.y += .5 * GRAV * Tt; return { O, v, Tt };
   }
   function apontar(alvo) {
@@ -144,7 +145,21 @@ const Arremesso = (() => {
   const ray = new THREE.Raycaster(), plano = new THREE.Plane(V(0, 0, 1), 8.5), tmp = V();
   function pontoNaTela(cx, cy) {
     const r = L.tab; ray.setFromCamera({ x: (cx - r.x) / r.w * 2 - 1, y: -((cy - r.y) / r.h) * 2 + 1 }, cam);
-    const hit = ray.intersectObjects(G.children, true)[0]; if (hit) return hit.point.clone();
+    const hit = ray.intersectObjects(G.children, true)[0];
+    if (hit && st.corpos.some(c => !c.morto && c.mesh === hit.object)) return hit.point.clone(); // tocou direto numa peça
+    // ímã: o dedo caiu perto de uma peça (ao lado, acima ou na plataforma) → mira no centro da peça mais próxima na tela
+    const raio = Math.max(48, Math.min(r.w, r.h) * .15); let melhor = null, md = raio;
+    for (const c of st.corpos) {
+      if (c.morto || c.caiu) continue; tmp.copy(c.p).project(cam);
+      const sx = r.x + (tmp.x + 1) / 2 * r.w, sy = r.y + (1 - tmp.y) / 2 * r.h, d = Math.hypot(sx - cx, sy - cy) * (c.alvo || c.tipo === 'barril' ? 1 : 1.35);
+      if (d < md) { md = d; melhor = c; }
+    }
+    if (melhor) return melhor.p.clone();
+    if (hit) return hit.point.clone();
+    // longe de tudo: usa a profundidade da plataforma mais próxima do dedo (antes era sempre uma parede fixa lá no fundo)
+    let pz = -8.5, mx = Infinity;
+    for (const P of st.plats) { tmp.set(P.x, P.y, P.z).project(cam); const sx = r.x + (tmp.x + 1) / 2 * r.w; if (Math.abs(sx - cx) < mx) { mx = Math.abs(sx - cx); pz = P.z; } }
+    plano.constant = -pz;
     return ray.ray.intersectPlane(plano, tmp) ? tmp.clone() : null;
   }
   function atirar() {
@@ -207,7 +222,7 @@ const Arremesso = (() => {
     if (vn < 0) { impacto(c, -vn, null); c.v.addScaledVector(nV, -vn * 1.25); c.v.x = P.vx + (c.v.x - P.vx) * .985; c.v.z *= .985; if (nV.y > .7) { c.w.set(c.v.z / c.r * .5, c.w.y * .9, -(c.v.x - P.vx) / c.r * .5); } }
   }
   function par(a, b, bEstatico) {
-    dV.copy(b.p).sub(a.p); const dist = dV.length(), rr = a.r + b.r; if (dist >= rr || dist < 1e-6) return;
+    dV.copy(b.p).sub(a.p); const dist = dV.length(), rr = a.r + b.r + (a.bola !== b.bola ? .12 : 0); if (dist >= rr || dist < 1e-6) return;
     nV.copy(dV).divideScalar(dist); const pen = rr - dist;
     const vn = (b.v.x - a.v.x) * nV.x + (b.v.y - a.v.y) * nV.y + (b.v.z - a.v.z) * nV.z;
     if (bEstatico) {
