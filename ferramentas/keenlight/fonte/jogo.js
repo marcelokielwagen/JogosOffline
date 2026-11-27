@@ -33,7 +33,7 @@ R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
 Tex.aniso = Math.min(8, R.capabilities.getMaxAnisotropy());
 canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); $('semgl').hidden = false; });
 const cena = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .02, 60); camera.layers.enable(1);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .03, 40); camera.layers.enable(1);
 
 /* ======================================================================
    VISTA 3D
@@ -45,13 +45,16 @@ function criarVista3D(nivel) {
   const A = ini(), atual = ini();
   const prender = p => { p.x = lim(p.x, cx[0][0], cx[1][0]); p.y = lim(p.y, cx[0][1], cx[1][1]); p.z = lim(p.z, cx[0][2], cx[1][2]); return p; };
   const dir = new V3(), dirDe = (az, el) => dir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
-  let auto = 0;
+  let auto = 0; const raioCam = new THREE.Raycaster(); raioCam.layers.set(0);
   function camPasso(dt) {
     const k = 1 - Math.exp(-dt * 8);
     atual.alvo.lerp(A.alvo, k); atual.az += (A.az + auto - atual.az) * k; atual.el += (A.el - atual.el) * k; atual.dist += (A.dist - atual.dist) * k;
     dirDe(atual.az, atual.el);
     let tmax = atual.dist;   // não deixa a câmera sair da sala
     for (let i = 0; i < 3; i++) { const d = dir.getComponent(i), o = atual.alvo.getComponent(i); if (Math.abs(d) < 1e-6) continue; const t = ((d > 0 ? cc[1][i] : cc[0][i]) - o) / d; if (t > 0) tmax = Math.min(tmax, t); }
+    raioCam.set(atual.alvo, dir); raioCam.near = .08; raioCam.far = tmax;
+    const bate = raioCam.intersectObject(nivel.raiz, true).find(h => h.object.visible && !h.object.userData.semClique && !(h.object.material && h.object.material.transparent && h.object.material.opacity < .5));
+    if (bate) tmax = Math.max(.05, bate.distance - .06);
     camera.position.copy(atual.alvo).addScaledVector(dir, Math.max(.05, tmax)); camera.lookAt(atual.alvo);
   }
   const dr = new V3(), du = new V3();

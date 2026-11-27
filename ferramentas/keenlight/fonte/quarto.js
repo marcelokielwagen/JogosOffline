@@ -32,24 +32,24 @@ function criarAtelie(cena) {
   parede(jz1 - jz0, H - jy1, -W, (H + jy1) / 2, (jz0 + jz1) / 2, PI / 2, [1, .55]);
   // paredes grossas por fora, para a sombra do sol só entrar pela janela
   const casca = mat('#3a2c20', { r: 1 });
-  em(raiz, caixa(.2, H, D + jz0, casca), -W - .1, H / 2, (-D + jz0) / 2); em(raiz, caixa(.2, H, D - jz1 + .4, casca), -W - .1, H / 2, (D + jz1) / 2 + .2);
-  em(raiz, caixa(.2, jy0, jz1 - jz0, casca), -W - .1, jy0 / 2, (jz0 + jz1) / 2); em(raiz, caixa(.2, H - jy1, jz1 - jz0, casca), -W - .1, (H + jy1) / 2, (jz0 + jz1) / 2);
-  em(raiz, caixa(2 * W + .4, .2, 2 * D + .4, casca), 0, H + .1, 0);
+  em(raiz, caixa(.2, H, D + jz0, casca), -W - .12, H / 2, (-D + jz0) / 2); em(raiz, caixa(.2, H, D - jz1 + .4, casca), -W - .12, H / 2, (D + jz1) / 2 + .2);
+  em(raiz, caixa(.2, jy0, jz1 - jz0, casca), -W - .12, jy0 / 2, (jz0 + jz1) / 2); em(raiz, caixa(.2, H - jy1, jz1 - jz0, casca), -W - .12, (H + jy1) / 2, (jz0 + jz1) / 2);
+  em(raiz, caixa(2 * W + .4, .2, 2 * D + .4, casca), 0, H + .12, 0);
   // teto e vigas
   const teto = em(raiz, malha(new THREE.PlaneGeometry(2 * W, 2 * D), mat('#ffffff', { map: tTeto, r: 1 })), 0, H, 0, PI / 2);
-  for (let i = 0; i < 5; i++) em(raiz, caixa(2 * W, .18, .16, nogueira), 0, H - .09, -2 + i * 1.05);
+  for (let i = 0; i < 5; i++) em(raiz, caixa(2 * W, .18, .16, nogueira), 0, H - .095, -2 + i * 1.05);
   // lambri, rodapé e moldura
   const lamb = (comp, x, z, ry) => {
-    const g = em(raiz, grupo(), x, 0, z, 0, ry);
+    const g = em(raiz, grupo(), x, ry ? .004 : 0, z, 0, ry);   // paredes laterais 4 mm acima: as molduras não se sobrepõem nos cantos
     em(g, caixa(comp, .92, .03, lambri), 0, .46, .015);
     const n = Math.max(1, Math.round(comp / .62));
     for (let i = 0; i < n; i++) { const pw = comp / n - .12; em(g, caixa(pw, .52, .018, lambri), -comp / 2 + (i + .5) * comp / n, .5, .035); }
     em(g, caixa(comp, .14, .05, nogueira), 0, .07, .025); em(g, caixa(comp, .05, .06, nogueira), 0, .94, .03);
-    em(g, caixa(comp, .1, .07, creme), 0, H - .05, .035);
+    em(g, caixa(comp, .1, .07, creme), 0, H - .056, .035);
   };
   lamb(2 * W, 0, -D, 0); lamb(2 * D, W, 0, -PI / 2);
   lamb(D + jz0, -W, (-D + jz0) / 2, PI / 2); lamb(D - jz1, -W, (D + jz1) / 2, PI / 2);
-  { const g = em(raiz, grupo(), -W, 0, (jz0 + jz1) / 2, 0, PI / 2); em(g, caixa(jz1 - jz0, .9, .03, lambri), 0, .45, .015); em(g, caixa(jz1 - jz0, .14, .05, nogueira), 0, .07, .025); em(g, caixa(jz1 - jz0, .1, .07, creme), 0, H - .05, .035); }
+  { const g = em(raiz, grupo(), -W, 0, (jz0 + jz1) / 2, 0, PI / 2); em(g, caixa(jz1 - jz0, .9, .03, lambri), 0, .45, .015); em(g, caixa(jz1 - jz0, .14, .05, nogueira), 0, .07, .025); em(g, caixa(jz1 - jz0, .1, .07, creme), 0, H - .056, .035); }
 
   /* =========== janela, céu e cortinas =========== */
   const ceu = em(raiz, new THREE.Mesh(new THREE.PlaneGeometry(4, 3), new THREE.MeshBasicMaterial({ map: Tex.ceu() })), -W - 1.4, 1.7, (jz0 + jz1) / 2, 0, PI / 2);
@@ -436,7 +436,7 @@ function criarAtelie(cena) {
 
   return {
     nome: 'O Ateliê do Pintor', raiz, itens, interativos,
-    camera: { alvo: [-.15, 1.0, -.35], dist: 4.75, az: 0, el: .2, fov: 50, az0: -.8, az1: .8, el0: -.14, el1: .9, d0: .32, d1: 5.3,
+    camera: { alvo: [-.15, 1.0, -.35], dist: 4.75, az: 0, el: .2, fov: 50, az0: -.8, az1: .8, el0: -.55, el1: .9, d0: .32, d1: 5.3,
       caixaAlvo: [[-3.36, .08, -2.36], [3.36, 2.7, 2.2]], caixaCam: [[-3.38, .1, -2.38], [3.38, 3.05, 6.5]] },
     fundo: '#1d1712',
     atualizar(t, dt) { animados.forEach(f => f(t, dt)); }

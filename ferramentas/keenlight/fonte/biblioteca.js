@@ -27,13 +27,13 @@ function criarBiblioteca(cena) {
   const pe = (w, h, y, z) => em(raiz, malha(new THREE.PlaneGeometry(w, h), parede), -W, y, z, 0, PI / 2);
   pe(D + jz0, H, H / 2, (-D + jz0) / 2); pe(D - jz1, H, H / 2, (D + jz1) / 2); pe(jz1 - jz0, jy0, jy0 / 2, (jz0 + jz1) / 2); pe(jz1 - jz0, H - jy1, (H + jy1) / 2, (jz0 + jz1) / 2);
   const casca = mat('#2a201a', { r: 1 });
-  em(raiz, caixa(.2, H, D + jz0, casca), -W - .1, H / 2, (-D + jz0) / 2); em(raiz, caixa(.2, H, D - jz1 + .4, casca), -W - .1, H / 2, (D + jz1) / 2 + .2);
-  em(raiz, caixa(.2, jy0, jz1 - jz0, casca), -W - .1, jy0 / 2, (jz0 + jz1) / 2); em(raiz, caixa(.2, H - jy1, jz1 - jz0, casca), -W - .1, (H + jy1) / 2, (jz0 + jz1) / 2);
-  em(raiz, caixa(2 * W + .4, .2, 2 * D + .4, casca), 0, H + .1, 0);
+  em(raiz, caixa(.2, H, D + jz0, casca), -W - .12, H / 2, (-D + jz0) / 2); em(raiz, caixa(.2, H, D - jz1 + .4, casca), -W - .12, H / 2, (D + jz1) / 2 + .2);
+  em(raiz, caixa(.2, jy0, jz1 - jz0, casca), -W - .12, jy0 / 2, (jz0 + jz1) / 2); em(raiz, caixa(.2, H - jy1, jz1 - jz0, casca), -W - .12, (H + jy1) / 2, (jz0 + jz1) / 2);
+  em(raiz, caixa(2 * W + .4, .2, 2 * D + .4, casca), 0, H + .12, 0);
   // teto em caixotões
   em(raiz, malha(new THREE.PlaneGeometry(2 * W, 2 * D), mat('#3a2a1e', { r: .8 })), 0, H, 0, PI / 2);
-  for (let i = -3; i <= 3; i++) em(raiz, caixa(.1, .14, 2 * D, mogno), i, H - .07, 0);
-  for (let j = -2; j <= 2; j++) em(raiz, caixa(2 * W, .14, .1, mogno), 0, H - .07, j);
+  for (let i = -3; i <= 3; i++) em(raiz, caixa(.1, .14, 2 * D, mogno), i, H - .075, 0);
+  for (let j = -2; j <= 2; j++) em(raiz, caixa(2 * W, .155, .1, mogno), 0, H - .085, j);   // mais baixa que a outra: no cruzamento não piscam
   // céu noturno lá fora
   const ceuT = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const gr = x.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#2a3040'); gr.addColorStop(1, '#6a6a7a'); x.fillStyle = gr; x.fillRect(0, 0, 256, 256); for (let i = 0; i < 80; i++) { x.fillStyle = 'rgba(255,255,240,.8)'; x.fillRect(Math.random() * 256, Math.random() * 160, 1.5, 1.5); } x.fillStyle = '#f0ecd8'; x.beginPath(); x.arc(190, 60, 18, 0, 7); x.fill(); x.fillStyle = '#1a1e24'; x.beginPath(); x.moveTo(0, 256); for (let i = 0; i <= 256; i += 16) x.lineTo(i, 200 + Math.sin(i * .05) * 20); x.lineTo(256, 256); x.fill(); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
   em(raiz, new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ map: ceuT })), -W - 1.2, 2, (jz0 + jz1) / 2, 0, PI / 2).userData.semClique = true;
@@ -43,7 +43,7 @@ function criarBiblioteca(cena) {
   em(jan, caixa(.04, jh, .06, mognoEsc), 0, (jy0 + jy1) / 2, -.03); for (let k = 1; k < 4; k++) em(jan, caixa(jw, .03, .06, mognoEsc), 0, jy0 + k * jh / 4, -.03);
   em(jan, malha(new THREE.PlaneGeometry(jw, jh), mat('#9aaab8', { r: .05, t: .18 })), 0, (jy0 + jy1) / 2, -.05).castShadow = false;
   // lambri escuro em volta
-  const lamb = (comp, x, z, ry) => { const g = em(raiz, grupo(), x, 0, z, 0, ry); em(g, caixa(comp, 1.0, .03, mognoEsc), 0, .5, .015); em(g, caixa(comp, .05, .06, mogno), 0, 1.0, .03); em(g, caixa(comp, .15, .05, mogno), 0, .075, .025); };
+  const lamb = (comp, x, z, ry) => { const g = em(raiz, grupo(), x, ry ? .004 : 0, z, 0, ry); em(g, caixa(comp, 1.0, .03, mognoEsc), 0, .5, .015); em(g, caixa(comp, .05, .06, mogno), 0, 1.0, .03); em(g, caixa(comp, .15, .05, mogno), 0, .075, .025); };
   lamb(2 * D, W, 0, -PI / 2); lamb(D + jz0, -W, (-D + jz0) / 2, PI / 2); lamb(D - jz1, -W, (D + jz1) / 2, PI / 2);
 
   /* =========== estantes do fundo (livros instanciados) =========== */
@@ -271,7 +271,7 @@ function criarBiblioteca(cena) {
 
   return {
     nome: 'Biblioteca Secreta', modo: 'silhueta', raiz, itens, interativos,
-    camera: { alvo: [-.1, 1.15, -.3], dist: 4.85, az: 0, el: .2, fov: 50, az0: -.8, az1: .8, el0: -.14, el1: .95, d0: .32, d1: 5.4,
+    camera: { alvo: [-.1, 1.15, -.3], dist: 4.85, az: 0, el: .2, fov: 50, az0: -.8, az1: .8, el0: -.55, el1: .95, d0: .32, d1: 5.4,
       caixaAlvo: [[-3.36, .08, -2.62], [3.36, 3.0, 2.2]], caixaCam: [[-3.38, .1, -2.38], [3.38, 3.25, 6.5]] },
     fundo: '#120c08',
     atualizar(t, dt) { animados.forEach(f => f(t, dt)); }
