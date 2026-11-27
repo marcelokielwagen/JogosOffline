@@ -1,4 +1,4 @@
-# Tico's Crown — plano e ponto de parada
+# Coroa do Minhoca (ex-Tico's Crown) — plano e ponto de parada
 
 Jogo casual 3D de vários desafios, 100% offline (um arquivo HTML só). Pedido de 26/11/2026 (prompt colado).
 Nome e personagem próprios (Rei Tico, anime caricato de cabelo laranja, coroa torta, capa vermelha). Nada de nomes,
@@ -58,3 +58,11 @@ personagens, arte ou músicas de outros jogos: o pedido citava jogos famosos só
    `capas/ticos-crown.webp`. Teste da música: `musica.mjs`.
 
 Fora do menu e do sw.js até o sim dele (cartão sugerido: categoria "Combinar e achar").
+
+## Depois de publicado (27/11/2026, pedidos dele)
+- Nome: **Coroa do Minhoca**; o rei virou **Rei Minhoca** (pasta continua `jogos/ticos-crown`).
+- Pintura saiu (difícil de entender): os 4 níveis foram tirados, o código ficou em `fonte/pintura.js`; agora são 18 níveis
+  (resgate 4, 9, 13, 17; arremesso 6, 11, 15, 18); baús depois do 5, 10, 15 e 18. Progresso salvo v3 renumera os níveis.
+- Dicas: lâmpada com 3 dicas por nível (mãozinha mostra a melhor jogada); parado 7 s, o rei oferece e a lâmpada pulsa;
+  sem dicas, as peças da jogada balançam. Teste: `dica.mjs pasta [celular]`.
+- Canhão: toque direto onde quer acertar, sem mira nem trajetória.

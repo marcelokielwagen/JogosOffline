@@ -361,7 +361,7 @@ async function animTroca(ka, kb) {
   ga.mesh.position.z = gb.mesh.position.z = 0;
 }
 const trocar = (ka, kb) => { [ka.gema, kb.gema] = [kb.gema, ka.gema]; };
-function inicioJogada() { T.cascata = 0; T.mov = { removidas: 0, especiais: 0 }; T.ocioso = 0; pararDica(); }
+function inicioJogada() { T.cascata = 0; T.mov = { removidas: 0, especiais: 0 }; T.ocioso = 0; T.ofereceu = false; pararDica(); Jogo.esconderDica(); }
 function gastar() { T.jogadas--; HUD.jogadas(); Resgate.jogada(); }
 async function resolver(prefer = []) {
   for (let i = 0; i < 60; i++) {
@@ -416,6 +416,24 @@ async function festaReal() {
   }
 }
 
+// melhor jogada para a dica: especial pronto, ou a troca que faz mais combinação, ajuda os objetivos e bate em obstáculos
+function melhorJogada() {
+  let best = null, bs = -1;
+  const metaCor = new Set(T.metas.filter(m => m.t === 'cor' && m.falta > 0).map(m => m.cor));
+  const linha = k => { const c = k.gema.cor; let h = 1, v = 1; for (let i = k.c - 1; corEm(k.r, i) === c; i--) h++; for (let i = k.c + 1; corEm(k.r, i) === c; i++) h++; for (let i = k.r - 1; corEm(i, k.c) === c; i--) v++; for (let i = k.r + 1; corEm(i, k.c) === c; i++) v++; return [h, v]; };
+  for (const a of todas()) {
+    if (a.gema && a.gema.tipo !== 'n' && !a.corrente && 12 > bs) { bs = 12; best = { esp: a }; }
+    if (!movel(a)) continue;
+    for (const b of [celula(a.r, a.c + 1), celula(a.r + 1, a.c)]) {
+      if (!movel(b) || a.gema.tipo !== 'n' || b.gema.tipo !== 'n') continue;
+      [a.gema, b.gema] = [b.gema, a.gema]; let sc = 0;
+      for (const k of [a, b]) { const [h, v] = linha(k), m = Math.max(h, v); if (m < 3) continue; sc += m * (m >= 4 ? 3 : 1) + (h >= 3 && v >= 3 ? 6 : 0); if (metaCor.has(k.gema.cor)) sc += 3; if (k.gelo) sc += 3; for (const q of vizinhos(k)) if (q.bloco || q.corrente) sc += 3; }
+      [a.gema, b.gema] = [b.gema, a.gema];
+      if (sc > bs) { bs = sc; best = { a, b }; }
+    }
+  }
+  return best;
+}
 // ---------- seleção, dica e animação parada ----------
 function selecionar(k) { T.sel = k; Som.selecao(); }
 function desselecionar() { if (T.sel && T.sel.gema) T.sel.gema.mesh.userData.int.scale.setScalar(1); T.sel = null; }
@@ -431,7 +449,8 @@ function tickTabuleiro(dt) {
   }
   if (T.sel && T.sel.gema) { const s = 1.14 + Math.sin(t * 10) * .07; T.sel.gema.mesh.userData.int.scale.setScalar(s); }
   if (!T.ativo || T.ocupado) T.ocioso = 0; else T.ocioso += dt;
-  if (T.ocioso > 6 && !T.dica && (T.modo || 'joias') === 'joias') { const j = existeJogada(); if (j) { T.dica = j; T.dicaT = 0; } }
+  if (T.ocioso > 7 && !T.ofereceu && (T.modo || 'joias') === 'joias') { T.ofereceu = true; Jogo.oferecerDica(); }
+  if (T.ocioso > 16 && !T.dica && (T.modo || 'joias') === 'joias') { const j = existeJogada(); if (j) { T.dica = j; T.dicaT = 0; } }
   if (T.dica) {
     T.dicaT += dt; const w = Math.sin(T.dicaT * 14) * .3 * (T.dicaT % 1.1 < .7 ? 1 : 0);
     for (const k of [T.dica.a, T.dica.b, T.dica.esp]) if (k && k.gema) k.gema.mesh.userData.int.rotation.z = w;

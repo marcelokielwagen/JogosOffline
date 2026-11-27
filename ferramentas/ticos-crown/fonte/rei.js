@@ -1,5 +1,5 @@
 'use strict';
-// Rei Tico: personagem caricato 3D em estilo anime. O rosto é desenhado ao vivo numa textura (olhos grandes,
+// Rei Minhoca: personagem caricato 3D em estilo anime. O rosto é desenhado ao vivo numa textura (olhos grandes,
 // sobrancelhas, boca, rubor, suor, lágrimas), e o corpo reage: pula, gira, treme, segura a cabeça.
 const Rei = (() => {
   const cena = new THREE.Scene(); cena.environment = ENV;

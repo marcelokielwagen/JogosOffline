@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2a1366">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script src="../../js/suite.js"></script>
-<title>Tico's Crown</title>
+<title>Coroa do Minhoca</title>
 <style>
 :root { --ouro: #ffd34d; --ouro2: #f0a20b; --rubi: #ff2f55; --safira: #2f7bff; --esm: #1fcf6c; --ame: #a64dff; --txt: #fff; --fonte: 'Arial Rounded MT Bold', 'Baloo 2', 'Nunito', 'Trebuchet MS', system-ui, sans-serif; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -88,7 +88,7 @@ canvas#tela { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 #telaInicio { justify-content: flex-start; }
 .logo { text-align: center; margin-top: 4px; }
 .logo h1 { margin: 0; font-size: clamp(42px, 10vw, 70px); line-height: .9; color: #fff3b0; -webkit-text-stroke: 3px #7a3200; paint-order: stroke fill; text-shadow: 0 6px 0 #7a3200, 0 10px 20px rgba(0, 0, 0, .4); transform: rotate(-3deg); }
-.logo h1 b { display: block; font-size: 1.2em; background: linear-gradient(180deg, #fffbe0 10%, #ffd34d 45%, #ff9d00 80%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 0; filter: drop-shadow(0 3px 0 #7a3200) drop-shadow(0 0 3px #7a3200); }
+.logo h1 b { display: block; font-size: 1.05em; background: linear-gradient(180deg, #fffbe0 10%, #ffd34d 45%, #ff9d00 80%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 0; filter: drop-shadow(0 3px 0 #7a3200) drop-shadow(0 0 3px #7a3200); }
 .logo p { margin: 8px 0 0; color: #ffe9a8; letter-spacing: .3em; text-transform: uppercase; font-size: 13px; }
 .rodape { max-width: 520px; margin: 0; font-size: 13px; font-weight: 600; text-align: center; color: #e6dcff; }
 .rodape b { color: var(--ouro); }
@@ -204,6 +204,13 @@ canvas#tela { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .premios svg { width: 26px; height: 26px; stroke: none; }
 .faixa.pintura { background: linear-gradient(180deg, #ffa8f0, #e04cd8 55%, #8a1a90); box-shadow: 0 5px 0 #4a0a50, 0 8px 16px rgba(0, 0, 0, .35); text-shadow: 0 2px 0 #4a0a50; }
 
+/* dica: mãozinha que mostra a jogada e lâmpada oferecida */
+#maoDica { position: fixed; left: 0; top: 0; z-index: 7; width: 48px; height: 58px; pointer-events: none; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .45)); }
+#maoDica svg { width: 100%; height: 100%; stroke: none; }
+#reforcos button[data-r="dica"] { background: linear-gradient(180deg, #ffe680, #f0a20b); }
+#reforcos button.oferta { animation: oferta .7s ease-in-out infinite; box-shadow: 0 0 0 3px #fff, 0 0 18px 6px rgba(255, 230, 100, .9); }
+@keyframes oferta { 50% { transform: scale(1.15) rotate(-6deg); } }
+
 </style>
 </head>
 <body>
@@ -230,7 +237,7 @@ canvas#tela { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 <div id="grito"></div>
 
 <section id="telaInicio" class="tela">
-  <div id="mapa"><svg id="mapaLinha" preserveAspectRatio="none"></svg><div class="logo"><h1>Tico's<b>Crown</b></h1><p>as joias do reino</p></div><div id="mapaNos"></div></div>
+  <div id="mapa"><svg id="mapaLinha" preserveAspectRatio="none"></svg><div class="logo"><h1>Coroa do<b>Minhoca</b></h1><p>as joias do reino</p></div><div id="mapaNos"></div></div>
   <button id="bJogar" class="botao verde grande">Jogar</button>
 </section>
 
@@ -270,6 +277,7 @@ canvas#tela { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 
 <div id="potes" hidden></div>
 <div id="reforcos" hidden>
+  <button data-r="dica" title="Dica: mostra uma boa jogada"><svg viewBox="0 0 40 40"><path d="M20 4a11 11 0 0 0-6 20c1 1 2 3 2 5h8c0-2 1-4 2-5a11 11 0 0 0-6-20z" fill="#ffe066" stroke="#a46a00" stroke-width="2"/><rect x="15" y="30" width="10" height="6" rx="2" fill="#c8ced8" stroke="#6a7686" stroke-width="1.5"/><path d="M16 13a6 6 0 0 1 5-4" stroke="#fff" stroke-width="2.5" fill="none"/></svg><b>3</b></button>
   <button data-r="martelo" title="Martelo: quebra uma peça"><svg viewBox="0 0 40 40"><rect x="17" y="14" width="6" height="24" rx="2" fill="#a0602a" stroke="#5a3010" stroke-width="2"/><rect x="6" y="5" width="28" height="12" rx="3" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><rect x="8" y="7" width="8" height="3" fill="#fff" opacity=".5"/></svg><b>0</b></button>
   <button data-r="flecha" title="Flecha: limpa uma linha"><svg viewBox="0 0 40 40"><path d="M4 20h26" stroke="#8a5a2a" stroke-width="4"/><path d="M28 12l9 8-9 8z" fill="#e0e6ef" stroke="#5a6676" stroke-width="2"/><path d="M4 14l6 6-6 6M9 14l6 6-6 6" fill="none" stroke="#ff2f55" stroke-width="3"/></svg><b>0</b></button>
   <button data-r="canhao" title="Canhão: limpa uma coluna"><svg viewBox="0 0 40 40"><path d="M14 30l6-24 6 24z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><circle cx="12" cy="32" r="5" fill="#7a4a20" stroke="#3a2010" stroke-width="2"/><circle cx="28" cy="32" r="5" fill="#7a4a20" stroke="#3a2010" stroke-width="2"/><circle cx="20" cy="5" r="3" fill="#333"/></svg><b>0</b></button>
@@ -277,6 +285,7 @@ canvas#tela { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 <section id="telaBau" class="tela bauTela" hidden>
   <div class="cartao bauCartao"><div class="faixa">Baú Real!</div><div id="bauPremios" class="ganho premios"></div><button id="bPegar" class="botao verde grande">Pegar!</button></div>
 </section>
+<div id="maoDica" hidden><svg viewBox="0 0 40 48"><path d="M14 4c2 0 4 2 4 4v14l2-1c2-1 4 0 5 1l1 1 2-1c2 0 4 1 4 3l2-1c2 0 4 2 4 4v8c0 7-5 12-12 12h-4c-4 0-7-2-9-5L6 33c-1-2 0-4 2-5 1-1 3 0 4 1l-2-3V8c0-2 2-4 4-4z" fill="#ffd9c0" stroke="#6a3a20" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
 <div id="semgl" hidden><p>Este aparelho não conseguiu abrir o 3D (WebGL).<br>Tente outro navegador.</p></div>
 <script>
 const THREE=(()=>{/**
@@ -806,7 +815,7 @@ function svgMeta(m) {
 
 /* ===== rei.js ===== */
 'use strict';
-// Rei Tico: personagem caricato 3D em estilo anime. O rosto é desenhado ao vivo numa textura (olhos grandes,
+// Rei Minhoca: personagem caricato 3D em estilo anime. O rosto é desenhado ao vivo numa textura (olhos grandes,
 // sobrancelhas, boca, rubor, suor, lágrimas), e o corpo reage: pula, gira, treme, segura a cabeça.
 const Rei = (() => {
   const cena = new THREE.Scene(); cena.environment = ENV;
@@ -1076,6 +1085,7 @@ const Rei = (() => {
 // = nível de Resgate: a sala do rei fica em cima; E = canal de entulho (colunas da direita, contínuo a partir do topo). Objetivo sem "n" = conta tudo do mapa.
 // modo: 'arremesso' = Modo 3 (canhão e física): plataformas {x,y(topo),z,w,d,mov:[amplitude,velocidade]}, pilhas de
 // linhas (de baixo para cima) com [peça, deslocamento x]; peças: lata, pedra, cristal, barril; bolas: bola, fogo, bomba.
+// (Pintura saiu do jogo em 27/11/2026: difícil de entender. O código continua em pintura.js.)
 // modo: 'pintura' = Modo 4: forma = relevo (dígito = altura, . vazio, N pedra, T solvente, R arco-íris), inicio [linha, coluna],
 // cores, semente (cores sorteadas fixas), folga (jogadas além do resolvedor guloso).
 // Cores: 0 rubi, 1 safira, 2 esmeralda, 3 topázio, 4 ametista, 5 coral.
@@ -1095,8 +1105,6 @@ const NIVEIS = [
     pilhas: [{ p: 0, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
   { jogadas: 26, cores: 5, metas: [{ t: 'gelo' }], dica: 'Gelo duplo precisa de duas batidas.',
     mapa: ['#......#', '........', '..IIII..', '..I##I..', '..I##I..', '..IIII..', '........', '#......#'] },
-  { modo: 'pintura', cores: 4, folga: 3, semente: 11, inicio: [5, 3], dica: 'Os números nos potes mostram quantos blocos cada cor pinta!',
-    forma: ['.22..22.', '23322332', '23333332', '.233332.', '..2332..', '...22...'] },
   { jogadas: 27, cores: 5, metas: [{ t: 'cofre' }], dica: 'Cofres aguentam 3 batidas. Foguetes e dinamites ajudam muito!',
     mapa: ['........', '........', '.v....v.', '........', '...vv...', '........', '.v....v.', '........'] },
   { resgate: { perigo: 'teto', material: 'bolas', reserva: 2 }, jogadas: 25, cores: 5, metas: [{ t: 'entulho' }],
@@ -1109,8 +1117,6 @@ const NIVEIS = [
       { p: 1, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['cristal', -.28], ['cristal', .28]]] }] },
   { jogadas: 28, cores: 6, metas: [{ t: 'corrente' }, { t: 'caixa' }], dica: 'Seis cores agora: combos ficam mais raros. Pense antes!',
     mapa: ['........', '.k....k.', '..k..k..', '...cc...', '...cc...', '..k..k..', '.k....k.', '........'] },
-  { modo: 'pintura', cores: 4, folga: 2, semente: 23, inicio: [4, 4], dica: 'Pedra cinza não pega tinta. O bloco arco-íris pinta tudo em volta!',
-    forma: ['4...4...4', '43.343.34', '333333333', '2N22R22N2', '222222222'] },
   { resgate: { perigo: 'agua', material: 'cubos', reserva: 2 }, jogadas: 24, cores: 5, metas: [{ t: 'entulho' }],
     mapa: ['....EEEE', '....EEEE', '....EEE.', '....EE..', '....E...', '........', '........', '........'] },
   { jogadas: 30, cores: 5, metas: [{ t: 'cofre' }, { t: 'caixa' }, { t: 'gelo' }],
@@ -1121,8 +1127,6 @@ const NIVEIS = [
       { p: 1, linhas: [[['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
   { jogadas: 32, cores: 5, metas: [{ t: 'gelo' }, { t: 'cofre' }, { t: 'corrente' }], dica: 'Desafio do castelo! Guarde os especiais para o centro.',
     mapa: ['#......#', '.IIIIII.', '.I.kk.I.', '.IkvvkI.', '.IkvvkI.', '.I.kk.I.', '.IIIIII.', '#......#'] },
-  { modo: 'pintura', cores: 5, folga: 3, semente: 5, inicio: [6, 4], dica: 'Cuidado com o solvente verde: quando a tinta encosta, ele apaga os blocos em volta!',
-    forma: ['4.4...4.4', '444...444', '332333233', '3T22N22T3', '322222223', '32N222N23', '322222223'] },
   { resgate: { perigo: 'espinhos', material: 'pedras', reserva: 2 }, jogadas: 29, cores: 5, metas: [{ t: 'entulho' }],
     mapa: ['....EEEE', '....EEEE', '.....EE.', '.....EE.', '.....EE.', '.....EE.', 'cc......', 'cc......'] },
   { modo: 'arremesso', bolas: ['bola', 'bola', 'fogo', 'bola', 'bomba', 'bola', 'fogo'], dica: 'Desafio! A plataforma do meio não para quieta.',
@@ -1130,8 +1134,6 @@ const NIVEIS = [
     pilhas: [{ p: 0, z: .35, linhas: [[['pedra', -.38], ['pedra', .38]]] }, { p: 0, z: -.35, linhas: [[['cristal', -.3], ['cristal', .3]], [['cristal', 0]]] },
       { p: 1, linhas: [[['barril', -.5], ['barril', .5]], [['lata', -.55], ['lata', 0], ['lata', .55]]] },
       { p: 2, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
-  { modo: 'pintura', cores: 5, folga: 3, semente: 42, inicio: [8, 4], dica: 'O grande escudo real! Pense duas jogadas à frente.',
-    forma: ['.4444444.', '433333334', '43T3R3T34', '433333334', '4N33333N4', '.4333334.', '..43T34..', '...434...', '....4....'] },
 ];
 
 /* ===== tabuleiro.js ===== */
@@ -1498,7 +1500,7 @@ async function animTroca(ka, kb) {
   ga.mesh.position.z = gb.mesh.position.z = 0;
 }
 const trocar = (ka, kb) => { [ka.gema, kb.gema] = [kb.gema, ka.gema]; };
-function inicioJogada() { T.cascata = 0; T.mov = { removidas: 0, especiais: 0 }; T.ocioso = 0; pararDica(); }
+function inicioJogada() { T.cascata = 0; T.mov = { removidas: 0, especiais: 0 }; T.ocioso = 0; T.ofereceu = false; pararDica(); Jogo.esconderDica(); }
 function gastar() { T.jogadas--; HUD.jogadas(); Resgate.jogada(); }
 async function resolver(prefer = []) {
   for (let i = 0; i < 60; i++) {
@@ -1553,6 +1555,24 @@ async function festaReal() {
   }
 }
 
+// melhor jogada para a dica: especial pronto, ou a troca que faz mais combinação, ajuda os objetivos e bate em obstáculos
+function melhorJogada() {
+  let best = null, bs = -1;
+  const metaCor = new Set(T.metas.filter(m => m.t === 'cor' && m.falta > 0).map(m => m.cor));
+  const linha = k => { const c = k.gema.cor; let h = 1, v = 1; for (let i = k.c - 1; corEm(k.r, i) === c; i--) h++; for (let i = k.c + 1; corEm(k.r, i) === c; i++) h++; for (let i = k.r - 1; corEm(i, k.c) === c; i--) v++; for (let i = k.r + 1; corEm(i, k.c) === c; i++) v++; return [h, v]; };
+  for (const a of todas()) {
+    if (a.gema && a.gema.tipo !== 'n' && !a.corrente && 12 > bs) { bs = 12; best = { esp: a }; }
+    if (!movel(a)) continue;
+    for (const b of [celula(a.r, a.c + 1), celula(a.r + 1, a.c)]) {
+      if (!movel(b) || a.gema.tipo !== 'n' || b.gema.tipo !== 'n') continue;
+      [a.gema, b.gema] = [b.gema, a.gema]; let sc = 0;
+      for (const k of [a, b]) { const [h, v] = linha(k), m = Math.max(h, v); if (m < 3) continue; sc += m * (m >= 4 ? 3 : 1) + (h >= 3 && v >= 3 ? 6 : 0); if (metaCor.has(k.gema.cor)) sc += 3; if (k.gelo) sc += 3; for (const q of vizinhos(k)) if (q.bloco || q.corrente) sc += 3; }
+      [a.gema, b.gema] = [b.gema, a.gema];
+      if (sc > bs) { bs = sc; best = { a, b }; }
+    }
+  }
+  return best;
+}
 // ---------- seleção, dica e animação parada ----------
 function selecionar(k) { T.sel = k; Som.selecao(); }
 function desselecionar() { if (T.sel && T.sel.gema) T.sel.gema.mesh.userData.int.scale.setScalar(1); T.sel = null; }
@@ -1568,7 +1588,8 @@ function tickTabuleiro(dt) {
   }
   if (T.sel && T.sel.gema) { const s = 1.14 + Math.sin(t * 10) * .07; T.sel.gema.mesh.userData.int.scale.setScalar(s); }
   if (!T.ativo || T.ocupado) T.ocioso = 0; else T.ocioso += dt;
-  if (T.ocioso > 6 && !T.dica && (T.modo || 'joias') === 'joias') { const j = existeJogada(); if (j) { T.dica = j; T.dicaT = 0; } }
+  if (T.ocioso > 7 && !T.ofereceu && (T.modo || 'joias') === 'joias') { T.ofereceu = true; Jogo.oferecerDica(); }
+  if (T.ocioso > 16 && !T.dica && (T.modo || 'joias') === 'joias') { const j = existeJogada(); if (j) { T.dica = j; T.dicaT = 0; } }
   if (T.dica) {
     T.dicaT += dt; const w = Math.sin(T.dicaT * 14) * .3 * (T.dicaT % 1.1 < .7 ? 1 : 0);
     for (const k of [T.dica.a, T.dica.b, T.dica.esp]) if (k && k.gema) k.gema.mesh.userData.int.rotation.z = w;
@@ -1582,7 +1603,7 @@ function tickTabuleiro(dt) {
 
 /* ===== resgate.js ===== */
 'use strict';
-// Modo 2: Resgate. Cena e tabuleiro numa coisa só: em cima do tabuleiro fica a sala do Rei Tico, que segura a porta
+// Modo 2: Resgate. Cena e tabuleiro numa coisa só: em cima do tabuleiro fica a sala do Rei Minhoca, que segura a porta
 // contra um depósito cheio de entulho (pedras, bolinhas de metal ou cubos). O entulho desce por um canal que entra no
 // tabuleiro: cada pedaço do canal quebrado (combinação ao lado ou explosão) faz a pilha inteira descer uma casa.
 // Enquanto isso a armadilha da sala (parede de espinhos, teto de espinhos ou água) avança a cada jogada.
@@ -1610,7 +1631,7 @@ const Resgate = (() => {
   const dummy = new THREE.Object3D(), corT = new THREE.Color();
   const FALAS = {
     espinhos: ['Uma parede de espinhos vem chegando!', 'Rápido, tire o entulho!', 'Socorro! Os espinhos estão nas minhas costas!'],
-    teto: ['O teto de espinhos está descendo!', 'Abaixa a cabeça, Tico!', 'Socorro! Já está na minha coroa!'],
+    teto: ['O teto de espinhos está descendo!', 'Abaixa a cabeça, Minhoca!', 'Socorro! Já está na minha coroa!'],
     agua: ['A sala está enchendo de água!', 'A água chegou na barriga!', 'Glub... glub... depressa!'],
   };
   const tamCanal = col => col.slots.filter(s => s.r !== null).length;
@@ -1756,8 +1777,8 @@ const Resgate = (() => {
 
 /* ===== arremesso.js ===== */
 'use strict';
-// Modo 3: Arremesso. Sem tabuleiro: o Rei Tico fica ao lado de um canhão de ouro; arraste para mirar (aparece a
-// trajetória) e solte para atirar contra pilhas de latas, pedras, cristais e barris explosivos em plataformas (algumas se
+// Modo 3: Arremesso. Sem tabuleiro: o Rei Minhoca fica ao lado de um canhão de ouro; toque onde quer acertar e o
+// canhão atira na hora contra pilhas de latas, pedras, cristais e barris explosivos em plataformas (algumas se
 // mexem). Física própria e leve: cada peça é uma esfera de colisão com giro; as pilhas ficam "dormindo" paradas até
 // serem atingidas, e quem perde o apoio acorda e cai (desmoronamento em cadeia).
 const Arremesso = (() => {
@@ -1890,12 +1911,13 @@ const Arremesso = (() => {
     const v = d.divideScalar(Tt); v.y += .5 * GRAV * Tt; return { O, v, Tt };
   }
   function apontar(alvo) {
+    const anel = anelMira.visible;
     st.mira = alvo; const { O, v, Tt } = trajetoria(alvo);
     const dir = alvo.clone().sub(canhao.position); giro.rotation.y = Math.atan2(-dir.x, -dir.z); tubo.rotation.x = clamp(Math.atan2(v.y, Math.hypot(v.x, v.z)), -.2, 1.1);
     if (st.mirando) {
       let n = 0; for (let i = 1; i <= 26; i++) { const t = i / 26 * Tt * 1.05; dummy.position.set(O.x + v.x * t, O.y + v.y * t - .5 * GRAV * t * t, O.z + v.z * t); dummy.scale.setScalar(1 - i / 40); dummy.updateMatrix(); pontos.setMatrixAt(n++, dummy.matrix); }
       pontos.count = n; pontos.instanceMatrix.needsUpdate = true; anelMira.visible = true; anelMira.position.copy(alvo); anelMira.lookAt(cam.position);
-    } else { pontos.count = 0; anelMira.visible = false; }
+    } else { pontos.count = 0; anelMira.visible = anel; }
   }
   const ray = new THREE.Raycaster(), plano = new THREE.Plane(V(0, 0, 1), 8.5), tmp = V();
   function pontoNaTela(cx, cy) {
@@ -2040,10 +2062,10 @@ const Arremesso = (() => {
     async entrada() { const p0 = cam.position.clone(); await Anim.add(1, k => { cam.position.set(0, lerp(6.5, 3.5, k), lerp(-4, 2.6, k)); cam.lookAt(0, 1.75, -7.5); }, Ease.inOut); cam.position.copy(p0); this.enquadrar(); },
     toque(tipo, e) {
       if (!st.ativo || !T.ativo || T.ocupado) { if (tipo === 'up') { st.mirando = false; apontar(st.mira || V(0, 2, -8)); } return; }
-      const oy = e.pointerType === 'touch' ? 70 : 0, p = pontoNaTela(e.clientX, e.clientY - oy);
-      if (tipo === 'down') { st.mirando = true; Som.init(); }
-      if (p && st.mirando) apontar(p);
-      if (tipo === 'up' && st.mirando) { st.mirando = false; atirar(); }
+      if (tipo !== 'down') return; Som.init();
+      const p = pontoNaTela(e.clientX, e.clientY); if (!p) return;
+      anelMira.visible = true; anelMira.position.copy(p); anelMira.lookAt(cam.position); setTimeout(() => { anelMira.visible = false; }, 450);
+      st.mirando = false; apontar(p); atirar();
     },
     recarregar(n) { for (let i = 0; i < n; i++) st.fila.push('bola'); carregarBola(); montarPrateleira(); },
     mirarEAtirar(x, y, z) { if (!T.ativo || T.ocupado) return false; st.mirando = true; apontar(V(x, y, z)); st.mirando = false; atirar(); return true; },
@@ -2349,10 +2371,15 @@ const Bau = (() => {
 const SAVE = 'tico:v1', VIDA_MAX = 5, VIDA_MIN = 10;
 // progresso salvo no aparelho (localStorage); versão 2 completa campos que faltarem e corrige valores fora do lugar
 const S = (() => {
-  const novo = { v: 2, nivel: 1, estrelas: {}, moedas: 500, vidas: VIDA_MAX, vidaT: 0, baus: {}, reforcos: { martelo: 0, flecha: 0, canhao: 0 } };
+  const novo = { v: 3, nivel: 1, estrelas: {}, moedas: 500, vidas: VIDA_MAX, vidaT: 0, baus: {}, reforcos: { martelo: 0, flecha: 0, canhao: 0 } };
   let s = null; try { s = JSON.parse(localStorage.getItem(SAVE)); } catch (e) {}
   if (!s || typeof s !== 'object' || !s.nivel) return novo;
-  s = Object.assign({}, novo, s); s.v = 2; s.reforcos = Object.assign({ martelo: 0, flecha: 0, canhao: 0 }, s.reforcos || {});
+  if ((s.v || 1) < 3) { // a pintura saiu: renumera níveis e estrelas da lista antiga de 22
+    const tirados = [8, 14, 19, 22], novoN = n => n - tirados.filter(t => t < n).length, est = {};
+    for (const k in s.estrelas || {}) if (!tirados.includes(+k)) est[novoN(+k)] = s.estrelas[k];
+    s.estrelas = est; s.nivel = novoN(+s.nivel || 1);
+  }
+  s = Object.assign({}, novo, s); s.v = 3; s.reforcos = Object.assign({ martelo: 0, flecha: 0, canhao: 0 }, s.reforcos || {});
   s.nivel = clamp(Math.floor(+s.nivel) || 1, 1, NIVEIS.length); s.moedas = Math.max(0, Math.floor(+s.moedas) || 0); s.vidas = clamp(Math.floor(+s.vidas), 0, VIDA_MAX);
   for (const k in s.estrelas) if (+k > NIVEIS.length) delete s.estrelas[k];
   return s;
@@ -2390,6 +2417,19 @@ const FALAS = {
   triste: ['Ah não... quase!', 'Minha coroa caiu de tristeza...', 'Vamos tentar de novo?'],
 };
 const Jogo = {
+  oferecerDica() {
+    const b = document.querySelector('#reforcos button[data-r="dica"]'); if (!b || !T.ativo || T.ocupado) return;
+    if (T.dicas > 0) { b.classList.add('oferta'); Rei.reagir('aceno'); Jogo.balao('Está difícil? Toque na lâmpada que eu mostro uma jogada!', 3.4); }
+    else { const j = melhorJogada(); if (j) { T.dica = j; T.dicaT = 0; } Jogo.balao('Olha ali, as peças que estão mexendo!', 2.4); }
+  },
+  esconderDica() { const m = $('#maoDica'); m.hidden = true; m.getAnimations().forEach(a => a.cancel()); document.querySelectorAll('#reforcos button.oferta').forEach(b => b.classList.remove('oferta')); },
+  mostrarDica() {
+    const j = melhorJogada(); if (!j) return false;
+    const pt = k => { const q = posCel(k.r, k.c); const [x, y] = telaDe(q.x, q.y, .3); return [x - 14, y - 6]; }, m = $('#maoDica'); m.hidden = false;
+    if (j.esp) { const [x, y] = pt(j.esp); m.animate([{ transform: `translate(${x}px,${y}px) scale(1)` }, { transform: `translate(${x}px,${y + 12}px) scale(.85)` }], { duration: 500, iterations: Infinity, direction: 'alternate' }); Jogo.balao('Toque nessa peça especial!', 2.4); }
+    else { const [x0, y0] = pt(j.a), [x1, y1] = pt(j.b); m.animate([{ transform: `translate(${x0}px,${y0}px)`, opacity: 0 }, { transform: `translate(${x0}px,${y0}px)`, opacity: 1, offset: .2 }, { transform: `translate(${x1}px,${y1}px)`, opacity: 1, offset: .8 }, { transform: `translate(${x1}px,${y1}px)`, opacity: 0 }], { duration: 1300, iterations: Infinity }); Jogo.balao('Arraste essa peça para o lado da mãozinha!', 2.6); }
+    T.dica = j; T.dicaT = 0; return true;
+  },
   balao(txt, dur = 2.6) { const b = $('#balao'); b.textContent = txt; b.classList.add('ver'); balaoT = dur; posicionarBalao(); },
   grito(txt) { const g = $('#grito'), b = document.createElement('b'); b.textContent = txt; g.innerHTML = ''; g.appendChild(b); g.style.left = (L.tab.x + L.tab.w / 2) + 'px'; g.style.top = (L.tab.y + L.tab.h * .42) + 'px'; },
   reagirJogada() {
@@ -2428,7 +2468,7 @@ function posicionarBalao() {
 // ---------- telas ----------
 const telas = ['#telaInicio', '#telaNivel', '#telaFim', '#telaPausa', '#telaBau'];
 function mostrar(id) { telas.forEach(t => $(t).hidden = t !== id); }
-const BAUS = [5, 10, 15, 20];
+const BAUS = [5, 10, 15, 18];
 const modoDe = nv => nv.modo === 'arremesso' ? 'arremesso' : nv.modo === 'pintura' ? 'pintura' : nv.resgate ? 'resgate' : 'joias';
 const SVG_BAU = '<svg viewBox="0 0 60 52"><path d="M6 22h48v26H6z" fill="#b8642a" stroke="#5a2a08" stroke-width="2.5"/><path d="M6 22c0-14 48-14 48 0z" fill="#d07a34" stroke="#5a2a08" stroke-width="2.5"/><path d="M4 21h52v5H4z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><path d="M26 24h8v10h-8z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><path d="M14 22v26M46 22v26" stroke="#ffc83a" stroke-width="3"/></svg>';
 const SVG_COROA = '<svg viewBox="0 0 46 40"><path d="M4 32L2 10l11 9 10-15 10 15 11-9-2 22z" fill="#ffd34d" stroke="#8a5a00" stroke-width="2.5" stroke-linejoin="round"/><rect x="4" y="31" width="38" height="6" rx="2" fill="#f0a20b" stroke="#8a5a00" stroke-width="2"/><circle cx="23" cy="21" r="3.5" fill="#ff2f55"/></svg>';
@@ -2470,10 +2510,11 @@ async function abrirBau(n) {
 $('#bPegar').onclick = () => { Som.clique(); Bau.fechar(); Rei.parar(); irInicio(); };
 function atualizarReforcos() {
   const r = S.reforcos || {};
-  document.querySelectorAll('#reforcos button').forEach(b => { const n = r[b.dataset.r] || 0; b.querySelector('b').textContent = n; b.disabled = n <= 0; b.classList.toggle('ativo', T.reforco === b.dataset.r); });
+  document.querySelectorAll('#reforcos button').forEach(b => { const n = b.dataset.r === 'dica' ? (T.dicas || 0) : r[b.dataset.r] || 0; b.hidden = b.dataset.r !== 'dica' && !n; b.querySelector('b').textContent = n; b.disabled = n <= 0; b.classList.toggle('ativo', T.reforco === b.dataset.r); });
 }
 document.querySelectorAll('#reforcos button').forEach(b => b.onclick = () => {
   Som.init(); if (!T.ativo || T.ocupado || T.modo !== 'joias') return; const r = b.dataset.r;
+  if (r === 'dica') { if ((T.dicas || 0) > 0 && Jogo.mostrarDica()) { T.dicas--; Som.especial(); } atualizarReforcos(); return; }
   T.reforco = T.reforco === r ? null : r; Som.clique(); atualizarReforcos();
   if (T.reforco) Jogo.balao({ martelo: 'Toque na peça que o martelo vai quebrar.', flecha: 'Toque numa peça: a flecha limpa a linha inteira.', canhao: 'Toque numa peça: o canhão limpa a coluna inteira.' }[r], 2.6);
 });
@@ -2507,7 +2548,7 @@ function irInicio() {
 function abrirNivel(n) {
   regenerarVidas();
   if (S.vidas <= 0) { HUD.topo(); Jogo.balao('Sem vidas! Espere um pouquinho que elas voltam.', 3); Rei.reagir('susto'); return; }
-  const nv = NIVEIS[n - 1]; T.nivel = n; T.modo = nv.modo === 'arremesso' ? 'arr' : nv.modo === 'pintura' ? 'pin' : 'joias'; T.reforco = null;
+  const nv = NIVEIS[n - 1]; T.nivel = n; T.modo = nv.modo === 'arremesso' ? 'arr' : nv.modo === 'pintura' ? 'pin' : 'joias'; T.reforco = null; T.dicas = 3; T.ofereceu = false;
   $('#nNum').textContent = n; $('#nJog').textContent = nv.jogadas || (nv.bolas ? nv.bolas.length : 0); $('#nJog').nextSibling.textContent = nv.bolas ? ' bolas' : ' jogadas';
   if (T.modo === 'arr') { Resgate.sair(); Pintura.sair(); Arremesso.carregar(nv); }
   else if (T.modo === 'pin') { Resgate.sair(); Arremesso.sair(); Pintura.carregar(nv); }
@@ -2516,9 +2557,9 @@ function abrirNivel(n) {
   $('#nFaixa').classList.toggle('resgate', !!nv.resgate); $('#nFaixa').firstChild.textContent = nv.resgate ? 'Resgate! Nível ' : T.modo === 'arr' ? 'Arremesso! Nível ' : T.modo === 'pin' ? 'Pintura! Nível ' : 'Nível ';
   $('#nFaixa').classList.toggle('pintura', T.modo === 'pin');
   $('#nFaixa').classList.toggle('arremesso', T.modo === 'arr'); document.querySelector('#painel .jogadas span').textContent = T.modo === 'arr' ? 'Bolas' : 'Jogadas';
-  if (T.modo === 'arr') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Arraste para mirar e solte para atirar. Derrube todas as latas e cristais!'; }
+  if (T.modo === 'arr') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Toque onde quer acertar: o canhão atira na hora. Derrube todas as latas e cristais!'; }
   if (T.modo === 'pin') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Escolha os potes de tinta: a parte pintada engole os blocos vizinhos da mesma cor. Pinte a escultura inteira!'; }
-  $('#nResgate').hidden = !nv.resgate; if (nv.resgate) $('#nResgate').textContent = { agua: 'A sala do rei está enchendo de água!', teto: 'O teto de espinhos está descendo!', espinhos: 'Uma parede de espinhos vem chegando!' }[nv.resgate.perigo] + ' Quebre o entulho do canal para a pilha descer e soltar o Rei Tico.';
+  $('#nResgate').hidden = !nv.resgate; if (nv.resgate) $('#nResgate').textContent = { agua: 'A sala do rei está enchendo de água!', teto: 'O teto de espinhos está descendo!', espinhos: 'Uma parede de espinhos vem chegando!' }[nv.resgate.perigo] + ' Quebre o entulho do canal para a pilha descer e soltar o Rei Minhoca.';
   $('#nMetas').innerHTML = T.metas.map(m => `<div class="meta">${svgMeta(m)}<b>${m.n}</b></div>`).join('');
   T.emNivel = true; atualizarReforcos(); $('#painel').hidden = false; HUD.montarMetas(); HUD.jogadas(); HUD.pontos(); $('#hNivel').textContent = n;
   dispor(); mostrar('#telaNivel');
@@ -2528,7 +2569,7 @@ async function comecarNivel() {
   Som.musica(T.modo === 'arr' ? 'arremesso' : T.modo === 'pin' ? 'pintura' : Resgate.ativo ? 'resgate' : 'joias'); Som.intensidade(0);
   if (T.modo === 'arr') await Arremesso.entrada(); else if (T.modo === 'pin') await Pintura.entrada(); else await entradaPecas(); T.ativo = true; T.ocupado = false;
   const nv = NIVEIS[T.nivel - 1];
-  if (T.modo === 'arr') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Arraste para mirar e solte para atirar!', 3.4); }
+  if (T.modo === 'arr') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Toque onde quer acertar!', 3.4); }
   else if (T.modo === 'pin') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Os números nos potes mostram quantos blocos cada cor pinta!', 3.6); }
   else if (Resgate.ativo) { Rei.reagir('susto'); Som.susto(); Jogo.balao(Resgate.fala(0), 3.2); } else { Rei.reagir('aceno'); Jogo.balao(nv.dica || pega(FALAS.inicio), 3.4); }
 }
@@ -2574,7 +2615,7 @@ tela.addEventListener('pointerdown', e => {
   Som.init();
   if (T.modo === 'arr') { if (!pausado()) { Arremesso.toque('down', e); tela.setPointerCapture?.(e.pointerId); } return; }
   if (L.rei.w > 2) { const rx = (e.clientX - (L.rei.x + L.rei.w / 2)) / (L.rei.w / 2), ry = (e.clientY - (L.rei.y + L.rei.h * .3)) / (L.rei.h / 2); Rei.olhar(rx, ry); }
-  if (e.clientX >= L.rei.x && e.clientX <= L.rei.x + L.rei.w && e.clientY >= L.rei.y && e.clientY <= L.rei.y + L.rei.h) { if (!T.ativo || !T.ocupado) { Rei.reagir(pega(['feliz', 'aceno', 'susto'])); Jogo.balao(pega(['Ei! Isso faz cócegas!', 'Minha coroa!', 'Hehe!', 'Sou o Rei Tico!'])); } return; }
+  if (e.clientX >= L.rei.x && e.clientX <= L.rei.x + L.rei.w && e.clientY >= L.rei.y && e.clientY <= L.rei.y + L.rei.h) { if (!T.ativo || !T.ocupado) { Rei.reagir(pega(['feliz', 'aceno', 'susto'])); Jogo.balao(pega(['Ei! Isso faz cócegas!', 'Minha coroa!', 'Hehe!', 'Sou o Rei Minhoca!'])); } return; }
   if (T.modo === 'pin' || !T.ativo || T.ocupado || pausado()) return;
   const k = celulaNaTela(e.clientX, e.clientY); if (!k) { desselecionar(); return; }
   toque = { k, x: e.clientX, y: e.clientY, moveu: false }; tela.setPointerCapture?.(e.pointerId);
@@ -2625,7 +2666,7 @@ function dispor() {
   $('#palco').style.display = Resgate.ativo || Arremesso.ativo ? 'none' : '';
   Object.assign($('#palco').style, { left: L.rei.x + 'px', top: L.rei.y + 'px', width: L.rei.w + 'px', height: L.rei.h + 'px' });
   for (const id of ['#telaInicio']) Object.assign($(id).style, { left: L.tab.x + 'px', top: L.tab.y + 'px', width: L.tab.w + 'px', height: L.tab.h + 'px' });
-  const nRef = Object.values(S.reforcos || {}).reduce((a, b) => a + b, 0), barra = T.emNivel ? (T.modo === 'pin' ? $('#potes') : T.modo === 'joias' && nRef > 0 ? $('#reforcos') : null) : null;
+  const barra = T.emNivel ? (T.modo === 'pin' ? $('#potes') : T.modo === 'joias' ? $('#reforcos') : null) : null;
   $('#reforcos').hidden = !(barra && barra.id === 'reforcos');
   if (barra) { const hb = barra.id === 'potes' ? 88 : 62; L.tab.h -= hb; Object.assign(barra.style, { left: L.tab.x + 'px', top: (L.tab.y + L.tab.h + 2) + 'px', width: L.tab.w + 'px', height: (hb - 6) + 'px' }); }
   if (Pintura.ativo) Pintura.enquadrar();
@@ -2656,7 +2697,7 @@ function quadro(agora) {
   R.setScissorTest(false); Bau.desenhar();
   R.setScissorTest(false); R.setViewport(0, 0, L.W, L.H); R.clearDepth(); R.render(cenaOver, camOver);
 }
-window.__tico = { VEL, L, dispor, enquadrarTab, processarFila, Som, T, S, Rei, Resgate, Arremesso, Pintura, Bau, abrirBau, usarReforco, montarMapa, atingir, todas, Anim, VEL, R, celula, tentarTroca, tocarEspecial, abrirNivel, comecarNivel, irInicio, existeJogada, telaDe, posCel, NIVEIS, Jogo, novaGema };
+window.__tico = { melhorJogada, VEL, L, dispor, enquadrarTab, processarFila, Som, T, S, Rei, Resgate, Arremesso, Pintura, Bau, abrirBau, usarReforco, montarMapa, atingir, todas, Anim, VEL, R, celula, tentarTroca, tocarEspecial, abrirNivel, comecarNivel, irInicio, existeJogada, telaDe, posCel, NIVEIS, Jogo, novaGema };
 try { R.compile(Rei.cena, Rei.cam); R.compile(cenaTab, camTab); } catch (e) {}
 irInicio(); requestAnimationFrame(quadro);
 

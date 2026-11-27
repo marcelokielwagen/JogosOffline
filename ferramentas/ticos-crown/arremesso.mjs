@@ -13,7 +13,7 @@ while (await av('__tico.T.ativo') && tiro < 10) {
   alvos.sort((a, b) => a[1] - b[1]); const a = alvos[0];
   // arrasta o dedo/mouse até o alvo (tela) e solta
   const [x, y] = await av(`__tico.Arremesso.tela(${a[0]},${a[1] - .05},${a[2]})`);
-  const oy = movel ? 70 : 0;
+  const oy = 0;
   if (movel) { await p.cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: y + oy }] }); await dorme(120); if (tiro === 0) await p.foto(F('3-mira')); await p.cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); }
   else { await p.cmd('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y }); await p.cmd('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 }); await dorme(150); if (tiro === 0) await p.foto(F('3-mira')); await p.cmd('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 }); }
   tiro++; await dorme(700); if (tiro === 1) await p.foto(F('4-impacto'));

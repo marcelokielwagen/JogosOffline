@@ -3,10 +3,15 @@
 const SAVE = 'tico:v1', VIDA_MAX = 5, VIDA_MIN = 10;
 // progresso salvo no aparelho (localStorage); versão 2 completa campos que faltarem e corrige valores fora do lugar
 const S = (() => {
-  const novo = { v: 2, nivel: 1, estrelas: {}, moedas: 500, vidas: VIDA_MAX, vidaT: 0, baus: {}, reforcos: { martelo: 0, flecha: 0, canhao: 0 } };
+  const novo = { v: 3, nivel: 1, estrelas: {}, moedas: 500, vidas: VIDA_MAX, vidaT: 0, baus: {}, reforcos: { martelo: 0, flecha: 0, canhao: 0 } };
   let s = null; try { s = JSON.parse(localStorage.getItem(SAVE)); } catch (e) {}
   if (!s || typeof s !== 'object' || !s.nivel) return novo;
-  s = Object.assign({}, novo, s); s.v = 2; s.reforcos = Object.assign({ martelo: 0, flecha: 0, canhao: 0 }, s.reforcos || {});
+  if ((s.v || 1) < 3) { // a pintura saiu: renumera níveis e estrelas da lista antiga de 22
+    const tirados = [8, 14, 19, 22], novoN = n => n - tirados.filter(t => t < n).length, est = {};
+    for (const k in s.estrelas || {}) if (!tirados.includes(+k)) est[novoN(+k)] = s.estrelas[k];
+    s.estrelas = est; s.nivel = novoN(+s.nivel || 1);
+  }
+  s = Object.assign({}, novo, s); s.v = 3; s.reforcos = Object.assign({ martelo: 0, flecha: 0, canhao: 0 }, s.reforcos || {});
   s.nivel = clamp(Math.floor(+s.nivel) || 1, 1, NIVEIS.length); s.moedas = Math.max(0, Math.floor(+s.moedas) || 0); s.vidas = clamp(Math.floor(+s.vidas), 0, VIDA_MAX);
   for (const k in s.estrelas) if (+k > NIVEIS.length) delete s.estrelas[k];
   return s;
@@ -44,6 +49,19 @@ const FALAS = {
   triste: ['Ah não... quase!', 'Minha coroa caiu de tristeza...', 'Vamos tentar de novo?'],
 };
 const Jogo = {
+  oferecerDica() {
+    const b = document.querySelector('#reforcos button[data-r="dica"]'); if (!b || !T.ativo || T.ocupado) return;
+    if (T.dicas > 0) { b.classList.add('oferta'); Rei.reagir('aceno'); Jogo.balao('Está difícil? Toque na lâmpada que eu mostro uma jogada!', 3.4); }
+    else { const j = melhorJogada(); if (j) { T.dica = j; T.dicaT = 0; } Jogo.balao('Olha ali, as peças que estão mexendo!', 2.4); }
+  },
+  esconderDica() { const m = $('#maoDica'); m.hidden = true; m.getAnimations().forEach(a => a.cancel()); document.querySelectorAll('#reforcos button.oferta').forEach(b => b.classList.remove('oferta')); },
+  mostrarDica() {
+    const j = melhorJogada(); if (!j) return false;
+    const pt = k => { const q = posCel(k.r, k.c); const [x, y] = telaDe(q.x, q.y, .3); return [x - 14, y - 6]; }, m = $('#maoDica'); m.hidden = false;
+    if (j.esp) { const [x, y] = pt(j.esp); m.animate([{ transform: `translate(${x}px,${y}px) scale(1)` }, { transform: `translate(${x}px,${y + 12}px) scale(.85)` }], { duration: 500, iterations: Infinity, direction: 'alternate' }); Jogo.balao('Toque nessa peça especial!', 2.4); }
+    else { const [x0, y0] = pt(j.a), [x1, y1] = pt(j.b); m.animate([{ transform: `translate(${x0}px,${y0}px)`, opacity: 0 }, { transform: `translate(${x0}px,${y0}px)`, opacity: 1, offset: .2 }, { transform: `translate(${x1}px,${y1}px)`, opacity: 1, offset: .8 }, { transform: `translate(${x1}px,${y1}px)`, opacity: 0 }], { duration: 1300, iterations: Infinity }); Jogo.balao('Arraste essa peça para o lado da mãozinha!', 2.6); }
+    T.dica = j; T.dicaT = 0; return true;
+  },
   balao(txt, dur = 2.6) { const b = $('#balao'); b.textContent = txt; b.classList.add('ver'); balaoT = dur; posicionarBalao(); },
   grito(txt) { const g = $('#grito'), b = document.createElement('b'); b.textContent = txt; g.innerHTML = ''; g.appendChild(b); g.style.left = (L.tab.x + L.tab.w / 2) + 'px'; g.style.top = (L.tab.y + L.tab.h * .42) + 'px'; },
   reagirJogada() {
@@ -82,7 +100,7 @@ function posicionarBalao() {
 // ---------- telas ----------
 const telas = ['#telaInicio', '#telaNivel', '#telaFim', '#telaPausa', '#telaBau'];
 function mostrar(id) { telas.forEach(t => $(t).hidden = t !== id); }
-const BAUS = [5, 10, 15, 20];
+const BAUS = [5, 10, 15, 18];
 const modoDe = nv => nv.modo === 'arremesso' ? 'arremesso' : nv.modo === 'pintura' ? 'pintura' : nv.resgate ? 'resgate' : 'joias';
 const SVG_BAU = '<svg viewBox="0 0 60 52"><path d="M6 22h48v26H6z" fill="#b8642a" stroke="#5a2a08" stroke-width="2.5"/><path d="M6 22c0-14 48-14 48 0z" fill="#d07a34" stroke="#5a2a08" stroke-width="2.5"/><path d="M4 21h52v5H4z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><path d="M26 24h8v10h-8z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><path d="M14 22v26M46 22v26" stroke="#ffc83a" stroke-width="3"/></svg>';
 const SVG_COROA = '<svg viewBox="0 0 46 40"><path d="M4 32L2 10l11 9 10-15 10 15 11-9-2 22z" fill="#ffd34d" stroke="#8a5a00" stroke-width="2.5" stroke-linejoin="round"/><rect x="4" y="31" width="38" height="6" rx="2" fill="#f0a20b" stroke="#8a5a00" stroke-width="2"/><circle cx="23" cy="21" r="3.5" fill="#ff2f55"/></svg>';
@@ -124,10 +142,11 @@ async function abrirBau(n) {
 $('#bPegar').onclick = () => { Som.clique(); Bau.fechar(); Rei.parar(); irInicio(); };
 function atualizarReforcos() {
   const r = S.reforcos || {};
-  document.querySelectorAll('#reforcos button').forEach(b => { const n = r[b.dataset.r] || 0; b.querySelector('b').textContent = n; b.disabled = n <= 0; b.classList.toggle('ativo', T.reforco === b.dataset.r); });
+  document.querySelectorAll('#reforcos button').forEach(b => { const n = b.dataset.r === 'dica' ? (T.dicas || 0) : r[b.dataset.r] || 0; b.hidden = b.dataset.r !== 'dica' && !n; b.querySelector('b').textContent = n; b.disabled = n <= 0; b.classList.toggle('ativo', T.reforco === b.dataset.r); });
 }
 document.querySelectorAll('#reforcos button').forEach(b => b.onclick = () => {
   Som.init(); if (!T.ativo || T.ocupado || T.modo !== 'joias') return; const r = b.dataset.r;
+  if (r === 'dica') { if ((T.dicas || 0) > 0 && Jogo.mostrarDica()) { T.dicas--; Som.especial(); } atualizarReforcos(); return; }
   T.reforco = T.reforco === r ? null : r; Som.clique(); atualizarReforcos();
   if (T.reforco) Jogo.balao({ martelo: 'Toque na peça que o martelo vai quebrar.', flecha: 'Toque numa peça: a flecha limpa a linha inteira.', canhao: 'Toque numa peça: o canhão limpa a coluna inteira.' }[r], 2.6);
 });
@@ -161,7 +180,7 @@ function irInicio() {
 function abrirNivel(n) {
   regenerarVidas();
   if (S.vidas <= 0) { HUD.topo(); Jogo.balao('Sem vidas! Espere um pouquinho que elas voltam.', 3); Rei.reagir('susto'); return; }
-  const nv = NIVEIS[n - 1]; T.nivel = n; T.modo = nv.modo === 'arremesso' ? 'arr' : nv.modo === 'pintura' ? 'pin' : 'joias'; T.reforco = null;
+  const nv = NIVEIS[n - 1]; T.nivel = n; T.modo = nv.modo === 'arremesso' ? 'arr' : nv.modo === 'pintura' ? 'pin' : 'joias'; T.reforco = null; T.dicas = 3; T.ofereceu = false;
   $('#nNum').textContent = n; $('#nJog').textContent = nv.jogadas || (nv.bolas ? nv.bolas.length : 0); $('#nJog').nextSibling.textContent = nv.bolas ? ' bolas' : ' jogadas';
   if (T.modo === 'arr') { Resgate.sair(); Pintura.sair(); Arremesso.carregar(nv); }
   else if (T.modo === 'pin') { Resgate.sair(); Arremesso.sair(); Pintura.carregar(nv); }
@@ -170,9 +189,9 @@ function abrirNivel(n) {
   $('#nFaixa').classList.toggle('resgate', !!nv.resgate); $('#nFaixa').firstChild.textContent = nv.resgate ? 'Resgate! Nível ' : T.modo === 'arr' ? 'Arremesso! Nível ' : T.modo === 'pin' ? 'Pintura! Nível ' : 'Nível ';
   $('#nFaixa').classList.toggle('pintura', T.modo === 'pin');
   $('#nFaixa').classList.toggle('arremesso', T.modo === 'arr'); document.querySelector('#painel .jogadas span').textContent = T.modo === 'arr' ? 'Bolas' : 'Jogadas';
-  if (T.modo === 'arr') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Arraste para mirar e solte para atirar. Derrube todas as latas e cristais!'; }
+  if (T.modo === 'arr') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Toque onde quer acertar: o canhão atira na hora. Derrube todas as latas e cristais!'; }
   if (T.modo === 'pin') { $('#nResgate').hidden = false; $('#nResgate').textContent = 'Escolha os potes de tinta: a parte pintada engole os blocos vizinhos da mesma cor. Pinte a escultura inteira!'; }
-  $('#nResgate').hidden = !nv.resgate; if (nv.resgate) $('#nResgate').textContent = { agua: 'A sala do rei está enchendo de água!', teto: 'O teto de espinhos está descendo!', espinhos: 'Uma parede de espinhos vem chegando!' }[nv.resgate.perigo] + ' Quebre o entulho do canal para a pilha descer e soltar o Rei Tico.';
+  $('#nResgate').hidden = !nv.resgate; if (nv.resgate) $('#nResgate').textContent = { agua: 'A sala do rei está enchendo de água!', teto: 'O teto de espinhos está descendo!', espinhos: 'Uma parede de espinhos vem chegando!' }[nv.resgate.perigo] + ' Quebre o entulho do canal para a pilha descer e soltar o Rei Minhoca.';
   $('#nMetas').innerHTML = T.metas.map(m => `<div class="meta">${svgMeta(m)}<b>${m.n}</b></div>`).join('');
   T.emNivel = true; atualizarReforcos(); $('#painel').hidden = false; HUD.montarMetas(); HUD.jogadas(); HUD.pontos(); $('#hNivel').textContent = n;
   dispor(); mostrar('#telaNivel');
@@ -182,7 +201,7 @@ async function comecarNivel() {
   Som.musica(T.modo === 'arr' ? 'arremesso' : T.modo === 'pin' ? 'pintura' : Resgate.ativo ? 'resgate' : 'joias'); Som.intensidade(0);
   if (T.modo === 'arr') await Arremesso.entrada(); else if (T.modo === 'pin') await Pintura.entrada(); else await entradaPecas(); T.ativo = true; T.ocupado = false;
   const nv = NIVEIS[T.nivel - 1];
-  if (T.modo === 'arr') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Arraste para mirar e solte para atirar!', 3.4); }
+  if (T.modo === 'arr') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Toque onde quer acertar!', 3.4); }
   else if (T.modo === 'pin') { Rei.reagir('aceno'); Jogo.balao(nv.dica || 'Os números nos potes mostram quantos blocos cada cor pinta!', 3.6); }
   else if (Resgate.ativo) { Rei.reagir('susto'); Som.susto(); Jogo.balao(Resgate.fala(0), 3.2); } else { Rei.reagir('aceno'); Jogo.balao(nv.dica || pega(FALAS.inicio), 3.4); }
 }
@@ -228,7 +247,7 @@ tela.addEventListener('pointerdown', e => {
   Som.init();
   if (T.modo === 'arr') { if (!pausado()) { Arremesso.toque('down', e); tela.setPointerCapture?.(e.pointerId); } return; }
   if (L.rei.w > 2) { const rx = (e.clientX - (L.rei.x + L.rei.w / 2)) / (L.rei.w / 2), ry = (e.clientY - (L.rei.y + L.rei.h * .3)) / (L.rei.h / 2); Rei.olhar(rx, ry); }
-  if (e.clientX >= L.rei.x && e.clientX <= L.rei.x + L.rei.w && e.clientY >= L.rei.y && e.clientY <= L.rei.y + L.rei.h) { if (!T.ativo || !T.ocupado) { Rei.reagir(pega(['feliz', 'aceno', 'susto'])); Jogo.balao(pega(['Ei! Isso faz cócegas!', 'Minha coroa!', 'Hehe!', 'Sou o Rei Tico!'])); } return; }
+  if (e.clientX >= L.rei.x && e.clientX <= L.rei.x + L.rei.w && e.clientY >= L.rei.y && e.clientY <= L.rei.y + L.rei.h) { if (!T.ativo || !T.ocupado) { Rei.reagir(pega(['feliz', 'aceno', 'susto'])); Jogo.balao(pega(['Ei! Isso faz cócegas!', 'Minha coroa!', 'Hehe!', 'Sou o Rei Minhoca!'])); } return; }
   if (T.modo === 'pin' || !T.ativo || T.ocupado || pausado()) return;
   const k = celulaNaTela(e.clientX, e.clientY); if (!k) { desselecionar(); return; }
   toque = { k, x: e.clientX, y: e.clientY, moveu: false }; tela.setPointerCapture?.(e.pointerId);
@@ -279,7 +298,7 @@ function dispor() {
   $('#palco').style.display = Resgate.ativo || Arremesso.ativo ? 'none' : '';
   Object.assign($('#palco').style, { left: L.rei.x + 'px', top: L.rei.y + 'px', width: L.rei.w + 'px', height: L.rei.h + 'px' });
   for (const id of ['#telaInicio']) Object.assign($(id).style, { left: L.tab.x + 'px', top: L.tab.y + 'px', width: L.tab.w + 'px', height: L.tab.h + 'px' });
-  const nRef = Object.values(S.reforcos || {}).reduce((a, b) => a + b, 0), barra = T.emNivel ? (T.modo === 'pin' ? $('#potes') : T.modo === 'joias' && nRef > 0 ? $('#reforcos') : null) : null;
+  const barra = T.emNivel ? (T.modo === 'pin' ? $('#potes') : T.modo === 'joias' ? $('#reforcos') : null) : null;
   $('#reforcos').hidden = !(barra && barra.id === 'reforcos');
   if (barra) { const hb = barra.id === 'potes' ? 88 : 62; L.tab.h -= hb; Object.assign(barra.style, { left: L.tab.x + 'px', top: (L.tab.y + L.tab.h + 2) + 'px', width: L.tab.w + 'px', height: (hb - 6) + 'px' }); }
   if (Pintura.ativo) Pintura.enquadrar();
@@ -310,6 +329,6 @@ function quadro(agora) {
   R.setScissorTest(false); Bau.desenhar();
   R.setScissorTest(false); R.setViewport(0, 0, L.W, L.H); R.clearDepth(); R.render(cenaOver, camOver);
 }
-window.__tico = { VEL, L, dispor, enquadrarTab, processarFila, Som, T, S, Rei, Resgate, Arremesso, Pintura, Bau, abrirBau, usarReforco, montarMapa, atingir, todas, Anim, VEL, R, celula, tentarTroca, tocarEspecial, abrirNivel, comecarNivel, irInicio, existeJogada, telaDe, posCel, NIVEIS, Jogo, novaGema };
+window.__tico = { melhorJogada, VEL, L, dispor, enquadrarTab, processarFila, Som, T, S, Rei, Resgate, Arremesso, Pintura, Bau, abrirBau, usarReforco, montarMapa, atingir, todas, Anim, VEL, R, celula, tentarTroca, tocarEspecial, abrirNivel, comecarNivel, irInicio, existeJogada, telaDe, posCel, NIVEIS, Jogo, novaGema };
 try { R.compile(Rei.cena, Rei.cam); R.compile(cenaTab, camTab); } catch (e) {}
 irInicio(); requestAnimationFrame(quadro);

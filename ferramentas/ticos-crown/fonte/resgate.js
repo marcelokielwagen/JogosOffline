@@ -1,5 +1,5 @@
 'use strict';
-// Modo 2: Resgate. Cena e tabuleiro numa coisa só: em cima do tabuleiro fica a sala do Rei Tico, que segura a porta
+// Modo 2: Resgate. Cena e tabuleiro numa coisa só: em cima do tabuleiro fica a sala do Rei Minhoca, que segura a porta
 // contra um depósito cheio de entulho (pedras, bolinhas de metal ou cubos). O entulho desce por um canal que entra no
 // tabuleiro: cada pedaço do canal quebrado (combinação ao lado ou explosão) faz a pilha inteira descer uma casa.
 // Enquanto isso a armadilha da sala (parede de espinhos, teto de espinhos ou água) avança a cada jogada.
@@ -27,7 +27,7 @@ const Resgate = (() => {
   const dummy = new THREE.Object3D(), corT = new THREE.Color();
   const FALAS = {
     espinhos: ['Uma parede de espinhos vem chegando!', 'Rápido, tire o entulho!', 'Socorro! Os espinhos estão nas minhas costas!'],
-    teto: ['O teto de espinhos está descendo!', 'Abaixa a cabeça, Tico!', 'Socorro! Já está na minha coroa!'],
+    teto: ['O teto de espinhos está descendo!', 'Abaixa a cabeça, Minhoca!', 'Socorro! Já está na minha coroa!'],
     agua: ['A sala está enchendo de água!', 'A água chegou na barriga!', 'Glub... glub... depressa!'],
   };
   const tamCanal = col => col.slots.filter(s => s.r !== null).length;

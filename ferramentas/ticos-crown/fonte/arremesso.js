@@ -1,6 +1,6 @@
 'use strict';
-// Modo 3: Arremesso. Sem tabuleiro: o Rei Tico fica ao lado de um canhão de ouro; arraste para mirar (aparece a
-// trajetória) e solte para atirar contra pilhas de latas, pedras, cristais e barris explosivos em plataformas (algumas se
+// Modo 3: Arremesso. Sem tabuleiro: o Rei Minhoca fica ao lado de um canhão de ouro; toque onde quer acertar e o
+// canhão atira na hora contra pilhas de latas, pedras, cristais e barris explosivos em plataformas (algumas se
 // mexem). Física própria e leve: cada peça é uma esfera de colisão com giro; as pilhas ficam "dormindo" paradas até
 // serem atingidas, e quem perde o apoio acorda e cai (desmoronamento em cadeia).
 const Arremesso = (() => {
@@ -133,12 +133,13 @@ const Arremesso = (() => {
     const v = d.divideScalar(Tt); v.y += .5 * GRAV * Tt; return { O, v, Tt };
   }
   function apontar(alvo) {
+    const anel = anelMira.visible;
     st.mira = alvo; const { O, v, Tt } = trajetoria(alvo);
     const dir = alvo.clone().sub(canhao.position); giro.rotation.y = Math.atan2(-dir.x, -dir.z); tubo.rotation.x = clamp(Math.atan2(v.y, Math.hypot(v.x, v.z)), -.2, 1.1);
     if (st.mirando) {
       let n = 0; for (let i = 1; i <= 26; i++) { const t = i / 26 * Tt * 1.05; dummy.position.set(O.x + v.x * t, O.y + v.y * t - .5 * GRAV * t * t, O.z + v.z * t); dummy.scale.setScalar(1 - i / 40); dummy.updateMatrix(); pontos.setMatrixAt(n++, dummy.matrix); }
       pontos.count = n; pontos.instanceMatrix.needsUpdate = true; anelMira.visible = true; anelMira.position.copy(alvo); anelMira.lookAt(cam.position);
-    } else { pontos.count = 0; anelMira.visible = false; }
+    } else { pontos.count = 0; anelMira.visible = anel; }
   }
   const ray = new THREE.Raycaster(), plano = new THREE.Plane(V(0, 0, 1), 8.5), tmp = V();
   function pontoNaTela(cx, cy) {
@@ -283,10 +284,10 @@ const Arremesso = (() => {
     async entrada() { const p0 = cam.position.clone(); await Anim.add(1, k => { cam.position.set(0, lerp(6.5, 3.5, k), lerp(-4, 2.6, k)); cam.lookAt(0, 1.75, -7.5); }, Ease.inOut); cam.position.copy(p0); this.enquadrar(); },
     toque(tipo, e) {
       if (!st.ativo || !T.ativo || T.ocupado) { if (tipo === 'up') { st.mirando = false; apontar(st.mira || V(0, 2, -8)); } return; }
-      const oy = e.pointerType === 'touch' ? 70 : 0, p = pontoNaTela(e.clientX, e.clientY - oy);
-      if (tipo === 'down') { st.mirando = true; Som.init(); }
-      if (p && st.mirando) apontar(p);
-      if (tipo === 'up' && st.mirando) { st.mirando = false; atirar(); }
+      if (tipo !== 'down') return; Som.init();
+      const p = pontoNaTela(e.clientX, e.clientY); if (!p) return;
+      anelMira.visible = true; anelMira.position.copy(p); anelMira.lookAt(cam.position); setTimeout(() => { anelMira.visible = false; }, 450);
+      st.mirando = false; apontar(p); atirar();
     },
     recarregar(n) { for (let i = 0; i < n; i++) st.fila.push('bola'); carregarBola(); montarPrateleira(); },
     mirarEAtirar(x, y, z) { if (!T.ativo || T.ocupado) return false; st.mirando = true; apontar(V(x, y, z)); st.mirando = false; atirar(); return true; },

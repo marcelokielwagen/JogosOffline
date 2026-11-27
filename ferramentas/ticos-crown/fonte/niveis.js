@@ -5,6 +5,7 @@
 // = nível de Resgate: a sala do rei fica em cima; E = canal de entulho (colunas da direita, contínuo a partir do topo). Objetivo sem "n" = conta tudo do mapa.
 // modo: 'arremesso' = Modo 3 (canhão e física): plataformas {x,y(topo),z,w,d,mov:[amplitude,velocidade]}, pilhas de
 // linhas (de baixo para cima) com [peça, deslocamento x]; peças: lata, pedra, cristal, barril; bolas: bola, fogo, bomba.
+// (Pintura saiu do jogo em 27/11/2026: difícil de entender. O código continua em pintura.js.)
 // modo: 'pintura' = Modo 4: forma = relevo (dígito = altura, . vazio, N pedra, T solvente, R arco-íris), inicio [linha, coluna],
 // cores, semente (cores sorteadas fixas), folga (jogadas além do resolvedor guloso).
 // Cores: 0 rubi, 1 safira, 2 esmeralda, 3 topázio, 4 ametista, 5 coral.
@@ -24,8 +25,6 @@ const NIVEIS = [
     pilhas: [{ p: 0, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
   { jogadas: 26, cores: 5, metas: [{ t: 'gelo' }], dica: 'Gelo duplo precisa de duas batidas.',
     mapa: ['#......#', '........', '..IIII..', '..I##I..', '..I##I..', '..IIII..', '........', '#......#'] },
-  { modo: 'pintura', cores: 4, folga: 3, semente: 11, inicio: [5, 3], dica: 'Os números nos potes mostram quantos blocos cada cor pinta!',
-    forma: ['.22..22.', '23322332', '23333332', '.233332.', '..2332..', '...22...'] },
   { jogadas: 27, cores: 5, metas: [{ t: 'cofre' }], dica: 'Cofres aguentam 3 batidas. Foguetes e dinamites ajudam muito!',
     mapa: ['........', '........', '.v....v.', '........', '...vv...', '........', '.v....v.', '........'] },
   { resgate: { perigo: 'teto', material: 'bolas', reserva: 2 }, jogadas: 25, cores: 5, metas: [{ t: 'entulho' }],
@@ -38,8 +37,6 @@ const NIVEIS = [
       { p: 1, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['cristal', -.28], ['cristal', .28]]] }] },
   { jogadas: 28, cores: 6, metas: [{ t: 'corrente' }, { t: 'caixa' }], dica: 'Seis cores agora: combos ficam mais raros. Pense antes!',
     mapa: ['........', '.k....k.', '..k..k..', '...cc...', '...cc...', '..k..k..', '.k....k.', '........'] },
-  { modo: 'pintura', cores: 4, folga: 2, semente: 23, inicio: [4, 4], dica: 'Pedra cinza não pega tinta. O bloco arco-íris pinta tudo em volta!',
-    forma: ['4...4...4', '43.343.34', '333333333', '2N22R22N2', '222222222'] },
   { resgate: { perigo: 'agua', material: 'cubos', reserva: 2 }, jogadas: 24, cores: 5, metas: [{ t: 'entulho' }],
     mapa: ['....EEEE', '....EEEE', '....EEE.', '....EE..', '....E...', '........', '........', '........'] },
   { jogadas: 30, cores: 5, metas: [{ t: 'cofre' }, { t: 'caixa' }, { t: 'gelo' }],
@@ -50,8 +47,6 @@ const NIVEIS = [
       { p: 1, linhas: [[['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
   { jogadas: 32, cores: 5, metas: [{ t: 'gelo' }, { t: 'cofre' }, { t: 'corrente' }], dica: 'Desafio do castelo! Guarde os especiais para o centro.',
     mapa: ['#......#', '.IIIIII.', '.I.kk.I.', '.IkvvkI.', '.IkvvkI.', '.I.kk.I.', '.IIIIII.', '#......#'] },
-  { modo: 'pintura', cores: 5, folga: 3, semente: 5, inicio: [6, 4], dica: 'Cuidado com o solvente verde: quando a tinta encosta, ele apaga os blocos em volta!',
-    forma: ['4.4...4.4', '444...444', '332333233', '3T22N22T3', '322222223', '32N222N23', '322222223'] },
   { resgate: { perigo: 'espinhos', material: 'pedras', reserva: 2 }, jogadas: 29, cores: 5, metas: [{ t: 'entulho' }],
     mapa: ['....EEEE', '....EEEE', '.....EE.', '.....EE.', '.....EE.', '.....EE.', 'cc......', 'cc......'] },
   { modo: 'arremesso', bolas: ['bola', 'bola', 'fogo', 'bola', 'bomba', 'bola', 'fogo'], dica: 'Desafio! A plataforma do meio não para quieta.',
@@ -59,6 +54,4 @@ const NIVEIS = [
     pilhas: [{ p: 0, z: .35, linhas: [[['pedra', -.38], ['pedra', .38]]] }, { p: 0, z: -.35, linhas: [[['cristal', -.3], ['cristal', .3]], [['cristal', 0]]] },
       { p: 1, linhas: [[['barril', -.5], ['barril', .5]], [['lata', -.55], ['lata', 0], ['lata', .55]]] },
       { p: 2, linhas: [[['lata', -.56], ['lata', 0], ['lata', .56]], [['lata', -.28], ['lata', .28]], [['lata', 0]]] }] },
-  { modo: 'pintura', cores: 5, folga: 3, semente: 42, inicio: [8, 4], dica: 'O grande escudo real! Pense duas jogadas à frente.',
-    forma: ['.4444444.', '433333334', '43T3R3T34', '433333334', '4N33333N4', '.4333334.', '..43T34..', '...434...', '....4....'] },
 ];
