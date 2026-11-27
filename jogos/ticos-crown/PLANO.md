@@ -1,4 +1,4 @@
-# Coroa do Minhoca (ex-Tico's Crown) — plano e ponto de parada
+# Crown & Chaos (ex-Coroa do Minhoca, ex-Tico's Crown) — plano e ponto de parada
 
 Jogo casual 3D de vários desafios, 100% offline (um arquivo HTML só). Pedido de 26/11/2026 (prompt colado).
 Nome e personagem próprios (Rei Tico, anime caricato de cabelo laranja, coroa torta, capa vermelha). Nada de nomes,
@@ -66,3 +66,4 @@ Fora do menu e do sw.js até o sim dele (cartão sugerido: categoria "Combinar e
 - Dicas: lâmpada com 3 dicas por nível (mãozinha mostra a melhor jogada); parado 7 s, o rei oferece e a lâmpada pulsa;
   sem dicas, as peças da jogada balançam. Teste: `dica.mjs pasta [celular]`.
 - Canhão: toque direto onde quer acertar, sem mira nem trajetória.
+- 27/11/2026: nome do jogo trocado para **Crown & Chaos** (o rei continua Rei Minhoca).
