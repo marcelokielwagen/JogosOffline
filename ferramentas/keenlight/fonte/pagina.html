@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1d1712">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="../../js/suite.js"></script>
+<title>Keenlight</title>
+<style>
+/*ESTILO*/
+</style>
+</head>
+<body>
+<canvas id="tela" aria-label="Cenário em 3D para procurar objetos"></canvas>
+<canvas id="tela2d" hidden aria-label="Ilustração para procurar objetos"></canvas>
+<div id="carregando" hidden><span></span>Preparando o cenário…</div>
+<div id="vinheta"></div>
+<div id="embaco" aria-hidden="true"><div class="gelo"></div><p>Calma, detetive…<br><small>clicar à toa embaça a lupa</small></p></div>
+<div id="avisos" aria-live="polite"></div>
+
+<header id="topo" hidden>
+  <a id="sair" href="../../index.html" aria-label="Voltar para a coleção de jogos" title="Coleção de jogos"><svg viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></a>
+  <button id="bMenu" aria-label="Pausar e voltar ao início" title="Início"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
+  <div id="placar">
+    <span class="caixa" title="Tempo"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.6 1.6M10 3h4"/></svg><b id="tempo">0:00</b></span>
+    <span class="caixa" title="Pontos"><svg viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><b id="pontos">0</b></span>
+    <span class="caixa" title="Moedas"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5v9M9.5 9.6c0-1 1.1-1.6 2.5-1.6s2.5.7 2.5 1.7-1 1.5-2.5 1.8-2.5.8-2.5 1.8 1.1 1.7 2.5 1.7 2.5-.6 2.5-1.6"/></svg><b id="moedas">0</b></span>
+  </div>
+  <div id="direita">
+    <button id="bModo" aria-label="Mudar a forma da lista" title="Forma da lista"><span id="nomeModo">Nomes</span></button>
+    <button id="bSom" aria-label="Som" title="Som" data-v="1"><svg viewBox="0 0 24 24"><path d="M5 10v4h3l4 3.5v-11L8 10z"/><path class="o1" d="M15 9.5a3.6 3.6 0 0 1 0 5"/><path class="ox" d="m15.5 10 4 4m0-4-4 4"/></svg></button>
+  </div>
+</header>
+
+<div id="lateral" hidden>
+  <button id="bMais" aria-label="Aproximar" title="Aproximar (roda do mouse)"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button>
+  <button id="bMenos" aria-label="Afastar" title="Afastar"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button>
+  <button id="bCentro" aria-label="Voltar a visão inicial" title="Visão inicial"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.2"/></svg></button>
+</div>
+
+<button id="bLupa" hidden aria-label="Lupa de dica" title="Lupa de dica">
+  <svg class="anel" viewBox="0 0 64 64"><circle class="fundo" cx="32" cy="32" r="29"/><circle id="carga" cx="32" cy="32" r="29"/></svg>
+  <svg class="lente" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5.5 5.5"/><path class="brilho" d="M7.8 8.6a3.4 3.4 0 0 1 2.6-1.9"/></svg>
+  <span id="precoLupa"></span>
+</button>
+
+<footer id="lista" hidden role="list" aria-label="Objetos para encontrar"></footer>
+
+<section id="abertura">
+  <div class="mapa">
+    <header class="mapaTopo">
+      <div><p class="selo">arquivo de casos</p><h1>Keenlight</h1></div>
+      <div class="ficha"><span class="pat" id="patente">Aprendiz</span><span><b id="totEstrelas">0</b>/18 ★</span><span><b id="totMoedas">0</b> moedas</span></div>
+    </header>
+    <div id="casos"><svg id="barbantes" aria-hidden="true"></svg></div>
+    <div class="mapaAcoes"><button id="bJogar" class="grande">Começar a investigação</button><button id="bConquistas" class="leve">Conquistas <span id="nConq"></span></button><button id="bComo" class="leve">Como jogar</button></div>
+  </div>
+</section>
+
+<section id="conquistas" class="janela" hidden>
+  <div class="cartaz largo">
+    <button class="fechar" aria-label="Fechar">×</button>
+    <p class="selo">medalhas do detetive</p>
+    <h2>Conquistas</h2>
+    <dl id="estat"></dl>
+    <ul id="listaConq"></ul>
+  </div>
+</section>
+
+<section id="como" class="janela" hidden>
+  <div class="cartaz">
+    <button class="fechar" aria-label="Fechar">×</button>
+    <h2>Como jogar</h2>
+    <ul class="ajuda">
+      <li><b>Arraste</b> para girar a câmera (3D) ou andar pela ilustração. <b>Roda do mouse</b> ou <b>pinça</b> aproxima onde você aponta.</li>
+      <li><b>Botão direito</b>, <b>Shift + arrastar</b> ou <b>dois dedos</b> movem a visão.</li>
+      <li><b>Toque</b> em gavetas, portas, cortinas, baús e estantes para abrir.</li>
+      <li>Toque no objeto quando achar. <b>Cliques à toa</b> embaçam a lupa por alguns segundos.</li>
+      <li>A <b>lupa de dica</b> recarrega sozinha; com moedas dá para usar antes. Tocar num item da lista escolhe qual a lupa procura.</li>
+      <li>Cada caso resolvido libera o próximo e dá estrelas: rapidez, poucas dicas e nenhuma lupa embaçada.</li>
+      <li>O jogo salva sozinho: feche quando quiser e continue o caso depois.</li>
+    </ul>
+  </div>
+</section>
+<div id="trofeus" aria-live="polite"></div>
+
+<section id="fim" hidden>
+  <div class="cartaz">
+    <p class="selo">caso encerrado</p>
+    <h2 id="fimTitulo">O Ateliê do Pintor</h2>
+    <div id="estrelas" aria-label="Estrelas"></div>
+    <dl id="resumo"></dl>
+    <div id="novasConq"></div>
+    <div class="acoes"><button id="bProximo" hidden>Próximo nível</button><button id="bDeNovo">Jogar de novo</button><button id="bInicio" class="leve">Início</button></div>
+  </div>
+</section>
+
+<div id="semgl" hidden>Este aparelho não conseguiu abrir o cenário em 3D.</div>
+<script>
+'use strict';
+/*THREE*/
+</script>
+<script>
+(() => { 'use strict';
+/*JOGO*/
+})();
+</script>
+</body>
+</html>

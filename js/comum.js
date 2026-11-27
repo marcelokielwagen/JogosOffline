@@ -63,6 +63,7 @@ const JO = (() => {
     let zn = {}; try { const x = JSON.parse(localStorage.getItem('zen.v1')); zn = (x && x.feitas) || {}; } catch (e) {}
     const znJ = j => `${['facil', 'medio', 'dificil'].reduce((a, d) => a + String(zn[j + '/' + d] || '').split('1').length - 1, 0)} de 150`;
     let la = null; try { la = JSON.parse(localStorage.getItem('cozinha-da-le.v1')); } catch (e) {}
+    let kl = null; try { kl = JSON.parse(localStorage.getItem('keenlight.v1')); } catch (e) {}
     const fcn = (n, nome) => { const s = fc && fc.stats && fc.stats[n]; return [nome, s && s.j ? `${s.v} de ${s.j} (${Math.round(100 * s.v / s.j)}%)` : '–']; };
     const pn = (n, nome) => { const s = p && p.stats && p.stats.n && p.stats.n[n]; return [nome, s && s.v ? `${s.v} · melhor ${relogio(s.melhor)}` : '–']; };
     // Caça-Palavras: fases vencidas, estrelas e temas completos.
@@ -83,6 +84,7 @@ const JO = (() => {
       ['Hushbell', [['Monumentos', `${hb && hb.feitos ? Math.min(5, hb.feitos) : 0} de 5`]]],
       ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
       ['Cozinha da Le', [['Pedidos servidos', la && la.st ? la.st.pedidos || 0 : 0], ['Nível', la ? la.nivel || 1 : 1], ['Fantasias vistas', `${la && la.st && Array.isArray(la.st.vistas) ? Math.max(0, la.st.vistas.length - 1) : 0} de 11`]]],
+      ['Keenlight', [['Casos resolvidos', `${Object.keys((kl && kl.niveis) || {}).length} de 6`], ['Estrelas', `${Object.values((kl && kl.niveis) || {}).reduce((a, n) => a + (n.estrelas || 0), 0)} de 18`], ['Conquistas', `${Object.keys((kl && kl.conquistas) || {}).length} de 14`]]],
       ['Loop Zen', [['Fases concluídas', znJ('loop')]]],
       ['Ricochet Zen', [['Fases concluídas', znJ('okay')]]],
     ];
