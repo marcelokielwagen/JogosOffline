@@ -2,7 +2,7 @@
 
 Jogo de objetos escondidos difícil e rico em detalhe (pedido de 26/11/2026), 100% offline, em 5 fases.
 Uma fase por comando ("continue" / "próxima fase"); toda resposta termina com **[CHECKPOINT DE SESSÃO]**.
-Nome **Keenlight** é provisório. **No menu desde 27/11/2026** (com o sim dele): cartão em "Combinar e achar", capa `capas/keenlight.webp` (`ferramentas/keenlight/capa.mjs`), Estatísticas em `js/comum.js` (`keenlight.v1`: casos, estrelas, conquistas), `sw.js` v81. Sem commit e sem publicar: perguntar.
+Nome: **Ache-me** (trocado de Keenlight em 27/11/2026, a pedido dele; pasta `keenlight` e salvamento `keenlight.v1` mantidos para não quebrar links e progresso). **No menu desde 27/11/2026** (com o sim dele): cartão em "Combinar e achar", capa `capas/keenlight.webp` (`ferramentas/keenlight/capa.mjs`), Estatísticas em `js/comum.js` (`keenlight.v1`: casos, estrelas, conquistas), `sw.js` v81. Sem commit e sem publicar: perguntar.
 
 ## Níveis planejados
 | # | Nível | Estilo | Fase |

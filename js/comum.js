@@ -84,7 +84,7 @@ const JO = (() => {
       ['Hushbell', [['Monumentos', `${hb && hb.feitos ? Math.min(5, hb.feitos) : 0} de 5`]]],
       ['Candeia', [['Fases acesas', `${cd && Array.isArray(cd.done) ? cd.done.length : 0} de 100`]]],
       ['Cozinha da Le', [['Pedidos servidos', la && la.st ? la.st.pedidos || 0 : 0], ['Nível', la ? la.nivel || 1 : 1], ['Fantasias vistas', `${la && la.st && Array.isArray(la.st.vistas) ? Math.max(0, la.st.vistas.length - 1) : 0} de 11`]]],
-      ['Keenlight', [['Casos resolvidos', `${Object.keys((kl && kl.niveis) || {}).length} de 6`], ['Estrelas', `${Object.values((kl && kl.niveis) || {}).reduce((a, n) => a + (n.estrelas || 0), 0)} de 18`], ['Conquistas', `${Object.keys((kl && kl.conquistas) || {}).length} de 14`]]],
+      ['Ache-me', [['Casos resolvidos', `${Object.keys((kl && kl.niveis) || {}).length} de 6`], ['Estrelas', `${Object.values((kl && kl.niveis) || {}).reduce((a, n) => a + (n.estrelas || 0), 0)} de 18`], ['Conquistas', `${Object.keys((kl && kl.conquistas) || {}).length} de 14`]]],
       ['Loop Zen', [['Fases concluídas', znJ('loop')]]],
       ['Ricochet Zen', [['Fases concluídas', znJ('okay')]]],
     ];
