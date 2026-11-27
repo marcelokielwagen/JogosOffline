@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#2a1366">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="../../js/suite.js"></script>
+<title>Tico's Crown</title>
+<style>
+/*ESTILO*/
+</style>
+</head>
+<body>
+<div id="fundo"></div>
+<div id="palco"><i class="nuvem n1"></i><i class="nuvem n2"></i><i class="torres"></i></div>
+<canvas id="tela" aria-label="Tabuleiro de joias em 3D"></canvas>
+
+<header id="topo">
+  <a id="sair" class="redondo" href="../../index.html" aria-label="Voltar para a coleção de jogos" title="Coleção de jogos"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="pilula vidas" title="Vidas"><i class="ico">&#9829;</i><b id="hVidas">5</b><small id="hVidaT"></small></div>
+  <div class="pilula moedas" title="Moedas"><i class="ico moeda"></i><b id="hMoedas">0</b></div>
+  <div class="pilula estrelas" title="Estrelas"><i class="ico">&#9733;</i><b id="hEstrelas">0</b></div>
+  <button id="bSom" class="redondo" aria-label="Som" title="Som (M)"><svg viewBox="0 0 24 24"><path d="M5 10v4h3l4 3.5v-11L8 10z"/><path class="o1" d="M15 9.5a3.6 3.6 0 0 1 0 5"/><path class="o2" d="M17.4 7.2a7 7 0 0 1 0 9.6"/><path class="ox" d="m15.5 10 4 4m0-4-4 4"/></svg></button>
+  <button id="bPausa" class="redondo" aria-label="Pausa" title="Pausa" hidden><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+</header>
+
+<div id="painel" hidden>
+  <div class="jogadas"><span>Jogadas</span><b id="hJog">0</b></div>
+  <div class="metas" id="hMetas"></div>
+  <div class="pontos"><span>Nível <em id="hNivel">1</em></span><b id="hPontos">0</b></div>
+</div>
+<div id="balao" aria-live="polite"></div>
+<div id="flutua"></div>
+<div id="grito"></div>
+
+<section id="telaInicio" class="tela">
+  <div id="mapa"><svg id="mapaLinha" preserveAspectRatio="none"></svg><div class="logo"><h1>Tico's<b>Crown</b></h1><p>as joias do reino</p></div><div id="mapaNos"></div></div>
+  <button id="bJogar" class="botao verde grande">Jogar</button>
+</section>
+
+<section id="telaNivel" class="tela modal" hidden>
+  <div class="cartao">
+    <div class="faixa" id="nFaixa">Nível <span id="nNum">1</span></div>
+    <p id="nResgate" class="sub resgateTxt" hidden></p>
+    <p class="sub">Objetivos</p>
+    <div id="nMetas" class="metasGrandes"></div>
+    <p class="sub"><b id="nJog">20</b> jogadas</p>
+    <button id="bComecar" class="botao verde grande">Jogar!</button>
+    <button id="bVoltarNivel" class="botao azul">Voltar</button>
+  </div>
+</section>
+
+<section id="telaFim" class="tela modal" hidden>
+  <div class="raios"></div>
+  <div class="cartao">
+    <div class="faixa" id="fTitulo">Nível concluído!</div>
+    <div class="estrelasFim"><i></i><i></i><i></i></div>
+    <p id="fTexto" class="sub"></p>
+    <div id="fGanho" class="ganho"></div>
+    <button id="bFim1" class="botao verde grande">Próximo</button>
+    <button id="bFim2" class="botao azul">Níveis</button>
+  </div>
+</section>
+
+<section id="telaPausa" class="tela modal" hidden>
+  <div class="cartao">
+    <div class="faixa">Pausa</div>
+    <button id="bContinuar" class="botao verde grande">Continuar</button>
+    <button id="bReiniciar" class="botao azul">Recomeçar nível</button>
+    <button id="bSairNivel" class="botao vermelho">Sair do nível</button>
+    <p class="sub pequeno">Sair ou recomeçar custa 1 vida.</p>
+  </div>
+</section>
+
+<div id="potes" hidden></div>
+<div id="reforcos" hidden>
+  <button data-r="martelo" title="Martelo: quebra uma peça"><svg viewBox="0 0 40 40"><rect x="17" y="14" width="6" height="24" rx="2" fill="#a0602a" stroke="#5a3010" stroke-width="2"/><rect x="6" y="5" width="28" height="12" rx="3" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><rect x="8" y="7" width="8" height="3" fill="#fff" opacity=".5"/></svg><b>0</b></button>
+  <button data-r="flecha" title="Flecha: limpa uma linha"><svg viewBox="0 0 40 40"><path d="M4 20h26" stroke="#8a5a2a" stroke-width="4"/><path d="M28 12l9 8-9 8z" fill="#e0e6ef" stroke="#5a6676" stroke-width="2"/><path d="M4 14l6 6-6 6M9 14l6 6-6 6" fill="none" stroke="#ff2f55" stroke-width="3"/></svg><b>0</b></button>
+  <button data-r="canhao" title="Canhão: limpa uma coluna"><svg viewBox="0 0 40 40"><path d="M14 30l6-24 6 24z" fill="#ffc83a" stroke="#8a5a00" stroke-width="2"/><circle cx="12" cy="32" r="5" fill="#7a4a20" stroke="#3a2010" stroke-width="2"/><circle cx="28" cy="32" r="5" fill="#7a4a20" stroke="#3a2010" stroke-width="2"/><circle cx="20" cy="5" r="3" fill="#333"/></svg><b>0</b></button>
+</div>
+<section id="telaBau" class="tela bauTela" hidden>
+  <div class="cartao bauCartao"><div class="faixa">Baú Real!</div><div id="bauPremios" class="ganho premios"></div><button id="bPegar" class="botao verde grande">Pegar!</button></div>
+</section>
+<div id="semgl" hidden><p>Este aparelho não conseguiu abrir o 3D (WebGL).<br>Tente outro navegador.</p></div>
+<script>
+/*THREE*/
+/*JOGO*/
+</script>
+</body>
+</html>
